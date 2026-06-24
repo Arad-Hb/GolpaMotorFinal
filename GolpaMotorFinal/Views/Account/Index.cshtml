@@ -1,0 +1,12 @@
+﻿@using System.ComponentModel
+@model IEnumerable<GolpaMotorFinal.Models.ViewModels.UserManagement.UserListItemViewModel>
+
+
+@if (User.Identity?.IsAuthenticated == true && User.IsInRole("Admin"))
+{
+
+}
+<div class="container">
+    @await Component.InvokeAsync("UserList",Model)
+</div>
+

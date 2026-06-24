@@ -1,0 +1,110 @@
+@model GolpaMotorFinal.Models.ViewModels.Account.RegisterViewModel
+
+@{
+    ViewData["Title"] = "ثبت نام";
+}
+
+<div class="auth-page">
+    <div class="auth-card auth-card-large">
+        <div class="auth-logo">
+            <img src="~/images/pics/logo.png" alt="Golpa Motor" />
+        </div>
+        <h2 class="auth-title">فرم ثبت نام</h2>
+        <form asp-action="Register" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+            <div class="auth-input-group">
+                <label> <i class="fa fa-user"></i> نام </label>
+                <input asp-for="FirstName" class="form-control" placeholder="نام را وارد کنید" />
+                <span asp-validation-for="FirstName" class="text-danger"></span>
+            </div>
+            <div class="auth-input-group">
+                <label> <i class="fa fa-user"></i> نام خانوادگی </label>
+                <input asp-for="LastName" class="form-control" placeholder="نام خانوادگی را وارد کنید" />
+                <span asp-validation-for="LastName" class="text-danger"></span>
+            </div>
+            <div class="auth-input-group">
+                <label> <i class="fa fa-envelope"></i> ایمیل </label>
+                <input asp-for="Email" class="form-control" placeholder="ایمیل را وارد کنید" />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+            <div class="auth-input-group">
+                <label> <i class="fa fa-mobile-alt"></i> شماره موبایل </label>
+                <input asp-for="PhoneNumber" class="form-control" placeholder="شماره موبایل را وارد کنید" />
+                <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <select asp-for="ProvinceID" asp-items="Model.Provinces" class="form-select">
+                        <option value="">استان</option>
+                    </select>
+                    <span asp-validation-for="ProvinceID" class="text-danger"></span>
+                </div>
+                <div class="col-md-6">
+                    <select asp-for="CityID" class="form-select">
+                        <option value="">شهر</option>
+                    </select>
+                    <span asp-validation-for="CityID" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="auth-input-group mt-3">
+                <label>
+                    <i class="fa fa-lock"></i> رمز عبور </label>
+                <input asp-for="Password" type="password" class="form-control" />
+                <span asp-validation-for="Password" class="text-danger"></span>
+            </div>
+            <div class="auth-input-group">
+                <label>
+                    <i class="fa fa-lock"></i> تکرار رمز عبور </label>
+                <input asp-for="ConfirmPassword" type="password" class="form-control" />
+                <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+            </div>
+            <button type="submit" class="btn auth-btn"> ثبت نام </button>
+            <div class="auth-links">
+                <a asp-action="Login"> من قبلاً ثبت نام کرده‌ام </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts
+{
+    <script>
+        $(document).ready(function () {
+            $("#ProvinceID").on("change", function () {
+                let provinceId = $(this).val();
+                $("#CityID").empty();
+                $("#CityID").append('<option value="">در حال بارگذاری...</option>');
+                if (!provinceId) {
+                    $("#CityID").html('<option value="">شهر</option>');
+                    return;
+                }
+                $.ajax({
+                    url: '/Account/GetCitiesByProvince',
+                    type: 'GET',
+                    data: { provinceId: provinceId },
+                    success: function (response) {
+                        $("#CityID").empty();
+                        $("#CityID").append('<option value="">انتخاب شهر</option>');
+                        if (response.success) {
+                            $.each(response.data, function (i, city) {
+                                $("#CityID").append(
+                                    `<option value="${city.cityID}">
+                                        ${city.name}
+                                    </option>`
+                                );
+                            });
+                        }
+                    },
+                    error: function (xhr) {
+                        console.log(xhr);
+                        $("#CityID").empty();
+                        $("#CityID").append(
+                            '<option value="">خطا در دریافت شهرها</option>'
+                        );
+                    }
+                });
+            });
+        });
+    </script>
+}
+

@@ -1,0 +1,58 @@
+﻿@model List<DomainModel.ViewModels.Product.ProductListItem>
+@using GolpaMotorFinal.Helpers
+
+<table class="table table-bordered table-hover align-middle">
+    <thead class="text-light" style="background-color:#1e3a8a">
+        <tr>   
+            <th>عکس محصول</th>
+            <th>نام محصول</th>
+            <th>امتیاز</th>
+            <th>وضعیت</th>
+            <td>جزئیات</td>
+            <td>ویرایش</td>
+            <td>حذف</td>
+            <td>حذف عکس</td>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var prod in Model)
+        {
+            <tr>
+                <td>
+                    <img src="@ImageHelper.Fix(prod.ImageUrl)" style="width:90px;height:90px;object-fit:cover;border-radius:8px;" />
+                </td>
+                <td>@prod.ProductName</td>
+
+                <td>@prod.ProductPoint</td>
+                <td>
+                    @(prod.IsAvailable ? "موجود" : "ناموجود")
+                </td>
+                <td>
+                    <button class="btn btn-info btnDetails" data-id="@prod.ProductID">
+                        <i class="fa fa-eye text-secondary"></i>
+                    </button>
+                </td>
+                <td>
+                    <button class="btn btn-warning btn-sm btnEdit" data-id="@prod.ProductID">
+                        <i class="fa fa-pen text-warning"></i>
+                    </button>
+                </td>
+
+                <td>
+                    <button class="btn btn-danger btn-sm btnDelete" data-id="@prod.ProductID">
+                        <i class="fa fa-trash text-danger"></i>
+                    </button>
+                </td>
+
+                <td>
+                    <button class="btn btn-sm btn-danger btnRemovePicture" data-id="@prod.ProductID">
+                        <i class="icon-remove"></i>
+                    </button>
+                </td>
+
+            </tr>
+        }
+
+    </tbody>
+
+</table>

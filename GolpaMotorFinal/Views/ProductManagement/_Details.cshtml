@@ -1,0 +1,58 @@
+﻿@model DomainModel.ViewModels.Product.ProductDetailsModel
+@using GolpaMotorFinal.Helpers
+
+<div class="row">
+
+    <div class="col-md-4">
+
+        @* <img src="@Model.ImageUrl" class="img-fluid" /> *@
+        <img src="@ImageHelper.Fix(Model.ImageUrl)" class="img-fluid img-thumbnail" />
+
+    </div>
+
+    <div class="col-md-8">
+
+        <table class="table table-bordered">
+
+            <tr>
+                <th>نام محصول</th>
+                <td>@Model.ProductName</td>
+            </tr>
+
+            <tr>
+                <th>امتیاز</th>
+                <td>@Model.ProductPoint</td>
+            </tr>
+
+            <tr>
+                <th>وضعیت</th>
+
+                <td>
+                    @if (Model.IsAvailable)
+                    {
+                        <span class="badge badge-success"> فعال </span>
+                    }
+                    else
+                    {
+                        <span class="badge badge-danger"> غیرفعال </span>
+                    }
+                </td>
+            </tr>
+
+            <tr>
+                <th>تعداد گارانتی</th>
+                <td>@Model.WarrantyCount</td>
+            </tr>
+
+        </table>
+
+        <div class="alert alert-info">
+
+            @* @Model.Description *@
+            @(string.IsNullOrWhiteSpace(Model.Description)? "توضیحی ثبت نشده است" : Model.Description)
+
+        </div>
+
+    </div>
+
+</div>

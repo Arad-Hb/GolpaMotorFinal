@@ -1,0 +1,324 @@
+.account-page {
+    min-height: 80vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px 15px;
+}
+
+.account-card {
+    width: 100%;
+    max-width: 500px;
+    background: #fff;
+    border-radius: 24px;
+    padding: 35px;
+    box-shadow: 0 15px 40px rgba(0,0,0,.08);
+}
+
+.register-card {
+    max-width: 650px;
+}
+
+.logo-wrap {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.logo-mark img {
+    width: 80px;
+    height: auto;
+}
+
+.logo-text {
+    text-align: right;
+}
+
+.brand {
+    font-size: 28px;
+    font-weight: 800;
+    color: #1e3a8a;
+}
+
+.sub {
+    font-size: 14px;
+    color: #64748b;
+    letter-spacing: 3px;
+}
+
+.account-card h1 {
+    text-align: center;
+    font-size: 26px;
+    font-weight: 800;
+    color: #1e3a8a;
+    margin-bottom: 30px;
+}
+
+.form-box {
+    margin-bottom: 18px;
+}
+
+    .form-box label {
+        font-weight: 600;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #374151;
+    }
+
+.input-wrap {
+    position: relative;
+}
+
+    .input-wrap .form-control,
+    .form-select {
+        height: 52px;
+        border-radius: 14px;
+    }
+
+.btn-submit {
+    width: 100%;
+    height: 54px;
+    border: none;
+    border-radius: 14px;
+    background: #2563eb;
+    color: white;
+    font-weight: 700;
+    margin-top: 15px;
+    transition: .3s;
+}
+
+    .btn-submit:hover {
+        background: #1d4ed8;
+    }
+
+.remember-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
+}
+
+.links {
+    text-align: center;
+    margin-top: 15px;
+}
+
+    .links a,
+    .login-link a {
+        text-decoration: none;
+        color: #2563eb;
+        font-weight: 600;
+    }
+
+.login-link {
+    text-align: center;
+    margin-top: 20px;
+}
+
+
+
+/* =====================================
+   MERGE ACCOUNT PAGE
+===================================== */
+
+.merge-account-page {
+    padding: 20px;
+    max-width:600px;
+    margin:0px auto;
+}
+
+    /* Main Card */
+
+    .merge-account-page > .card {
+        border: 0;
+        border-radius: 28px;
+        overflow: hidden;
+        box-shadow: 0 5px 30px rgba(0,0,0,.06);
+    }
+
+    /* Header */
+
+    .merge-account-page .card-header {
+        background: #fff;
+        padding: 24px;
+        margin: 2px auto;
+        color: #04264e;
+        font-size:26px;
+    }
+
+        .merge-account-page .card-header h2 {
+            color: #04264e;
+            font-weight: 700;
+            margin: 0;
+        }
+
+    /* Inner Cards */
+
+    .merge-account-page .card-body .card {
+        border: 1px solid #e5ebf3;
+        border-radius: 22px;
+        box-shadow: none;
+        transition: all .25s ease;
+    }
+
+        .merge-account-page .card-body .card:hover {
+            box-shadow: 0 8px 24px rgba(0,0,0,.05);
+        }
+
+/* Avatar */
+
+.merge-avatar {
+    width: 82px;
+    height: 82px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+    .merge-avatar i {
+        font-size: 32px;
+    }
+
+.merge-avatar-primary {
+    background: #eaf1ff;
+}
+
+    .merge-avatar-primary i {
+        color: #0d6efd;
+    }
+
+.merge-avatar-success {
+    background: #e7f7ee;
+}
+
+    .merge-avatar-success i {
+        color: #198754;
+    }
+
+/* Search */
+
+.merge-account-page .input-group-text {
+    background: #f8fafc;
+    border-color: #dde4ee;
+}
+
+.merge-account-page .form-control {
+    height: 56px;
+    border-color: #dde4ee;
+}
+
+    .merge-account-page .form-control:focus {
+        border-color: #04264e;
+        box-shadow: 0 0 0 3px rgba(4,38,78,.08);
+    }
+.merge-search-icon{
+    border-top-right-radius:7px;
+    border-bottom-right-radius:7px;
+    background-color:dodgerblue;
+    color:white;
+    transition:all .3s;
+}
+    .merge-search-icon:hover {
+        background-color: white;
+        color: dodgerblue;
+        transition: all .3s;
+    }
+    /* Result Box */
+    .merge-account-page .alert-success {
+        background: #e8f6ef;
+        border: none;
+        border-radius: 22px;
+        padding: 30px;
+    }
+
+/* =====================================
+   CIRCULAR DELETE BUTTON
+===================================== */
+
+.merge-delete-btn {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    border: 2px dashed #dc3545;
+    background: transparent;
+    color: #dc3545;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all .25s ease;
+}
+
+    .merge-delete-btn:hover {
+        background: #dc3545;
+        color: #fff;
+    }
+
+    .merge-delete-btn i {
+        font-size: 16px;
+    }
+
+/* =====================================
+   CONFIRM BUTTON
+===================================== */
+
+.merge-confirm-btn {
+    height: 54px;
+    border: none;
+    border-radius: 14px;
+    background: #04264e;
+    color: #fff;
+    font-weight: 600;
+    transition: .25s;
+}
+
+    .merge-confirm-btn:hover {
+        background: #06396d;
+    }
+
+/* =====================================
+   CANCEL BUTTON
+===================================== */
+
+.merge-cancel-btn {
+    height: 54px;
+    border-radius: 14px;
+    border: 1.5px solid #dc3545;
+    background: #fff;
+    color: #dc3545;
+    font-weight: 600;
+    transition: .25s;
+}
+
+    .merge-cancel-btn:hover {
+        background: #dc3545;
+        color: #fff;
+    }
+
+/* Mobile */
+
+@media (max-width: 768px) {
+
+    .merge-account-page .card-header h2 {
+        font-size: 1.35rem;
+        text-align: center;
+    }
+
+    .merge-avatar {
+        width: 70px;
+        height: 70px;
+        margin: auto;
+    }
+
+        .merge-avatar i {
+            font-size: 26px;
+        }
+
+    .merge-delete-btn {
+        margin: auto;
+    }
+}

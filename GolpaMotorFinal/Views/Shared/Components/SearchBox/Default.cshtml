@@ -1,0 +1,32 @@
+﻿@model GolpaMotorFinal.Models.ViewModels.SearchBoxViewModel
+
+@section styles {
+    <link rel="stylesheet" href="~/css/search-box.css" />
+}
+
+<form asp-action="@Model.Action"
+      asp-controller="@Model.Controller"
+      method="post">
+
+    <div class="search-box shadow-sm">
+        <div class="input-group">
+
+            <span class="input-group-text bg-white border-end-0">
+                <i class="fa fa-search text-secondary"></i>
+            </span>
+
+            <input type="text"
+                   name="searchTerm"
+                   value="@Model.SearchTerm"
+                   class="form-control border-start-0"
+                   placeholder="@Model.Placeholder" />
+
+            <button type="submit"
+                    class="btn btn-search">
+                جستجو
+            </button>
+
+        </div>
+    </div>
+
+</form>

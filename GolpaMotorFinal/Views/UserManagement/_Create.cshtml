@@ -1,0 +1,64 @@
+﻿@model GolpaMotorFinal.Models.ViewModels.UserManagement.UserAddEditViewModel
+
+
+<form id="UserFormCreate" enctype="multipart/form-data">
+
+    @Html.AntiForgeryToken()
+
+    <div class="row">
+
+        <div class="col-md-6">
+
+            <label>نام</label>
+
+            <input asp-for="FirstName" class="form-control" />
+
+        </div>
+        <div class="col-md-6">
+
+            <label>نام خانوادگی</label>
+
+            <input asp-for="LastName" class="form-control" />
+
+        </div>
+        <div class="col-md-6">
+
+            <label>شماره تلفن</label>
+
+            <input asp-for="PhoneNumber" class="form-control" />
+
+        </div>
+        <div class="col-md-6">
+
+            <label>;کد پستی</label>
+
+            <input asp-for="PostalCode" class="form-control" />
+
+        </div>
+
+    </div>
+
+    <div class="mt-3">
+
+        <label>آدرس</label>
+
+        <textarea asp-for="Address" class="form-control"></textarea>
+
+    </div>
+
+    <div class="mt-3">
+
+        <label>تصویر کاربر</label>
+
+        <input asp-for="ProfileImage" type="file" class="form-control" />
+
+    </div>
+
+
+    <div class="mt-4">
+
+        <button type="submit" class="btn btn-success"> ثبت </button>
+
+    </div>
+
+</form>

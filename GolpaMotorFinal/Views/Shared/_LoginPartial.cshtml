@@ -1,0 +1,53 @@
+﻿@using DomainModel.Models
+@using Microsoft.AspNetCore.Identity
+
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+
+@if (SignInManager.IsSignedIn(User))
+{
+    var user = await UserManager.GetUserAsync(User);
+
+    <div class="d-flex align-items-center gap-2">
+
+        <a asp-controller="Account" asp-action="Manage" class="user-info-btn text-decoration-none">
+
+            <i class="fa-solid fa-user me-2"></i>
+
+            خوش آمدید
+            @(user?.FirstName ?? "")
+            @(user?.LastName ?? "")
+
+        </a>
+
+        <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+
+            @Html.AntiForgeryToken()
+
+            <button type="submit" class="btn btn-danger logout-btn">
+
+                <i class="fa-solid fa-right-from-bracket"></i>
+                خروج
+
+            </button>
+
+        </form>
+
+    </div>
+}
+else
+{
+    <a asp-controller="Account" asp-action="Login" class="btn btn-outline-primary">
+
+        <i class="fa-solid fa-right-to-bracket"></i>
+        ورود
+
+    </a>
+
+    <a asp-controller="Account" asp-action="Register" class="btn btn-primary">
+
+        <i class="fa-solid fa-user-plus"></i>
+        ثبت نام
+
+    </a>
+}

@@ -1,0 +1,73 @@
+﻿@model IEnumerable<DomainModel.ViewModels.User.UserListItem>
+@using GolpaMotorFinal.Helpers
+
+<div class="main-card">
+    <div class="p-4">
+        <div class="section-title mb-3">
+            <i class="fa fa-table text-primary"></i>
+            لیست کاربران
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th>عکس </th>
+                        <th>نام</th>
+                        <th>نام خانوادگی</th>
+                        <th>ایمیل</th>
+                        <th>شماره موبایل</th>
+                        <th>استان</th>
+                        <th>شهر</th>
+                        <th>تاریخ ثبت</th>
+                        <th>جزئیات</th>
+                        <th>ویرایش</th>
+                        <th>حذف</th>
+                        <td>حذف عکس</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>
+                                <img src="@ImageHelper.FixUser(item.ExistingProfileImageUrl)" style="width:60px;height:60px;object-fit:cover;border-radius:8px;" />
+                            </td>
+                            <td>@item.FirstName</td>
+                            <td>@item.LastName</td>
+                            <td>@item.Email</td>
+                            <td>@item.PhoneNumber</td>
+                            <td>@item.Province</td>
+                            <td>@item.City</td>
+                            <td>
+                                @item.RegisterDate.ToString("yyyy/MM/dd")
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btnDetails"
+                                        data-id="@item.UserID">
+                                    <i class="fa fa-eye text-secondary"></i>
+                                </button>
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btnEdit"
+                                        data-id="@item.UserID">
+                                    <i class="fa fa-pen text-warning"></i>
+                                </button>
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btnDelete"
+                                        data-id="@item.UserID">
+                                    <i class="fa fa-trash text-danger"></i>
+                                </button>
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-danger btnRemovePicture" data-id="@item.UserID">
+                                    <i class="fa fa-minus-square text-light" aria-hidden="true"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

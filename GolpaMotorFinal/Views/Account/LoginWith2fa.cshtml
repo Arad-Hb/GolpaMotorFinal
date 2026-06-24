@@ -1,0 +1,18 @@
+@model GolpaMotorFinal.Models.ViewModels.Account.LoginWith2faViewModel
+@{
+    ViewData["Title"] = "Two-factor authentication";
+}
+
+<h2>Two-factor authentication</h2>
+<form asp-action="LoginWith2fa" method="post">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="mb-2">
+        <input asp-for="TwoFactorCode" class="form-control" placeholder="Code" />
+        <span asp-validation-for="TwoFactorCode" class="text-danger"></span>
+    </div>
+    <div class="mb-2">
+        <input asp-for="RememberMe" type="checkbox" /> Remember me
+    </div>
+    <input type="hidden" asp-for="ReturnUrl" />
+    <button type="submit" class="btn btn-primary">Verify</button>
+</form>

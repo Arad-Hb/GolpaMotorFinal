@@ -1,0 +1,497 @@
+/*-------------Home Index and Layout-------------*/
+
+
+/*-------------reset css-------------*/
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+b, u, i, center,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, embed,
+figure, figcaption, footer, header, hgroup,
+menu, nav, output, ruby, section, summary,
+time, mark, audio, video {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    font-size: 100%;
+    font: inherit;
+    vertical-align: baseline;
+}
+
+@font-face {
+    font-family: 'FontAwesome';
+    src: url('../fonts/fontawesome-free-6.7.2-web/webfonts/fa-brands-400.ttf') format('truetype'), url('../fonts/fontawesome-free-6.7.2-web/webfonts/fa-brands-400.woff2') format('woff2'), url('../fonts/fontawesome-free-6.7.2-web/webfonts/fa-regular-400.ttf') format('truetype'), url('../fonts/fontawesome-free-6.7.2-web/webfonts/fa-regular-400.woff2') format('woff2'), url('../fonts/fontawesome-free-6.7.2-web/webfonts/fa-solid-900.ttf') format('truetype'), url('../fonts/fontawesome-free-6.7.2-web/webfonts/fa-solid-900.woff2') format('woff2'),url('../fonts/fontawesome-free-6.7.2-web/webfonts/fa-v4compatibility.ttf') format('truetype'),url('../fonts/fontawesome-free-6.7.2-web/webfonts/fa-v4compatibility.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: 'VazirFD';
+    src: url('../fonts/vazir/Vazir-FD-WOL.woff2') format('woff2'), url('../fonts/vazir/Vazir-FD-WOL.woff') format('woff'), url('../fonts/vazir/Vazir-FD-WOL.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'VazirFD';
+    src: url('../fonts/vazir/Vazir-Bold-FD-WOL.woff2') format('woff2'), url('../fonts/vazir/Vazir-Bold-FD-WOL.woff') format('woff'), url('../fonts/vazir/Vazir-Bold-FD-WOL.ttf') format('truetype');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+
+:root {
+    --navy: #04264e;
+    --orange: #eb792d;
+    --accent: #dc6532;
+    --white: #fff;
+    --dark: #212121;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'VazirFD'
+}
+
+
+body {
+    font-family: 'VazirFD', sans-serif;
+    background: #f6f8fc;
+}
+
+/* Navbar */
+.navbar {
+    padding: 5px 0;
+    background: #fff;
+}
+
+.navbar-nav {
+    gap: 15px;
+}
+
+.navbar-nav .nav-link {
+    font-weight: 500;
+    color: #333;
+    transition: .3s;
+}
+
+    .navbar-nav .nav-link:hover {
+        color: #0d6efd;
+    }
+
+.navbar .container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.nav-auth {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.nav-auth .btn {
+    min-width: 90px;
+    border-radius: 10px;
+}
+
+.navbar-toggler {
+    border: none;
+}
+
+    .navbar-toggler:focus {
+        box-shadow: none;
+    }
+
+.logo-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+}
+
+.logo-img {
+    height: 75px;
+    width: auto;
+    object-fit: contain;
+}
+
+.search-box {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-right: 40px;
+}
+
+.search-box .form-control {
+    width: 380px;
+    border-radius: 10px;
+}
+
+.search-box .btn {
+    border-radius: 10px;
+}
+
+.search-input {
+    width: 250px;
+}
+
+/*.auth-buttons {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-right: 150px;
+}*/
+.auth-buttons {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+    .auth-buttons .btn {
+        border-radius: 12px;
+        font-weight: 600;
+    }
+   
+    .auth-buttons form {
+        margin: 0;
+    }
+
+.auth-buttons {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.user-info-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 42px;
+    padding: 0 16px !important;
+    border-radius: 50px;
+    background: #f8fafc;
+    border: 1px solid #dbe3f0;
+    color: #0f172a;
+    font-size: 14px;
+    font-weight: 600;
+    white-space: nowrap;
+    transition: .25s;
+}
+
+    .user-info-btn:hover {
+        background: #eef4ff;
+        border-color: #0d6efd;
+        color: #0d6efd;
+    }
+
+.logout-btn {
+    height: 42px;
+    border-radius: 50px;
+    padding: 0 16px;
+    font-size: 14px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+    .user-info-btn:hover {
+        background: #04264e;
+        color: #fff;
+    }
+
+/* ======================
+    Auth Pages
+====================== */
+
+.auth-page {
+    min-height: calc(100vh - 220px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px 15px;
+}
+
+.auth-card {
+    width: 100%;
+    max-width: 580px;
+    background: #fff;
+    border-radius: 28px;
+    padding: 35px;
+    box-shadow: 0 15px 40px rgba(0,0,0,.08);
+}
+
+.auth-card-large {
+    max-width: 650px;
+}
+
+.auth-logo {
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+    .auth-logo img {
+        height: 90px;
+        object-fit: contain;
+    }
+
+.auth-title {
+    text-align: center;
+    color: #1e3a8a;
+    font-weight: 800;
+    margin-bottom: 30px;
+}
+
+.auth-input-group {
+    background: #fafafa;
+    border: 1px solid #e5e7eb;
+    border-radius: 18px;
+    padding: 15px;
+    margin-bottom: 15px;
+}
+
+    .auth-input-group label {
+        font-weight: 700;
+        margin-bottom: 10px;
+        color: #111827;
+        display: block;
+    }
+
+    .auth-input-group i {
+        color: #1e3a8a;
+        margin-left: 5px;
+    }
+
+    .auth-input-group .form-control {
+        border-radius: 12px;
+        height: 50px;
+    }
+
+.auth-remember {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.auth-btn {
+    width: 100%;
+    margin-top: 20px;
+    background: #1e3a8a;
+    color: #fff;
+    height: 55px;
+    border-radius: 14px;
+    font-size: 20px;
+    font-weight: 700;
+}
+
+    .auth-btn:hover {
+        background: #172554;
+        color: #fff;
+    }
+
+.auth-links {
+    text-align: center;
+    margin-top: 15px;
+}
+
+    .auth-links a {
+        text-decoration: none;
+        color: #2563eb;
+    }
+
+        .auth-links a:hover {
+            color: #1e40af;
+        }
+
+@media(max-width:768px) {
+
+    .auth-card {
+        padding: 25px;
+        border-radius: 22px;
+    }
+
+    .auth-title {
+        font-size: 24px;
+    }
+}
+
+/* Hero */
+.hero {
+    padding: 70px 0;
+    background: linear-gradient(135deg, #eef2ff, #ffffff);
+}
+
+/* Category */
+.category-card {
+    background: #fff;
+    padding: 25px;
+    text-align: center;
+    border-radius: 15px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+    transition: 0.3s;
+    font-weight: 600;
+}
+
+    .category-card:hover {
+        background: #1e3a8a;
+        color: #fff;
+        transform: translateY(-5px);
+    }
+
+/* Product Card */
+.product-card {
+    background: #fff;
+    border-radius: 15px;
+    padding: 15px;
+    text-align: center;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    transition: 0.3s;
+}
+
+    .product-card:hover {
+        transform: translateY(-6px);
+    }
+
+    .product-card img {
+        width: 100%;
+        height: 150px;
+        object-fit: cover;
+        border-radius: 10px;
+    }
+
+.price {
+    color: #16a34a;
+    font-weight: bold;
+    margin-top: 5px;
+}
+
+/* Features */
+.features {
+    background: #eef2ff;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+/* Footer */
+.footer {
+    background: #0f172a;
+    color: white;
+    padding: 30px 0;
+    margin-top: 40px;
+}
+
+.footer h5 {
+    margin-bottom: 10px;
+}
+
+.footer p {
+    margin-bottom: 0;
+}
+
+/* Responsive */
+@media (max-width: 991px) {
+
+    .navbar-collapse {
+        margin-top: 15px;
+    }
+
+    .search-box {
+        margin: 15px 0;
+        width: 100%;
+    }
+
+        .search-box .form-control {
+            width: 100%;
+        }
+
+    .nav-auth {
+        width: 100%;
+        justify-content: center;
+        margin-top: 10px;
+    }
+
+    .hero {
+        text-align: center;
+    }
+
+    .hero-img {
+        max-width: 100%;
+        margin-top: 20px;
+    }
+}
+
+@media (max-width: 991px) {
+
+    .search-box {
+        width: 100%;
+        margin: 15px 0;
+    }
+
+    .auth-buttons {
+        width: 100%;
+        margin-right: 0;
+        margin-top: 10px;
+        justify-content: center;
+    }
+
+    .navbar-nav {
+        margin-top: 15px;
+    }
+}
+
+
+
+
+/* =====================================
+   WARRANTEE CARD PAGE
+===================================== */
+
+.warranty-card-page {
+    display:flex;
+    flex-direction:row;
+    padding: 20px;
+    width: 600px;
+    margin: 0px auto;
+}
+    .warranty-card-page>.card {
+        border: 0;
+        border-radius: 28px;
+        overflow: hidden;
+        box-shadow: 0 5px 30px rgba(0,0,0,.06);
+    }
+.btn-add-extra-warranty{
+    font-size:24px;
+
+}
+.remove-row {
+    font-size: 20px;
+    padding:1px 3px;
+    color:orangered;
+}
+.customer-type-btn {
+    font-size: 14px;
+    border: 1px solid #04264e;
+    color: #04264e;
+    background-color: white;
+    border-radius: 8px;
+    padding: 8px 16px;
+    transition: all .2s ease;
+}
+
+.btn-check:checked + .customer-type-btn {
+    background-color: #04264e;
+    color: white;
+}
+
+.customer-type-btn:hover {
+    background-color: #f1f5f9;
+}

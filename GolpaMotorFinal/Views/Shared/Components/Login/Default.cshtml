@@ -1,0 +1,35 @@
+
+    <div class="login-wrapper">
+    <p class="subtitle">
+        فرم زیر را تکمیل کنید و ورود بزنید
+    </p>
+        <div class="login-box">
+        <form asp-controller="Account" asp-action="Login" method="post" enctype="multipart/form-data" class="d-flex flex-column">
+            <div class="input-group">
+                <span class="icon"><i class="fa fa-envelope-o"></i></span>
+                <input type="email" name="email" placeholder="ایمیل" class="form-control mb-2" />
+            </div>
+            <div class="input-group">
+                <span class="icon"><i class="fa fa-lock"></i></span>
+                <input name="password" placeholder="رمز عبور" type="password" class="form-control mb-2" />
+            </div> 
+            <button type="submit" class="btn-login">ورود</button>
+        </form>
+        <form asp-controller="Account" asp-action="Register" class="d-flex flex-column">
+            <button type="submit" class="btn-Register">ثبت نام</button>
+        </form>
+        
+
+            <div class="remember-row"><label>مرا به خاطر بسپار<input type="checkbox"></label></div>
+            <button class="btn-facebook"><i class="fa fa-facebook"></i>ورود با فیسبوک</button>
+            <button class="btn-google"><i class="fa fa-google-plus"></i>ورود با گوگل</button>
+            <div class="links">
+                <a href="#">رمز عبورم را فراموش کرده ام.</a>
+            </div>
+        </div>
+    </div>
+
+
+    
+
+

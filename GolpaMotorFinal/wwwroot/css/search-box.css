@@ -1,0 +1,31 @@
+﻿.search-box {
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+    .search-box .form-control {
+        min-height: 48px;
+        border-color: #dee2e6;
+        box-shadow: none;
+    }
+
+        .search-box .form-control:focus {
+            border-color: #04264e;
+            box-shadow: 0 0 0 0.15rem rgba(4,38,78,.15);
+        }
+
+    .search-box .input-group-text {
+        min-width: 50px;
+    }
+
+.btn-search {
+    background-color: #04264e;
+    color: #fff;
+    min-width: 110px;
+    font-weight: 600;
+}
+
+    .btn-search:hover {
+        background-color: #06376f;
+        color: white;
+    }

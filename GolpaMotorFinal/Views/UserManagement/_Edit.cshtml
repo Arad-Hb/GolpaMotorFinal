@@ -1,0 +1,73 @@
+﻿@model GolpaMotorFinal.Models.ViewModels.UserManagement.UserAddEditViewModel
+@using GolpaMotorFinal.Helpers
+
+<form id="UserFormEdit" enctype="multipart/form-data">
+
+    @Html.AntiForgeryToken()
+
+    <input asp-for="UserID" type="hidden" />
+
+    @* <input asp-for="ProfileImage" type="hidden" /> *@
+
+    <div class="row">
+
+        <div class="col-md-6">
+
+            <label>نام</label>
+
+            <input asp-for="FirstName" class="form-control" />
+
+        </div>
+        <div class="col-md-6">
+
+            <label>نام خانوادگی</label>
+
+            <input asp-for="LastName" class="form-control" />
+
+        </div>
+        <div class="col-md-6">
+
+            <label>شماره تلفن</label>
+
+            <input asp-for="PhoneNumber" class="form-control" />
+
+        </div>
+        <div class="col-md-6">
+
+            <label>;کد پستی</label>
+
+            <input asp-for="PostalCode" class="form-control" />
+
+        </div>
+
+    </div>
+
+    <div class="mt-3">
+
+        <label>آدرس</label>
+
+        <textarea asp-for="Address" class="form-control"></textarea>
+
+    </div>
+
+    <div class="mt-3">
+
+        <input asp-for="ProfileImage" type="file" class="form-control" />
+
+    </div>
+
+    <div class="mt-3">
+
+        <input asp-for="IsActive" />
+
+        <label asp-for="IsActive">فعال </label>
+
+    </div>
+
+    <div class="mt-4">
+
+        <button type="submit" class="btn btn-warning"> ویرایش </button>
+
+    </div>
+
+</form>

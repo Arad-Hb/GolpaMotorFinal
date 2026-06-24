@@ -1,0 +1,302 @@
+﻿@{
+    Layout = "_AdminLayout";
+}
+
+<div class="row mb-3">
+    <div class="col-md-12">
+        @await Component.InvokeAsync("UploadExcel")
+    </div>
+</div>
+
+<h2>مدیریت محصولات</h2>
+
+<button class="btn btn-success mb-3" id="btnAdd"> افزودن محصول </button>
+
+<form id="frmAntiForgery">
+    @Html.AntiForgeryToken()
+</form>
+
+<div id="ProductGrid">  </div>
+
+<div id="ModalArea">   </div>
+
+<div class="modal fade" id="productModal">
+
+    <div class="modal-dialog modal-lg">
+
+        <div class="modal-content">
+
+            <div class="modal-header">
+
+                <h5 class="modal-title"> مدیریت محصول </h5>
+
+                <button type="button" class="close" data-dismiss="modal">
+
+                    <span>&times;</span>
+
+                </button>
+
+            </div>
+
+            <div class="modal-body" id="modalBody">
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+@section Scripts
+{
+    <script>
+
+        $(function () {
+
+            LoadProducts();
+
+        });
+
+        function LoadProducts()
+        {
+            // $("#ProductGrid").load("/ProductManagement/ProductList");
+            $("#ProductGrid").load("/ProductManagement/ProductList?ts=" + new Date().getTime());
+        }
+
+        //create
+         $(document).on("click","#btnAdd",function(){
+
+            $.get("/ProductManagement/Create",function(result){
+
+                $("#modalBody").html(result);
+
+                $("#productModal").modal("show");
+
+            });
+
+        });        
+        //SaveCreate
+        $(document).on("submit", "#frmCreate", function (e) {
+
+            e.preventDefault();
+
+            var formData = new FormData(this);
+
+            $.ajax({
+
+                url: "/ProductManagement/Create",
+
+                type: "POST",
+
+                data: formData,
+
+                processData: false,
+
+                contentType: false,
+
+                headers: {
+                    RequestVerificationToken:
+                        $('input[name="__RequestVerificationToken"]', this).val()
+                },
+
+                success: function (res) {
+
+                    if (res.success) {
+
+                        $("#productModal").modal("hide");
+
+                        LoadProducts();
+
+                        alert(res.message);
+                    }
+                    else {
+
+                        alert(res.message);
+                    }
+                }
+            });
+
+        });
+
+        //Edit
+        $(document).on("click", ".btnEdit", function () {
+
+            var id = $(this).data("id");
+
+            $.get("/ProductManagement/Edit",
+
+                {
+                    productID: id
+                },
+
+                function (result) {
+
+                    $("#modalBody").html(result);
+
+                    $("#productModal").modal("show");
+
+                });
+
+        });
+        //SaveEdit
+        $(document).on("submit", "#frmEdit", function (e) {
+
+            e.preventDefault();
+
+            var formData = new FormData(this);
+
+            $.ajax({
+
+                url: "/ProductManagement/Edit",
+
+                type: "POST",
+
+                data: formData,
+
+                processData: false,
+
+                contentType: false,
+
+                headers: {
+                    RequestVerificationToken:
+                        $('input[name="__RequestVerificationToken"]', this).val()
+                },
+
+                success: function (res) {
+
+                    if (res.success) {
+
+                        $("#productModal").modal("hide");
+
+                        LoadProducts();
+
+                        alert(res.message);
+                    }
+                    else {
+
+                        alert(res.message);
+                    }
+                }
+            });
+
+        });
+        //Details
+             $(document).on("click", ".btnDetails", function () {
+
+            var id = $(this).data("id");
+
+            $.get("/ProductManagement/Details",
+
+                {
+                    productID: id
+                },
+
+                function (result) {
+
+                    $("#modalBody").html(result);
+
+                    $("#productModal").modal("show");
+
+                });
+
+        });
+        //Delete
+        $(document).on("click", ".btnDelete", function () {
+
+            if (!confirm("آیا از حذف محصول مطمئن هستید؟"))
+                return;
+
+            var id = $(this).data("id");
+
+            $.ajax({
+
+                url: "/ProductManagement/Delete",
+
+                type: "POST",
+
+                data: {
+                    productID: id
+                },
+
+                headers: {
+                    RequestVerificationToken:
+                        $('#frmAntiForgery input[name="__RequestVerificationToken"]').val()
+                },
+
+                success: function (res) {
+
+                    if (res.success) {
+
+                        LoadProducts();
+
+                        alert(res.message);
+                    }
+                    else {
+
+                        alert(res.message);
+                    }
+                }
+            });
+
+        });
+
+        //RemovePicture
+        $(document).on("click", ".btnRemovePicture", function () {
+
+            var id = $(this).data("id");
+
+            if (!confirm("آیا مطمئن هستید؟"))
+                return;
+
+            var token = $('#frmAntiForgery input[name="__RequestVerificationToken"]').val();
+
+            $.ajax({
+                url: '/ProductManagement/RemovePicture',
+                type: 'POST',
+                data: {
+                    productID: id,
+                    __RequestVerificationToken: token
+                },
+                success: function (res) {
+                    if (res.success) {
+                        alert(res.message);
+
+                        // بهتر از reload:
+                        LoadProducts();
+                    } else {
+                        alert(res.message);
+                    }
+                },
+                error: function (xhr) {
+                    console.log(xhr.responseText);
+                    alert("خطا در ارتباط با سرور");
+                }
+            });
+
+        });
+
+        //آپلود فایل اکسل
+        $("#btnUploadExcel").click(function () {
+
+            var formData = new FormData();
+
+            formData.append(
+                "ProductID",
+                $("#ProductID").val());
+
+            formData.append(
+                "ExcelFile",
+                $("#ExcelFile")[0].files[0]);
+
+            $.ajax({
+                url: "/Admin/WarrantyManagement/UploadExcel",
+                type: "POST",
+                data: formData,
+                processData: false,
+                contentType: false
+            });
+        });
+    </script>
+}
+
+  

@@ -1,0 +1,254 @@
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewData["Title"]</title>
+    <link href="~/lib/bootstrap-5.3.8-dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="~/fonts/fontawesome-free-6.7.2-web/css/fontawesome.min.css" rel="stylesheet" />
+    <link href="~/fonts/fontawesome-free-6.7.2-web/css/all.min.css" rel="stylesheet" />
+    <link href="~/css/adminlayout.css" rel="stylesheet" />
+    <link href="~/css/account.css" rel="stylesheet" />
+    <link href="~/fonts/vazirmatn-master/vazirmatn-font-face.css" rel="stylesheet" />
+
+    @RenderSection("Styles", false)
+
+</head>
+
+<body>
+    <div class="d-flex">
+        <partial name="_AdminSidebar" />
+        <div class="main w-100">
+            <partial name="_AdminHeader" />
+            <div class="content p-4">
+                @RenderBody()
+            </div>
+            <partial name="_AdminFooter" />
+        </div>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap-5.3.8-dist/js/bootstrap.bundle.js"></script>
+    <script src="~/lib/bootstrap-5.3.8-dist/js/bootstrap.min.js"></script>
+   <script>
+     $(function() {
+         LoadUsers();
+     });
+
+     function LoadUsers() {
+         $("#UserGrid").load("/UserManagement/UserList?ts=" + new Date().getTime());
+     }
+
+     //create
+     $(document).on("click", "#btnAddUser", function() {
+
+         $.get("/UserManagement/Create", function(result) {
+
+             $("#UserModalBody").html(result);
+
+             $("#UserModal").modal("show");
+
+         });
+
+     });
+     //SaveCreate
+     $(document).on("submit", "#UserFormCreate", function(e) {
+
+         e.preventDefault();
+
+         var formData = new FormData(this);
+
+         $.ajax({
+
+             url: "/UserManagement/Create",
+
+             type: "POST",
+
+             data: formData,
+
+             processData: false,
+
+             contentType: false,
+
+             headers: {
+                 RequestVerificationToken:
+                     $('input[name="__RequestVerificationToken"]', this).val()
+             },
+
+             success: function(res) {
+
+                 if (res.success) {
+
+                     $("#UserModal").modal("hide");
+
+                     LoadUsers();
+
+                     alert(res.message);
+                 }
+                 else {
+
+                     alert(res.message);
+                 }
+             }
+         });
+
+     });
+
+     //Edit
+     $(document).on("click", ".btnEdit", function() {
+
+         var id = $(this).data("id");
+
+         $.get("/UserManagement/Edit",
+
+             {
+                 userID: id
+             },
+
+             function(result) {
+
+                 $("#UserModalBody").html(result);
+
+                 $("#UserModal").modal("show");
+
+             });
+
+     });
+     //SaveEdit
+     $(document).on("submit", "#UserFormEdit", function(e) {
+
+         e.preventDefault();
+
+         var formData = new FormData(this);
+
+         $.ajax({
+
+             url: "/UserManagement/Edit",
+
+             type: "POST",
+
+             data: formData,
+
+             processData: false,
+
+             contentType: false,
+
+             headers: {
+                 RequestVerificationToken:
+                     $('input[name="__RequestVerificationToken"]', this).val()
+             },
+
+             success: function(res) {
+
+                 if (res.success) {
+
+                     $("#UserModal").modal("hide");
+
+                     LoadUsers();
+
+                     alert(res.message);
+                 }
+                 else {
+
+                     alert(res.message);
+                 }
+             }
+         });
+
+     });
+     //Details
+     $(document).on("click", ".btnDetails", function() {
+
+         var id = $(this).data("id");
+
+         $.get("/UserManagement/Details",
+
+             {
+                 UserID: id
+             },
+
+             function(result) {
+
+                 $("#UserModalBody").html(result);
+
+                 $("#UserModal").modal("show");
+
+             });
+
+     });
+     //Delete
+     $(document).on("click", ".btnDelete", function() {
+
+         if (!confirm("آیا از حذف مطمئن هستید؟"))
+             return;
+
+         var id = $(this).data("id");
+
+         $.ajax({
+
+             url: "/UserManagement/Delete",
+
+             type: "POST",
+
+             data: {
+                 UserID: id
+             },
+
+             headers: {
+                 RequestVerificationToken:
+                     $('#frmAntiForgery input[name="__RequestVerificationToken"]').val()
+             },
+
+             success: function(res) {
+
+                 if (res.success) {
+
+                     LoadUsers();
+
+                     alert(res.message);
+                 }
+                 else {
+
+                     alert(res.message);
+                 }
+             }
+         });
+
+     });
+
+     //RemovePicture
+     $(document).on("click", ".btnRemovePicture", function() {
+         var id = $(this).data("id");
+         if (!confirm("آیا مطمئن هستید؟"))
+             return;
+         var token = $('#frmAntiForgery input[name="__RequestVerificationToken"]').val();
+         $.ajax({
+             url: '/UserManagement/RemovePicture',
+             type: 'POST',
+             data: {
+                 UserID: id,
+                 __RequestVerificationToken: token
+             },
+             success: function(res) {
+                 if (res.success) {
+                     alert(res.message);
+                     LoadUsers();} 
+                 else {alert(res.message);}
+             },
+             error: function(xhr) {
+                 console.log(xhr.responseText);
+                 alert("خطا در ارتباط با سرور");
+             }
+         });
+     });
+   </script>
+   
+    @RenderSection("Scripts", false)
+
+</body>
+</html>

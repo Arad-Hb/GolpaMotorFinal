@@ -1,0 +1,26 @@
+@using DomainModel.Models
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<ApplicationUser> SignInManager
+@{
+    var hasExternalLogins = (await SignInManager.GetExternalAuthenticationSchemesAsync()).Any();
+    var currentSection = string.Empty;
+    if (ViewContext.RouteData.Values.ContainsKey("section"))
+    {
+        currentSection = ViewContext.RouteData.Values["section"]?.ToString() ?? string.Empty;
+    }
+    if (string.IsNullOrEmpty(currentSection))
+    {
+        currentSection = Context.Request.Query["section"].ToString() ?? string.Empty;
+    }
+}
+<ul class="nav nav-pills flex-column">
+    <li class="nav-item"><a class="nav-link @(currentSection == "Index" ? "active" : "")" id="profile" asp-controller="Account" asp-action="Manage" asp-route-section="Index">Profile</a></li>
+    <li class="nav-item"><a class="nav-link @(currentSection == "Email" ? "active" : "")" id="email" asp-controller="Account" asp-action="Manage" asp-route-section="Email">Email</a></li>
+    <li class="nav-item"><a class="nav-link @(currentSection == "ChangePassword" ? "active" : "")" id="change-password" asp-controller="Account" asp-action="Manage" asp-route-section="ChangePassword">Password</a></li>
+    @if (hasExternalLogins)
+    {
+        <li id="external-logins" class="nav-item"><a id="external-login" class="nav-link @(currentSection == "ExternalLogins" ? "active" : "")" asp-controller="Account" asp-action="Manage" asp-route-section="ExternalLogins">External logins</a></li>
+    }
+    <li class="nav-item"><a class="nav-link @(currentSection == "TwoFactorAuthentication" ? "active" : "")" id="two-factor" asp-controller="Account" asp-action="Manage" asp-route-section="TwoFactorAuthentication">Two-factor authentication</a></li>
+    <li class="nav-item"><a class="nav-link @(currentSection == "PersonalData" ? "active" : "")" id="personal-data" asp-controller="Account" asp-action="Manage" asp-route-section="PersonalData">Personal data</a></li>
+</ul>
