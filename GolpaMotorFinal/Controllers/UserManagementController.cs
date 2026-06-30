@@ -1,8 +1,11 @@
-﻿using DataAccess.Services;
+﻿using DataAccess.Repositories;
+using DataAccess.Services;
 using DomainModel.ViewModels.User;
 using GolpaMotorFinal.FrameworkUI.Services;
+using GolpaMotorFinal.Models.ViewModels;
 using GolpaMotorFinal.Models.ViewModels.UserManagement;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
@@ -13,7 +16,7 @@ namespace GolpaMotorFinal.Controllers
     {
         private readonly IUserRepository repo;
         private readonly IUserService service;
-        public UserManagementController(IUserRepository repo , IUserService service)
+        public UserManagementController(IUserRepository repo, IUserService service)
         {
             this.repo = repo;
             this.service = service;
@@ -21,13 +24,51 @@ namespace GolpaMotorFinal.Controllers
 
         public async Task<IActionResult> Index()
         {
-            return View();
+            var model = await service.GetUsers();
+            return View(model);
         }
 
         [HttpGet]
-        public IActionResult UserList()
+        public async Task<IActionResult> MergeAccounts(string userID)
         {
-            return ViewComponent("UserList");
+            var currentUser =await service.GetUserMergeAccounts(userID);
+
+            var vm = new MergeAccountsComplexViewModel
+            {
+                CurrentUser = currentUser,
+               
+                Search = new SearchBoxViewModel
+                {
+                    Action = "SearchUserForMerge",
+                    Controller = "UserManagement",
+                    SearchParameterName = "Search.SearchTerm",
+                    Placeholder = "شماره موبایل",
+                    UseAjax = true,
+                    UpdateTargetId = "mergeResultContainer",
+                    ComponentId = "mergeAccountSearch"
+                }
+            };
+
+            return PartialView("_MergeAccounts",vm);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> MergeAccounts(MergeAccountsComplexViewModel model)
+        {
+            var result=await service.MergeUsers(model.CurrentUser);
+
+            return RedirectToAction(nameof(UserReport));
+        }
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SearchUserForMerge(MergeAccountsComplexViewModel model)
+        {
+            model.SearchedUser =await service.GetMergeSearchResult(model.Search.SearchTerm); 
+
+            return PartialView("_MergeResult", model);
         }
 
         [HttpGet]
@@ -159,11 +200,21 @@ namespace GolpaMotorFinal.Controllers
             return Json(result);
         }
 
+        [HttpGet]
+        public async Task<IActionResult> UserList(List<UserListItemViewModel> model)
+        {
+            return View(model);
+        }
 
         [HttpGet]
-        public IActionResult UserReport()
+        public async Task<IActionResult> UserReport()
         {
-            return View();
+            var model = await service.GetUserReport();
+            return View(model);
         }
+      
+       
+
     }
+
 }

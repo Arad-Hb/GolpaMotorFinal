@@ -1,0 +1,61 @@
+﻿@model GolpaMotorFinal.Models.ViewModels.UserManagement.MergeAccountsComplexViewModel
+@using GolpaMotorFinal.Helpers
+
+<h4 class="mb-3">حساب(های) یافت شده</h4>
+
+@if (Model.SearchedUser != null)
+{
+
+    <div class="card mb-3">
+        <div class="card-body">
+
+            <div class="row align-items-center">
+
+                <div class="col-auto">
+                    <img src="@ImageHelper.FixUser(Model.SearchedUser.ProfileImageUrl)"
+                         style="width:50px;height:50px;border-radius:50%;object-fit:cover;" />
+                </div>
+
+                <div class="col">
+
+                    <div class="fw-bold">@Model.SearchedUser.FullName</div>
+
+                    <div class="text-muted">
+                        @Model.SearchedUser.PhoneNumber
+                    </div>
+
+                    <div class="text-primary">
+                        امتیاز: @Model.SearchedUser.RemainedPoints
+                    </div>
+
+                </div>
+
+                <div class="col-auto">
+                    <div class="form-check">
+
+                        <input class="form-check-input select-user"
+                               type="radio"
+                               name="CurrentUser.SelectedMergeUserID"
+                               value="@Model.SearchedUser.UserID"
+                               id="mergeUser_@Model.SearchedUser.UserID" />
+
+                        <label class="form-check-label"
+                               for="mergeUser_@Model.SearchedUser.UserID">
+                            انتخاب
+                        </label>
+
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+}
+else
+{
+    <div class="alert alert-warning">
+        هیچ حسابی یافت نشد
+    </div>
+}

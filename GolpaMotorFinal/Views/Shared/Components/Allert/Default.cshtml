@@ -1,0 +1,14 @@
+﻿@if (ViewBag.Message != null)
+{
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+
+            Swal.fire({
+                icon: '@(Convert.ToBoolean(ViewBag.Success) ? "success" : "error")',
+                text: '@Html.Raw(ViewBag.Message)',
+                confirmButtonText: 'OK'
+            });
+
+        });
+    </script>
+}

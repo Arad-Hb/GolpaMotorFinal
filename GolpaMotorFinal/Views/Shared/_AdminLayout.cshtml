@@ -1,7 +1,7 @@
 @{
     Layout = null;
-}
 
+}
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 
@@ -15,6 +15,8 @@
     <link href="~/css/adminlayout.css" rel="stylesheet" />
     <link href="~/css/account.css" rel="stylesheet" />
     <link href="~/fonts/vazirmatn-master/vazirmatn-font-face.css" rel="stylesheet" />
+    <link rel="stylesheet" href="~/lib/sweetalert2/sweetalert2.min.css">
+
 
     @RenderSection("Styles", false)
 
@@ -23,6 +25,15 @@
 <body>
     <div class="d-flex">
         <partial name="_AdminSidebar" />
+        @* @if (TempData["AlertMessage"] != null)
+        {
+            <script>
+                        showOperationResult(
+                             @TempData["AlertSuccess"]!.ToString()!.ToLower(),
+                            '@Html.Raw(TempData["AlertMessage"])'
+                        );
+            </script>
+        } *@
         <div class="main w-100">
             <partial name="_AdminHeader" />
             <div class="content p-4">
@@ -35,220 +46,56 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap-5.3.8-dist/js/bootstrap.bundle.js"></script>
     <script src="~/lib/bootstrap-5.3.8-dist/js/bootstrap.min.js"></script>
-   <script>
-     $(function() {
-         LoadUsers();
-     });
-
-     function LoadUsers() {
-         $("#UserGrid").load("/UserManagement/UserList?ts=" + new Date().getTime());
-     }
-
-     //create
-     $(document).on("click", "#btnAddUser", function() {
-
-         $.get("/UserManagement/Create", function(result) {
-
-             $("#UserModalBody").html(result);
-
-             $("#UserModal").modal("show");
-
-         });
-
-     });
-     //SaveCreate
-     $(document).on("submit", "#UserFormCreate", function(e) {
-
-         e.preventDefault();
-
-         var formData = new FormData(this);
-
-         $.ajax({
-
-             url: "/UserManagement/Create",
-
-             type: "POST",
-
-             data: formData,
-
-             processData: false,
-
-             contentType: false,
-
-             headers: {
-                 RequestVerificationToken:
-                     $('input[name="__RequestVerificationToken"]', this).val()
-             },
-
-             success: function(res) {
-
-                 if (res.success) {
-
-                     $("#UserModal").modal("hide");
-
-                     LoadUsers();
-
-                     alert(res.message);
-                 }
-                 else {
-
-                     alert(res.message);
-                 }
-             }
-         });
-
-     });
-
-     //Edit
-     $(document).on("click", ".btnEdit", function() {
-
-         var id = $(this).data("id");
-
-         $.get("/UserManagement/Edit",
-
-             {
-                 userID: id
-             },
-
-             function(result) {
-
-                 $("#UserModalBody").html(result);
-
-                 $("#UserModal").modal("show");
-
-             });
-
-     });
-     //SaveEdit
-     $(document).on("submit", "#UserFormEdit", function(e) {
-
-         e.preventDefault();
-
-         var formData = new FormData(this);
-
-         $.ajax({
-
-             url: "/UserManagement/Edit",
-
-             type: "POST",
-
-             data: formData,
-
-             processData: false,
-
-             contentType: false,
-
-             headers: {
-                 RequestVerificationToken:
-                     $('input[name="__RequestVerificationToken"]', this).val()
-             },
-
-             success: function(res) {
-
-                 if (res.success) {
-
-                     $("#UserModal").modal("hide");
-
-                     LoadUsers();
-
-                     alert(res.message);
-                 }
-                 else {
-
-                     alert(res.message);
-                 }
-             }
-         });
-
-     });
-     //Details
-     $(document).on("click", ".btnDetails", function() {
-
-         var id = $(this).data("id");
-
-         $.get("/UserManagement/Details",
-
-             {
-                 UserID: id
-             },
-
-             function(result) {
-
-                 $("#UserModalBody").html(result);
-
-                 $("#UserModal").modal("show");
-
-             });
-
-     });
-     //Delete
-     $(document).on("click", ".btnDelete", function() {
-
-         if (!confirm("آیا از حذف مطمئن هستید؟"))
-             return;
-
-         var id = $(this).data("id");
-
-         $.ajax({
-
-             url: "/UserManagement/Delete",
-
-             type: "POST",
-
-             data: {
-                 UserID: id
-             },
-
-             headers: {
-                 RequestVerificationToken:
-                     $('#frmAntiForgery input[name="__RequestVerificationToken"]').val()
-             },
-
-             success: function(res) {
-
-                 if (res.success) {
-
-                     LoadUsers();
-
-                     alert(res.message);
-                 }
-                 else {
-
-                     alert(res.message);
-                 }
-             }
-         });
-
-     });
-
-     //RemovePicture
-     $(document).on("click", ".btnRemovePicture", function() {
-         var id = $(this).data("id");
-         if (!confirm("آیا مطمئن هستید؟"))
-             return;
-         var token = $('#frmAntiForgery input[name="__RequestVerificationToken"]').val();
-         $.ajax({
-             url: '/UserManagement/RemovePicture',
-             type: 'POST',
-             data: {
-                 UserID: id,
-                 __RequestVerificationToken: token
-             },
-             success: function(res) {
-                 if (res.success) {
-                     alert(res.message);
-                     LoadUsers();} 
-                 else {alert(res.message);}
-             },
-             error: function(xhr) {
-                 console.log(xhr.responseText);
-                 alert("خطا در ارتباط با سرور");
-             }
-         });
-     });
-   </script>
-   
+    <script src="~/lib/sweetalert2/sweetalert2.all.min.js"></script>
+    <script src="~/js/site.js"></script>
+    <script>
+
+        //Dynamic General SearchBox viewcomponents
+
+        $(document).on("click", ".search__button", function (e) {
+
+            e.preventDefault();
+        
+            var searchBox = $(this).closest(".search");
+        
+            var componentId = searchBox.data("component-id");
+            var url = searchBox.data("action");
+            var target = searchBox.data("target");
+        
+            var input = $("#searchInput-" + componentId);
+        
+            $.ajax({
+        
+                url: url,
+                type: "POST",
+        
+                data: {
+                    __RequestVerificationToken:
+                        $('input[name="__RequestVerificationToken"]').first().val(),
+        
+                    [input.attr("name")]: input.val()
+                },
+        
+                success: function (html) {
+        
+                    $("#" + target).html(html);
+        
+                },
+        
+                error: function (xhr) {
+        
+                    console.log(xhr.responseText);
+        
+                }
+        
+            });
+        
+        });
+    </script>
+
+    @await Component.InvokeAsync("Allert")
     @RenderSection("Scripts", false)
 
+    
 </body>
 </html>

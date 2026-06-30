@@ -60,5 +60,15 @@ namespace DomainModel.ViewModels.User
 
         [Display(Name = "شماره حساب")]
         public string? AccountNumber { get; set; }
+
+        
+        public int? TotalEarnedPoints { get; set; }
+
+        public int? TotalSettledPoints { get; set; }
+
+        [Display(Name = "امتیاز باقیمانده")]
+        public int? RemainedPoints { get; set; }
+
+        public int? TotalRegisteredCards { get; set; }
     }
 }

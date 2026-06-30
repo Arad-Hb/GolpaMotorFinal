@@ -1,6 +1,8 @@
-﻿@{
+﻿@model List<GolpaMotorFinal.Models.ViewModels.UserManagement.UserListItemViewModel>
+@{
     Layout = "_AdminLayout";
 }
+
 <h2>مدیریت کاربران</h2>
 
 <button class="btn btn-success mb-3" id="btnAddUser"> افزودن کاربر </button>
@@ -9,7 +11,9 @@
     @Html.AntiForgeryToken()
 </form>
 
-<div id="UserGrid">  </div>
+<div id="UserGrid">
+    @await Component.InvokeAsync("UserList", Model)
+</div>
 
 <div id="UserModalArea">   </div>
 
@@ -23,11 +27,7 @@
 
                 <h5 class="modal-title"> مدیریت کاربران </h5>
 
-                <button type="button" class="close" data-dismiss="modal">
-
-                    <span>&times;</span>
-
-                </button>
+                <button type="button" class="btn-close" id="btnCloseUserModal" data-dismiss="modal"></button>
 
             </div>
 
@@ -40,4 +40,227 @@
 
 </div>
 
-  
+
+
+  @section Scripts
+{
+   <script>
+
+     function LoadUsers() {
+         $("#UserGrid").load("/UserManagement/UserList");
+     }
+     // close modal when clicking the close button
+            $("#btnCloseUserModal").click(function () {
+                var modalEl = document.getElementById("UserModal");
+                var modal = bootstrap.Modal.getInstance(modalEl);
+            
+                if (modal) {
+                    modal.hide();
+                }
+            });
+
+     //create
+     $(document).on("click", "#btnAddUser", function() {
+
+         $.get("/UserManagement/Create", function(result) {
+
+             $("#UserModalBody").html(result);
+
+             $("#UserModal").modal("show");
+
+         });
+
+     });
+     //SaveCreate
+     $(document).on("submit", "#UserFormCreate", function(e) {
+
+         e.preventDefault();
+
+         var formData = new FormData(this);
+
+         $.ajax({
+
+             url: "/UserManagement/Create",
+
+             type: "POST",
+
+             data: formData,
+
+             processData: false,
+
+             contentType: false,
+
+             headers: {
+                 RequestVerificationToken:
+                     $('input[name="__RequestVerificationToken"]', this).val()
+             },
+
+             success: function(res) {
+
+                 if (res.success) {
+
+                     $("#UserModal").modal("hide");
+
+                     LoadUsers();
+
+                     alert(res.message);
+                 }
+                 else {
+
+                     alert(res.message);
+                 }
+             }
+         });
+
+     });
+
+     //Edit
+     $(document).on("click", ".btnEdit", function() {
+
+         var id = $(this).data("id");
+
+         $.get("/UserManagement/Edit",
+
+             {
+                 userID: id
+             },
+
+             function(result) {
+
+                 $("#UserModalBody").html(result);
+
+                 $("#UserModal").modal("show");
+
+             });
+
+     });
+     //SaveEdit
+     $(document).on("submit", "#UserFormEdit", function(e) {
+
+         e.preventDefault();
+
+         var formData = new FormData(this);
+
+         $.ajax({
+
+             url: "/UserManagement/Edit",
+
+             type: "POST",
+
+             data: formData,
+
+             processData: false,
+
+             contentType: false,
+
+             headers: {
+                 RequestVerificationToken:
+                     $('input[name="__RequestVerificationToken"]', this).val()
+             },
+
+             success: function(res) {
+
+                 if (res.success) {
+
+                     $("#UserModal").modal("hide");
+
+                     LoadUsers();
+
+                     alert(res.message);
+                 }
+                 else {
+
+                     alert(res.message);
+                 }
+             }
+         });
+
+     });
+     //Details
+     $(document).on("click", ".btnDetails", function() {
+
+         var id = $(this).data("id");
+
+         $.get("/UserManagement/Details",
+
+             {
+                 UserID: id
+             },
+
+             function(result) {
+
+                 $("#UserModalBody").html(result);
+
+                 $("#UserModal").modal("show");
+
+             });
+
+     });
+     //Delete
+     $(document).on("click", ".btnDelete", function() {
+
+         if (!confirm("آیا از حذف مطمئن هستید؟"))
+             return;
+
+         var id = $(this).data("id");
+
+         $.ajax({
+
+             url: "/UserManagement/Delete",
+
+             type: "POST",
+
+             data: {
+                 UserID: id
+             },
+
+             headers: {
+                 RequestVerificationToken:
+                     $('#frmAntiForgery input[name="__RequestVerificationToken"]').val()
+             },
+
+             success: function(res) {
+
+                 if (res.success) {
+
+                     LoadUsers();
+
+                     alert(res.message);
+                 }
+                 else {
+
+                     alert(res.message);
+                 }
+             }
+         });
+
+     });
+
+     //RemovePicture
+     $(document).on("click", ".btnRemovePicture", function() {
+         var id = $(this).data("id");
+         if (!confirm("آیا مطمئن هستید؟"))
+             return;
+         var token = $('#frmAntiForgery input[name="__RequestVerificationToken"]').val();
+         $.ajax({
+             url: '/UserManagement/RemovePicture',
+             type: 'POST',
+             data: {
+                 UserID: id,
+                 __RequestVerificationToken: token
+             },
+             success: function(res) {
+                 if (res.success) {
+                     alert(res.message);
+                     LoadUsers();} 
+                 else {alert(res.message);}
+             },
+             error: function(xhr) {
+                 console.log(xhr.responseText);
+                 alert("خطا در ارتباط با سرور");
+             }
+         });
+     });
+   </script>
+
+}

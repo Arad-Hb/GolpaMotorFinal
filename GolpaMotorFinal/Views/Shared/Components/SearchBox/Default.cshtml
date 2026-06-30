@@ -1,32 +1,34 @@
 ﻿@model GolpaMotorFinal.Models.ViewModels.SearchBoxViewModel
 
-@section styles {
-    <link rel="stylesheet" href="~/css/search-box.css" />
-}
+<div class="search-component-page">
 
-<form asp-action="@Model.Action"
-      asp-controller="@Model.Controller"
-      method="post">
+    <div class="search"
+         id="searchBox-@Model.ComponentId"
+         data-component-id="@Model.ComponentId"
+         data-action="@Url.Action(Model.Action, Model.Controller)"
+         data-target="@Model.UpdateTargetId"
+         data-ajax="@Model.UseAjax">
 
-    <div class="search-box shadow-sm">
-        <div class="input-group">
+        <div class="search__field">
 
-            <span class="input-group-text bg-white border-end-0">
-                <i class="fa fa-search text-secondary"></i>
-            </span>
-
-            <input type="text"
-                   name="searchTerm"
+            <input id="searchInput-@Model.ComponentId"
+                   class="search__input"
+                   type="search"
+                   name="@Model.SearchParameterName"
                    value="@Model.SearchTerm"
-                   class="form-control border-start-0"
-                   placeholder="@Model.Placeholder" />
+                   placeholder="@Model.Placeholder"
+                   autocomplete="off" />
 
-            <button type="submit"
-                    class="btn btn-search">
-                جستجو
+            <button id="searchButton-@Model.ComponentId"
+                    type="button"
+                    class="search__button">
+
+                <i class="fa-solid fa-magnifying-glass"></i>
+
             </button>
 
         </div>
+
     </div>
 
-</form>
+</div>

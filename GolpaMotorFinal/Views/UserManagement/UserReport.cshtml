@@ -1,8 +1,12 @@
-﻿@{
+﻿@model List<GolpaMotorFinal.Models.ViewModels.UserManagement.UserReportViewModel>
+@{
     Layout = "_AdminLayout";
 }
 
+
 <div class="container-fluid py-3" dir="rtl">
+
+    <!-- Header -->
     <div class="row mb-3">
         <div class="col-12">
             <h3 class="fw-bold mb-1">گزارش‌ها و تحلیل‌ها</h3>
@@ -11,14 +15,13 @@
                     <li class="breadcrumb-item">
                         <a href="#" class="text-decoration-none">خانه</a>
                     </li>
-                    <li class="breadcrumb-item active">
-                        گزارش‌ها و تحلیل‌ها
-                    </li>
+                    <li class="breadcrumb-item active">گزارش‌ها و تحلیل‌ها</li>
                 </ol>
             </nav>
         </div>
     </div>
-    <!-- Filters Card -->
+
+    <!-- Filters -->
     <div class="card shadow-sm mb-4">
         <div class="card-header bg-white">
             <div class="d-flex justify-content-between align-items-center">
@@ -33,22 +36,18 @@
                 </div>
             </div>
         </div>
+
         <div class="collapse show" id="filtersSection">
             <div class="card-body">
                 <div class="row g-3">
 
-                    <!-- Province -->
                     <div class="col-12 col-md-6 col-lg-3">
                         <label class="form-label">استان و شهر</label>
                         <select class="form-select">
                             <option>همه استان‌ها</option>
-                            <option>تهران</option>
-                            <option>اصفهان</option>
-                            <option>فارس</option>
                         </select>
                     </div>
 
-                    <!-- Job -->
                     <div class="col-12 col-md-6 col-lg-3">
                         <label class="form-label">شغل</label>
                         <select class="form-select">
@@ -56,84 +55,61 @@
                         </select>
                     </div>
 
-                    <!-- Date Range -->
                     <div class="col-12 col-md-6 col-lg-3">
-                        <label class="form-label">بازه زمانی (از)</label>
-                        <input type="date" class="form-control">
+                        <label class="form-label">از تاریخ</label>
+                        <input type="date" class="form-control" />
                     </div>
 
                     <div class="col-12 col-md-6 col-lg-3">
-                        <label class="form-label">بازه زمانی (تا)</label>
-                        <input type="date" class="form-control">
+                        <label class="form-label">تا تاریخ</label>
+                        <input type="date" class="form-control" />
                     </div>
 
-                    <!-- Score Range -->
-                    <div class="col-12 col-md-6 col-lg-3">
-                        <label class="form-label">امتیاز کل از</label>
-                        <input type="number" class="form-control">
-                    </div>
-
-                    <div class="col-12 col-md-6 col-lg-3">
-                        <label class="form-label">امتیاز کل تا</label>
-                        <input type="number" class="form-control">
-                    </div>
-
-                    <!-- Redeemed Score -->
-                    <div class="col-12 col-md-6 col-lg-3">
-                        <label class="form-label">امتیاز مصرف شده از</label>
-                        <input type="number" class="form-control">
-                    </div>
-
-                    <div class="col-12 col-md-6 col-lg-3">
-                        <label class="form-label">امتیاز مصرف شده تا</label>
-                        <input type="number" class="form-control">
-                    </div>
-
-                    <!-- Buttons -->
-                    <div class="col-12">
-                        <div class="d-flex flex-wrap gap-2 justify-content-end">
-                            <button class="btn btn-outline-secondary">
-                                <i class="fa fa-arrow-clockwise"></i>
-                                پاک کردن فیلترها
-                            </button>
-                            <button class="btn btn-primary">
-                                <i class="fa fa-search"></i>
-                                اعمال فیلترها
-                            </button>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Actions -->
+     <!-- UserReportModal -->
+    <div class="modal fade" id="UserReportModal">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"> جزییات کاربر </h5>
+                    <button type="button" class="btn-close" id="btnCloseModal" data-bs-dismiss="modal"></button>
+                </div>
+    
+                <!-- Modal Body -->
+                <div class="modal-body" id="UserReportModalBody"></div>
+            </div>
+        </div>
+    </div>
+    <!-- Table -->
     <div class="card shadow-sm">
         <div class="card-body">
-            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-3">
+
+            <!-- Toolbar -->
+            <div class="d-flex justify-content-between align-items-center mb-3">
 
                 <div class="d-flex gap-2">
-
                     <button class="btn btn-outline-success">
                         <i class="bi bi-file-earmark-excel"></i>
                         خروجی اکسل
                     </button>
 
                     <button class="btn btn-outline-primary">
-                        <i class="bi bi-columns-gap"></i>
                         ستون‌ها
                     </button>
-
                 </div>
 
                 <div class="text-muted">
                     تعداد نتایج:
-                    <strong class="text-primary">1,248</strong>
+                    <strong class="text-primary">@(Model?.Count() ?? 0)</strong>
                 </div>
 
             </div>
 
-            <!-- Responsive Table -->
+            <!-- Table -->
             <div class="table-responsive">
                 <table class="table table-bordered table-hover align-middle text-nowrap">
                     <thead class="table-dark">
@@ -143,27 +119,55 @@
                             <th>شماره موبایل</th>
                             <th>استان</th>
                             <th>شهر</th>
+                            <th>کارت ثبت شده</th>
                             <th>امتیاز کل</th>
                             <th>امتیاز مصرف شده</th>
                             <th>مانده امتیاز</th>
-                            <th>تاریخ عضویت</th>
-                            <th>آخرین تراکنش</th>
+                            <th>جزییات کاربر</th>
+                            <th>ادغام کاربر</th>
                         </tr>
                     </thead>
+
                     <tbody>
-                        @for (int i = 1; i <= 8; i++)
+                        @if (Model != null && Model.Any())
+                        {
+                            int i = 1;
+
+                            foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td>@i</td>
+                                    <td>@item.FullName</td>
+                                    <td>@item.PhoneNumber</td>
+                                    <td>@item.Province</td>
+                                    <td>@item.City</td>
+                                    <td>@item.TotalRegisteredCards</td>
+                                    <td>@item.TotalEarnedPoints</td>
+                                    <td>@item.TotalSettledPoints</td>
+                                    <td class="text-success fw-bold">@item.RemainedPoints</td>
+
+                                    <td class=" text-secondary fw-bold">
+                                        <button class="btn btn-sm btnUserDetails"
+                                                data-id="@item.UserID">
+                                            <i class="fa fa-eye"></i>
+                                        </button>
+                                    </td>
+                                    <td class=" text-warning fw-bold">
+                                        <button class="btn btn-sm btnMergeAccounts"
+                                                data-id="@item.UserID">
+                                            <i class="fa fa-user-plus"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                i++;
+                            }
+                        }
+                        else
                         {
                             <tr>
-                                <td>@i</td>
-                                <td>مهدی کریمی</td>
-                                <td>09123456789</td>
-                                <td>تهران</td>
-                                <td>تهران</td>
-                                <td>125,000</td>
-                                <td>25,000</td>
-                                <td class="text-success fw-bold">100,000</td>
-                                <td>1402/01/15</td>
-                                <td>1403/02/28</td>
+                                <td colspan="8" class="text-center text-muted">
+                                    هیچ داده‌ای برای نمایش وجود ندارد
+                                </td>
                             </tr>
                         }
                     </tbody>
@@ -171,227 +175,90 @@
             </div>
 
             <!-- Footer -->
-            <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mt-3 gap-3">
+            <div class="d-flex justify-content-between align-items-center mt-3">
 
-                <!-- Pagination -->
-                <nav>
-                    <ul class="pagination mb-0">
-                        <li class="page-item disabled">
-                            <a class="page-link">«</a>
-                        </li>
-                        <li class="page-item">
-                            <a class="page-link">1</a>
-                        </li>
-                        <li class="page-item">
-                            <a class="page-link">2</a>
-                        </li>
-                        <li class="page-item">
-                            <a class="page-link">3</a>
-                        </li>
-                        <li class="page-item active">
-                            <a class="page-link">4</a>
-                        </li>
-                        <li class="page-item">
-                            <a class="page-link">»</a>
-                        </li>
-                    </ul>
-                </nav>
-
-                <!-- Page Size -->
-                <div class="d-flex align-items-center gap-2">
-                    <span>تعداد در صفحه</span>
+                <div>
                     <select class="form-select form-select-sm" style="width:auto;">
                         <option>10</option>
                         <option selected>20</option>
                         <option>50</option>
-                        <option>100</option>
                     </select>
                 </div>
+
+                <nav>
+                    <ul class="pagination mb-0">
+                        <li class="page-item disabled"><a class="page-link">«</a></li>
+                        <li class="page-item active"><a class="page-link">1</a></li>
+                        <li class="page-item"><a class="page-link">2</a></li>
+                        <li class="page-item"><a class="page-link">»</a></li>
+                    </ul>
+                </nav>
+
             </div>
+
         </div>
     </div>
 </div>
+@section Scripts
+{
+<script>
 
+     $(function () {
 
+        //Details
+        $(document).on("click", ".btnUserDetails", function () {
 
+             var id = $(this).data("id");
+         
+             $.ajax({
+                 url: "/UserManagement/Details",
+                 type: "GET",
+                 data: { userID: id },
+                 success: function (html) {
+                    
+                     $("#UserReportModalBody").html(html);
+                     $("#UserReportModal").modal("show");
+                 },
+                 error: function () {
+                     alert("Error loading user details.");
+                 }
+             });
+         });
 
+        //MergeAccounts
+        $(document).on("click", ".btnMergeAccounts", function () {
 
-@* <div class="d-flex flex-column">
-
-    <div class="rpt-header">
-        <div>
-            <h1 class="rpt-header__title">گزارش ها و تحلیل ها</h1>
-
-            <div class="rpt-header__breadcrumb">
-                <i class="fa fa-home"></i>
-                <span>خانه</span>
-                <span>/</span>
-                <span>گزارش ها و تحلیل ها</span>
-            </div>
-        </div>
-    </div>
-
-    <section class="d-flex flex-row flex-wrap">
-
-        <div class="rpt-filter-panel__header">
-            <h3 class="rpt-filter-panel__title">فیلترها</h3>
-            <i class="fa fa-search"></i>
-        </div>
-
-        <div class="d-flex flex-row flex-wrap">
-
-            <div class="rpt-filter-group">
-                <label>شغل</label>
-                <select>
-                    <option>همه مشاغل</option>
-                </select>
-            </div>
-
-            <div class="rpt-filter-group">
-                <label>استان و شهر</label>
-                <select>
-                    <option>همه استان ها</option>
-                </select>
-            </div>
-
-            <div class="rpt-filter-group">
-                <label>از تاریخ</label>
-                <input type="text" value="1403/02/01">
-            </div>
-
-            <div class="rpt-filter-group">
-                <label>تا تاریخ</label>
-                <input type="text" value="1403/03/21">
-            </div>
-
-            <div class="rpt-filter-group">
-                <label>امتیاز کل از</label>
-                <input type="number">
-            </div>
-
-            <div class="rpt-filter-group">
-                <label>امتیاز کل تا</label>
-                <input type="number">
-            </div>
-
-            <div class="rpt-filter-group">
-                <label>امتیاز کسب شده از</label>
-                <input type="number">
-            </div>
-
-            <div class="rpt-filter-group">
-                <label>امتیاز کسب شده تا</label>
-                <input type="number">
-            </div>
-
-            <div class="rpt-filter-group rpt-filter-group--full">
-                <div class="rpt-filter-actions">
-                    <button class="rpt-btn btn btn-primary">
-                        <i class="fa fa-magnet"></i>
-                        اعمال فیلترها
-                    </button>
-
-                    <button class="rpt-btn btn btn-secondary">
-                        <i class="fa fa-rotate-left"></i>
-                        پاک کردن فیلترها
-                    </button>
-                </div>
-            </div>
-
-        </div>
-
-    </section>
-
-    <section class="rpt-results-card">
-
-        <div class="rpt-results-toolbar">
-
-            <div class="rpt-toolbar-buttons">
-
-                <button class="rpt-btn rpt-btn--light">
-                    <i class="fa fa-file-excel-o"></i>
-                    خروجی اکسل
-                </button>
-
-                <button class="rpt-btn rpt-btn--light">
-                    <i class="fa fa-table"></i>
-                    ستون ها
-                </button>
-
-            </div>
-
-            <div class="rpt-results-count">
-                تعداد نتایج:
-                <strong>1,248</strong>
-            </div>
-
-        </div>
-
-        <div class="rpt-data-table__wrapper">
-
-            <table class="table table-bordered table-striped table-hover">
-                <thead>
-                    <tr>
-                        <th>ردیف</th>
-                        <th>نام مشتری</th>
-                        <th>شماره موبایل</th>
-                        <th>استان</th>
-                        <th>شهر</th>
-                        <th>امتیاز کل</th>
-                        <th>امتیاز سوخته شده</th>
-                        <th>مانده امتیازات</th>
-                        <th>تاریخ عضویت</th>
-                        <th>آخرین تراکنش</th>
-                    </tr>
-                </thead>
-
-                <tbody>
-
-                    @for (var i = 1; i <= 10; i++)
-                    {
-                        <tr>
-                            <td>@i</td>
-                            <td>مهدی رحیمی</td>
-                            <td>09123456789</td>
-                            <td>اصفهان</td>
-                            <td>اصفهان</td>
-                            <td>125,000</td>
-                            <td>100,000</td>
-                            <td class="rpt-positive">25,000</td>
-                            <td>1402/01/15</td>
-                            <td>1403/02/28</td>
-                        </tr>
+                var id = $(this).data("id");
+            
+                $.ajax({
+                    url: "/UserManagement/MergeAccounts",
+                    type: "GET",
+                    data: { UserID: id },
+                    success: function (html) {
+            
+                    $("#UserReportModalBody").html(html);
+            
+                    var modal = new bootstrap.Modal(document.getElementById("UserReportModal"));
+                     modal.show();
+            
+                    },
+                    error: function () {
+                        alert("Error loading merge accounts.");
                     }
+                });
+            });
 
-                </tbody>
+        // close modal when clicking the close button
+        $("#btnCloseModal").click(function () {
+                var modalEl = document.getElementById("UserReportModal");
+                var modal = bootstrap.Modal.getInstance(modalEl);
+            
+                if (modal) {
+                    modal.hide();
+                }
+            });
 
-            </table>
 
-        </div>
-
-        <div class="d-flex flex-row flex-wrap">
-
-            <div>
-                <select class="rpt-page-size">
-                    <option>20</option>
-                    <option>50</option>
-                    <option>100</option>
-                </select>
-            </div>
-
-            <div class="rpt-pagination__pages">
-
-                <button>«</button>
-                <button>1</button>
-                <button class="active">2</button>
-                <button>3</button>
-                <button>4</button>
-                <button>»</button>
-
-            </div>
-
-        </div>
-
-    </section>
-
-</div> *@
+});
+</script>
+}

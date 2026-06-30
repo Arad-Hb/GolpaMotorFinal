@@ -118,25 +118,6 @@ body {
     gap:15px;
 }
 
-.search-box{
-    position:relative;
-    width:450px;
-}
-
-.search-box i{
-    position:absolute;
-    right:15px;
-    top:50%;
-    transform:translateY(-50%);
-    color:#94a3b8;
-}
-
-.search-box input{
-    padding-right:45px;
-    height:48px;
-    border-radius:14px;
-}
-
 .theme-toggle{
     width:45px;
     height:45px;

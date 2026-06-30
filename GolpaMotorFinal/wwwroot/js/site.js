@@ -1,4 +1,10 @@
-﻿// Please see documentation at https://learn.microsoft.com/aspnet/core/client-side/bundling-and-minification
-// for details on configuring this project to bundle and minify static web assets.
+﻿function showOperationResult(success, message) {
 
-// Write your JavaScript code.
+    Swal.fire({
+        icon: success ? 'success' : 'error',
+        title: success ? 'Success' : 'Error',
+        text: message,
+        confirmButtonColor: success ? '#28a745' : '#dc3545'
+    });
+
+}

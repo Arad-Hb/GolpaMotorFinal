@@ -5,15 +5,11 @@ namespace GolpaMotorFinal.ViewComponents
 {
     public class SearchBoxViewComponent:ViewComponent
     {
-        public IViewComponentResult Invoke(string placeholderText, string actionName, string controllerName)
+        public IViewComponentResult Invoke(SearchBoxViewModel model)
         {
-            var model = new SearchBoxViewModel
-            {
-                Placeholder = placeholderText,
-                Action = actionName,
-                Controller = controllerName
-            };
             return View(model);
         }
     }
 }
+
+

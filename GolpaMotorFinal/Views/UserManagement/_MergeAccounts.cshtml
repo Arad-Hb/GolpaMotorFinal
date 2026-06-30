@@ -1,0 +1,98 @@
+﻿@model GolpaMotorFinal.Models.ViewModels.UserManagement.MergeAccountsComplexViewModel
+@using GolpaMotorFinal.Helpers
+
+<form id="mergeForm"
+      asp-controller="UserManagement"
+      asp-action="MergeAccounts"
+      method="post">
+
+    @Html.AntiForgeryToken()
+
+    @Html.HiddenFor(m => m.CurrentUser.UserID)
+    @Html.HiddenFor(m => m.CurrentUser.SelectedMergeUserID)
+
+    <div class="row justify-content-center">
+        <div class="col-12 col-xl-11">
+
+            <div class="card shadow-sm">
+
+                <!-- HEADER -->
+                <div class="card-header bg-white text-center border-bottom">
+                    <h2 class="fw-bold mb-0">
+                        ادغام حساب‌های کاربری
+                    </h2>
+                </div>
+
+                <div class="card-body">
+                    <!-- CURRENT USER -->
+                    <h5 class="text-primary mb-3">حساب اصلی</h5>
+
+                    <div class="card mb-4">
+                        <div class="card-body">
+
+                            <div class="row align-items-center">
+
+                                <div class="col-auto">
+                                    <img src="@ImageHelper.FixUser(@Model.CurrentUser.ProfileImageUrl)"
+                                         style="width:60px;height:60px;border-radius:50%;object-fit:cover;" />
+                                </div>
+
+                                <div class="col">
+
+                                    <div class="mb-1">
+                                        <span class="text-muted">نام:</span>
+                                        <strong>@Model.CurrentUser.FullName</strong>
+                                    </div>
+
+                                    <div class="mb-1">
+                                        <span class="text-muted">موبایل:</span>
+                                        <strong>@Model.CurrentUser.PhoneNumber</strong>
+                                    </div>
+                                    <div>
+                                        <span class="text-muted">امتیاز:</span>
+                                        <strong class="text-primary">@Model.CurrentUser.RemainedPoints</strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- SEARCH BOX -->
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">
+                            افزودن شماره جدید
+                        </label>
+
+                        <!-- Search Component -->
+                        @await Component.InvokeAsync("SearchBox",Model.Search)
+                    </div>
+
+                    <!--  MERGE RESULT PARTIAL -->
+                    <div id="mergeResultContainer">
+                        @await Html.PartialAsync("_MergeResult", Model)
+                    </div>
+
+                    <!-- ACTION BUTTONS -->
+                    <div class="row g-2 mt-4">
+
+                        <div class="col-12 col-md-6">
+                            <button type="submit" class="btn btn-success w-100">
+                                تایید ادغام
+                            </button>
+                        </div>
+
+                        <div class="col-12 col-md-6">
+                            <button type="button" class="btn btn-secondary w-100">
+                                انصراف
+                            </button>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+</form>

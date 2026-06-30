@@ -1,6 +1,8 @@
 using DataAccess.Services;
 using DomainModel.Models;
 using DomainModel.ViewModels;
+using DomainModel.ViewModels.User;
+using GolpaMotorFinal.Helpers;
 using GolpaMotorFinal.Models.ViewModels.Account;
 using GolpaMotorFinal.Models.ViewModels.UserManagement;
 using Microsoft.AspNetCore.Authorization;
@@ -25,7 +27,6 @@ namespace GolpaMotorFinal.Controllers
             this.signInManager = signInManager;
             this.userRepository = userRepository;
         }
-
         private async Task<SelectList> BindProvince()
         {
             var provinces = await userRepository.GetProvinces();
@@ -73,6 +74,7 @@ namespace GolpaMotorFinal.Controllers
             {
                 if (!string.IsNullOrEmpty(model.ReturnUrl) && Url.IsLocalUrl(model.ReturnUrl))
                 {
+
                     TempData["SuccessMessage"] = $"خوش آمدید {model.Email}";
                     return Redirect(model.ReturnUrl);
                 }
@@ -188,12 +190,6 @@ namespace GolpaMotorFinal.Controllers
                 model.Cities = new List<SelectListItem>();
 
             return View(model);
-        }
-
-        [HttpGet]
-        public IActionResult MergeAccounts()
-        {
-            return View();
         }
 
         [HttpGet]

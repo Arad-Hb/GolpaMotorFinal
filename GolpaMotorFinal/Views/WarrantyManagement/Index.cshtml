@@ -2,6 +2,14 @@
 
 @if (TempData["Success"] != null)
 {
+    <script>
+        Swal.fire({
+            title: 'Success!',
+            text: '@TempData["SuccessMessage"]',
+            icon: 'success',
+            confirmButtonText: 'OK'
+        });
+    </script>
     <div class="alert alert-success">@TempData["Success"]</div>
 }
 

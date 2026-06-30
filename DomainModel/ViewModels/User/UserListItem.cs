@@ -20,6 +20,7 @@ namespace DomainModel.ViewModels.User
         public string PhoneNumber { get; set; } = string.Empty;
         public string? ExistingProfileImageUrl { get; set; }
         public DateTime RegisterDate { get; set; }
+        public int? RemainedPoints { get; set; }
 
     }
 }

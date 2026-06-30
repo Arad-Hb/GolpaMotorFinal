@@ -10,7 +10,7 @@ namespace DomainModel.Models
     {
         public int CustomerTypeID { get; set; }
 
-        public string Title { get; set; } = null!;
+        public string Title { get; set; }
 
         public virtual ICollection<UserCustomerType> UserCustomerTypes { get; set; }
             = new HashSet<UserCustomerType>();

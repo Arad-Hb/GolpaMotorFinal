@@ -1,12 +1,15 @@
 ﻿using DataAccess.Services;
 using DomainModel.Models;
+using Framework.Common;
 using GolpaMotorFinal.FrameworkUI.Services;
+using GolpaMotorFinal.Helpers;
 using GolpaMotorFinal.Models.ViewModels.Account;
 using GolpaMotorFinal.Models.ViewModels.WarrantyManagement;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace GolpaMotor.Controllers
 {
@@ -36,11 +39,12 @@ namespace GolpaMotor.Controllers
             });
         }
         // صفحه فرم
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(RegisterationCardViewModel? request)
         {
             var vm = new RegisterationCardViewModel
             {
-                CustomerTypes = await BindCustomerTypes()
+                CustomerTypes = await BindCustomerTypes(),
+                op = request?.op
             };
             return View(vm);
         }
@@ -49,9 +53,12 @@ namespace GolpaMotor.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Register(RegisterationCardViewModel request)
         {
+            var op = new OperationResult("WarrantyRegistration");
             if (!ModelState.IsValid)
             {
-                return View("Index", request);
+                request.op.ToFailed("اطلاعات وارد شده در فرم معتبر نیست.");
+                ModelState.AddModelError("", "اطلاعات وارد شده در فرم معتبر نیست.");
+                return View("Index",request);
             }
 
             if (request.SerialNumber == null ||
@@ -59,6 +66,7 @@ namespace GolpaMotor.Controllers
                 request.SerialNumber.Count == 0 ||
                 request.SerialNumber.Count != request.ScratchedCode.Count)
             {
+                request.op.ToFailed("اطلاعات کارت‌ها نامعتبر است.");
                 ModelState.AddModelError("", "اطلاعات کارت‌ها نامعتبر است.");
                 return View("Index", request);
             }
@@ -105,6 +113,7 @@ namespace GolpaMotor.Controllers
             {
                 foreach (var error in invalidCards)
                 {
+                    request.op.ToFailed("اطلاعات وارد شده همه کارتها نامعتبر است.");
                     ModelState.AddModelError("", error);
                 }
 
@@ -196,13 +205,16 @@ namespace GolpaMotor.Controllers
             var successCount = validCards.Count;
             var failCount = invalidCards.Count;
 
-            TempData["Success"] =
-                $"{successCount} کارت با موفقیت ثبت شد.";
+            request.op.ToSuccess($"{successCount} کارت با موفقیت ثبت شد.");
+            //TempData["Success"] =
+            //    $"{successCount} کارت با موفقیت ثبت شد.";
 
             if (failCount > 0)
             {
-                TempData["Warning"] =
-                    $"{failCount} کارت ثبت نشد.";
+
+                request.op.ToFailed($"{successCount} کارت ثبت شد و {failCount} کارت نامعتبر بود.");
+                //TempData["Warning"] =
+                //    $"{failCount} کارت ثبت نشد.";
 
                 TempData["FailedCards"] =
                     string.Join("<br/>", invalidCards);

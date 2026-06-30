@@ -9,17 +9,16 @@ namespace GolpaMotorFinal.Models.ViewModels.UserManagement
         [Display(Name = "نام")]
         [StringLength(50)]
         public string? FirstName { get; set; }
-        [Display(Name = "نام")]
-        [StringLength(100)]
-        public string? FullName { get; set; }
 
         [Display(Name = "نام خانوادگی")]
         [StringLength(50)]
         public string? LastName { get; set; }
 
-        [Required(ErrorMessage = "نام کاربری اجباری است.")]
         [Display(Name = "نام کاربری")]
         public string? UserName { get; set; }
+
+        [Display(Name = "رمز عبور")]
+        public string? Password { get; set; }
 
         [Required(ErrorMessage = "شماره موبایل اجباری است.")]
         [Phone(ErrorMessage = "شماره موبایل معتبر نیست.")]
@@ -47,11 +46,6 @@ namespace GolpaMotorFinal.Models.ViewModels.UserManagement
 
         [Display(Name = "حذف شده")]
         public bool IsDeleted { get; set; }
-
-        // فقط هنگام ایجاد کاربر اجباری
-        [DataType(DataType.Password)]
-        [Display(Name = "رمز عبور")]
-        public string? Password { get; set; }
 
         // عکس جدید
         public IFormFile? ProfileImage { get; set; }

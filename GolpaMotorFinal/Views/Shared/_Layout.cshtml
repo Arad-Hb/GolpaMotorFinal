@@ -9,7 +9,7 @@
     <link href="~/fonts/fontawesome-free-6.7.2-web/css/all.min.css" rel="stylesheet" />
     <link href="~/fonts/vazirmatn-master/vazirmatn-font-face.css" rel="stylesheet" />
     <link href="~/css/Layout.css" rel="stylesheet" />
-
+    <link rel="stylesheet" href="~/lib/sweetalert2/sweetalert2.min.css">
     @RenderSection("Styles", required: false)
 
 </head>
@@ -49,15 +49,16 @@
             </div>
         </div>
     </nav>
+
     @if (TempData["SuccessMessage"] != null)
     {
-        <div class="container mt-3">
+       <div class="container mt-3">
             <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
                 <i class="fa-solid fa-circle-check me-2"></i>
                 @TempData["SuccessMessage"]
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
-        </div>
+        </div> 
     }
     <main>
         @RenderBody()
@@ -74,9 +75,11 @@
     <script src="~/lib/bootstrap-5.3.8-dist/js/bootstrap.min.js"></script>
     <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
     <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
-
+    <script src="~/lib/sweetalert2/sweetalert2.all.min.js"></script>
+    <script src="~/js/site.js"></script>
+    @await Component.InvokeAsync("Allert")
     @RenderSection("Scripts", required: false)
-
+    
 </body>
 
 </html>
