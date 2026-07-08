@@ -26,5 +26,13 @@
             // مسیر نهایی ثابت
             return "/images/imageUsers/" + safeFileName;
         }
+
+        public static string ToThumbnail(string? imageUrl)
+        {
+            if (string.IsNullOrWhiteSpace(imageUrl))
+                return "/images/imageUsers/noimage.jpg";
+
+            return imageUrl.Replace("/uploads/", "/thumbnails/");
+        }
     }
 }

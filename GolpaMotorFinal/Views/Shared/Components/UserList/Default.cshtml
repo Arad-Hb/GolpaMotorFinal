@@ -37,7 +37,7 @@
                         {
                             <tr>
                                 <td>
-                                    <img src="@ImageHelper.FixUser(item.ProfileImageUrl)"
+                                    <img src="@ImageHelper.ToThumbnail(item.ProfileImageUrl)" 
                                          style="width:50px;height:50px;object-fit:cover;border-radius:6px;" />
                                 </td>
                                 <td>@item.FullName</td>
@@ -48,20 +48,32 @@
                                 <td>@item.TotalRegisteredCards</td>
                                 <td>@item.TotalEarnedPoints</td>
                                 <td>
-                                    <button class="btn btn-sm btnDetails" data-id="@item.UserID">
+                                    <button class="btn btn-sm btnDetails open-modal"
+                                        data-url='@Url.Action("Details", "UserManagement")'
+                                        data-title="جزییات"
+                                        data-id="@item.UserID">
                                         <i class="fa fa-eye text-secondary"></i>
                                     </button>
                                 </td>
 
                                 <td>
-                                    <button class="btn btn-sm btnEdit" data-id="@item.UserID">
+                                    <button class="btn btn-sm btnEdit open-modal"
+                                            data-url='@Url.Action("Edit", "UserManagement")'
+                                            data-title="ویرایش"
+                                            data-id="@item.UserID">
                                         <i class="fa fa-pen text-warning"></i>
                                     </button>
                                 </td>
 
                                 <td>
-                                    <button class="btn btn-sm btnDelete" data-id="@item.UserID">
+                                    <button class="btn btn-sm btnDelete" 
+                                            data-id="@item.UserID"
+                                            data-url='@Url.Action("Delete","UserManagement")'
+                                            data-refresh-target-url='@Url.Action("Grid","UserManagement")'
+                                            data-refresh-target-id="UserGrid">
+
                                         <i class="fa fa-trash text-danger"></i>
+
                                     </button>
                                 </td>
                             </tr>

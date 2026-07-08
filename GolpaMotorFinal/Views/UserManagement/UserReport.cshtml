@@ -70,20 +70,6 @@
         </div>
     </div>
 
-     <!-- UserReportModal -->
-    <div class="modal fade" id="UserReportModal">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title"> جزییات کاربر </h5>
-                    <button type="button" class="btn-close" id="btnCloseModal" data-bs-dismiss="modal"></button>
-                </div>
-    
-                <!-- Modal Body -->
-                <div class="modal-body" id="UserReportModalBody"></div>
-            </div>
-        </div>
-    </div>
     <!-- Table -->
     <div class="card shadow-sm">
         <div class="card-body">
@@ -147,13 +133,17 @@
                                     <td class="text-success fw-bold">@item.RemainedPoints</td>
 
                                     <td class=" text-secondary fw-bold">
-                                        <button class="btn btn-sm btnUserDetails"
+                                        <button class="btn btn-sm btnUserDetails open-modal"
+                                                data-title="جزییات"
+                                                data-url="@Url.Action("Details", "UserManagement")"
                                                 data-id="@item.UserID">
                                             <i class="fa fa-eye"></i>
                                         </button>
                                     </td>
                                     <td class=" text-warning fw-bold">
-                                        <button class="btn btn-sm btnMergeAccounts"
+                                        <button class="btn btn-sm btnMergeAccounts open-modal"
+                                                data-title="ادغام کاربر"
+                                                data-url="@Url.Action("MergeAccounts", "UserManagement")"
                                                 data-id="@item.UserID">
                                             <i class="fa fa-user-plus"></i>
                                         </button>
@@ -199,66 +189,3 @@
         </div>
     </div>
 </div>
-@section Scripts
-{
-<script>
-
-     $(function () {
-
-        //Details
-        $(document).on("click", ".btnUserDetails", function () {
-
-             var id = $(this).data("id");
-         
-             $.ajax({
-                 url: "/UserManagement/Details",
-                 type: "GET",
-                 data: { userID: id },
-                 success: function (html) {
-                    
-                     $("#UserReportModalBody").html(html);
-                     $("#UserReportModal").modal("show");
-                 },
-                 error: function () {
-                     alert("Error loading user details.");
-                 }
-             });
-         });
-
-        //MergeAccounts
-        $(document).on("click", ".btnMergeAccounts", function () {
-
-                var id = $(this).data("id");
-            
-                $.ajax({
-                    url: "/UserManagement/MergeAccounts",
-                    type: "GET",
-                    data: { UserID: id },
-                    success: function (html) {
-            
-                    $("#UserReportModalBody").html(html);
-            
-                    var modal = new bootstrap.Modal(document.getElementById("UserReportModal"));
-                     modal.show();
-            
-                    },
-                    error: function () {
-                        alert("Error loading merge accounts.");
-                    }
-                });
-            });
-
-        // close modal when clicking the close button
-        $("#btnCloseModal").click(function () {
-                var modalEl = document.getElementById("UserReportModal");
-                var modal = bootstrap.Modal.getInstance(modalEl);
-            
-                if (modal) {
-                    modal.hide();
-                }
-            });
-
-
-});
-</script>
-}

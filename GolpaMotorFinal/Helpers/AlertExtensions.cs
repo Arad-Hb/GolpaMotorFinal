@@ -1,16 +1,19 @@
-﻿using Framework.Common;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GolpaMotorFinal.Helpers
 {
     public static class AlertExtensions
     {
-        public static void ShowAlert(
-            this Controller controller,
-            OperationResult op)
+        public static void SetSuccessAlert(this Controller controller, string message)
         {
-            controller.TempData["Success"] = op.Success;
-            controller.TempData["Message"] = op.Message;
+            controller.TempData["Success"] = true;
+            controller.TempData["Message"] = message;
+        }
+
+        public static void SetErrorAlert(this Controller controller, string message)
+        {
+            controller.TempData["Success"] = false;
+            controller.TempData["Message"] = message;
         }
     }
 }

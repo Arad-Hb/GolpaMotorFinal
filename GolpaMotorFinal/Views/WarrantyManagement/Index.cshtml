@@ -1,29 +1,5 @@
 ﻿@model GolpaMotorFinal.Models.ViewModels.WarrantyManagement.RegisterationCardViewModel
 
-@if (TempData["Success"] != null)
-{
-    <script>
-        Swal.fire({
-            title: 'Success!',
-            text: '@TempData["SuccessMessage"]',
-            icon: 'success',
-            confirmButtonText: 'OK'
-        });
-    </script>
-    <div class="alert alert-success">@TempData["Success"]</div>
-}
-
-@if (TempData["Warning"] != null)
-{
-    <div class="alert alert-warning">@TempData["Warning"]</div>
-}
-
-@if (TempData["FailedCards"] != null)
-{
-    <div class="alert alert-danger">@Html.Raw(TempData["FailedCards"])</div>
-}
-
-
 <div class="warranty-card-page">
     <div class="card">
         <div class="card-body p-4">

@@ -1,4 +1,5 @@
 using DataAccess.Services;
+using GolpaMotorFinal.FrameworkUI.Services;
 using GolpaMotorFinal.Models.ViewModels.UserManagement;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
@@ -10,9 +11,18 @@ namespace GolpaMotorFinal.ViewComponents
     public class UserListViewComponent : ViewComponent
     {
 
-        public async Task<IViewComponentResult> InvokeAsync(List<UserListItemViewModel> model)
+        private readonly IUserService servive;
+
+        public UserListViewComponent(IUserService _servive)
         {
-            return View(model);
+            servive = _servive;
+        }
+
+        public async Task<IViewComponentResult> InvokeAsync()
+        {
+            var vm = await servive.GetUsers();
+
+            return View(vm);
         }
     }
 }

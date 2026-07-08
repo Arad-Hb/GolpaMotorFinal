@@ -26,12 +26,18 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
+    <PackageReference Include="SixLabors.ImageSharp" Version="2.1.13" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\DataAccess\DataAccess.csproj" />
     <ProjectReference Include="..\DomainModel\DomainModel.csproj" />
     <ProjectReference Include="..\Framework\Framework.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="wwwroot\images\imageUsers\thumbnails\" />
+    <Folder Include="wwwroot\images\imageUsers\uploads\" />
   </ItemGroup>
 
 </Project>

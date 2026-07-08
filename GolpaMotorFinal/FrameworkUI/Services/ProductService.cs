@@ -37,8 +37,8 @@ namespace GolpaMotorFinal.FrameworkUI.Services
                 // تغییر: بعد از موفقیت DB، فایل حذف می‌شود
                 if (!string.IsNullOrEmpty(product.ImageUrl))
                 {
-                    var path = fileManager.ToPhysicalAddress(product.ImageUrl, "ImageProducts");
-                    fileManager.RemoveFile(path);
+
+                    fileManager.Remove(product.ImageUrl);
                 }
 
                 return result;
@@ -58,14 +58,7 @@ namespace GolpaMotorFinal.FrameworkUI.Services
                 if (imageFile == null)
                     return op.ToFailed("تصویر محصول الزامی است");
 
-                // تغییر: همه validation ها داخل FileManager انجام می‌شود
-                var saveResult = fileManager.SaveFile(imageFile, "ImageProducts", 2048, 2097152);
-
-                if (!saveResult.Success)
-                    return op.ToFailed(saveResult.Message);
-
-                // تغییر مهم: فقط نام فایل ذخیره می‌شود
-                prod.ImageUrl = saveResult.Message;
+                //prod.ImageUrl = saveResult.Message;
 
                 prod.IsDeleted = false;
 
@@ -77,7 +70,7 @@ namespace GolpaMotorFinal.FrameworkUI.Services
             }
         }
 
-        public async Task<OperationResult> UpdateProduct(ProductAddEditModel prod, IFormFile? imageFile)
+        public async Task<OperationResult> UpdateProduct(ProductAddEditModel prod)
         {
             var op = new OperationResult("UpdateProduct");
 
@@ -87,32 +80,6 @@ namespace GolpaMotorFinal.FrameworkUI.Services
 
                 if (current == null)
                     return op.ToFailed("محصول یافت نشد");
-
-                if (imageFile != null)
-                {
-                    // تغییر: FileManager مسئول save + validation
-                    var saveResult = fileManager.SaveFile(imageFile, "ImageProducts", 2048, 2097152);
-
-                    if (!saveResult.Success)
-                        return op.ToFailed(saveResult.Message);
-
-                    // تغییر: حذف فایل قبلی قبل از جایگزینی
-                    if (!string.IsNullOrEmpty(current.ImageUrl))
-                    {
-                        var oldPath = fileManager.ToPhysicalAddress(current.ImageUrl, "ImageProducts");
-
-                        // تغییر: حذف امن فایل قبلی
-                        fileManager.RemoveFile(oldPath);
-                    }
-
-                    // تغییر مهم: فقط نام فایل جدید
-                    prod.ImageUrl = saveResult.Message;
-                }
-                else
-                {
-                    // تغییر: اگر عکس جدید نیامد، قبلی حفظ می‌شود
-                    prod.ImageUrl = current.ImageUrl;
-                }
 
                 return await repo.Update(prod);
             }
@@ -141,10 +108,10 @@ namespace GolpaMotorFinal.FrameworkUI.Services
                 if (string.IsNullOrEmpty(product.ImageUrl))
                     return op.ToFailed("تصویری وجود ندارد");
 
-                var path = fileManager.ToPhysicalAddress(product.ImageUrl, "ImageProducts");
-                fileManager.RemoveFile(path);
+                //var path = fileManager.ToPhysicalAddress(product.ImageUrl, "ImageProducts");
+                //fileManager.RemoveFile(path);
 
-                await repo.RemoveImage(productID);
+                //await repo.RemoveImage(productID);
 
                 return op.ToSuccess("تصویر حذف شد");
             }
@@ -152,6 +119,11 @@ namespace GolpaMotorFinal.FrameworkUI.Services
             {
                 return op.ToFailed("خطا در حذف تصویر: " + ex.Message);
             }
+        }
+
+        public Task<OperationResult> UpdateProduct(ProductAddEditModel prod, IFormFile? imageFile)
+        {
+            throw new NotImplementedException();
         }
     }
 }

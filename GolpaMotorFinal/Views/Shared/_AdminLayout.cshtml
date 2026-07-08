@@ -1,6 +1,6 @@
+
 @{
     Layout = null;
-
 }
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
@@ -15,7 +15,6 @@
     <link href="~/css/adminlayout.css" rel="stylesheet" />
     <link href="~/css/account.css" rel="stylesheet" />
     <link href="~/fonts/vazirmatn-master/vazirmatn-font-face.css" rel="stylesheet" />
-    <link rel="stylesheet" href="~/lib/sweetalert2/sweetalert2.min.css">
 
 
     @RenderSection("Styles", false)
@@ -24,33 +23,36 @@
 
 <body>
     <div class="d-flex">
+
         <partial name="_AdminSidebar" />
-        @* @if (TempData["AlertMessage"] != null)
-        {
-            <script>
-                        showOperationResult(
-                             @TempData["AlertSuccess"]!.ToString()!.ToLower(),
-                            '@Html.Raw(TempData["AlertMessage"])'
-                        );
-            </script>
-        } *@
+
         <div class="main w-100">
+
             <partial name="_AdminHeader" />
+
             <div class="content p-4">
                 @RenderBody()
             </div>
+
             <partial name="_AdminFooter" />
+
         </div>
+    </div>
+    <div>
+
+        <partial name="_GeneralModal" />
+
     </div>
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap-5.3.8-dist/js/bootstrap.bundle.js"></script>
     <script src="~/lib/bootstrap-5.3.8-dist/js/bootstrap.min.js"></script>
-    <script src="~/lib/sweetalert2/sweetalert2.all.min.js"></script>
-    <script src="~/js/site.js"></script>
+    <script src="~/js/AdminLayout.js"></script>
+    <script src="~/js/modal.js"></script>
+
     <script>
 
-        //Dynamic General SearchBox viewcomponents
+        //---Dynamic General SearchBox viewcomponents---\\
 
         $(document).on("click", ".search__button", function (e) {
 
@@ -93,9 +95,7 @@
         });
     </script>
 
-    @await Component.InvokeAsync("Allert")
     @RenderSection("Scripts", false)
 
-    
 </body>
 </html>

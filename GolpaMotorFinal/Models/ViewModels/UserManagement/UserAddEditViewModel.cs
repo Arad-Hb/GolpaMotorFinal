@@ -47,10 +47,13 @@ namespace GolpaMotorFinal.Models.ViewModels.UserManagement
         [Display(Name = "حذف شده")]
         public bool IsDeleted { get; set; }
 
+        // عکس فعلی
+        public string? ExistingProfileImageUrl { get; set; }
+
         // عکس جدید
         public IFormFile? ProfileImage { get; set; }
 
-        // عکس فعلی
-        public string? ExistingProfileImageUrl { get; set; }
+        public CrudFormViewModel CrudFormViewModel { get; set; } = new();
+
     }
 }

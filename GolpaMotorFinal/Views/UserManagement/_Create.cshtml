@@ -1,36 +1,35 @@
 ﻿@model GolpaMotorFinal.Models.ViewModels.UserManagement.UserAddEditViewModel
 
 
-<form id="UserFormCreate" enctype="multipart/form-data">
-
+<crud-form model="Model.CrudFormViewModel">
     @Html.AntiForgeryToken()
 
     <div class="row">
 
         <div class="col-md-6">
 
-            <label>نام</label>
+            <label asp-for="FirstName">نام</label>
 
             <input asp-for="FirstName" class="form-control" />
 
         </div>
         <div class="col-md-6">
 
-            <label>نام خانوادگی</label>
+            <label asp-for="LastName">نام خانوادگی</label>
 
             <input asp-for="LastName" class="form-control" />
 
         </div>
         <div class="col-md-6">
 
-            <label>شماره تلفن</label>
+            <label asp-for="PhoneNumber">شماره تلفن</label>
 
             <input asp-for="PhoneNumber" class="form-control" />
 
         </div>
         <div class="col-md-6">
 
-            <label>کد پستی</label>
+            <label asp-for="PostalCode">کد پستی</label>
 
             <input asp-for="PostalCode" class="form-control" />
 
@@ -40,7 +39,7 @@
 
     <div class="mt-3">
 
-        <label>آدرس</label>
+        <label asp-for="Address">آدرس</label>
 
         <textarea asp-for="Address" class="form-control"></textarea>
 
@@ -48,17 +47,24 @@
 
     <div class="mt-3">
 
-        <label>تصویر کاربر</label>
+        <label asp-for="ProfileImage">تصویر کاربر</label>
 
         <input asp-for="ProfileImage" type="file" class="form-control" />
 
-    </div>
+        <span asp-validation-for="ProfileImage"></span>
 
+    </div>
 
     <div class="mt-4">
 
-        <button type="submit" class="btn btn-success"> ثبت </button>
+
+         <button type="submit" class="btn btn-primary">
+
+                 @Model.CrudFormViewModel.SubmitButtonText
+
+        </button>
+
+        <button type="button" class="btn btn-warning cancel-modal"> انصراف </button>
 
     </div>
-
-</form>
+</crud-form>

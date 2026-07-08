@@ -1,13 +1,10 @@
 ﻿@model GolpaMotorFinal.Models.ViewModels.UserManagement.UserAddEditViewModel
 @using GolpaMotorFinal.Helpers
 
-<form id="UserFormEdit" enctype="multipart/form-data">
-
+<crud-form model="@Model.CrudFormViewModel">
     @Html.AntiForgeryToken()
 
     <input asp-for="UserID" type="hidden" />
-
-    @* <input asp-for="ProfileImage" type="hidden" /> *@
 
     <div class="row">
 
@@ -34,7 +31,7 @@
         </div>
         <div class="col-md-6">
 
-            <label>;کد پستی</label>
+            <label>کد پستی</label>
 
             <input asp-for="PostalCode" class="form-control" />
 
@@ -67,7 +64,7 @@
     <div class="mt-4">
 
         <button type="submit" class="btn btn-warning"> ویرایش </button>
+        <button type="button" class="btn btn-warning cancel-modal"> انصراف </button>
 
     </div>
-
-</form>
+</crud-form>

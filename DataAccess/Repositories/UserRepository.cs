@@ -1,12 +1,10 @@
 ﻿using DataAccess.Services;
 using DomainModel.Models;
-using DomainModel.ViewModels.Product;
 using DomainModel.ViewModels.User;
 using Framework.Common;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+
 
 namespace DataAccess.Repositories
 {
@@ -23,6 +21,10 @@ namespace DataAccess.Repositories
 
         private ApplicationUser ToDbModel(UserAddEditModel user)
         {
+            if (string.IsNullOrWhiteSpace(user.Email))
+            {
+                user.Email = $"{user.PhoneNumber}@gmail.com";
+            }
             return new ApplicationUser
             {
                 FirstName = user.FirstName,
@@ -37,7 +39,8 @@ namespace DataAccess.Repositories
                 IsActive = user.IsActive,
                 CreditCartNumber = user.CreditCartNumber,
                 IBAN = user.IBAN,
-                AccountNumber = user.AccountNumber
+                AccountNumber = user.AccountNumber,
+                ProfileImageUrl=user.ProfileImageUrl,
             };
         }
 
@@ -57,7 +60,8 @@ namespace DataAccess.Repositories
                 IsActive = user.IsActive,
                 CreditCartNumber = user.CreditCartNumber,
                 IBAN = user.IBAN,
-                AccountNumber = user.AccountNumber
+                AccountNumber = user.AccountNumber,
+                ProfileImageUrl=user.ProfileImageUrl,
             };
         }
 
@@ -71,7 +75,8 @@ namespace DataAccess.Repositories
 
                 newUser.EmailConfirmed = true;
 
-                var result = await userManager.CreateAsync(newUser, "123456");
+
+                var result = await userManager.CreateAsync(newUser,"userpassword@123");
 
                 if (!result.Succeeded)
                 {

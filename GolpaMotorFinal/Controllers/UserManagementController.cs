@@ -1,6 +1,7 @@
 ﻿using DataAccess.Repositories;
 using DataAccess.Services;
 using DomainModel.ViewModels.User;
+using Framework.Common;
 using GolpaMotorFinal.FrameworkUI.Services;
 using GolpaMotorFinal.Models.ViewModels;
 using GolpaMotorFinal.Models.ViewModels.UserManagement;
@@ -16,10 +17,12 @@ namespace GolpaMotorFinal.Controllers
     {
         private readonly IUserRepository repo;
         private readonly IUserService service;
-        public UserManagementController(IUserRepository repo, IUserService service)
+        private readonly IFileManager fileManager;
+        public UserManagementController(IUserRepository repo, IUserService service, IFileManager _fileManager)
         {
             this.repo = repo;
             this.service = service;
+            this.fileManager = _fileManager;
         }
 
         public async Task<IActionResult> Index()
@@ -88,16 +91,63 @@ namespace GolpaMotorFinal.Controllers
         [HttpGet]
         public IActionResult Create()
         {
-            return PartialView("_Create");
+            var form = new CrudFormViewModel
+            {
+                Title = "افزودن کاربر",
+                Controller = "UserManagement",
+                Action = "Create",
+                Method="POST",
+                Enctype= "multipart/form-data",
+                SubmitButtonText = "افزودن",
+                CloseOnSuccess=true,
+                RefreshGrid=true,
+                GridId = "UserGrid",
+                RefreshGridUrl = "UserManagement/Grid"
+                //RefreshGridUrl = Url.Action("Grid", "UserManagement") 
+            };
+            var vm = new UserAddEditViewModel
+            {
+                CrudFormViewModel = form
+            };
+
+            return PartialView("_Create",vm);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<JsonResult> Create(UserAddEditViewModel vm)
+        public async Task<IActionResult> Create(UserAddEditViewModel vm)
         {
+
             if (!ModelState.IsValid)
             {
-                return Json(new { success = false, message = "اطلاعات معتبر نیست" });
+                return Json(new
+                {
+                    success = false,
+                    message = "اطلاعات وارد شده معتبر نیست."
+                });
+            }
+
+            vm.ExistingProfileImageUrl = "/images/imageUsers/noimage.jpg";
+
+            if (vm.ProfileImage != null)
+            {
+                var upload = await fileManager.UploadAsync(
+                    vm.ProfileImage,
+                    5,
+                    new[] { "jpg", "jpeg", "png" },
+                    "images/imageUsers/uploads",
+                    "images/imageUsers/thumbnails");
+
+                if (!upload.Success)
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        message = upload.Message
+                    });
+                }
+
+                vm.ExistingProfileImageUrl = upload.FileUrl;
             }
 
             var model = new UserAddEditModel
@@ -110,12 +160,27 @@ namespace GolpaMotorFinal.Controllers
                 CityID = vm.CityID,
                 Address = vm.Address,
                 PostalCode = vm.PostalCode,
-                IsActive = vm.IsActive
+                IsActive = vm.IsActive,
+                ProfileImageUrl = vm.ExistingProfileImageUrl
             };
 
-            var result = await service.AddUser(model, vm.ProfileImage);
+            var op = await service.AddUser(model);
 
-            return Json(new { success = result.Success, message = result.Message });
+            if (!op.Success && vm.ProfileImage != null)
+            {
+                if (!string.IsNullOrWhiteSpace(vm.ExistingProfileImageUrl))
+                {
+                    fileManager.Remove(vm.ExistingProfileImageUrl);
+
+                    var thumbnailPath = vm.ExistingProfileImageUrl.Replace(
+                        "/images/imageUsers/uploads/",
+                        "/images/imageUsers/thumbnails/");
+
+                    fileManager.Remove(thumbnailPath);
+                }
+            }
+
+            return Json(op);
         }
 
         [HttpGet]
@@ -125,6 +190,10 @@ namespace GolpaMotorFinal.Controllers
 
             if (user == null)
                 return NotFound();
+            if(user.ProfileImageUrl == null)
+            {
+                user.ProfileImageUrl = "~/images/imageUsers/noimage.jpg";
+            }
 
             var vm = new UserAddEditViewModel
             {
@@ -138,7 +207,8 @@ namespace GolpaMotorFinal.Controllers
                 Address = user.Address,
                 PostalCode = user.PostalCode,
                 IsActive = user.IsActive,
-                IsDeleted = user.IsDeleted
+                IsDeleted = user.IsDeleted,
+                ExistingProfileImageUrl=user.ProfileImageUrl
             };
 
             return PartialView("_Edit", vm);
@@ -173,8 +243,8 @@ namespace GolpaMotorFinal.Controllers
             return Json(result);
         }
 
+
         [HttpPost]
-        [ValidateAntiForgeryToken]
         public async Task<JsonResult> Delete(string userID)
         {
             var result = await repo.Delete(userID);
@@ -189,21 +259,14 @@ namespace GolpaMotorFinal.Controllers
             if (user == null)
                 return NotFound();
 
+
             return PartialView("_Details", user);
         }
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<JsonResult> RemovePicture(string userID)
-        {
-            var result = await service.RemovePicture(userID);
-            return Json(result);
-        }
-
         [HttpGet]
-        public async Task<IActionResult> UserList(List<UserListItemViewModel> model)
+        public IActionResult Grid()
         {
-            return View(model);
+            return ViewComponent("UserList");
         }
 
         [HttpGet]
@@ -212,8 +275,6 @@ namespace GolpaMotorFinal.Controllers
             var model = await service.GetUserReport();
             return View(model);
         }
-      
-       
 
     }
 

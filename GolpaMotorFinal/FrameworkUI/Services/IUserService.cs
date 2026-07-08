@@ -7,7 +7,7 @@ namespace GolpaMotorFinal.FrameworkUI.Services
 {
     public interface IUserService
     {
-        Task<OperationResult> AddUser(UserAddEditModel user, IFormFile imageFile);
+        Task<OperationResult> AddUser(UserAddEditModel user);
         Task<OperationResult> UpdateUser(UserAddEditModel user, IFormFile? imageFile);
         Task<OperationResult> DeleteUser(string userID);
         Task<UserAddEditModel?> GetForEdit(string userID);
@@ -17,6 +17,6 @@ namespace GolpaMotorFinal.FrameworkUI.Services
         Task<MergeAccountsViewModel> GetMergeSearchResult(string sm);
 
         Task<OperationResult> MergeUsers(MergeAccountsViewModel model);
-        Task<OperationResult> RemovePicture(string userID);
+
     }
 }
