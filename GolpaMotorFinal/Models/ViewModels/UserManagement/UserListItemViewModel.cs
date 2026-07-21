@@ -32,6 +32,7 @@ namespace GolpaMotorFinal.Models.ViewModels.UserManagement
         public string City { get; set; }
 
         public CrudGridViewModel? CrudGridModel { get; set; }
+        
 
     }
 }

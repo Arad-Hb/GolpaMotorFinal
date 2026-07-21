@@ -39,6 +39,8 @@ namespace DomainModel.ViewModels.User
         [Display(Name = "آدرس")]
         public string? Address { get; set; }
 
+        public DateTime? RegisterDate { get; set; }
+
         [StringLength(20)]
         [Display(Name = "کد پستی")]
         public string? PostalCode { get; set; }

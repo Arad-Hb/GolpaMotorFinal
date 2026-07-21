@@ -14,9 +14,6 @@ namespace GolpaMotorFinal.Models.ViewModels.UserManagement
         [StringLength(50)]
         public string? LastName { get; set; }
 
-        [Display(Name = "نام کاربری")]
-        public string? UserName { get; set; }
-
         [Display(Name = "رمز عبور")]
         public string? Password { get; set; }
 
@@ -48,7 +45,7 @@ namespace GolpaMotorFinal.Models.ViewModels.UserManagement
         public bool IsDeleted { get; set; }
 
         // عکس فعلی
-        public string? ExistingProfileImageUrl { get; set; }
+        public string? ProfileImageUrl { get; set; }
 
         // عکس جدید
         public IFormFile? ProfileImage { get; set; }

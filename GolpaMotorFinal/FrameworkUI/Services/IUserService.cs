@@ -8,7 +8,7 @@ namespace GolpaMotorFinal.FrameworkUI.Services
     public interface IUserService
     {
         Task<OperationResult> AddUser(UserAddEditModel user);
-        Task<OperationResult> UpdateUser(UserAddEditModel user, IFormFile? imageFile);
+        Task<OperationResult> UpdateUser(UserAddEditModel user);
         Task<OperationResult> DeleteUser(string userID);
         Task<UserAddEditModel?> GetForEdit(string userID);
         Task<List<UserListItemViewModel>> GetUsers();

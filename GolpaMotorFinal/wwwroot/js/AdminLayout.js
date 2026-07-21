@@ -69,47 +69,67 @@ $(document).on("submit", ".crud-form", function (e) {
 
 
 //SaveEdit
-$(document).on("submit", "#UserFormEdit", function (e) {
+// $(document).on("submit", ".crud-form", function (e) {
 
-    e.preventDefault();
+//     e.preventDefault();
 
-    var formData = new FormData(this);
+//     const form = $(this);
+//     const formData = new FormData(this);
 
-    $.ajax({
+//     $.ajax({
+//         url: form.attr("action"),
+//         type: form.attr("method"),
+//         data: formData,
+//         processData: false,
+//         contentType: false,
+//         cache: false,
 
-        url: "/UserManagement/Edit",
+//         headers: {
+//             "RequestVerificationToken":
+//                 form.find('input[name="__RequestVerificationToken"]').val()
+//         },
 
-        type: "POST",
+//         success: function (op) {
 
-        data: formData,
+//             if (!op.success) {
+//                 alert(op.message);
+//                 return;
+//             }
 
-        processData: false,
+//             if (form.data("refresh-grid")) {
 
-        contentType: false,
+//                 const targetID = "#" + form.data("grid-id");
+//                 const url = form.data("refresh-grid-url");
 
-        headers: {
-            RequestVerificationToken:
-                $('input[name="__RequestVerificationToken"]', this).val()
-        },
+//                 if (url) {
+//                     $.get(url, function (html) {
+//                         $(targetID).html(html);
+//                         alert(op.message);
+//                     });
 
-        success: function (res) {
+//                     grid.load(url);
+//                 }
+//             }
 
-            if (res.success) {
+//             if (form.data("close-on-success")) {
+//                 generalModal.hide();
+//             }
 
-                $("#UserModal").modal("hide");
+//             alert(op.message);
+//         },
 
-                LoadUsers();
+//         error: function (xhr) {
 
-                alert(res.message);
-            }
-            else {
+//             if (xhr.responseJSON?.message) {
+//                 alert(xhr.responseJSON.message);
+//             }
+//             else {
+//                 alert("An unexpected error occurred.");
+//             }
+//         }
+//     });
 
-                alert(res.message);
-            }
-        }
-    });
-
-});
+// });
 
 
 //Delete

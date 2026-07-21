@@ -1,11 +1,10 @@
-﻿using DataAccess.Repositories;
-using DataAccess.Services;
+﻿using DataAccess.Services;
 using DomainModel.ViewModels.User;
 using Framework.Common;
 using GolpaMotorFinal.FrameworkUI.Services;
 using GolpaMotorFinal.Models.ViewModels.UserManagement;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using static GolpaMotorFinal.FrameworkUI.Services.UserService;
 
 
 namespace GolpaMotorFinal.FrameworkUI.Services
@@ -68,42 +67,16 @@ namespace GolpaMotorFinal.FrameworkUI.Services
             }
         }
 
-        public async Task<OperationResult> UpdateUser(UserAddEditModel user, IFormFile? imageFile)
+        public async Task<OperationResult> UpdateUser(UserAddEditModel user)
         {
             var op = new OperationResult("UpdateUser");
 
             try
             {
-            //    var current = await repo.Get(user.UserID);
+                var currentUser = await repo.Get(user.UserID);
 
-            //    if (current == null)
-            //        return op.ToFailed("کاربر یافت نشد");
-
-            //    if (imageFile != null)
-            //    {
-            //        // تغییر: FileManager مسئول save + validation
-            //        var saveResult = fileManager.SaveFile(imageFile, "~/images/imageUsers", 2048, 2097152);
-
-            //        if (!saveResult.Success)
-            //            return op.ToFailed(saveResult.Message);
-
-            //        // تغییر: حذف فایل قبلی قبل از جایگزینی
-            //        if (!string.IsNullOrEmpty(current.ProfileImageUrl))
-            //        {
-            //            var oldPath = fileManager.ToPhysicalAddress(current.ProfileImageUrl, "~/images/imageUsers");
-
-            //            // تغییر: حذف امن فایل قبلی
-            //            fileManager.RemoveFile(oldPath);
-            //        }
-
-            //        // تغییر مهم: فقط نام فایل جدید
-            //        user.ProfileImageUrl = saveResult.Message;
-                //}
-                //else
-                //{
-                //    // تغییر: اگر عکس جدید نیامد، قبلی حفظ می‌شود
-                //    user.ProfileImageUrl = current.ProfileImageUrl;
-                //}
+                if (currentUser == null)
+                    return op.ToFailed("کاربر یافت نشد.");
 
                 return await repo.Update(user);
             }

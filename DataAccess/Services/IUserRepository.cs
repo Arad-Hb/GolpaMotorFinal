@@ -1,11 +1,7 @@
 ﻿using DomainModel.Models;
-using DomainModel.ViewModels;
-using DomainModel.ViewModels.Product;
 using DomainModel.ViewModels.User;
 using Framework.Common;
-using Microsoft.AspNetCore.Identity;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+
 
 namespace DataAccess.Services
 {

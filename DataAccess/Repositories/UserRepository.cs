@@ -19,130 +19,177 @@ namespace DataAccess.Repositories
             this.userManager = userManager;            
         }
 
-        private ApplicationUser ToDbModel(UserAddEditModel user)
+        private ApplicationUser ToDbModel(UserAddEditModel model)
         {
-            if (string.IsNullOrWhiteSpace(user.Email))
+            var user = new ApplicationUser
             {
-                user.Email = $"{user.PhoneNumber}@gmail.com";
-            }
-            return new ApplicationUser
-            {
-                FirstName = user.FirstName,
-                LastName = user.LastName,
-                Email = user.Email,
-                UserName = user.Email,
-                PhoneNumber = user.PhoneNumber,
-                ProvinceID = user.ProvinceID,
-                CityID = user.CityID,
-                Address = user.Address,
-                PostalCode = user.PostalCode,
-                IsActive = user.IsActive,
-                CreditCartNumber = user.CreditCartNumber,
-                IBAN = user.IBAN,
-                AccountNumber = user.AccountNumber,
-                ProfileImageUrl=user.ProfileImageUrl,
+                UserName = string.IsNullOrWhiteSpace(model.Email)
+                            ? $"USR_{Guid.NewGuid():N}"
+                            : model.Email.Trim(),
+
+                Email = string.IsNullOrWhiteSpace(model.Email)
+                            ? $"USR_{Guid.NewGuid():N}"
+                            : model.Email.Trim(),
+
+                PhoneNumber = model.PhoneNumber,
+
+                FirstName = model.FirstName?.Trim(),
+                LastName = model.LastName?.Trim(),
+
+                ProvinceID = model.ProvinceID,
+                CityID = model.CityID,
+
+                Address = string.IsNullOrWhiteSpace(model.Address) ? null : model.Address.Trim(),
+                PostalCode = string.IsNullOrWhiteSpace(model.PostalCode) ? null : model.PostalCode.Trim(),
+
+                ProfileImageUrl = string.IsNullOrWhiteSpace(model.ProfileImageUrl)
+                    ? null
+                    : model.ProfileImageUrl,
+
+                CreditCartNumber = string.IsNullOrWhiteSpace(model.CreditCartNumber)
+                    ? null
+                    : model.CreditCartNumber,
+
+                IBAN = string.IsNullOrWhiteSpace(model.IBAN)
+                    ? null
+                    : model.IBAN,
+
+                AccountNumber = string.IsNullOrWhiteSpace(model.AccountNumber)
+                    ? null
+                    : model.AccountNumber,
+
+                IsActive = model.IsActive,
+                IsDeleted = false,
+                IsConfirmedCode = false,
+
+                RegisterDate = model.RegisterDate ?? DateTime.Now,
+
+                TotalEarnedPoints = model.TotalEarnedPoints ?? 0,
+                TotalSettledPoints = model.TotalSettledPoints ?? 0,
+                TotalRegisteredCards = model.TotalRegisteredCards ?? 0
             };
+
+            user.RemainedPoints =
+                (user.TotalEarnedPoints ?? 0) -
+                (user.TotalSettledPoints ?? 0);
+
+            return user;
         }
 
-        private UserAddEditModel ToViewModel(ApplicationUser user)
+        private void UpdateDbModel(ApplicationUser user, UserAddEditModel model)
+        {
+            user.FirstName = model.FirstName?.Trim();
+            user.LastName = model.LastName?.Trim();
+            user.PhoneNumber = model.PhoneNumber?.Trim();
+
+            user.ProvinceID = model.ProvinceID;
+            user.CityID = model.CityID;
+
+            user.Address = model.Address?.Trim();
+            user.PostalCode = model.PostalCode?.Trim();
+
+            user.ProfileImageUrl = model.ProfileImageUrl?.Trim();
+
+            user.CreditCartNumber = model.CreditCartNumber?.Trim();
+            user.IBAN = model.IBAN?.Trim();
+            user.AccountNumber = model.AccountNumber?.Trim();
+
+            user.IsActive = model.IsActive;
+
+            user.TotalEarnedPoints = model.TotalEarnedPoints ?? 0;
+            user.TotalSettledPoints = model.TotalSettledPoints ?? 0;
+            user.TotalRegisteredCards = model.TotalRegisteredCards ?? 0;
+
+            user.RemainedPoints =
+                (user.TotalEarnedPoints ?? 0) -
+                (user.TotalSettledPoints ?? 0);
+        }
+
+        private UserAddEditModel ToViewModel(ApplicationUser model)
         {
             return new UserAddEditModel
             {
-                UserID = user.Id,
-                FirstName = user.FirstName,
-                LastName = user.LastName,
-                Email = user.Email,
-                PhoneNumber = user.PhoneNumber,
-                ProvinceID = user.ProvinceID,
-                CityID = user.CityID,
-                Address = user.Address,
-                PostalCode = user.PostalCode,
-                IsActive = user.IsActive,
-                CreditCartNumber = user.CreditCartNumber,
-                IBAN = user.IBAN,
-                AccountNumber = user.AccountNumber,
-                ProfileImageUrl=user.ProfileImageUrl,
+                UserID = model.Id,
+                FirstName = model.FirstName,
+                LastName = model.LastName,
+                Email = model.Email,
+                PhoneNumber = model.PhoneNumber,
+
+                ProvinceID = model.ProvinceID,
+                CityID = model.CityID,
+                Address = model.Address,
+                PostalCode = model.PostalCode,
+                ProfileImageUrl = model.ProfileImageUrl,
+
+                IsActive = model.IsActive,
+                IsDeleted = model.IsDeleted,
+
+                CreditCartNumber = model.CreditCartNumber,
+                IBAN = model.IBAN,
+                AccountNumber = model.AccountNumber,
+
+                TotalEarnedPoints = model.TotalEarnedPoints,
+                TotalSettledPoints = model.TotalSettledPoints,
+                RemainedPoints = model.RemainedPoints,
+                TotalRegisteredCards = model.TotalRegisteredCards
             };
         }
 
-        public async Task<OperationResult> Add(UserAddEditModel user)
+        public async Task<OperationResult> Add(UserAddEditModel model)
         {
-            var op = new OperationResult("Add User");
+            var result = new OperationResult("Add User");
 
             try
             {
-                var newUser = ToDbModel(user);
+                var user = ToDbModel(model);
+                var password = $"P@ss{Guid.NewGuid():N}1!";
+                var identityResult = await userManager.CreateAsync(user, password);
 
-                newUser.EmailConfirmed = true;
-
-
-                var result = await userManager.CreateAsync(newUser,"userpassword@123");
-
-                if (!result.Succeeded)
+                if (!identityResult.Succeeded)
                 {
-                    return op.ToFailed(string.Join(" | ",
-                        result.Errors.Select(x => x.Description)));
+                    return result.ToFailed(string.Join(Environment.NewLine,
+                        identityResult.Errors.Select(x => x.Description)));
                 }
 
-                await db.SaveChangesAsync();
-                return op.ToSuccess("کاربر با موفقیت ثبت شد");
+                return result.ToSuccess("کاربر با موفقیت ثبت شد");
             }
             catch (Exception ex)
             {
-                return op.ToFailed("خطا در ثبت کاربر : " + ex.Message);
+                return result.ToFailed("خطا در ثبت کاربر : " + ex.Message);
             }
         }
 
-        public async Task<OperationResult> Update(UserAddEditModel user)
+        public async Task<OperationResult> Update(UserAddEditModel model)
         {
             var op = new OperationResult("Update User");
 
-            if (string.IsNullOrEmpty(user.UserID))
-                return op.ToFailed("شناسه کاربر نامعتبر است");
-
             try
             {
-                var dbUser = await userManager.FindByIdAsync(user.UserID);
+                if (string.IsNullOrWhiteSpace(model.UserID))
+                    return op.ToFailed("شناسه کاربر نامعتبر است");
 
-                if (dbUser == null)
+                var user = await userManager.FindByIdAsync(model.UserID);
+
+                if (user == null)
                     return op.ToFailed("کاربر یافت نشد");
 
-                dbUser.FirstName = user.FirstName;
-                dbUser.LastName = user.LastName;
-                dbUser.Email = user.Email;
-                dbUser.UserName = user.Email;
-                dbUser.PhoneNumber = user.PhoneNumber;
-                dbUser.ProvinceID = user.ProvinceID;
-                dbUser.CityID = user.CityID;
-                dbUser.Address = user.Address;
-                dbUser.PostalCode = user.PostalCode;
-                dbUser.ProfileImageUrl = user.ProfileImageUrl;
-                dbUser.IsActive = user.IsActive;
-                dbUser.CreditCartNumber = user.CreditCartNumber;
-                dbUser.IBAN = user.IBAN;
-                dbUser.AccountNumber = user.AccountNumber;
+                UpdateDbModel(user, model);
 
-                dbUser.TotalSettledPoints = user.TotalSettledPoints;
-                dbUser.TotalEarnedPoints = user.TotalEarnedPoints;
-                dbUser.RemainedPoints = user.RemainedPoints;
-                dbUser.TotalRegisteredCards = user.TotalRegisteredCards;
-
-                
-
-                var result = await userManager.UpdateAsync(dbUser);
-
-                if (!result.Succeeded)
+                if (!string.IsNullOrWhiteSpace(model.Email))
                 {
-                    return op.ToFailed(string.Join(" | ",
-                        result.Errors.Select(x => x.Description)));
+                    user.Email = model.Email.Trim();
                 }
 
-                await db.SaveChangesAsync();
+                var result = await userManager.UpdateAsync(user);
+
+                if (!result.Succeeded)
+                    return op.ToFailed(string.Join(" | ", result.Errors.Select(x => x.Description)));
+
                 return op.ToSuccess("اطلاعات کاربر با موفقیت ویرایش شد");
             }
             catch (Exception ex)
             {
-                return op.ToFailed("خطا در ویرایش کاربر : " + ex.Message);
+                return op.ToFailed($"خطا در ویرایش کاربر: {ex.Message}");
             }
         }
 

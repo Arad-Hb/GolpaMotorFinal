@@ -102,7 +102,7 @@ namespace GolpaMotorFinal.Controllers
                 CloseOnSuccess=true,
                 RefreshGrid=true,
                 GridId = "UserGrid",
-                RefreshGridUrl = "UserManagement/Grid"
+                RefreshGridUrl = "/UserManagement/Grid"
                 //RefreshGridUrl = Url.Action("Grid", "UserManagement") 
             };
             var vm = new UserAddEditViewModel
@@ -127,7 +127,7 @@ namespace GolpaMotorFinal.Controllers
                 });
             }
 
-            vm.ExistingProfileImageUrl = "/images/imageUsers/noimage.jpg";
+            vm.ProfileImageUrl = "/images/imageUsers/noimage.jpg";
 
             if (vm.ProfileImage != null)
             {
@@ -147,7 +147,7 @@ namespace GolpaMotorFinal.Controllers
                     });
                 }
 
-                vm.ExistingProfileImageUrl = upload.FileUrl;
+                vm.ProfileImageUrl = upload.FileUrl;
             }
 
             var model = new UserAddEditModel
@@ -161,18 +161,18 @@ namespace GolpaMotorFinal.Controllers
                 Address = vm.Address,
                 PostalCode = vm.PostalCode,
                 IsActive = vm.IsActive,
-                ProfileImageUrl = vm.ExistingProfileImageUrl
+                ProfileImageUrl = vm.ProfileImageUrl
             };
 
             var op = await service.AddUser(model);
 
             if (!op.Success && vm.ProfileImage != null)
             {
-                if (!string.IsNullOrWhiteSpace(vm.ExistingProfileImageUrl))
+                if (!string.IsNullOrWhiteSpace(vm.ProfileImageUrl))
                 {
-                    fileManager.Remove(vm.ExistingProfileImageUrl);
+                    fileManager.Remove(vm.ProfileImageUrl);
 
-                    var thumbnailPath = vm.ExistingProfileImageUrl.Replace(
+                    var thumbnailPath = vm.ProfileImageUrl.Replace(
                         "/images/imageUsers/uploads/",
                         "/images/imageUsers/thumbnails/");
 
@@ -188,12 +188,21 @@ namespace GolpaMotorFinal.Controllers
         {
             var user = await repo.Get(userID);
 
-            if (user == null)
-                return NotFound();
-            if(user.ProfileImageUrl == null)
+            if (user == null) return NotFound();
+
+            var form = new CrudFormViewModel
             {
-                user.ProfileImageUrl = "~/images/imageUsers/noimage.jpg";
-            }
+                Title = "ویرایش کاربر",
+                Controller = "UserManagement",
+                Action = "Edit",
+                Method = "POST",
+                Enctype = "multipart/form-data",
+                SubmitButtonText = "ثبت نهایی",
+                CloseOnSuccess = true,
+                RefreshGrid = true,
+                GridId = "UserGrid",
+                RefreshGridUrl = "/UserManagement/Grid"
+            };
 
             var vm = new UserAddEditViewModel
             {
@@ -208,7 +217,8 @@ namespace GolpaMotorFinal.Controllers
                 PostalCode = user.PostalCode,
                 IsActive = user.IsActive,
                 IsDeleted = user.IsDeleted,
-                ExistingProfileImageUrl=user.ProfileImageUrl
+                ProfileImageUrl=user.ProfileImageUrl,  //set NoImage by ImageHelper in view
+                CrudFormViewModel = form
             };
 
             return PartialView("_Edit", vm);
@@ -221,7 +231,39 @@ namespace GolpaMotorFinal.Controllers
             if (!ModelState.IsValid)
                 return Json(new { success = false, message = "اطلاعات معتبر نیست" });
 
-            // تبدیل ViewModel → Domain Model
+            vm.ProfileImageUrl = "/images/imageUsers/noimage.jpg";
+
+            if (vm.ProfileImage != null)
+            {
+                var upload = await fileManager.UploadAsync(
+                    vm.ProfileImage,
+                    5,
+                    new[] { "jpg", "jpeg", "png" },
+                    "images/imageUsers/uploads",
+                    "images/imageUsers/thumbnails");
+
+                if (!upload.Success)
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        message = upload.Message
+                    });
+                }
+
+                if (upload.FileUrl == vm.ProfileImageUrl)
+                {
+                    fileManager.Remove(vm.ProfileImageUrl);
+                    var thumbnailPath = vm.ProfileImageUrl.Replace(
+                        "/images/imageUsers/uploads/",
+                        "/images/imageUsers/thumbnails/");
+
+                    fileManager.Remove(thumbnailPath);
+                }
+
+                vm.ProfileImageUrl = upload.FileUrl;
+            }
+
             var model = new UserAddEditModel
             {
                 UserID = vm.UserID,
@@ -234,11 +276,11 @@ namespace GolpaMotorFinal.Controllers
                 Address = vm.Address,
                 PostalCode = vm.PostalCode,
                 IsActive = vm.IsActive,
-                IsDeleted = vm.IsDeleted
+                IsDeleted = vm.IsDeleted,
+                ProfileImageUrl= vm.ProfileImageUrl
             };
 
-            // ارسال به Service همراه فایل جدید
-            var result = await service.UpdateUser(model, vm.ProfileImage);
+            var result = await service.UpdateUser(model);
 
             return Json(result);
         }
