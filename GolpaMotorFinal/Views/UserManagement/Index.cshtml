@@ -1,21 +1,28 @@
-﻿@model List<GolpaMotorFinal.Models.ViewModels.UserManagement.UserListItemViewModel>
-
+﻿@using GolpaMotorFinal.Models.ViewModels
+@model List<GolpaMotorFinal.Models.ViewModels.UserManagement.UserListItemViewModel>
 
 @{
     Layout = "_AdminLayout";
+
+    var crudModel = new CrudIndexViewModel
+    {
+        Title = "مدیریت کاربران",
+        GridId = "UserGrid",
+        ViewComponent = "UserList",
+        CreateUrl = Url.Action("Create", "UserManagement") ?? "/UserManagement/Create",
+        CreateTitle = "افزودن کاربر",
+        CreateButtonText = "افزودن"
+    };
+    ViewData["SearchBoxModel"] = new GolpaMotorFinal.Models.ViewModels.SearchBoxViewModel
+    {
+        Action = "Search",
+        Controller = "UserManagement",
+        ComponentId = "userSearch",
+        UpdateTargetId = "UserGrid",
+        UseAjax = true,
+        SearchParameterName = "Search.SearchTerm",
+        Placeholder = "شماره موبایل"
+    };
 }
 
-<h2>مدیریت کاربران</h2>
-
-<button class="btn btn-success open-modal"
-        data-url='@Url.Action("Create","UserManagement")'
-        data-id="null"
-        data-title="افزودن کاربر">
-
-    افزودن کاربر
-
-</button>
-
-<div id="UserGrid">
-    @await Component.InvokeAsync("UserList") 
-</div>
+@await Html.PartialAsync("_CrudPage", crudModel)

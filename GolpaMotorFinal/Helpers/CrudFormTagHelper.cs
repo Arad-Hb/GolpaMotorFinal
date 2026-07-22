@@ -47,12 +47,20 @@ namespace GolpaMotorFinal.Helpers
 
             if (!string.IsNullOrEmpty(Model.RefreshGridUrl))
             {
-                output.Attributes.SetAttribute(
-                    "data-refresh-grid-url",
-                    urlHelper.Action(
+                string refreshUrl;
+                if (Model.RefreshGridUrl.StartsWith("/") || Model.RefreshGridUrl.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+                {
+                    refreshUrl = Model.RefreshGridUrl;
+                }
+                else
+                {
+                    refreshUrl = urlHelper.Action(
                         Model.RefreshGridUrl,
                         Model.Controller,
-                        Model.RefreshGridRouteValues));
+                        Model.RefreshGridRouteValues) ?? Model.RefreshGridUrl;
+                }
+
+                output.Attributes.SetAttribute("data-refresh-grid-url", refreshUrl);
             };
 
             output.Attributes.SetAttribute("data-refresh-grid", Model.RefreshGrid.ToString().ToLower());

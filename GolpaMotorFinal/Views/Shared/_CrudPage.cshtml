@@ -1,0 +1,62 @@
+@using GolpaMotorFinal.Models.ViewModels
+@model CrudIndexViewModel
+
+<div class="crud-page">
+
+    <!-- Page title -->
+    <div class="page-title mb-2">
+        <h2 class="m-0">@Model.Title</h2>
+    </div>
+
+    <!-- Breadcrumb -->
+    @if (Model.Breadcrumb != null)
+    {
+        @await Component.InvokeAsync("Breadcrumb", Model.Breadcrumb)
+    }
+
+    <!-- Search and filters area -->
+    <div class="d-flex justify-content-between align-items-center my-3 gap-3">
+        <div>
+            @* If you want to render a search component, set ViewData["SearchBoxModel"] to a SearchBoxViewModel before calling this partial *@
+            @{
+                var sbModel = ViewData["SearchBoxModel"] as GolpaMotorFinal.Models.ViewModels.SearchBoxViewModel;
+                if (sbModel != null)
+                {
+                    @await Component.InvokeAsync("SearchBox", sbModel)
+                }
+            }
+        </div>
+
+        <div>
+            @* Create button that opens generic modal *@
+            <button class="btn btn-success open-modal"
+                    data-url='@Model.CreateUrl'
+                    data-id="null"
+                    data-title='@Model.CreateTitle'>
+                @Model.CreateButtonText
+            </button>
+        </div>
+    </div>
+
+    <!-- Main content box showing form and grid -->
+    <div class="card">
+        <div class="card-body">
+
+            <div class="mb-4" id="crud-form-area">
+                @* Optional area where CrudForm will be rendered inside modal; keep empty on index page *@
+            </div>
+
+            <div id="@Model.GridId">
+                @await Component.InvokeAsync(Model.ViewComponent)
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    @{
+        var pager = new PaginationViewModel { GridId = Model.GridId };
+    }
+    @await Component.InvokeAsync("Pagination", pager)
+
+</div>

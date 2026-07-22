@@ -1,11 +1,15 @@
 ﻿@model GolpaMotorFinal.Models.ViewModels.UserManagement.UserAddEditViewModel
 @using GolpaMotorFinal.Helpers
 
-<crud-form model="@Model.CrudFormViewModel">
+<crud-form model="Model.CrudFormViewModel">
     @Html.AntiForgeryToken()
 
     <input asp-for="UserID" type="hidden" />
     <input asp-for="Email" type="hidden" />
+    <input asp-for="Password" type="hidden" />
+    <input asp-for="ProvinceID" type="hidden" />
+    <input asp-for="CityID" type="hidden" />
+    <input asp-for="IsDeleted" type="hidden" />
 
     <div class="row">
 

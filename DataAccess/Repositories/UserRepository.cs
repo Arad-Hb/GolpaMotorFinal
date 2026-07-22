@@ -3,6 +3,7 @@ using DomainModel.Models;
 using DomainModel.ViewModels.User;
 using Framework.Common;
 using Microsoft.AspNetCore.Identity;
+using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
 
 
@@ -24,11 +25,11 @@ namespace DataAccess.Repositories
             var user = new ApplicationUser
             {
                 UserName = string.IsNullOrWhiteSpace(model.Email)
-                            ? $"USR_{Guid.NewGuid():N}"
+                            ? $"noemail_{Guid.NewGuid():N}@noemail.local"
                             : model.Email.Trim(),
 
                 Email = string.IsNullOrWhiteSpace(model.Email)
-                            ? $"USR_{Guid.NewGuid():N}"
+                            ? $"noemail_{Guid.NewGuid():N}@noemail.local"
                             : model.Email.Trim(),
 
                 PhoneNumber = model.PhoneNumber,
@@ -107,12 +108,19 @@ namespace DataAccess.Repositories
 
         private UserAddEditModel ToViewModel(ApplicationUser model)
         {
+            var email = model.Email;
+            var emailAttr = new EmailAddressAttribute();
+            if (!string.IsNullOrWhiteSpace(email) && !emailAttr.IsValid(email))
+            {
+                email = null;
+            }
+
             return new UserAddEditModel
             {
                 UserID = model.Id,
                 FirstName = model.FirstName,
                 LastName = model.LastName,
-                Email = model.Email,
+                Email = email,
                 PhoneNumber = model.PhoneNumber,
 
                 ProvinceID = model.ProvinceID,
@@ -128,10 +136,10 @@ namespace DataAccess.Repositories
                 IBAN = model.IBAN,
                 AccountNumber = model.AccountNumber,
 
-                TotalEarnedPoints = model.TotalEarnedPoints,
-                TotalSettledPoints = model.TotalSettledPoints,
-                RemainedPoints = model.RemainedPoints,
-                TotalRegisteredCards = model.TotalRegisteredCards
+                TotalEarnedPoints = model.TotalEarnedPoints ?? 0,
+                TotalSettledPoints = model.TotalSettledPoints ?? 0,
+                RemainedPoints = model.RemainedPoints ?? 0,
+                TotalRegisteredCards = model.TotalRegisteredCards ?? 0
             };
         }
 
@@ -324,7 +332,7 @@ namespace DataAccess.Repositories
             var user = await db.Users.FirstOrDefaultAsync(x => x.Id == userID && !x.IsDeleted);
 
             if (user == null)
-                return null;
+                return new UserAddEditModel();
 
             return ToViewModel(user);
         }

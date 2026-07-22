@@ -86,9 +86,44 @@ namespace GolpaMotorFinal.FrameworkUI.Services
             }
         }
 
-        public async Task<UserAddEditModel?> GetForEdit(string userID)
+        public async Task<UserAddEditViewModel?> GetForEdit(string userID)
         {
-            return await repo.Get(userID);
+            var user = await repo.Get(userID);
+
+            if (user == null) return null;
+
+            var form = new GolpaMotorFinal.Models.ViewModels.CrudFormViewModel
+            {
+                Title = "ویرایش کاربر",
+                Controller = "UserManagement",
+                Action = "Edit",
+                Method = "POST",
+                Enctype = "multipart/form-data",
+                SubmitButtonText = "ثبت نهایی",
+                CloseOnSuccess = true,
+                RefreshGrid = true,
+                GridId = "UserGrid",
+                RefreshGridUrl = "Grid"
+            };
+
+            var vm = new UserAddEditViewModel
+            {
+                UserID = user.UserID,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Email = user.Email,
+                PhoneNumber = user.PhoneNumber,
+                ProvinceID = user.ProvinceID,
+                CityID = user.CityID,
+                Address = user.Address,
+                PostalCode = user.PostalCode,
+                IsActive = user.IsActive,
+                IsDeleted = user.IsDeleted,
+                ProfileImageUrl = user.ProfileImageUrl,
+                CrudFormViewModel = form
+            };
+
+            return vm;
         }
 
 

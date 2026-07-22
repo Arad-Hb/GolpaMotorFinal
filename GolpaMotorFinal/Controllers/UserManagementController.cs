@@ -59,7 +59,27 @@ namespace GolpaMotorFinal.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> MergeAccounts(MergeAccountsComplexViewModel model)
         {
-            var result=await service.MergeUsers(model.CurrentUser);
+            if (model?.CurrentUser == null)
+            {
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                    return Json(new { success = false, message = "اطلاعات نامعتبر است." });
+
+                return RedirectToAction(nameof(UserReport));
+            }
+
+            var result = await service.MergeUsers(model.CurrentUser);
+
+            // If AJAX call, return JSON so client can refresh grid and close modal
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            {
+                return Json(result);
+            }
+
+            if (!result.Success)
+            {
+                TempData["MergeMessage"] = result.Message;
+                return RedirectToAction(nameof(UserReport));
+            }
 
             return RedirectToAction(nameof(UserReport));
         }
@@ -102,8 +122,7 @@ namespace GolpaMotorFinal.Controllers
                 CloseOnSuccess=true,
                 RefreshGrid=true,
                 GridId = "UserGrid",
-                RefreshGridUrl = "/UserManagement/Grid"
-                //RefreshGridUrl = Url.Action("Grid", "UserManagement") 
+                RefreshGridUrl = "Grid"
             };
             var vm = new UserAddEditViewModel
             {
@@ -186,40 +205,9 @@ namespace GolpaMotorFinal.Controllers
         [HttpGet]
         public async Task<IActionResult> Edit(string userID)
         {
-            var user = await repo.Get(userID);
+            var vm = await service.GetForEdit(userID);
 
-            if (user == null) return NotFound();
-
-            var form = new CrudFormViewModel
-            {
-                Title = "ویرایش کاربر",
-                Controller = "UserManagement",
-                Action = "Edit",
-                Method = "POST",
-                Enctype = "multipart/form-data",
-                SubmitButtonText = "ثبت نهایی",
-                CloseOnSuccess = true,
-                RefreshGrid = true,
-                GridId = "UserGrid",
-                RefreshGridUrl = "/UserManagement/Grid"
-            };
-
-            var vm = new UserAddEditViewModel
-            {
-                UserID = user.UserID,
-                FirstName = user.FirstName,
-                LastName = user.LastName,
-                Email = user.Email,
-                PhoneNumber = user.PhoneNumber,
-                ProvinceID = user.ProvinceID,
-                CityID = user.CityID,
-                Address = user.Address,
-                PostalCode = user.PostalCode,
-                IsActive = user.IsActive,
-                IsDeleted = user.IsDeleted,
-                ProfileImageUrl=user.ProfileImageUrl,  //set NoImage by ImageHelper in view
-                CrudFormViewModel = form
-            };
+            if (vm == null) return NotFound();
 
             return PartialView("_Edit", vm);
         }
@@ -228,8 +216,23 @@ namespace GolpaMotorFinal.Controllers
         [ValidateAntiForgeryToken]
         public async Task<JsonResult> Edit(UserAddEditViewModel vm)
         {
+            if (string.IsNullOrWhiteSpace(vm.Password))
+                ModelState.Remove(nameof(vm.Password));
+
+            if (string.IsNullOrWhiteSpace(vm.Email))
+                ModelState.Remove(nameof(vm.Email));
+
+            if (!vm.ProvinceID.HasValue)
+                ModelState.Remove(nameof(vm.ProvinceID));
+
+            if (!vm.CityID.HasValue)
+                ModelState.Remove(nameof(vm.CityID));
+
             if (!ModelState.IsValid)
-                return Json(new { success = false, message = "اطلاعات معتبر نیست" });
+                return Json(new { success = false, message = "اطلاعات معتبر نیست", errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage) });
+
+            if (string.IsNullOrWhiteSpace(vm.UserID))
+                return Json(new { success = false, message = "شناسه کاربر معتبر نیست" });
 
             vm.ProfileImageUrl = "/images/imageUsers/noimage.jpg";
 
