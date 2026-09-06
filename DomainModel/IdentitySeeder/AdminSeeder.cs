@@ -14,7 +14,7 @@ namespace DomainModel.IdentitySeeder
             var configuration =
                 serviceProvider.GetRequiredService<IConfiguration>();
 
-            const string email = "aradhabashi@gmail.com";
+            const string email = "admin@gmail.com";
             var password = configuration["AdminSeeder:Password"];
 
             if (string.IsNullOrWhiteSpace(password))
