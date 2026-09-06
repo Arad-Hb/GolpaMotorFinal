@@ -1,4 +1,33 @@
-﻿@model List<GolpaMotorFinal.Models.ViewModels.UserManagement.UserReportViewModel>
+﻿@using GolpaMotorFinal.Models.ViewModels.CRUD
+@using GolpaMotorFinal.Models.ViewModels.UserManagement
+@model CrudGridViewModel
+
+@{
+    Layout = "_AdminLayout";
+}
+
+<div class="card shadow-sm">
+
+    <div class="card-body">
+
+        @await Component.InvokeAsync("CrudGrid", Model)
+
+    </div>
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+@* @model List<GolpaMotorFinal.Models.ViewModels.UserManagement.UserReportViewModel>
 @{
     Layout = "_AdminLayout";
 }
@@ -188,4 +217,4 @@
 
         </div>
     </div>
-</div>
+</div> *@

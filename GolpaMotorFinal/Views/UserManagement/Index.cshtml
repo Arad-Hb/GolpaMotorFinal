@@ -1,4 +1,4 @@
-﻿@using GolpaMotorFinal.Models.ViewModels
+﻿@using GolpaMotorFinal.Models.ViewModels.CRUD
 @model List<GolpaMotorFinal.Models.ViewModels.UserManagement.UserListItemViewModel>
 
 @{
@@ -13,7 +13,7 @@
         CreateTitle = "افزودن کاربر",
         CreateButtonText = "افزودن"
     };
-    ViewData["SearchBoxModel"] = new GolpaMotorFinal.Models.ViewModels.SearchBoxViewModel
+    ViewData["SearchBoxModel"] = new SearchBoxViewModel
     {
         Action = "Search",
         Controller = "UserManagement",

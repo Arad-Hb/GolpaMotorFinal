@@ -1,10 +1,8 @@
 ﻿using DataAccess.Services;
 using DomainModel.ViewModels.User;
 using Framework.Common;
-using GolpaMotorFinal.FrameworkUI.Services;
 using GolpaMotorFinal.Models.ViewModels.UserManagement;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
+using GolpaMotorFinal.Models.ViewModels.CRUD;
 
 
 namespace GolpaMotorFinal.FrameworkUI.Services
@@ -92,7 +90,7 @@ namespace GolpaMotorFinal.FrameworkUI.Services
 
             if (user == null) return null;
 
-            var form = new GolpaMotorFinal.Models.ViewModels.CrudFormViewModel
+            var form = new CrudFormViewModel
             {
                 Title = "ویرایش کاربر",
                 Controller = "UserManagement",
@@ -223,6 +221,139 @@ namespace GolpaMotorFinal.FrameworkUI.Services
                 return op.ToFailed("امکان ادغام یک کاربر با خودش وجود ندارد.");
 
             return await repo.MergeAccounts(model.UserID, model.SelectedMergeUserID);
+        }
+
+        public CrudGridViewModel BuildUserGrid(IEnumerable<UserListItemViewModel> users)
+        {
+            throw new NotImplementedException();
+        }
+
+        public CrudGridViewModel BuildUserReportGrid(IEnumerable<UserReportViewModel> users)
+        {
+            var grid = new CrudGridViewModel();
+
+            grid.GridId = "UserReportGrid";
+
+            grid.Headers.Add("تصویر");
+            grid.Headers.Add("نام");
+            grid.Headers.Add("موبایل");
+            grid.Headers.Add("شغل");
+            grid.Headers.Add("کارت");
+            grid.Headers.Add("امتیاز");
+            grid.Headers.Add("تسویه");
+            grid.Headers.Add("مانده");
+            grid.Headers.Add("استان");
+            grid.Headers.Add("شهر");
+            
+
+            foreach (var item in users)
+            {
+                var row = new GridRow
+                {
+                    Key = item.UserID
+                };
+
+                row.Columns.Add(Text(item.FullName));
+
+                row.Columns.Add(Text(item.PhoneNumber));
+
+                row.Columns.Add(Text(item.RoleName));
+
+                row.Columns.Add(Number(item.TotalRegisteredCards));
+
+                row.Columns.Add(Number(item.TotalEarnedPoints));
+
+                row.Columns.Add(Number(item.TotalSettledPoints));
+
+                row.Columns.Add(Number(
+                    item.RemainedPoints,
+                    "fw-bold text-success"));
+
+                row.Columns.Add(Text(item.Province));
+
+                row.Columns.Add(Text(item.City));
+
+                row.Columns.Add(Image(item.ProfileImageUrl));
+
+                row.Actions.Add(
+                   ActionText: "جزئیات",
+                   OpenModal: true,
+                   EnableRefresh:true,
+                   Ajax:true,
+                   Icon: "fa fa-eye",
+                   Url: "/UserManagement/Details",
+                   Id: item.UserID,
+                   CssClass:"btn btn-sm btn-secondary");
+
+                row.Actions.Add(ActionText:"ادغام",
+                    OpenModal: true,
+                   EnableRefresh: true,
+                   Ajax: true,
+                    Icon:"fa fa-user-plus",
+                    Url:"/UserManagement/MergeAccounts",
+                    Id:item.UserID,
+                    CssClass:"btn btn-sm btn-warning");
+
+                grid.Rows.Add(row);
+            }
+
+            return grid;
+        }
+
+        private GridColumn Number(object value,string css = "")
+        {
+            return new GridColumn
+            {
+                Type = GridColumnType.Number,
+                Value = value ?? 0,
+                CssClass = css
+            };
+        }
+        private GridColumn Text(object value,string css = "")
+        {
+            return new GridColumn
+            {
+                Type = GridColumnType.Text,
+                Value = value ?? "-",
+                CssClass = css
+            };
+        }
+        private GridColumn Image(string url)
+        {
+            return new GridColumn
+            {
+                Type = GridColumnType.Image,
+                ImageUrl = string.IsNullOrWhiteSpace(url)
+                    ? "/images/avatar.png"
+                    : url
+            };
+        }
+        private GridColumn PersianDate(DateTime? value)
+        {
+            return new GridColumn
+            {
+                Type = GridColumnType.PersianDate,
+                Value = value
+            };
+        }
+        private GridColumn Boolean(bool value)
+        {
+            return new GridColumn
+            {
+                Type = GridColumnType.Boolean,
+                Value = value,
+                TrueIcon = "fa fa-check text-success",
+                FalseIcon = "fa fa-times text-danger"
+            };
+        }
+        private GridColumn Badge(string value,string css)
+        {
+            return new GridColumn
+            {
+                Type = GridColumnType.Badge,
+                Value = value,
+                BadgeClass = css
+            };
         }
     }
 }

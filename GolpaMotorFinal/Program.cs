@@ -5,6 +5,7 @@ using DomainModel.DataSeeder;
 using DomainModel.IdentitySeeder;
 using DomainModel.Models;
 using GolpaMotorFinal.FrameworkUI.Services;
+using GolpaMotorFinal.Models.ViewModels.UserManagement;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using OfficeOpenXml;
@@ -55,6 +56,7 @@ builder.Services.AddAntiforgery(options =>
 });
 
 
+builder.Services.AddScoped<IGridConfigurationFactory, GridConfigurationFactory>();
 
 var app = builder.Build();
 

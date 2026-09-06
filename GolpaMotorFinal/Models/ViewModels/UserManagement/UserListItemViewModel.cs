@@ -30,9 +30,5 @@ namespace GolpaMotorFinal.Models.ViewModels.UserManagement
 
         [Display(Name = "شهر")]
         public string City { get; set; }
-
-        public CrudGridViewModel? CrudGridModel { get; set; }
-        
-
     }
 }

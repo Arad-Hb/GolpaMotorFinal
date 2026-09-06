@@ -1,3 +1,4 @@
+@using GolpaMotorFinal.Models.ViewModels.CRUD
 @using GolpaMotorFinal.Models.ViewModels
 @model CrudIndexViewModel
 
@@ -19,7 +20,7 @@
         <div>
             @* If you want to render a search component, set ViewData["SearchBoxModel"] to a SearchBoxViewModel before calling this partial *@
             @{
-                var sbModel = ViewData["SearchBoxModel"] as GolpaMotorFinal.Models.ViewModels.SearchBoxViewModel;
+                var sbModel = ViewData["SearchBoxModel"] as SearchBoxViewModel;
                 if (sbModel != null)
                 {
                     @await Component.InvokeAsync("SearchBox", sbModel)

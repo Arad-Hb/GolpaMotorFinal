@@ -1,4 +1,6 @@
-﻿namespace GolpaMotorFinal.Models.ViewModels.UserManagement
+﻿using GolpaMotorFinal.Models.ViewModels.CRUD;
+
+namespace GolpaMotorFinal.Models.ViewModels.UserManagement
 {
     public class MergeAccountsComplexViewModel
     {

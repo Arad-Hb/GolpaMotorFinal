@@ -1,13 +1,10 @@
 ﻿using DataAccess.Repositories;
 using DataAccess.Services;
 using DomainModel.ViewModels.User;
-using Framework.Common;
 using GolpaMotorFinal.FrameworkUI.Services;
-using GolpaMotorFinal.Models.ViewModels;
 using GolpaMotorFinal.Models.ViewModels.UserManagement;
+using GolpaMotorFinal.Models.ViewModels.CRUD;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GolpaMotorFinal.Controllers
@@ -27,8 +24,13 @@ namespace GolpaMotorFinal.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var model = await service.GetUsers();
-            return View(model);
+            var users = await service.GetUsers();
+
+            var grid = service.BuildUserGrid(users);
+
+            return View(grid);
+            //var model = await service.GetUsers();
+            //return View(model);
         }
 
         [HttpGet]
@@ -314,12 +316,133 @@ namespace GolpaMotorFinal.Controllers
             return ViewComponent("UserList");
         }
 
+
         [HttpGet]
         public async Task<IActionResult> UserReport()
         {
-            var model = await service.GetUserReport();
-            return View(model);
+
+            var users = await service.GetUserReport();
+
+            var grid = service.BuildUserReportGrid(users);
+
+            return View(grid);
+            //        var users = await service.GetUserReport();
+
+            //        var grid = new CrudGridViewModel
+            //        {
+            //            Items = users.Cast<object>(),
+
+            //            Columns =
+            //{
+            //    new GridColumn
+            //    {
+            //        Header = "نام",
+            //        PropertyName = nameof(UserReportViewModel.FullName)
+            //    },
+
+            //    new GridColumn
+            //    {
+            //        Header = "موبایل",
+            //        PropertyName = nameof(UserReportViewModel.PhoneNumber)
+            //    },
+
+            //    new GridColumn
+            //    {
+            //        Header = "استان",
+            //        PropertyName = nameof(UserReportViewModel.Province)
+            //    },
+
+            //    new GridColumn
+            //    {
+            //        Header = "شهر",
+            //        PropertyName = nameof(UserReportViewModel.City)
+            //    },
+
+            //    new GridColumn
+            //    {
+            //        Header = "تصویر",
+            //        PropertyName = nameof(UserReportViewModel.ProfileImageUrl),
+            //        Type = GridColumnType.Image
+            //    }
+            //},
+
+            //            Actions =
+            //{
+            //    new GridAction
+            //    {
+            //        Title = "جزئیات",
+            //        Icon = "fa fa-eye",
+            //        CssClass = "btn btn-sm btn-secondary",
+            //        Url = Url.Action("Details","UserManagement"),
+            //        IdProperty = nameof(UserReportViewModel.UserID)
+            //    },
+
+            //    new GridAction
+            //    {
+            //        Title = "ادغام",
+            //        Icon = "fa fa-user-plus",
+            //        CssClass = "btn btn-sm btn-warning",
+            //        Url = Url.Action("MergeAccounts","UserManagement"),
+            //        IdProperty = nameof(UserReportViewModel.UserID)
+            //    }
+            //}
+            //        };
+
+
+
+            //        grid.Columns.Add(new()
+            //        {
+            //            Header = "کارت ثبت شده",
+            //            Value = x => x.TotalRegisteredCards
+            //        });
+
+            //        grid.Columns.Add(new()
+            //        {
+            //            Header = "امتیاز کسب شده",
+            //            Value = x => x.TotalEarnedPoints
+            //        });
+
+            //        grid.Columns.Add(new()
+            //        {
+            //            Header = "امتیاز تسویه شده",
+            //            Value = x => x.TotalSettledPoints
+            //        });
+
+            //        grid.Columns.Add(new()
+            //        {
+            //            Header = "مانده امتیاز",
+            //            Value = x => x.RemainedPoints,
+            //            CssClass = "fw-bold text-success"
+            //        });
+
+            //        grid.Actions.Add(new()
+            //        {
+            //            Title = "جزئیات",
+            //            Icon = "fa fa-eye",
+            //            CssClass = "btn btn-sm btn-secondary open-modal",
+            //            Url = Url.Action("Details", "UserManagement"),
+            //            Id = x => x.UserID
+            //        });
+
+            //        grid.Actions.Add(new()
+            //        {
+            //            Title = "ادغام",
+            //            Icon = "fa fa-user-plus",
+            //            CssClass = "btn btn-sm btn-warning open-modal",
+            //            Url = Url.Action("MergeAccounts", "UserManagement"),
+            //            Id = x => x.UserID
+            //        });
+
+            //        return View(grid);
         }
+
+
+        //[HttpGet]
+        //public async Task<IActionResult> UserReport()
+        //{
+        //    var model = await service.GetUserReport();
+        //    return View(model);
+        //}
 
     }
 

@@ -3,13 +3,12 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace GolpaMotorFinal.ViewComponents
 {
-    public class SearchBoxViewComponent:ViewComponent
+    public class CrudGridViewComponent : ViewComponent
     {
-        public IViewComponentResult Invoke(SearchBoxViewModel model)
+        public IViewComponentResult Invoke<T>(CrudGridViewModel model)
         {
             return View(model);
         }
+
     }
 }
-
-

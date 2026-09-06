@@ -1,6 +1,7 @@
 ﻿
 using DomainModel.ViewModels.User;
 using Framework.Common;
+using GolpaMotorFinal.Models.ViewModels.CRUD;
 using GolpaMotorFinal.Models.ViewModels.UserManagement;
 
 namespace GolpaMotorFinal.FrameworkUI.Services
@@ -16,6 +17,10 @@ namespace GolpaMotorFinal.FrameworkUI.Services
         Task<MergeAccountsViewModel> GetUserMergeAccounts(string userID);
         Task<MergeAccountsViewModel> GetMergeSearchResult(string sm);
         Task<OperationResult> MergeUsers(MergeAccountsViewModel model);
+        CrudGridViewModel BuildUserGrid(
+        IEnumerable<UserListItemViewModel> users);
 
+        CrudGridViewModel BuildUserReportGrid(
+            IEnumerable<UserReportViewModel> users);
     }
 }

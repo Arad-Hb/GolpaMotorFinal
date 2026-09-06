@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using GolpaMotorFinal.Models.ViewModels.CRUD;
+using System.ComponentModel.DataAnnotations;
 
 namespace GolpaMotorFinal.Models.ViewModels.UserManagement
 {

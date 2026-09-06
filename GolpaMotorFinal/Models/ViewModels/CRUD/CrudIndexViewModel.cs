@@ -1,4 +1,4 @@
-namespace GolpaMotorFinal.Models.ViewModels
+namespace GolpaMotorFinal.Models.ViewModels.CRUD
 {
     public class CrudIndexViewModel
     {

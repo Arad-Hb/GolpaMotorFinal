@@ -90,7 +90,6 @@ $(document).on("submit", ".crud-form", function (e) {
         success: function (op) {
 
             if (!op.success) {
-                // If server returned validation errors, show them
                 if (op.errors && Array.isArray(op.errors) && op.errors.length) {
                     console.warn('Validation errors:', op.errors);
                     alert(op.errors.join('\n'));
