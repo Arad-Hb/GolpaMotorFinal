@@ -9,6 +9,7 @@
                 <span> @Framework.Common.Extensions.DateTimeExtensions.ToPersianDate(DateTime.Now) </span>
             </div>
             <div class="profile-box">
+                <a asp-controller="Admin" asp-action="Profile" class="text-decoration-none text-reset d-flex align-items-center gap-2">
                 <div>
                     <div class="profile-name">
                         @User.Identity?.Name
@@ -18,6 +19,7 @@
                     </div>
                 </div>
                 <img src="~/images/pics/admin.jpg" class="profile-image" alt="admin">
+                </a>
             </div>
         </div>
     </div>

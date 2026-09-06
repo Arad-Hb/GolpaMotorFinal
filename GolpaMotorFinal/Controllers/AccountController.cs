@@ -2,7 +2,7 @@ using DataAccess.Services;
 using DomainModel.Models;
 using DomainModel.ViewModels;
 using DomainModel.ViewModels.User;
-using GolpaMotorFinal.Helpers;
+using GolpaMotorFinal.FrameworkUI.Services;
 using GolpaMotorFinal.Models;
 using GolpaMotorFinal.Models.ViewModels.Account;
 using GolpaMotorFinal.Models.ViewModels.UserManagement;
@@ -21,12 +21,21 @@ namespace GolpaMotorFinal.Controllers
         private readonly UserManager<ApplicationUser> userManager;
         private readonly SignInManager<ApplicationUser> signInManager;
         private readonly IUserRepository userRepository;
+        private readonly ICardRegistrationRepository cardRepository;
+        private readonly IFileManager fileManager;
 
-        public AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IUserRepository userRepository)
+        public AccountController(
+            UserManager<ApplicationUser> userManager,
+            SignInManager<ApplicationUser> signInManager,
+            IUserRepository userRepository,
+            ICardRegistrationRepository cardRepository,
+            IFileManager fileManager)
         {
             this.userManager = userManager;
             this.signInManager = signInManager;
             this.userRepository = userRepository;
+            this.cardRepository = cardRepository;
+            this.fileManager = fileManager;
         }
         private async Task<SelectList> BindProvince()
         {
@@ -415,9 +424,79 @@ namespace GolpaMotorFinal.Controllers
                 return RedirectToAction(nameof(Login));
 
             if (await userManager.IsInRoleAsync(user, "Admin"))
-                return RedirectToAction("Index", "Admin");
+                return RedirectToAction("Profile", "Admin");
 
-            var vm = new ManageViewModel
+            return View(await BuildManageModel(user));
+        }
+
+        [HttpPost]
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Manage(ManageViewModel model)
+        {
+            var user = await userManager.GetUserAsync(User);
+            if (user == null)
+                return RedirectToAction(nameof(Login));
+
+            if (await userManager.IsInRoleAsync(user, "Admin"))
+                return RedirectToAction("Profile", "Admin");
+
+            user.FirstName = model.FirstName?.Trim();
+            user.LastName = model.LastName?.Trim();
+            user.Address = model.Address?.Trim();
+            user.PostalCode = model.PostalCode?.Trim();
+            user.PhoneNumber = model.PhoneNumber?.Trim();
+
+            if (model.ProfileImage != null)
+            {
+                var upload = await fileManager.UploadAsync(
+                    model.ProfileImage,
+                    5,
+                    new[] { "jpg", "jpeg", "png" },
+                    "images/imageUsers/uploads",
+                    "images/imageUsers/thumbnails");
+                if (!upload.Success)
+                {
+                    ModelState.AddModelError(string.Empty, upload.Message);
+                    return View(await BuildManageModel(user));
+                }
+                user.ProfileImageUrl = upload.FileUrl;
+            }
+
+            var update = await userManager.UpdateAsync(user);
+            if (!update.Succeeded)
+            {
+                foreach (var error in update.Errors)
+                    ModelState.AddModelError(string.Empty, error.Description);
+                return View(await BuildManageModel(user));
+            }
+
+            if (!string.IsNullOrWhiteSpace(model.NewPassword))
+            {
+                if (string.IsNullOrWhiteSpace(model.CurrentPassword))
+                {
+                    ModelState.AddModelError(nameof(model.CurrentPassword), "رمز فعلی را وارد کنید.");
+                    return View(await BuildManageModel(user));
+                }
+
+                var changed = await userManager.ChangePasswordAsync(user, model.CurrentPassword, model.NewPassword);
+                if (!changed.Succeeded)
+                {
+                    foreach (var error in changed.Errors)
+                        ModelState.AddModelError(string.Empty, error.Description);
+                    return View(await BuildManageModel(user));
+                }
+            }
+
+            await signInManager.RefreshSignInAsync(user);
+            TempData["SuccessMessage"] = "پروفایل به‌روزرسانی شد.";
+            return RedirectToAction(nameof(Manage));
+        }
+
+        private async Task<ManageViewModel> BuildManageModel(ApplicationUser user)
+        {
+            var cards = await cardRepository.GetByUserAsync(user.Id);
+            return new ManageViewModel
             {
                 Email = user.Email ?? string.Empty,
                 UserName = user.UserName ?? string.Empty,
@@ -426,10 +505,17 @@ namespace GolpaMotorFinal.Controllers
                 Address = user.Address,
                 PostalCode = user.PostalCode,
                 PhoneNumber = user.PhoneNumber,
-                ProfileImageUrl = user.ProfileImageUrl
+                ProfileImageUrl = user.ProfileImageUrl,
+                RemainedPoints = user.RemainedPoints ?? 0,
+                TotalRegisteredCards = cards.Count,
+                Cards = cards.Select(c => new CustomerCardItem
+                {
+                    SerialNumber = c.SerialNumber,
+                    ProductName = c.WarrantyCard?.Product?.ProductName ?? "-",
+                    CreatedAt = c.CreatedAt,
+                    Points = c.WarrantyCard?.Product?.ProductPoint ?? c.EarnedPionts
+                }).ToList()
             };
-
-            return View(vm);
         }
 
         [HttpGet]

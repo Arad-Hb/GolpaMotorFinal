@@ -19,17 +19,23 @@ namespace GolpaMotorFinal.Controllers
         private readonly RoleManager<IdentityRole> roleManager;
         private readonly ICardRegistrationRepository repo;
         private readonly IWarrantyExcelService excelService;
+        private readonly IWarrantyCardRepository warrantyCards;
+        private readonly IProductRepository products;
 
         public WarrantyManagementController(
                ICardRegistrationRepository repo,
                UserManager<ApplicationUser> userManager,
                RoleManager<IdentityRole> roleManager,
-               IWarrantyExcelService excelService)
+               IWarrantyExcelService excelService,
+               IWarrantyCardRepository warrantyCards,
+               IProductRepository products)
         {
             this.repo = repo;
             this.userManager = userManager;
             this.roleManager = roleManager;
             this.excelService = excelService;
+            this.warrantyCards = warrantyCards;
+            this.products = products;
         }
 
         private async Task<IEnumerable<SelectListItem>> BindCustomerTypes()
@@ -52,7 +58,7 @@ namespace GolpaMotorFinal.Controllers
         {
             EnsureOperation(request);
             request.CustomerTypes = await BindCustomerTypes();
-            return View("Index", request);
+            return View("Register", request);
         }
 
         private async Task EnsureRoleAsync(string roleName)
@@ -61,7 +67,38 @@ namespace GolpaMotorFinal.Controllers
                 await roleManager.CreateAsync(new IdentityRole(roleName));
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(long? productId, bool? isRegistered)
+        {
+            if (!User.IsInRole("Admin"))
+                return RedirectToAction(nameof(Register));
+
+            var vm = new WarrantyAdminIndexViewModel
+            {
+                ProductID = productId,
+                IsRegistered = isRegistered,
+                Products = await products.GetAll(),
+                Cards = await warrantyCards.SearchAsync(productId, isRegistered),
+                Stats = await products.GetStatistics()
+            };
+
+            if (TempData["ImportMessage"] is string importMsg)
+            {
+                vm.LastImport = new WarrantyExcelImportResult
+                {
+                    Success = TempData["ImportSuccess"] as bool? ?? false,
+                    Message = importMsg,
+                    Inserted = TempData["ImportInserted"] as int? ?? 0,
+                    Duplicate = TempData["ImportDuplicate"] as int? ?? 0,
+                    Empty = TempData["ImportEmpty"] as int? ?? 0
+                };
+            }
+
+            return View(vm);
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        public async Task<IActionResult> Register()
         {
             var vm = new RegisterationCardViewModel
             {
@@ -78,6 +115,7 @@ namespace GolpaMotorFinal.Controllers
         }
 
         [HttpPost]
+        [AllowAnonymous]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Register(RegisterationCardViewModel request)
         {
@@ -240,26 +278,78 @@ namespace GolpaMotorFinal.Controllers
                 TempData["SuccessMessage"] = $"{successCount} کارت با موفقیت ثبت شد.";
             }
 
+            return RedirectToAction(nameof(Register));
+        }
+
+        [HttpPost]
+        [Authorize(Roles = "Admin")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UploadExcel(UploadWarrantyExcelViewModel model)
+        {
+            if (model.ProductID <= 0 || model.ExcelFile == null)
+            {
+                TempData["ImportSuccess"] = false;
+                TempData["ImportMessage"] = "محصول و فایل اکسل الزامی است.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            try
+            {
+                var result = await excelService.ImportExcel(model.ProductID, model.ExcelFile);
+                TempData["ImportSuccess"] = result.Success;
+                TempData["ImportMessage"] = result.Message;
+                TempData["ImportInserted"] = result.Inserted;
+                TempData["ImportDuplicate"] = result.Duplicate;
+                TempData["ImportEmpty"] = result.Empty;
+            }
+            catch (Exception ex)
+            {
+                TempData["ImportSuccess"] = false;
+                TempData["ImportMessage"] = ex.Message;
+            }
+
             return RedirectToAction(nameof(Index));
         }
 
         [HttpPost]
         [Authorize(Roles = "Admin")]
         [ValidateAntiForgeryToken]
-        public IActionResult UploadExcel(UploadWarrantyExcelViewModel model)
+        public async Task<IActionResult> GenerateCodes(long productId, int count)
         {
-            try
+            if (productId <= 0 || count <= 0)
             {
-                if (model.ProductID <= 0 || model.ExcelFile == null)
-                    return Json(new { success = false, message = "محصول و فایل اکسل الزامی است." });
+                TempData["ImportSuccess"] = false;
+                TempData["ImportMessage"] = "محصول و تعداد معتبر نیست.";
+                return RedirectToAction(nameof(Index));
+            }
 
-                excelService.ImportExcel(model.ProductID, model.ExcelFile);
-                return Json(new { success = true, message = "کارت‌های گارانتی با موفقیت وارد شدند." });
-            }
-            catch (Exception ex)
+            if (count > 200)
+                count = 200;
+
+            var created = 0;
+            for (var i = 0; i < count; i++)
             {
-                return Json(new { success = false, message = ex.Message });
+                string serial;
+                do
+                {
+                    serial = WarrantyCodeGenerator.Serial();
+                } while (await warrantyCards.SerialExistsAsync(serial));
+
+                await warrantyCards.AddAsync(new WarrantyCard
+                {
+                    ProductID = productId,
+                    SerialNumber = serial,
+                    ScratchedCode = WarrantyCodeGenerator.ScratchedCode(),
+                    IsRegistered = false,
+                    ValidityMonths = 12
+                });
+                created++;
             }
+
+            await warrantyCards.SaveAsync();
+            TempData["ImportSuccess"] = true;
+            TempData["ImportMessage"] = $"{created} کد گارانتی تولید شد.";
+            return RedirectToAction(nameof(Index), new { productId });
         }
     }
 }

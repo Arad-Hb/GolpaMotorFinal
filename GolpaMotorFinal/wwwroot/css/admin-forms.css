@@ -1,0 +1,51 @@
+.admin-form .form-label,
+.admin-form label {
+    font-weight: 600;
+    margin-bottom: .35rem;
+}
+
+.admin-form .form-control,
+.admin-form .form-select {
+    min-height: 42px;
+}
+
+.admin-form .row {
+    --bs-gutter-x: 1rem;
+    --bs-gutter-y: 0.75rem;
+}
+
+.table-actions .btn,
+.table-actions button {
+    margin-inline: 2px;
+}
+
+#generalModal .modal-dialog {
+    margin: 1.75rem auto;
+}
+
+@media (max-width: 768px) {
+    #generalModal .modal-dialog,
+    #productModal .modal-dialog {
+        margin: 0;
+        max-width: 100%;
+        height: 100%;
+    }
+
+    #generalModal .modal-content,
+    #productModal .modal-content {
+        height: 100%;
+        border-radius: 0;
+    }
+}
+
+.warranty-card-page {
+    max-width: 720px;
+    margin: 2rem auto;
+}
+
+.image-preview {
+    max-width: 150px;
+    max-height: 150px;
+    object-fit: cover;
+    border-radius: 8px;
+}

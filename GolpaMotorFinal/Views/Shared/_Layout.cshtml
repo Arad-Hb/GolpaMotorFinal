@@ -9,6 +9,8 @@
     <link href="~/fonts/fontawesome-free-6.7.2-web/css/all.min.css" rel="stylesheet" />
     <link href="~/fonts/vazirmatn-master/vazirmatn-font-face.css" rel="stylesheet" />
     <link href="~/css/Layout.css" rel="stylesheet" />
+    <link href="~/css/account.css" rel="stylesheet" />
+    <link href="~/css/admin-forms.css" rel="stylesheet" />
 
     @RenderSection("Styles", required: false)
 
@@ -31,7 +33,7 @@
                         <a asp-controller="ProductManagement" asp-action="Index" class="nav-link"> محصولات </a>
                     </li>
                     <li class="nav-item">
-                        <a asp-controller="WarrantyManagement" asp-action="Index" class="nav-link"> ثبت کارت گارانتی </a>
+                        <a asp-controller="WarrantyManagement" asp-action="Register" class="nav-link"> ثبت کارت گارانتی </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link"> تماس با ما </a>

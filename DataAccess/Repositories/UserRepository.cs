@@ -260,63 +260,91 @@ namespace DataAccess.Repositories
         {
             var op = new OperationResult("MergeAccounts");
 
+            if (string.IsNullOrWhiteSpace(currentUserID) || string.IsNullOrWhiteSpace(mergeUserID))
+                return op.ToFailed("اطلاعات ادغام نامعتبر است.");
+
+            if (currentUserID == mergeUserID)
+                return op.ToFailed("امکان ادغام یک کاربر با خودش وجود ندارد.");
+
             await using var transaction = await db.Database.BeginTransactionAsync();
 
             try
             {
-                var currentUser = await Get(currentUserID);
+                var currentUser = await db.Users.FirstOrDefaultAsync(x => x.Id == currentUserID && !x.IsDeleted);
+                var sourceUser = await db.Users.FirstOrDefaultAsync(x => x.Id == mergeUserID && !x.IsDeleted);
 
                 if (currentUser == null)
                     return op.ToFailed("کاربر اصلی یافت نشد.");
 
-                var mergeUser = await Get(mergeUserID);
-
-                if (mergeUser == null)
+                if (sourceUser == null)
                     return op.ToFailed("کاربر انتخاب شده یافت نشد.");
 
-                // Merge statistics
-                currentUser.TotalSettledPoints += mergeUser.TotalSettledPoints;
-                currentUser.TotalEarnedPoints += mergeUser.TotalEarnedPoints;
-                currentUser.TotalRegisteredCards += mergeUser.TotalRegisteredCards;
-                currentUser.RemainedPoints += mergeUser.RemainedPoints;
+                if (await userManager.IsInRoleAsync(sourceUser, "Admin"))
+                    return op.ToFailed("امکان ادغام حساب مدیر وجود ندارد.");
 
+                var sourceCards = await db.CardRegistrations
+                    .Where(x => x.UserID == mergeUserID)
+                    .ToListAsync();
+                foreach (var card in sourceCards)
+                    card.UserID = currentUserID;
+
+                var sourceTx = await db.PointTransactions
+                    .Where(x => x.UserID == mergeUserID)
+                    .ToListAsync();
+                foreach (var tx in sourceTx)
+                    tx.UserID = currentUserID;
+
+                var sourceTypes = await db.UserCustomerTypes
+                    .Where(x => x.UserID == mergeUserID)
+                    .ToListAsync();
+                var currentTypeIds = await db.UserCustomerTypes
+                    .Where(x => x.UserID == currentUserID)
+                    .Select(x => x.CustomerTypeID)
+                    .ToListAsync();
+                foreach (var type in sourceTypes)
+                {
+                    if (currentTypeIds.Contains(type.CustomerTypeID))
+                        db.UserCustomerTypes.Remove(type);
+                    else
+                        type.UserID = currentUserID;
+                }
+
+                var sourceRewards = await db.RewardRequests
+                    .Where(x => x.UserID == mergeUserID)
+                    .ToListAsync();
+                foreach (var reward in sourceRewards)
+                    reward.UserID = currentUserID;
+
+                await db.SaveChangesAsync();
+
+                var earned = await db.PointTransactions
+                    .Where(x => x.UserID == currentUserID && x.PointsAmount > 0)
+                    .SumAsync(x => (int?)x.PointsAmount) ?? 0;
+                var settled = Math.Abs(await db.PointTransactions
+                    .Where(x => x.UserID == currentUserID && x.PointsAmount < 0)
+                    .SumAsync(x => (int?)x.PointsAmount) ?? 0);
+
+                currentUser.TotalEarnedPoints = earned;
+                currentUser.TotalSettledPoints = settled;
+                currentUser.RemainedPoints = earned - settled;
+                currentUser.TotalRegisteredCards = await db.CardRegistrations.CountAsync(x => x.UserID == currentUserID);
                 currentUser.IsActive = true;
 
-                // Disable merged account
-                mergeUser.IsActive = false;
+                sourceUser.IsActive = false;
+                sourceUser.IsDeleted = true;
+                sourceUser.TotalEarnedPoints = 0;
+                sourceUser.TotalSettledPoints = 0;
+                sourceUser.RemainedPoints = 0;
+                sourceUser.TotalRegisteredCards = 0;
 
-                var deleteResult = await SoftDelete(mergeUser.UserID);
-
-                if (!deleteResult.Success)
-                {
-                    await transaction.RollbackAsync();
-                    return op.ToFailed(deleteResult.Message);
-                }
-
-                var updateCurrentUser = await Update(currentUser);
-
-                if (!updateCurrentUser.Success)
-                {
-                    await transaction.RollbackAsync();
-                    return op.ToFailed("تغییرات در حساب کاربری مورد نظر در هنگام ادغام با خطا متوقف شد.");
-                }
-
-                var updateMergeUser = await Update(mergeUser);
-
-                if (!updateMergeUser.Success)
-                {
-                    await transaction.RollbackAsync();
-                    return op.ToFailed("به‌روزرسانی حساب کاربری ادغام‌شونده با خطا مواجه شد.");
-                }
-
+                await db.SaveChangesAsync();
                 await transaction.CommitAsync();
 
                 return op.ToSuccess("حساب‌های کاربری با موفقیت ادغام شدند.");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 await transaction.RollbackAsync();
-
                 return op.ToFailed("در هنگام ادغام حساب‌ها خطایی رخ داد.");
             }
         }
@@ -342,7 +370,7 @@ namespace DataAccess.Repositories
             var result = new UserDetailsModel();
           
             var searchResult=await db.Users
-               .Where(x => x.PhoneNumber == sm || x.FirstName==sm || x.LastName==sm)
+               .Where(x => !x.IsDeleted && (x.PhoneNumber == sm || x.FirstName==sm || x.LastName==sm))
                .Select(x => new UserDetailsModel
                {
                    UserID = x.Id,

@@ -1,7 +1,7 @@
 ﻿@using GolpaMotorFinal.Models.ViewModels.CRUD
 @model CrudGridViewModel
 
-<div class="table-responsive" id="@Model.GridId">
+<div class="table-responsive" data-grid="@Model.GridId">
     <table class="table table-bordered table-hover align-middle">
         <thead class="table-dark">
             <tr>
@@ -69,9 +69,11 @@
                                 {
                                     <button type="button"
                                             class="@action.CssClass @(action.OpenModal ? "open-modal" : "")"
+                                            title="@action.ActionText"
                                             data-title="@action.ActionText"
                                             data-url="@action.Url"
-                                            data-id="@action.Id">
+                                            data-id="@action.Id"
+                                            data-id-name="userID">
                                         <i class="@action.Icon"></i>
                                     </button>
                                 }

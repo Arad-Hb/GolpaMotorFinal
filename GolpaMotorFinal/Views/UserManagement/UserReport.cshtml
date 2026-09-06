@@ -10,7 +10,9 @@
 
     <div class="card-body">
 
-        @await Component.InvokeAsync("CrudGrid", Model)
+        <div id="UserReportGrid">
+            @await Component.InvokeAsync("CrudGrid", Model)
+        </div>
 
     </div>
 

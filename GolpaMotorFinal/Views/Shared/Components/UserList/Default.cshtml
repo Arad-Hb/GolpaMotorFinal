@@ -24,9 +24,7 @@
                         <th>شهر</th>
                         <th>کارت ثبت شده</th>
                         <th>امتیاز کسب شده</th>
-                        <th>جزئیات</th>
-                        <th>ویرایش</th>
-                        <th>حذف</th>
+                        <th>عملیات</th>
                     </tr>
                 </thead>
 
@@ -47,33 +45,41 @@
                                 <td>@item.City</td>
                                 <td>@item.TotalRegisteredCards</td>
                                 <td>@item.TotalEarnedPoints</td>
-                                <td>
-                                    <button class="btn btn-sm btnDetails open-modal"
+                                <td class="table-actions">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary open-modal"
+                                        title="جزئیات"
                                         data-url='@Url.Action("Details", "UserManagement")'
-                                        data-title="جزییات"
-                                        data-id="@item.UserID">
-                                        <i class="fa fa-eye text-secondary"></i>
+                                        data-title="جزئیات کاربر"
+                                        data-id="@item.UserID"
+                                        data-id-name="userID">
+                                        <i class="fa fa-eye"></i>
                                     </button>
-                                </td>
-
-                                <td>
-                                    <button class="btn btn-sm btnEdit open-modal"
+                                    <button type="button" class="btn btn-sm btn-outline-warning open-modal"
+                                            title="ویرایش"
                                             data-url='@Url.Action("Edit", "UserManagement")'
-                                            data-title="ویرایش"
-                                            data-id="@item.UserID">
-                                        <i class="fa fa-pen text-warning"></i>
-                                    </button>
-                                </td>
-
-                                <td>
-                                    <button class="btn btn-sm btnDelete" 
+                                            data-title="ویرایش کاربر"
                                             data-id="@item.UserID"
+                                            data-id-name="userID">
+                                        <i class="fa fa-pen"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-primary open-modal"
+                                            title="ادغام حساب"
+                                            data-url='@Url.Action("MergeAccounts", "UserManagement")'
+                                            data-title="ادغام حساب"
+                                            data-id="@item.UserID"
+                                            data-id-name="userID"
+                                            data-grid-id="UserGrid"
+                                            data-refresh-url="@Url.Action("Grid", "UserManagement")">
+                                        <i class="fa fa-user-plus"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-danger btnDelete"
+                                            title="حذف"
+                                            data-id="@item.UserID"
+                                            data-id-name="userID"
                                             data-url='@Url.Action("Delete","UserManagement")'
                                             data-refresh-target-url='@Url.Action("Grid","UserManagement")'
                                             data-refresh-target-id="UserGrid">
-
-                                        <i class="fa fa-trash text-danger"></i>
-
+                                        <i class="fa fa-trash"></i>
                                     </button>
                                 </td>
                             </tr>

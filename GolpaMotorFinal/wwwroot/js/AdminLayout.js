@@ -1,75 +1,58 @@
-//-----General CRUD Events-----\\
-
-
-// Generic helper to refresh a grid/container from server HTML
 function refreshGrid(targetId, targetUrl, closeOnSuccess = true, afterRefresh) {
-    if (!targetUrl) return;
+    if (!targetUrl) {
+        if (closeOnSuccess) {
+            try { generalModal.hide(); } catch (e) { }
+        }
+        if (typeof afterRefresh === "function") afterRefresh();
+        return;
+    }
 
     $.get(targetUrl)
         .done(function (html) {
             if (targetId) {
                 $(targetId).html(html);
             }
-
             if (closeOnSuccess) {
                 try { generalModal.hide(); } catch (e) { }
             }
-
-            if (typeof afterRefresh === 'function') afterRefresh();
+            if (typeof afterRefresh === "function") afterRefresh();
         })
         .fail(function () {
-            alert('Failed to refresh grid.');
+            toastError("بارگذاری مجدد لیست ناموفق بود.");
         });
 }
 
-// Merge accounts - submit merge form via AJAX and refresh grid
 $(document).on("submit", ".merge-form", function (e) {
-
     e.preventDefault();
 
     const form = $(this);
-    const url = form.attr('action');
-    const data = form.serialize();
-    const targetUrl = form.data('refresh-grid-url');
-    const targetId = form.data('grid-id') ? ('#' + form.data('grid-id')) : null;
-
     $.ajax({
-        url: url,
-        type: 'POST',
-        data: data,
+        url: form.attr("action"),
+        type: "POST",
+        data: form.serialize(),
         headers: {
-            'RequestVerificationToken': form.find('input[name="__RequestVerificationToken"]').val(),
-            'X-Requested-With': 'XMLHttpRequest'
+            RequestVerificationToken: form.find('input[name="__RequestVerificationToken"]').val(),
+            "X-Requested-With": "XMLHttpRequest"
         }
     }).done(function (op) {
         if (!op.success) {
-            if (op.errors && Array.isArray(op.errors) && op.errors.length) {
-                alert(op.errors.join('\n'));
-                return;
-            }
-
-            alert(op.message || 'عملیات ناموفق بود');
+            toastError(op.message || "عملیات ناموفق بود");
             return;
         }
-
+        const targetUrl = form.data("refresh-grid-url");
+        const targetId = form.data("grid-id") ? ("#" + form.data("grid-id")) : null;
         refreshGrid(targetId, targetUrl, true, function () {
-            alert(op.message || 'عملیات با موفقیت انجام شد');
+            toastSuccess(op.message);
         });
-
     }).fail(function () {
-        alert('خطا در انجام عملیات ادغام');
+        toastError("خطا در انجام عملیات ادغام");
     });
-
 });
 
-//SaveCreate / SaveEdit
 $(document).on("submit", ".crud-form", function (e) {
-
     e.preventDefault();
-
     const form = $(this);
     const formData = new FormData(this);
-
     const targetId = form.data("grid-id") ? ("#" + form.data("grid-id")) : null;
     const targetUrl = form.data("refresh-grid-url");
 
@@ -80,85 +63,68 @@ $(document).on("submit", ".crud-form", function (e) {
         processData: false,
         contentType: false,
         cache: false,
-
         headers: {
-            "RequestVerificationToken":
-                form.find('input[name="__RequestVerificationToken"]').val()
+            RequestVerificationToken: form.find('input[name="__RequestVerificationToken"]').val()
         },
-
         success: function (op) {
-
             if (!op.success) {
-                if (op.errors && Array.isArray(op.errors) && op.errors.length) {
-                    console.warn('Validation errors:', op.errors);
-                    alert(op.errors.join('\n'));
-                    return;
-                }
-
-                alert(op.message || 'Operation failed');
+                toastError(op.message || "عملیات ناموفق بود");
                 return;
             }
-
             if (form.data("refresh-grid")) {
                 refreshGrid(targetId, targetUrl, form.data("close-on-success"), function () {
-                    alert(op.message);
+                    toastSuccess(op.message);
                 });
-            }
-            else {
+            } else {
                 if (form.data("close-on-success")) {
-                    generalModal.hide();
+                    try { generalModal.hide(); } catch (err) { }
                 }
-
-                alert(op.message);
+                toastSuccess(op.message);
             }
         },
-
         error: function (xhr) {
-
-            if (xhr.responseJSON?.message) {
-                alert(xhr.responseJSON.message);
-            }
-            else {
-                alert("An unexpected error occurred.");
-            }
+            toastError(xhr.responseJSON?.message || "خطای غیرمنتظره رخ داد.");
         }
     });
-
 });
 
-//Delete
-$(document).on("click", ".btnDelete", function () {
+$(document).on("change", ".image-preview-input", function () {
+    const file = this.files && this.files[0];
+    const img = $(this).closest("form").find(".image-preview");
+    if (!file || !img.length) return;
+    const reader = new FileReader();
+    reader.onload = function (e) {
+        img.attr("src", e.target.result).removeClass("d-none");
+    };
+    reader.readAsDataURL(file);
+});
 
-    if (!confirm("آیا از حذف مطمئن هستید؟"))
-        return;
+$(document).on("click", ".btnDelete", async function () {
+    const ok = await confirmDelete("این مورد حذف خواهد شد.");
+    if (!ok) return;
 
-    const sendingUrl = $(this).data("url");
-    const refreshUrl = $(this).data("refresh-target-url");
-    const targetID = $(this).data("refresh-target-id") ? ("#" + $(this).data("refresh-target-id")) : null;
+    const btn = $(this);
+    const idName = btn.data("id-name") || "userID";
+    const payload = {};
+    payload[idName] = btn.data("id");
 
     $.ajax({
-        url: sendingUrl,
+        url: btn.data("url"),
         type: "POST",
-        data: { userID: $(this).data("id") },
+        data: payload,
         headers: {
-            RequestVerificationToken: $('input[name="__RequestVerificationToken"]').first().val()
+            RequestVerificationToken: token()
         }
-    })
-        .done(function (op) {
-
-            if (op.success) {
-
-                refreshGrid(targetID, refreshUrl, true, function () {
-                    alert(op.message);
-                });
-
-            } else {
-                alert(op.message);
-            }
-
-        })
-        .fail(function () {
-            alert("An error occurred while deleting the user.");
-        });
-
+    }).done(function (op) {
+        if (op.success) {
+            const targetID = btn.data("refresh-target-id") ? ("#" + btn.data("refresh-target-id")) : null;
+            refreshGrid(targetID, btn.data("refresh-target-url"), true, function () {
+                toastSuccess(op.message);
+            });
+        } else {
+            toastError(op.message);
+        }
+    }).fail(function () {
+        toastError("خطا در حذف");
+    });
 });

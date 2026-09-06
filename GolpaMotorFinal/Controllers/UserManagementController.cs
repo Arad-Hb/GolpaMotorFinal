@@ -49,12 +49,15 @@ namespace GolpaMotorFinal.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> MergeAccounts(string userID)
+        public async Task<IActionResult> MergeAccounts(string userID, string? gridId = null, string? refreshUrl = null)
         {
             var currentUser =await service.GetUserMergeAccounts(userID);
 
             if (string.IsNullOrWhiteSpace(currentUser.UserID))
                 return NotFound();
+
+            ViewBag.GridId = string.IsNullOrWhiteSpace(gridId) ? "UserGrid" : gridId;
+            ViewBag.RefreshUrl = string.IsNullOrWhiteSpace(refreshUrl) ? Url.Action("Grid", "UserManagement") : refreshUrl;
 
             var vm = new MergeAccountsComplexViewModel
             {
@@ -109,9 +112,21 @@ namespace GolpaMotorFinal.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> SearchUserForMerge(MergeAccountsComplexViewModel model)
         {
-            model.SearchedUser =await service.GetMergeSearchResult(model.Search.SearchTerm); 
+            var found = await service.GetMergeSearchResult(model.Search?.SearchTerm ?? string.Empty);
+            if (string.IsNullOrWhiteSpace(found.UserID) || found.UserID == model.CurrentUser?.UserID)
+                model.SearchedUser = null;
+            else
+                model.SearchedUser = found;
 
             return PartialView("_MergeResult", model);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> UserReportGrid()
+        {
+            var users = await service.GetUserReport();
+            var grid = service.BuildUserReportGrid(users);
+            return ViewComponent("CrudGrid", grid);
         }
 
         [HttpGet]

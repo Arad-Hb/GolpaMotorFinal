@@ -1,56 +1,75 @@
 ﻿@{
     Layout = "_AdminLayout";
+    var stats = ViewBag.Stats as DomainModel.ViewModels.Product.ProductStatistics;
 }
 
-<div class="row mb-3">
-    <div class="col-md-12">
-        @await Component.InvokeAsync("UploadExcel")
+<div class="mb-4">
+    <div class="page-title">مدیریت محصولات</div>
+    <div class="page-subtitle">جستجو، آمار و ویرایش محصولات</div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card dashboard-card"><div class="card-body">
+            <h4>@(stats?.TotalProducts ?? 0)</h4>
+            <p>کل محصولات</p>
+        </div></div>
+    </div>
+    <div class="col-md-3">
+        <div class="card dashboard-card"><div class="card-body">
+            <h4>@(stats?.AvailableProducts ?? 0)</h4>
+            <p>موجود</p>
+        </div></div>
+    </div>
+    <div class="col-md-3">
+        <div class="card dashboard-card"><div class="card-body">
+            <h4>@(stats?.ProductsWithoutCards ?? 0)</h4>
+            <p>بدون کارت گارانتی</p>
+        </div></div>
+    </div>
+    <div class="col-md-3">
+        <div class="card dashboard-card"><div class="card-body">
+            <h4>@(stats?.TotalRegisteredPoints ?? 0)</h4>
+            <p>مجموع امتیاز ثبت‌شده</p>
+        </div></div>
     </div>
 </div>
 
-<h2>مدیریت محصولات</h2>
-
-<button class="btn btn-success mb-3" id="btnAdd"> افزودن محصول </button>
+<div class="d-flex flex-wrap gap-2 justify-content-between align-items-center mb-3">
+    <div class="input-group" style="max-width:360px">
+        <input id="productSearch" class="form-control" placeholder="جستجوی نام محصول..." />
+        <button type="button" class="btn btn-primary" id="btnSearchProduct">
+            <i class="fa-solid fa-magnifying-glass"></i>
+        </button>
+    </div>
+    <button class="btn btn-success" id="btnAdd"><i class="fa fa-plus ms-1"></i> افزودن محصول</button>
+</div>
 
 <form id="frmAntiForgery">
     @Html.AntiForgeryToken()
 </form>
 
-<div id="ProductGrid">  </div>
-
-<div id="ModalArea">   </div>
+<div id="ProductGrid"></div>
 
 <div class="modal fade" id="productModal">
-
-    <div class="modal-dialog modal-lg">
-
+    <div class="modal-dialog modal-lg modal-fullscreen-sm-down">
         <div class="modal-content">
-
             <div class="modal-header">
-
-                <h5 class="modal-title"> مدیریت محصول </h5>
-
+                <h5 class="modal-title">مدیریت محصول</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-
             </div>
-
-            <div class="modal-body" id="modalBody">
-            </div>
-
+            <div class="modal-body" id="modalBody"></div>
         </div>
-
     </div>
-
 </div>
 
 @section Scripts
 {
     <script>
+        let currentPage = 0;
 
         $(function () {
-
             LoadProducts();
-
         });
 
         function productModal() {
@@ -61,255 +80,142 @@
             productModal().show();
         }
 
-        function LoadProducts()
-        {
-            $("#ProductGrid").load("/ProductManagement/ProductList?ts=" + new Date().getTime());
+        function hideProductModal() {
+            productModal().hide();
         }
 
-        //create
-         $(document).on("click","#btnAdd",function(){
+        function productListUrl(page) {
+            const name = $("#productSearch").val();
+            return "/ProductManagement/ProductList?productName=" + encodeURIComponent(name || "") + "&pageIndex=" + (page ?? currentPage) + "&ts=" + new Date().getTime();
+        }
 
-            $.get("/ProductManagement/Create",function(result){
+        function LoadProducts(page) {
+            if (typeof page === "number") currentPage = page;
+            $("#ProductGrid").load(productListUrl(currentPage));
+        }
 
+        $("#btnSearchProduct").on("click", function () {
+            LoadProducts(0);
+        });
+
+        $(document).on("click", ".product-page", function (e) {
+            e.preventDefault();
+            LoadProducts(parseInt($(this).data("page"), 10) || 0);
+        });
+
+        $(document).on("click", "#btnAdd", function () {
+            $.get("/ProductManagement/Create", function (result) {
                 $("#modalBody").html(result);
-
                 showProductModal();
-
             });
+        });
 
-        });        
-        //SaveCreate
         $(document).on("submit", "#frmCreate", function (e) {
-
             e.preventDefault();
-
             var formData = new FormData(this);
-
             $.ajax({
-
                 url: "/ProductManagement/Create",
-
                 type: "POST",
-
                 data: formData,
-
                 processData: false,
-
                 contentType: false,
-
                 headers: {
-                    RequestVerificationToken:
-                        $('input[name="__RequestVerificationToken"]', this).val()
+                    RequestVerificationToken: $('input[name="__RequestVerificationToken"]', this).val()
                 },
-
                 success: function (res) {
-
                     if (res.success) {
-
                         hideProductModal();
-
                         LoadProducts();
-
-                        alert(res.message);
-                    }
-                    else {
-
-                        alert(res.message);
+                        toastSuccess(res.message);
+                    } else {
+                        toastError(res.message);
                     }
                 }
             });
-
         });
 
-        //Edit
         $(document).on("click", ".btnEdit", function () {
-
-            var id = $(this).data("id");
-
-            $.get("/ProductManagement/Edit",
-
-                {
-                    productID: id
-                },
-
-                function (result) {
-
-                    $("#modalBody").html(result);
-
-                    showProductModal();
-
-                });
-
+            $.get("/ProductManagement/Edit", { productID: $(this).data("id") }, function (result) {
+                $("#modalBody").html(result);
+                showProductModal();
+            });
         });
-        //SaveEdit
+
         $(document).on("submit", "#frmEdit", function (e) {
-
             e.preventDefault();
-
             var formData = new FormData(this);
-
             $.ajax({
-
                 url: "/ProductManagement/Edit",
-
                 type: "POST",
-
                 data: formData,
-
                 processData: false,
-
                 contentType: false,
-
                 headers: {
-                    RequestVerificationToken:
-                        $('input[name="__RequestVerificationToken"]', this).val()
+                    RequestVerificationToken: $('input[name="__RequestVerificationToken"]', this).val()
                 },
-
                 success: function (res) {
-
                     if (res.success) {
-
                         hideProductModal();
-
                         LoadProducts();
-
-                        alert(res.message);
-                    }
-                    else {
-
-                        alert(res.message);
+                        toastSuccess(res.message);
+                    } else {
+                        toastError(res.message);
                     }
                 }
             });
-
         });
-        //Details
-             $(document).on("click", ".btnDetails", function () {
 
-            var id = $(this).data("id");
-
-            $.get("/ProductManagement/Details",
-
-                {
-                    productID: id
-                },
-
-                function (result) {
-
-                    $("#modalBody").html(result);
-
-                    showProductModal();
-
-                });
-
+        $(document).on("click", ".btnDetails", function () {
+            $.get("/ProductManagement/Details", { productID: $(this).data("id") }, function (result) {
+                $("#modalBody").html(result);
+                showProductModal();
+            });
         });
-        //Delete
-        $(document).on("click", ".btnDelete", function () {
 
-            if (!confirm("آیا از حذف محصول مطمئن هستید؟"))
-                return;
-
-            var id = $(this).data("id");
-
+        $(document).on("click", "#ProductGrid .btnDelete", async function (e) {
+            e.stopImmediatePropagation();
+            const ok = await confirmDelete("این محصول حذف خواهد شد.");
+            if (!ok) return;
+            const id = $(this).data("id");
             $.ajax({
-
                 url: "/ProductManagement/Delete",
-
                 type: "POST",
-
-                data: {
-                    productID: id
-                },
-
+                data: { productID: id },
                 headers: {
-                    RequestVerificationToken:
-                        $('#frmAntiForgery input[name="__RequestVerificationToken"]').val()
+                    RequestVerificationToken: $('#frmAntiForgery input[name="__RequestVerificationToken"]').val()
                 },
-
                 success: function (res) {
-
                     if (res.success) {
-
                         LoadProducts();
-
-                        alert(res.message);
-                    }
-                    else {
-
-                        alert(res.message);
+                        toastSuccess(res.message);
+                    } else {
+                        toastError(res.message);
                     }
                 }
             });
-
         });
 
-        //RemovePicture
-        $(document).on("click", ".btnRemovePicture", function () {
-
-            var id = $(this).data("id");
-
-            if (!confirm("آیا مطمئن هستید؟"))
-                return;
-
-            var token = $('#frmAntiForgery input[name="__RequestVerificationToken"]').val();
-
+        $(document).on("click", ".btnRemovePicture", async function () {
+            const ok = await confirmDelete("عکس محصول حذف شود؟");
+            if (!ok) return;
+            const id = $(this).data("id");
+            const token = $('#frmAntiForgery input[name="__RequestVerificationToken"]').val();
             $.ajax({
                 url: '/ProductManagement/RemovePicture',
                 type: 'POST',
-                data: {
-                    productID: id,
-                    __RequestVerificationToken: token
-                },
+                data: { productID: id, __RequestVerificationToken: token },
                 success: function (res) {
                     if (res.success) {
-                        alert(res.message);
-
-                        // بهتر از reload:
+                        toastSuccess(res.message);
                         LoadProducts();
                     } else {
-                        alert(res.message);
+                        toastError(res.message);
                     }
                 },
-                error: function (xhr) {
-                    console.log(xhr.responseText);
-                    alert("خطا در ارتباط با سرور");
-                }
-            });
-
-        });
-
-        //آپلود فایل اکسل
-        $("#btnUploadExcel").click(function () {
-
-            var formData = new FormData();
-
-            formData.append(
-                "ProductID",
-                $("#ProductID").val());
-
-            formData.append(
-                "ExcelFile",
-                $("#ExcelFile")[0].files[0]);
-
-            $.ajax({
-                url: "/WarrantyManagement/UploadExcel",
-                type: "POST",
-                data: formData,
-                processData: false,
-                contentType: false,
-                headers: {
-                    RequestVerificationToken:
-                        $("#frmAntiForgery input[name='__RequestVerificationToken']").val()
-                },
-                success: function (res) {
-                    alert(res.message || (res.success ? "آپلود انجام شد" : "آپلود ناموفق بود"));
-                },
                 error: function () {
-                    alert("خطا در آپلود فایل اکسل");
+                    toastError("خطا در ارتباط با سرور");
                 }
             });
         });
     </script>
 }
-
-  

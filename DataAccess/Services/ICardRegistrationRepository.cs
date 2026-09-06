@@ -18,5 +18,6 @@ namespace DataAccess.Services
         Task<IEnumerable<CustomerType>> GetCustomerTypes();
         Task<bool> IsCardAlreadyRegisteredByUserAsync(int CustomerTypeId, string userId);
         Task SaveChangesAsync();
+        Task<List<CardRegistration>> GetByUserAsync(string userId);
     }
 }

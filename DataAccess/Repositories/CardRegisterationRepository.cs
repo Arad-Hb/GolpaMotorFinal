@@ -76,5 +76,15 @@ namespace DataAccess.Repositories
                 || await db.WarrantyCards
                     .AnyAsync(x => x.WarrantyCardID == cardId && x.IsRegistered);
         }
+
+        public async Task<List<CardRegistration>> GetByUserAsync(string userId)
+        {
+            return await db.CardRegistrations
+                .Include(x => x.WarrantyCard)
+                    .ThenInclude(x => x.Product)
+                .Where(x => x.UserID == userId)
+                .OrderByDescending(x => x.CreatedAt)
+                .ToListAsync();
+        }
     }
 }

@@ -19,6 +19,8 @@ namespace DataAccess.Services
         Task<ProductDetailsModel?> GetDetails(long productID);
         Task<bool> Exists(long productID);
         Task<ProductListComplexModel> Search(ProductSearchModel sm);
-        Task RemoveImage(long productID);        
+        Task RemoveImage(long productID);
+        Task<ProductStatistics> GetStatistics();
+        Task<List<NamedCountItem>> GetTopRegistrars(int take = 5); 
     }
 }

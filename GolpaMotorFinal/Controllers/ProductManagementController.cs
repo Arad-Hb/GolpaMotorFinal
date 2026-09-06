@@ -17,15 +17,16 @@ namespace GolpaMotorFinal.Controllers
             this.repo = repo;
             this.service = service;
         }
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
+            ViewBag.Stats = await repo.GetStatistics();
             return View();
         }
 
         [HttpGet]
-        public IActionResult ProductList()
+        public IActionResult ProductList(string? productName, int pageIndex = 0)
         {
-            return ViewComponent("ProductList");
+            return ViewComponent("ProductList", new { productName, pageIndex });
         }
 
         [HttpGet]

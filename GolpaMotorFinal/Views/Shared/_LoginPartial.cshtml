@@ -7,18 +7,28 @@
 @if (SignInManager.IsSignedIn(User))
 {
     var user = await UserManager.GetUserAsync(User);
+    var isAdmin = user != null && await UserManager.IsInRoleAsync(user, "Admin");
 
     <div class="d-flex align-items-center gap-2">
 
-        <a asp-controller="Account" asp-action="Manage" class="user-info-btn text-decoration-none">
-
-            <i class="fa-solid fa-user me-2"></i>
-
-            خوش آمدید
-            @(user?.FirstName ?? "")
-            @(user?.LastName ?? "")
-
-        </a>
+        @if (isAdmin)
+        {
+            <a asp-controller="Admin" asp-action="Profile" class="user-info-btn text-decoration-none">
+                <i class="fa-solid fa-user me-2"></i>
+                خوش آمدید
+                @(user?.FirstName ?? "")
+                @(user?.LastName ?? "")
+            </a>
+        }
+        else
+        {
+            <a asp-controller="Account" asp-action="Manage" class="user-info-btn text-decoration-none">
+                <i class="fa-solid fa-user me-2"></i>
+                خوش آمدید
+                @(user?.FirstName ?? "")
+                @(user?.LastName ?? "")
+            </a>
+        }
 
         <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
 

@@ -1,12 +1,104 @@
 @model GolpaMotorFinal.Models.ViewModels.Account.ManageViewModel
+@using GolpaMotorFinal.Helpers
 @{
-    ViewData["Title"] = "Manage";
+    ViewData["Title"] = "پنل مشتری";
 }
 
-<h2>Manage account</h2>
-<dl>
-    <dt>Email</dt>
-    <dd>@Model.Email</dd>
-    <dt>User name</dt>
-    <dd>@Model.UserName</dd>
-</dl>
+<div class="container py-4">
+    <div class="row g-4">
+        <div class="col-12 col-lg-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <img src="@ImageHelper.ToThumbnail(Model.ProfileImageUrl)" class="rounded-circle mb-3" style="width:96px;height:96px;object-fit:cover;" />
+                    <h4>@(Model.FirstName) @(Model.LastName)</h4>
+                    <p class="text-muted mb-1">@Model.PhoneNumber</p>
+                    <p class="mb-0">مانده امتیاز: <strong>@Model.RemainedPoints</strong></p>
+                    <p>کارت ثبت‌شده: <strong>@Model.TotalRegisteredCards</strong></p>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-lg-8">
+            <div class="card mb-4">
+                <div class="card-body admin-form">
+                    <h5 class="mb-3">ویرایش پروفایل</h5>
+                    <form asp-action="Manage" method="post" enctype="multipart/form-data">
+                        @Html.AntiForgeryToken()
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <div class="row g-3">
+                            <div class="col-12 col-md-6">
+                                <label class="form-label">نام</label>
+                                <input asp-for="FirstName" class="form-control" />
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label class="form-label">نام خانوادگی</label>
+                                <input asp-for="LastName" class="form-control" />
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label class="form-label">موبایل</label>
+                                <input asp-for="PhoneNumber" class="form-control" />
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label class="form-label">کد پستی</label>
+                                <input asp-for="PostalCode" class="form-control" />
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">آدرس</label>
+                                <textarea asp-for="Address" class="form-control"></textarea>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">عکس</label>
+                                <input asp-for="ProfileImage" type="file" class="form-control" accept="image/*" />
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label class="form-label">رمز فعلی</label>
+                                <input asp-for="CurrentPassword" type="password" class="form-control" />
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label class="form-label">رمز جدید</label>
+                                <input asp-for="NewPassword" type="password" class="form-control" />
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary mt-3">ذخیره</button>
+                    </form>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="mb-3">کارت‌های ثبت‌شده</h5>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead>
+                                <tr>
+                                    <th>سریال</th>
+                                    <th>محصول</th>
+                                    <th>امتیاز</th>
+                                    <th>تاریخ</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model.Cards.Any())
+                                {
+                                    foreach (var card in Model.Cards)
+                                    {
+                                        <tr>
+                                            <td>@card.SerialNumber</td>
+                                            <td>@card.ProductName</td>
+                                            <td>@card.Points</td>
+                                            <td>@card.CreatedAt.ToLocalTime().ToString("yyyy/MM/dd")</td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="4" class="text-center text-muted">کارتی ثبت نشده است</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

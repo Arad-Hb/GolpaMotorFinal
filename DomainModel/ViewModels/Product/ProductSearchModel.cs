@@ -12,15 +12,13 @@ namespace DomainModel.ViewModels.Product
     {
         public long ProductID { get; set; }
 
-        [Required(ErrorMessage = "نام محصول اجباری است.")]
-        [StringLength(50, MinimumLength = 3, ErrorMessage = "نام محصول باید بین ۳ تا ۵۰ کاراکتر باشد.")]
+        [StringLength(50, ErrorMessage = "نام محصول باید حداکثر ۵۰ کاراکتر باشد.")]
         [Display(Name = "نام محصول")]
-        public string ProductName { get; set; }
+        public string? ProductName { get; set; }
 
         [Display(Name = "لینک تصویر پیش‌فرض")]
         public string? ImageUrl { get; set; }
 
-        [Required(ErrorMessage = "وارد کردن امتیاز محصول اجباری می باشد .")]
         [Display(Name = "امتیاز محصول")]
         public int ProductPoint { get; set; }
         public bool? IsDeleted { get; set; }

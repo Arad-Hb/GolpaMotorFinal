@@ -1,0 +1,53 @@
+@model GolpaMotorFinal.Models.ViewModels.Admin.AdminProfileViewModel
+@using GolpaMotorFinal.Helpers
+@{
+    ViewData["Title"] = "پروفایل مدیر";
+    Layout = "_AdminLayout";
+}
+
+<div class="mb-3">
+    <div class="page-title">پروفایل مدیر</div>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+}
+
+<div class="card">
+    <div class="card-body admin-form">
+        <form asp-action="Profile" method="post" enctype="multipart/form-data">
+            @Html.AntiForgeryToken()
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="row g-3">
+                <div class="col-12 col-md-6">
+                    <label class="form-label"><i class="fa fa-user ms-1"></i> نام</label>
+                    <input asp-for="FirstName" class="form-control" />
+                </div>
+                <div class="col-12 col-md-6">
+                    <label class="form-label"><i class="fa fa-user ms-1"></i> نام خانوادگی</label>
+                    <input asp-for="LastName" class="form-control" />
+                </div>
+                <div class="col-12 col-md-6">
+                    <label class="form-label"><i class="fa fa-envelope ms-1"></i> ایمیل</label>
+                    <input asp-for="Email" class="form-control" />
+                    <span asp-validation-for="Email" class="text-danger small"></span>
+                </div>
+                <div class="col-12 col-md-6">
+                    <label class="form-label"><i class="fa fa-image ms-1"></i> عکس</label>
+                    <input asp-for="ProfileImage" type="file" class="form-control image-preview-input" accept="image/*" />
+                    <img src="@ImageHelper.ToThumbnail(Model.ProfileImageUrl)" class="image-preview mt-2" style="width:80px;height:80px;object-fit:cover;border-radius:50%;" />
+                </div>
+                <div class="col-12 col-md-6">
+                    <label class="form-label">رمز فعلی</label>
+                    <input asp-for="CurrentPassword" type="password" class="form-control" />
+                </div>
+                <div class="col-12 col-md-6">
+                    <label class="form-label">رمز جدید</label>
+                    <input asp-for="NewPassword" type="password" class="form-control" />
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary mt-4">ذخیره</button>
+        </form>
+    </div>
+</div>

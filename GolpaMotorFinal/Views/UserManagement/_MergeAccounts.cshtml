@@ -2,17 +2,16 @@
 @using GolpaMotorFinal.Helpers
 
 <form id="mergeForm"
-      class="merge-form"
+      class="merge-form admin-form"
       asp-controller="UserManagement"
       asp-action="MergeAccounts"
       method="post"
-      data-refresh-grid-url="/UserManagement/Grid"
-      data-grid-id="UserGrid">
+      data-refresh-grid-url="@(ViewBag.RefreshUrl ?? "/UserManagement/Grid")"
+      data-grid-id="@(ViewBag.GridId ?? "UserGrid")">
 
     @Html.AntiForgeryToken()
 
     @Html.HiddenFor(m => m.CurrentUser.UserID)
-    @Html.HiddenFor(m => m.CurrentUser.SelectedMergeUserID)
 
     <div class="row justify-content-center">
         <div class="col-12 col-xl-11">

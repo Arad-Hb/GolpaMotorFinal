@@ -36,7 +36,7 @@ namespace GolpaMotorFinal.Helpers
             output.Attributes.SetAttribute("id", Model.FormId);
             output.Attributes.SetAttribute("method", Model.Method.ToLower());
             output.Attributes.SetAttribute("action", actionUrl);
-            output.Attributes.SetAttribute("class", "crud-form");
+            output.Attributes.SetAttribute("class", "crud-form admin-form");
             output.Attributes.SetAttribute("enctype", Model.Enctype);
 
             if (Model.Ajax)

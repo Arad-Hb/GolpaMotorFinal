@@ -238,6 +238,46 @@ namespace DataAccess.Repositories
                 product.ImageUrl = null;
                 await db.SaveChangesAsync();
             }
-        }                     
+        }
+
+        public async Task<ProductStatistics> GetStatistics()
+        {
+            var stats = new ProductStatistics
+            {
+                TotalProducts = await db.Products.CountAsync(x => !x.IsDeleted),
+                AvailableProducts = await db.Products.CountAsync(x => !x.IsDeleted && x.IsAvailable),
+                ProductsWithoutCards = await db.Products.CountAsync(x => !x.IsDeleted && !x.WarrantyCards.Any()),
+                RegisteredCards = await db.WarrantyCards.CountAsync(x => x.IsRegistered),
+                UnregisteredCards = await db.WarrantyCards.CountAsync(x => !x.IsRegistered),
+                TotalRegisteredPoints = await db.CardRegistrations
+                    .SumAsync(x => (int?)x.WarrantyCard.Product.ProductPoint) ?? 0
+            };
+            return stats;
+        }
+
+        public async Task<List<NamedCountItem>> GetTopRegistrars(int take = 5)
+        {
+            var grouped = await db.CardRegistrations
+                .GroupBy(x => x.UserID)
+                .Select(g => new { UserID = g.Key, Count = g.Count() })
+                .OrderByDescending(x => x.Count)
+                .Take(take)
+                .ToListAsync();
+
+            var userIds = grouped.Select(x => x.UserID).ToList();
+            var users = await db.Users
+                .Where(x => userIds.Contains(x.Id))
+                .Select(x => new { x.Id, x.FirstName, x.LastName, x.UserName })
+                .ToListAsync();
+
+            return grouped.Select(g =>
+            {
+                var user = users.FirstOrDefault(u => u.Id == g.UserID);
+                var name = $"{user?.FirstName} {user?.LastName}".Trim();
+                if (string.IsNullOrWhiteSpace(name))
+                    name = user?.UserName ?? "نامشخص";
+                return new NamedCountItem { Name = name, Count = g.Count };
+            }).ToList();
+        }
     }
 }

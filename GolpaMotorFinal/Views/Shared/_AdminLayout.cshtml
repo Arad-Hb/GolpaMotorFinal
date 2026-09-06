@@ -14,7 +14,9 @@
     <link href="~/fonts/fontawesome-free-6.7.2-web/css/all.min.css" rel="stylesheet" />
     <link href="~/css/adminlayout.css" rel="stylesheet" />
     <link href="~/css/account.css" rel="stylesheet" />
+    <link href="~/css/admin-forms.css" rel="stylesheet" />
     <link href="~/fonts/vazirmatn-master/vazirmatn-font-face.css" rel="stylesheet" />
+    <link href="~/lib/sweetalert2/dist/sweetalert2.css" rel="stylesheet" />
 
 
     @RenderSection("Styles", false)
@@ -46,8 +48,9 @@
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap-5.3.8-dist/js/bootstrap.bundle.js"></script>
-    <script src="~/js/AdminLayout.js"></script>
+    <script src="~/lib/sweetalert2/dist/sweetalert2.all.js"></script>
     <script src="~/js/modal.js"></script>
+    <script src="~/js/AdminLayout.js"></script>
     <form id="antiforgery-form" class="d-none">@Html.AntiForgeryToken()</form>
 
     <script>

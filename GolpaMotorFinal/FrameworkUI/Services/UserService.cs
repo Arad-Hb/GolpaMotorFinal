@@ -220,6 +220,9 @@ namespace GolpaMotorFinal.FrameworkUI.Services
             if (model == null)
                 return op.ToFailed("اطلاعات نامعتبر است.");
 
+            if (string.IsNullOrWhiteSpace(model.SelectedMergeUserID))
+                return op.ToFailed("لطفاً حساب مقصد را انتخاب کنید.");
+
             if (model.UserID == model.SelectedMergeUserID)
                 return op.ToFailed("امکان ادغام یک کاربر با خودش وجود ندارد.");
 
@@ -300,7 +303,7 @@ namespace GolpaMotorFinal.FrameworkUI.Services
                     EnableRefresh = true,
                     Ajax = true,
                     Icon = "fa fa-user-plus",
-                    Url = "/UserManagement/MergeAccounts",
+                    Url = "/UserManagement/MergeAccounts?gridId=UserReportGrid&refreshUrl=/UserManagement/UserReportGrid",
                     Id = item.UserID,
                     CssClass = "btn btn-sm btn-warning"
                 });
