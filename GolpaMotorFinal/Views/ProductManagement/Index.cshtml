@@ -30,11 +30,7 @@
 
                 <h5 class="modal-title"> مدیریت محصول </h5>
 
-                <button type="button" class="close" data-dismiss="modal">
-
-                    <span>&times;</span>
-
-                </button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 
             </div>
 
@@ -57,9 +53,16 @@
 
         });
 
+        function productModal() {
+            return bootstrap.Modal.getOrCreateInstance(document.getElementById("productModal"));
+        }
+
+        function showProductModal() {
+            productModal().show();
+        }
+
         function LoadProducts()
         {
-            // $("#ProductGrid").load("/ProductManagement/ProductList");
             $("#ProductGrid").load("/ProductManagement/ProductList?ts=" + new Date().getTime());
         }
 
@@ -70,7 +73,7 @@
 
                 $("#modalBody").html(result);
 
-                $("#productModal").modal("show");
+                showProductModal();
 
             });
 
@@ -103,7 +106,7 @@
 
                     if (res.success) {
 
-                        $("#productModal").modal("hide");
+                        hideProductModal();
 
                         LoadProducts();
 
@@ -133,7 +136,7 @@
 
                     $("#modalBody").html(result);
 
-                    $("#productModal").modal("show");
+                    showProductModal();
 
                 });
 
@@ -166,7 +169,7 @@
 
                     if (res.success) {
 
-                        $("#productModal").modal("hide");
+                        hideProductModal();
 
                         LoadProducts();
 
@@ -195,7 +198,7 @@
 
                     $("#modalBody").html(result);
 
-                    $("#productModal").modal("show");
+                    showProductModal();
 
                 });
 
@@ -289,11 +292,21 @@
                 $("#ExcelFile")[0].files[0]);
 
             $.ajax({
-                url: "/Admin/WarrantyManagement/UploadExcel",
+                url: "/WarrantyManagement/UploadExcel",
                 type: "POST",
                 data: formData,
                 processData: false,
-                contentType: false
+                contentType: false,
+                headers: {
+                    RequestVerificationToken:
+                        $("#frmAntiForgery input[name='__RequestVerificationToken']").val()
+                },
+                success: function (res) {
+                    alert(res.message || (res.success ? "آپلود انجام شد" : "آپلود ناموفق بود"));
+                },
+                error: function () {
+                    alert("خطا در آپلود فایل اکسل");
+                }
             });
         });
     </script>

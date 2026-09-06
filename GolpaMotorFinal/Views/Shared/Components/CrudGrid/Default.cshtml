@@ -1,288 +1,94 @@
 ﻿@using GolpaMotorFinal.Models.ViewModels.CRUD
-@model dynamic
+@model CrudGridViewModel
 
-<div class="table-responsive">
-
+<div class="table-responsive" id="@Model.GridId">
     <table class="table table-bordered table-hover align-middle">
-
         <thead class="table-dark">
-
             <tr>
-
-                <th style="width:60px">#</th>
-
-                @foreach (var column in Model.Columns)
-                {
-                    <th>@column.Header</th>
-                }
-
-                @if (Model.Actions.Count > 0)
-                {
-                    <th style="width:180px">
-                        عملیات
-                    </th>
-                }
-
-            </tr>
-
-        </thead>
-
-        <tbody>
-
-            @{
-                int row = 1;
-            }
-
-            @foreach (var item in Model.Items)
-            {
-                <tr>
-
-                    <td>@row</td>
-
-                    @foreach (var column in Model.Columns)
-                    {
-                        var value = column.Value(item);
-
-                        <td class="@column.CssClass">
-
-                            @switch (column.Type)
-                            {
-                                case GridColumnType.Image:
-
-                                    <img src="@(string.IsNullOrWhiteSpace(value?.ToString())
-                                                                        ? column.DefaultImage
-                                                                        : value)"
-                                         class="rounded"
-                                         width="45"
-                                         height="45" />
-
-                                    break;
-
-                                case GridColumnType.Boolean:
-
-                                    if (value is bool b)
-                                    {
-                                        <i class="@(b ? column.TrueIcon : column.FalseIcon)"></i>
-                                    }
-
-                                    break;
-
-                                case GridColumnType.Badge:
-
-                                    <span class="badge @column.BadgeClass">
-                                        @(value ?? column.EmptyText)
-                                    </span>
-
-                                    break;
-
-                                case GridColumnType.PersianDate:
-
-                                    @* Replace with your PersianDate extension *@
-                                    @(value ?? column.EmptyText)
-
-                                    break;
-
-                                default:
-
-                                    @(value ?? column.EmptyText)
-
-                                    break;
-                            }
-
-                        </td>
-                    }
-
-                    @if (Model.Actions.Count > 0)
-                    {
-                        <td>
-
-                            @foreach (var action in Model.Actions)
-                            {
-                                var id = action.Id(item);
-
-                                <button class="@action.CssClass @(action.OpenModal ? "open-modal" : "")"
-                                        data-title="@action.Title"
-                                        data-url="@action.Url"
-                                        data-id="@id">
-
-                                    <i class="@action.Icon"></i>
-
-                                </button>
-                            }
-
-                        </td>
-                    }
-
-                </tr>
-
-                row++;
-            }
-
-        </tbody>
-
-    </table>
-
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-@* @model GolpaMotorFinal.Models.ViewModels.CRUD.CrudGridViewModel
-
-<div class="table-responsive">
-
-    <table class="table table-bordered table-hover align-middle text-nowrap">
-
-        <thead class="table-dark">
-
-            <tr>
-
                 @if (Model.ShowRowNumber)
                 {
-                    <th style="width:70px;">#</th>
+                    <th style="width:60px">#</th>
                 }
-
-                @foreach (var col in Model.Columns)
+                @foreach (var header in Model.Headers)
                 {
-                    <th style="width:@col.Width">
-                        @col.Header
-                    </th>
+                    <th>@header</th>
                 }
-
-                @if (Model.Actions.Any())
+                @if (Model.Rows.Any(r => r.Actions.Count > 0))
                 {
-                    <th style="width:150px">
-                        عملیات
-                    </th>
+                    <th style="width:180px">عملیات</th>
                 }
-
             </tr>
-
         </thead>
-
         <tbody>
-
-            @if (Model.Items.Any())
+            @if (Model.Rows.Any())
             {
-                int row = 1;
-
-                foreach (var item in Model.Items)
+                int rowNumber = 1;
+                foreach (var row in Model.Rows)
                 {
                     <tr>
-
                         @if (Model.ShowRowNumber)
                         {
-                            <td>@row</td>
+                            <td>@rowNumber</td>
                         }
-
-                        @foreach (var col in Model.Columns)
+                        @foreach (var column in row.Columns)
                         {
-                            var property = item.GetType().GetProperty(col.PropertyName);
-
-                            var value = property?.GetValue(item);
-
-                            <td class="@col.CssClass">
-
-                                @switch (col.Type)
+                            <td class="@column.CssClass">
+                                @switch (column.Type)
                                 {
                                     case GridColumnType.Image:
-
-                                        <img src="@value"
+                                        var imageSrc = !string.IsNullOrWhiteSpace(column.ImageUrl)
+                                            ? column.ImageUrl
+                                            : column.Value?.ToString();
+                                        <img src="@(string.IsNullOrWhiteSpace(imageSrc) ? "/images/imageUsers/noimage.jpg" : imageSrc)"
                                              class="rounded"
-                                             style="width:45px;height:45px;object-fit:cover;" />
-
+                                             width="45"
+                                             height="45"
+                                             alt="" />
                                         break;
-
                                     case GridColumnType.Boolean:
-
-                                        if (value is bool b)
+                                        if (column.Value is bool flag)
                                         {
-                                            if (b)
-                                            {
-                                                <span class="badge bg-success">
-                                                    فعال
-                                                </span>
-                                            }
-                                            else
-                                            {
-                                                <span class="badge bg-danger">
-                                                    غیرفعال
-                                                </span>
-                                            }
+                                            <i class="@(flag ? column.TrueIcon : column.FalseIcon)"></i>
                                         }
-
                                         break;
-
                                     case GridColumnType.Badge:
-
-                                        <span class="badge bg-primary">
-                                            @value
+                                        <span class="badge @column.BadgeClass">
+                                            @(column.Value ?? column.EmptyText)
                                         </span>
-
                                         break;
-
                                     default:
-
-                                        @value
-
+                                        @(column.Value ?? column.EmptyText)
                                         break;
                                 }
-
                             </td>
                         }
-
-                        @if (Model.Actions.Any())
+                        @if (Model.Rows.Any(r => r.Actions.Count > 0))
                         {
                             <td>
-
-                                @foreach (var action in Model.Actions)
+                                @foreach (var action in row.Actions)
                                 {
-                                    var idProperty = item.GetType().GetProperty(action.IdProperty);
-
-                                    var id = idProperty?.GetValue(item);
-
-                                    <button class="@action.CssClass @(action.OpenModal ? "open-modal" : "")"
-                                            data-title="@action.Title"
+                                    <button type="button"
+                                            class="@action.CssClass @(action.OpenModal ? "open-modal" : "")"
+                                            data-title="@action.ActionText"
                                             data-url="@action.Url"
-                                            data-id="@id">
-
+                                            data-id="@action.Id">
                                         <i class="@action.Icon"></i>
-
                                     </button>
                                 }
-
                             </td>
                         }
-
                     </tr>
-
-                    row++;
+                    rowNumber++;
                 }
             }
             else
             {
                 <tr>
-
                     <td colspan="100" class="text-center text-muted">
-
                         @Model.EmptyMessage
-
                     </td>
-
                 </tr>
             }
-
         </tbody>
-
     </table>
-
-</div> *@
+</div>

@@ -20,6 +20,7 @@ function refreshGrid(targetId, targetUrl, closeOnSuccess = true, afterRefresh) {
         .fail(function () {
             alert('Failed to refresh grid.');
         });
+}
 
 // Merge accounts - submit merge form via AJAX and refresh grid
 $(document).on("submit", ".merge-form", function (e) {
@@ -51,7 +52,6 @@ $(document).on("submit", ".merge-form", function (e) {
             return;
         }
 
-        // success - refresh grid and close modal
         refreshGrid(targetId, targetUrl, true, function () {
             alert(op.message || 'عملیات با موفقیت انجام شد');
         });
@@ -61,7 +61,6 @@ $(document).on("submit", ".merge-form", function (e) {
     });
 
 });
-}
 
 //SaveCreate / SaveEdit
 $(document).on("submit", ".crud-form", function (e) {
@@ -137,8 +136,13 @@ $(document).on("click", ".btnDelete", function () {
     const refreshUrl = $(this).data("refresh-target-url");
     const targetID = $(this).data("refresh-target-id") ? ("#" + $(this).data("refresh-target-id")) : null;
 
-    $.post(sendingUrl, {
-        userID: $(this).data("id")
+    $.ajax({
+        url: sendingUrl,
+        type: "POST",
+        data: { userID: $(this).data("id") },
+        headers: {
+            RequestVerificationToken: $('input[name="__RequestVerificationToken"]').first().val()
+        }
     })
         .done(function (op) {
 

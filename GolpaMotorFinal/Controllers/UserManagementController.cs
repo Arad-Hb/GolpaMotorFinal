@@ -24,19 +24,37 @@ namespace GolpaMotorFinal.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var users = await service.GetUsers();
+            var model = await service.GetUsers();
+            return View(model);
+        }
 
-            var grid = service.BuildUserGrid(users);
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Search([FromForm(Name = "Search.SearchTerm")] string? searchTerm)
+        {
+            var sm = new UserSearchModel { PhoneNumber = searchTerm, SearchTerm = searchTerm };
+            var result = await repo.Search(sm);
 
-            return View(grid);
-            //var model = await service.GetUsers();
-            //return View(model);
+            var users = result.userList.Select(u => new UserListItemViewModel
+            {
+                UserID = u.UserID,
+                FullName = $"{u.FirstName ?? string.Empty} {u.LastName ?? string.Empty}".Trim(),
+                PhoneNumber = u.PhoneNumber ?? string.Empty,
+                ProfileImageUrl = u.ExistingProfileImageUrl ?? string.Empty,
+                Province = u.Province ?? string.Empty,
+                City = u.City ?? string.Empty
+            }).ToList();
+
+            return ViewComponent("UserList", users);
         }
 
         [HttpGet]
         public async Task<IActionResult> MergeAccounts(string userID)
         {
             var currentUser =await service.GetUserMergeAccounts(userID);
+
+            if (string.IsNullOrWhiteSpace(currentUser.UserID))
+                return NotFound();
 
             var vm = new MergeAccountsComplexViewModel
             {
@@ -236,7 +254,10 @@ namespace GolpaMotorFinal.Controllers
             if (string.IsNullOrWhiteSpace(vm.UserID))
                 return Json(new { success = false, message = "شناسه کاربر معتبر نیست" });
 
-            vm.ProfileImageUrl = "/images/imageUsers/noimage.jpg";
+            var current = await repo.Get(vm.UserID);
+            vm.ProfileImageUrl = string.IsNullOrWhiteSpace(current?.ProfileImageUrl)
+                ? "/images/imageUsers/noimage.jpg"
+                : current.ProfileImageUrl;
 
             if (vm.ProfileImage != null)
             {
@@ -292,6 +313,7 @@ namespace GolpaMotorFinal.Controllers
 
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<JsonResult> Delete(string userID)
         {
             var result = await repo.Delete(userID);

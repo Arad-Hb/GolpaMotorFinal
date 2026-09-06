@@ -3,6 +3,7 @@ using DomainModel.Models;
 using DomainModel.ViewModels;
 using DomainModel.ViewModels.User;
 using GolpaMotorFinal.Helpers;
+using GolpaMotorFinal.Models;
 using GolpaMotorFinal.Models.ViewModels.Account;
 using GolpaMotorFinal.Models.ViewModels.UserManagement;
 using Microsoft.AspNetCore.Authorization;
@@ -85,9 +86,6 @@ namespace GolpaMotorFinal.Controllers
                 {
                     if (await userManager.IsInRoleAsync(user, "Admin"))
                         return RedirectToAction("Index", "Admin");
-
-                    if (await userManager.IsInRoleAsync(user, "Customer"))
-                        return RedirectToAction("Index", "Customer");
                 }
 
                 return RedirectToAction("Index", "Home");
@@ -206,7 +204,7 @@ namespace GolpaMotorFinal.Controllers
             if (result.Succeeded)
                 return View("ConfirmEmail");
 
-            return View("Error");
+            return View("~/Views/Shared/Error.cshtml", new ErrorViewModel());
         }
 
         [HttpGet]
@@ -413,14 +411,32 @@ namespace GolpaMotorFinal.Controllers
         public async Task<IActionResult> Manage()
         {
             var user = await userManager.GetUserAsync(User);
+            if (user == null)
+                return RedirectToAction(nameof(Login));
 
             if (await userManager.IsInRoleAsync(user, "Admin"))
                 return RedirectToAction("Index", "Admin");
 
-            if (await userManager.IsInRoleAsync(user, "Employee"))
-                return RedirectToAction("Index", "Employee");
+            var vm = new ManageViewModel
+            {
+                Email = user.Email ?? string.Empty,
+                UserName = user.UserName ?? string.Empty,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Address = user.Address,
+                PostalCode = user.PostalCode,
+                PhoneNumber = user.PhoneNumber,
+                ProfileImageUrl = user.ProfileImageUrl
+            };
 
-            return RedirectToAction("Profile", "Account");
+            return View(vm);
+        }
+
+        [HttpGet]
+        [Authorize]
+        public IActionResult Profile()
+        {
+            return RedirectToAction(nameof(Manage));
         }
     }
 }

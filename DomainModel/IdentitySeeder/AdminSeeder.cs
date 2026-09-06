@@ -1,11 +1,7 @@
 ﻿using DomainModel.Models;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DomainModel.IdentitySeeder
 {
@@ -15,11 +11,15 @@ namespace DomainModel.IdentitySeeder
         {
             var userManager =
                 serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+            var configuration =
+                serviceProvider.GetRequiredService<IConfiguration>();
 
             const string email = "aradhabashi@gmail.com";
-            const string password = "aradhb369852";
+            var password = configuration["AdminSeeder:Password"];
 
-            // آیا ادمین قبلاً ساخته شده؟
+            if (string.IsNullOrWhiteSpace(password))
+                throw new InvalidOperationException("AdminSeeder:Password is not configured. Set it in User Secrets.");
+
             var adminUser = await userManager.FindByEmailAsync(email);
 
             if (adminUser == null)
@@ -29,24 +29,18 @@ namespace DomainModel.IdentitySeeder
                     UserName = email,
                     Email = email,
                     EmailConfirmed = true,
-
                     FirstName = "آراد",
                     LastName = "حبشی",
-
                     IsActive = true,
                     IsConfirmedCode = true,
-
                     RegisterDate = DateTime.Now,
-
                     TotalEarnedPoints = 0,
                     TotalSettledPoints = 0,
                     RemainedPoints = 0,
                     TotalRegisteredCards = 0
                 };
 
-                var result = await userManager.CreateAsync(
-                    adminUser,
-                    password);
+                var result = await userManager.CreateAsync(adminUser, password);
 
                 if (!result.Succeeded)
                 {
@@ -56,7 +50,6 @@ namespace DomainModel.IdentitySeeder
                 }
             }
 
-            // اگر در رول Admin نیست، اضافه کن
             if (!await userManager.IsInRoleAsync(adminUser, "Admin"))
             {
                 await userManager.AddToRoleAsync(adminUser, "Admin");

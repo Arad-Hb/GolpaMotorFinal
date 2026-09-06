@@ -18,10 +18,9 @@ namespace GolpaMotorFinal.ViewComponents
             servive = _servive;
         }
 
-        public async Task<IViewComponentResult> InvokeAsync()
+        public async Task<IViewComponentResult> InvokeAsync(IEnumerable<UserListItemViewModel>? users = null)
         {
-            var vm = await servive.GetUsers();
-
+            var vm = users?.ToList() ?? await servive.GetUsers();
             return View(vm);
         }
     }

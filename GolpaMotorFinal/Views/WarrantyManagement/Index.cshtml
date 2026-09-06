@@ -8,6 +8,17 @@
                 <img src="~/images/pics/logo.png" alt="Golpa Motor" class="img-fluid mb-3" style="max-height:80px;" />
                 <h3 class="fw-bold mb-0" style="color:#04264e">ثبت گارانتی گلپا موتور</h3>
             </div>
+            @if (Model.op != null && !string.IsNullOrWhiteSpace(Model.op.Message))
+            {
+                <div class="alert @(Model.op.Success ? "alert-success" : "alert-danger")">
+                    @Model.op.Message
+                </div>
+            }
+            @if (TempData["FailedCards"] is string failedCards && !string.IsNullOrWhiteSpace(failedCards))
+            {
+                <div class="alert alert-warning">@failedCards</div>
+            }
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <form asp-action="Register" asp-controller="WarrantyManagement" method="post">
                 @Html.AntiForgeryToken()
                 <!-- Warranty Codes -->

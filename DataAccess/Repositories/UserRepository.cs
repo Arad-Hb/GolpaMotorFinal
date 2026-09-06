@@ -505,7 +505,14 @@ namespace DataAccess.Repositories
             {
                 q = q.Where(u => u.LastName.Contains(sm.LastName));
             }
-            if (!string.IsNullOrEmpty(sm.PhoneNumber))
+            if (!string.IsNullOrEmpty(sm.SearchTerm))
+            {
+                q = q.Where(u =>
+                    (u.PhoneNumber != null && u.PhoneNumber.Contains(sm.SearchTerm)) ||
+                    (u.FirstName != null && u.FirstName.Contains(sm.SearchTerm)) ||
+                    (u.LastName != null && u.LastName.Contains(sm.SearchTerm)));
+            }
+            if (!string.IsNullOrEmpty(sm.PhoneNumber) && string.IsNullOrEmpty(sm.SearchTerm))
             {
                 q = q.Where(u => u.PhoneNumber.Contains(sm.PhoneNumber));
             }

@@ -23,6 +23,7 @@ namespace DataAccess.Repositories
         public async Task<WarrantyCard?> GetBySerialAsync(string serial, string code)
         {
             return await db.WarrantyCards
+                .Include(x => x.Product)
                 .FirstOrDefaultAsync(x =>
                     x.SerialNumber == serial &&
                     x.ScratchedCode == code);
@@ -68,9 +69,12 @@ namespace DataAccess.Repositories
             }).ToListAsync();
         }
 
-        public Task<bool> IsRegisteredAsync(long cardId)
+        public async Task<bool> IsRegisteredAsync(long cardId)
         {
-            throw new NotImplementedException();
+            return await db.CardRegistrations
+                .AnyAsync(x => x.WarrantyCardID == cardId)
+                || await db.WarrantyCards
+                    .AnyAsync(x => x.WarrantyCardID == cardId && x.IsRegistered);
         }
     }
 }

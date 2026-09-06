@@ -169,6 +169,7 @@ namespace GolpaMotorFinal.FrameworkUI.Services
                 TotalEarnedPoints = u.TotalEarnedPoints,
                 TotalSettledPoints = u.TotalSettledPoints,
                 RemainedPoints = u.RemainedPoints,
+                ProfileImageUrl = u.ProfileImageUrl,
 
                 Province = u.Province ?? string.Empty,
                 City = u.City ?? string.Empty
@@ -179,15 +180,17 @@ namespace GolpaMotorFinal.FrameworkUI.Services
         {
             var user = await repo.GetDetails(userID);
 
-            var result = new MergeAccountsViewModel
+            if (user == null)
+                return new MergeAccountsViewModel();
+
+            return new MergeAccountsViewModel
             {
                 UserID = user.UserID,
-                FullName = user.FirstName + " " + user.LastName,
+                FullName = $"{user.FirstName} {user.LastName}".Trim(),
                 PhoneNumber = user.PhoneNumber,
                 RemainedPoints = user.RemainedPoints,
                 ProfileImageUrl = user.ProfileImageUrl
             };
-            return result;
         }
         public async Task<MergeAccountsViewModel> GetMergeSearchResult(string sm)
         {
@@ -225,74 +228,82 @@ namespace GolpaMotorFinal.FrameworkUI.Services
 
         public CrudGridViewModel BuildUserGrid(IEnumerable<UserListItemViewModel> users)
         {
-            throw new NotImplementedException();
+            var grid = new CrudGridViewModel { GridId = "UserGrid" };
+            grid.Headers.AddRange(new[] { "تصویر", "نام", "موبایل", "شغل", "کارت", "امتیاز", "استان", "شهر" });
+
+            foreach (var item in users)
+            {
+                var row = new GridRow { Key = item.UserID };
+                row.Columns.Add(Image(item.ProfileImageUrl));
+                row.Columns.Add(Text(item.FullName));
+                row.Columns.Add(Text(item.PhoneNumber));
+                row.Columns.Add(Text(item.RoleName));
+                row.Columns.Add(Number(item.TotalRegisteredCards));
+                row.Columns.Add(Number(item.TotalEarnedPoints));
+                row.Columns.Add(Text(item.Province));
+                row.Columns.Add(Text(item.City));
+                row.Actions.Add(new GridAction
+                {
+                    ActionText = "جزئیات",
+                    OpenModal = true,
+                    Icon = "fa fa-eye",
+                    Url = "/UserManagement/Details",
+                    Id = item.UserID,
+                    CssClass = "btn btn-sm btn-secondary"
+                });
+                grid.Rows.Add(row);
+            }
+
+            return grid;
         }
 
         public CrudGridViewModel BuildUserReportGrid(IEnumerable<UserReportViewModel> users)
         {
-            var grid = new CrudGridViewModel();
+            var grid = new CrudGridViewModel { GridId = "UserReportGrid" };
 
-            grid.GridId = "UserReportGrid";
-
-            grid.Headers.Add("تصویر");
-            grid.Headers.Add("نام");
-            grid.Headers.Add("موبایل");
-            grid.Headers.Add("شغل");
-            grid.Headers.Add("کارت");
-            grid.Headers.Add("امتیاز");
-            grid.Headers.Add("تسویه");
-            grid.Headers.Add("مانده");
-            grid.Headers.Add("استان");
-            grid.Headers.Add("شهر");
-            
+            grid.Headers.AddRange(new[]
+            {
+                "تصویر", "نام", "موبایل", "شغل", "کارت", "امتیاز", "تسویه", "مانده", "استان", "شهر"
+            });
 
             foreach (var item in users)
             {
-                var row = new GridRow
-                {
-                    Key = item.UserID
-                };
-
-                row.Columns.Add(Text(item.FullName));
-
-                row.Columns.Add(Text(item.PhoneNumber));
-
-                row.Columns.Add(Text(item.RoleName));
-
-                row.Columns.Add(Number(item.TotalRegisteredCards));
-
-                row.Columns.Add(Number(item.TotalEarnedPoints));
-
-                row.Columns.Add(Number(item.TotalSettledPoints));
-
-                row.Columns.Add(Number(
-                    item.RemainedPoints,
-                    "fw-bold text-success"));
-
-                row.Columns.Add(Text(item.Province));
-
-                row.Columns.Add(Text(item.City));
+                var row = new GridRow { Key = item.UserID };
 
                 row.Columns.Add(Image(item.ProfileImageUrl));
+                row.Columns.Add(Text(item.FullName));
+                row.Columns.Add(Text(item.PhoneNumber));
+                row.Columns.Add(Text(item.RoleName));
+                row.Columns.Add(Number(item.TotalRegisteredCards));
+                row.Columns.Add(Number(item.TotalEarnedPoints));
+                row.Columns.Add(Number(item.TotalSettledPoints));
+                row.Columns.Add(Number(item.RemainedPoints, "fw-bold text-success"));
+                row.Columns.Add(Text(item.Province));
+                row.Columns.Add(Text(item.City));
 
-                row.Actions.Add(
-                   ActionText: "جزئیات",
-                   OpenModal: true,
-                   EnableRefresh:true,
-                   Ajax:true,
-                   Icon: "fa fa-eye",
-                   Url: "/UserManagement/Details",
-                   Id: item.UserID,
-                   CssClass:"btn btn-sm btn-secondary");
+                row.Actions.Add(new GridAction
+                {
+                    ActionText = "جزئیات",
+                    OpenModal = true,
+                    EnableRefresh = true,
+                    Ajax = true,
+                    Icon = "fa fa-eye",
+                    Url = "/UserManagement/Details",
+                    Id = item.UserID,
+                    CssClass = "btn btn-sm btn-secondary"
+                });
 
-                row.Actions.Add(ActionText:"ادغام",
-                    OpenModal: true,
-                   EnableRefresh: true,
-                   Ajax: true,
-                    Icon:"fa fa-user-plus",
-                    Url:"/UserManagement/MergeAccounts",
-                    Id:item.UserID,
-                    CssClass:"btn btn-sm btn-warning");
+                row.Actions.Add(new GridAction
+                {
+                    ActionText = "ادغام",
+                    OpenModal = true,
+                    EnableRefresh = true,
+                    Ajax = true,
+                    Icon = "fa fa-user-plus",
+                    Url = "/UserManagement/MergeAccounts",
+                    Id = item.UserID,
+                    CssClass = "btn btn-sm btn-warning"
+                });
 
                 grid.Rows.Add(row);
             }
@@ -300,7 +311,7 @@ namespace GolpaMotorFinal.FrameworkUI.Services
             return grid;
         }
 
-        private GridColumn Number(object value,string css = "")
+        private GridColumn Number(object? value, string css = "")
         {
             return new GridColumn
             {

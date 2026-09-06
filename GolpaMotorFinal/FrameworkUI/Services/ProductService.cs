@@ -1,8 +1,6 @@
 ﻿using DataAccess.Services;
-using DomainModel.Models;
 using DomainModel.ViewModels.Product;
 using Framework.Common;
-using GolpaMotorFinal.FrameworkUI.Services;
 
 namespace GolpaMotorFinal.FrameworkUI.Services
 {
@@ -17,6 +15,10 @@ namespace GolpaMotorFinal.FrameworkUI.Services
             this.fileManager = fileManager;
         }
 
+        private static readonly string[] ImageExtensions = { "jpg", "jpeg", "png" };
+        private const string ProductUploadFolder = "images/imageProducts/uploads";
+        private const string ProductThumbFolder = "images/imageProducts/thumbnails";
+
         public async Task<OperationResult> DeleteProduct(long productID)
         {
             var op = new OperationResult("DeleteProduct");
@@ -28,18 +30,13 @@ namespace GolpaMotorFinal.FrameworkUI.Services
                 if (product == null)
                     return op.ToFailed("محصول یافت نشد");
 
-                // تغییر: اول DB حذف انجام می‌شود (امن‌تر)
                 var result = await repo.Delete(productID);
 
                 if (!result.Success)
                     return result;
 
-                // تغییر: بعد از موفقیت DB، فایل حذف می‌شود
                 if (!string.IsNullOrEmpty(product.ImageUrl))
-                {
-
                     fileManager.Remove(product.ImageUrl);
-                }
 
                 return result;
             }
@@ -49,7 +46,7 @@ namespace GolpaMotorFinal.FrameworkUI.Services
             }
         }
 
-        public async Task<OperationResult> AddProduct(ProductAddEditModel prod, IFormFile imageFile)
+        public async Task<OperationResult> AddProduct(ProductAddEditModel prod, IFormFile? imageFile)
         {
             var op = new OperationResult("AddProduct");
 
@@ -58,8 +55,17 @@ namespace GolpaMotorFinal.FrameworkUI.Services
                 if (imageFile == null)
                     return op.ToFailed("تصویر محصول الزامی است");
 
-                //prod.ImageUrl = saveResult.Message;
+                var upload = await fileManager.UploadAsync(
+                    imageFile,
+                    5,
+                    ImageExtensions,
+                    ProductUploadFolder,
+                    ProductThumbFolder);
 
+                if (!upload.Success)
+                    return op.ToFailed(upload.Message);
+
+                prod.ImageUrl = upload.FileUrl;
                 prod.IsDeleted = false;
 
                 return await repo.Add(prod);
@@ -70,7 +76,7 @@ namespace GolpaMotorFinal.FrameworkUI.Services
             }
         }
 
-        public async Task<OperationResult> UpdateProduct(ProductAddEditModel prod)
+        public async Task<OperationResult> UpdateProduct(ProductAddEditModel prod, IFormFile? imageFile)
         {
             var op = new OperationResult("UpdateProduct");
 
@@ -80,6 +86,28 @@ namespace GolpaMotorFinal.FrameworkUI.Services
 
                 if (current == null)
                     return op.ToFailed("محصول یافت نشد");
+
+                if (imageFile != null)
+                {
+                    var upload = await fileManager.UploadAsync(
+                        imageFile,
+                        5,
+                        ImageExtensions,
+                        ProductUploadFolder,
+                        ProductThumbFolder);
+
+                    if (!upload.Success)
+                        return op.ToFailed(upload.Message);
+
+                    if (!string.IsNullOrWhiteSpace(current.ImageUrl))
+                        fileManager.Remove(current.ImageUrl);
+
+                    prod.ImageUrl = upload.FileUrl;
+                }
+                else if (string.IsNullOrWhiteSpace(prod.ImageUrl))
+                {
+                    prod.ImageUrl = current.ImageUrl;
+                }
 
                 return await repo.Update(prod);
             }
@@ -91,7 +119,7 @@ namespace GolpaMotorFinal.FrameworkUI.Services
 
         public async Task<ProductAddEditModel?> GetForEdit(int productID)
         {
-            return await repo.Get(productID);           
+            return await repo.Get(productID);
         }
 
         public async Task<OperationResult> RemovePicture(long productID)
@@ -108,10 +136,8 @@ namespace GolpaMotorFinal.FrameworkUI.Services
                 if (string.IsNullOrEmpty(product.ImageUrl))
                     return op.ToFailed("تصویری وجود ندارد");
 
-                //var path = fileManager.ToPhysicalAddress(product.ImageUrl, "ImageProducts");
-                //fileManager.RemoveFile(path);
-
-                //await repo.RemoveImage(productID);
+                fileManager.Remove(product.ImageUrl);
+                await repo.RemoveImage(productID);
 
                 return op.ToSuccess("تصویر حذف شد");
             }
@@ -119,11 +145,6 @@ namespace GolpaMotorFinal.FrameworkUI.Services
             {
                 return op.ToFailed("خطا در حذف تصویر: " + ex.Message);
             }
-        }
-
-        public Task<OperationResult> UpdateProduct(ProductAddEditModel prod, IFormFile? imageFile)
-        {
-            throw new NotImplementedException();
         }
     }
 }

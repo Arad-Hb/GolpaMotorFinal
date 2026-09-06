@@ -1,27 +1,26 @@
 ﻿using DataAccess.Services;
-using DomainModel.Models;
 using DomainModel.ViewModels.Product;
-using Framework.Common;
 using GolpaMotorFinal.FrameworkUI.Services;
 using GolpaMotorFinal.Models.ViewModels.ProductManagement;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace GolpaMotorFinal.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class ProductManagementController : Controller
     {
-        private readonly IProductRepository repo;        
+        private readonly IProductRepository repo;
         private readonly IProductService service;
         public ProductManagementController(IProductRepository repo, IProductService service)
         {
-            this.repo = repo;           
+            this.repo = repo;
             this.service = service;
         }
         public IActionResult Index()
         {
             return View();
-        }              
+        }
 
         [HttpGet]
         public IActionResult ProductList()
@@ -42,11 +41,11 @@ namespace GolpaMotorFinal.Controllers
             var products = await repo.GetAll();
             return Json(products);
         }
-        
+
         [HttpGet]
         public IActionResult Create()
         {
-            return PartialView("_Create");
+            return PartialView("_Create", new ProductAddEditViewModel());
         }
 
         [HttpPost]
@@ -96,7 +95,6 @@ namespace GolpaMotorFinal.Controllers
             if (!ModelState.IsValid)
                 return Json(new { success = false, message = "اطلاعات معتبر نیست" });
 
-            // تبدیل ViewModel → Domain Model
             var model = new ProductAddEditModel
             {
                 ProductID = vm.ProductID,
@@ -104,10 +102,9 @@ namespace GolpaMotorFinal.Controllers
                 Description = vm.Description,
                 ProductPoint = vm.ProductPoint,
                 IsAvailable = vm.IsAvailable,
-                ImageUrl = vm.ExistingImageUrl // عکس قبلی
+                ImageUrl = vm.ExistingImageUrl
             };
 
-            // ارسال به Service همراه فایل جدید
             var result = await service.UpdateProduct(model, vm.ImageFile);
 
             return Json(result);
@@ -117,11 +114,11 @@ namespace GolpaMotorFinal.Controllers
         [ValidateAntiForgeryToken]
         public async Task<JsonResult> Delete(long productID)
         {
-            var result = await repo.Delete(productID);
+            var result = await service.DeleteProduct(productID);
 
             return Json(result);
         }
-        
+
         [HttpGet]
         public async Task<IActionResult> Details(long productID)
         {
