@@ -188,7 +188,10 @@ namespace GolpaMotorFinal.FrameworkUI.Services
                 UserID = user.UserID,
                 FullName = $"{user.FirstName} {user.LastName}".Trim(),
                 PhoneNumber = user.PhoneNumber,
+                TotalEarnedPoints = user.TotalEarnedPoints,
+                TotalSettledPoints = user.TotalSettledPoints,
                 RemainedPoints = user.RemainedPoints,
+                TotalRegisteredCards = user.TotalRegisteredCards,
                 ProfileImageUrl = user.ProfileImageUrl
             };
         }
@@ -205,7 +208,10 @@ namespace GolpaMotorFinal.FrameworkUI.Services
                     UserID = searchResult.UserID,
                     FullName = searchResult.FirstName + " " + searchResult.LastName,
                     PhoneNumber = searchResult.PhoneNumber,
+                    TotalEarnedPoints = searchResult.TotalEarnedPoints,
+                    TotalSettledPoints = searchResult.TotalSettledPoints,
                     RemainedPoints = searchResult.RemainedPoints,
+                    TotalRegisteredCards = searchResult.TotalRegisteredCards,
                     ProfileImageUrl = searchResult.ProfileImageUrl
                 };
             }
@@ -252,7 +258,7 @@ namespace GolpaMotorFinal.FrameworkUI.Services
                     Icon = "fa fa-eye",
                     Url = "/UserManagement/Details",
                     Id = item.UserID,
-                    CssClass = "btn btn-sm btn-secondary"
+                    CssClass = "btn btn-sm btn-outline-secondary"
                 });
                 grid.Rows.Add(row);
             }
@@ -293,7 +299,7 @@ namespace GolpaMotorFinal.FrameworkUI.Services
                     Icon = "fa fa-eye",
                     Url = "/UserManagement/Details",
                     Id = item.UserID,
-                    CssClass = "btn btn-sm btn-secondary"
+                    CssClass = "btn btn-sm btn-outline-secondary"
                 });
 
                 row.Actions.Add(new GridAction
@@ -305,7 +311,7 @@ namespace GolpaMotorFinal.FrameworkUI.Services
                     Icon = "fa fa-user-plus",
                     Url = "/UserManagement/MergeAccounts?gridId=UserReportGrid&refreshUrl=/UserManagement/UserReportGrid",
                     Id = item.UserID,
-                    CssClass = "btn btn-sm btn-warning"
+                    CssClass = "btn btn-sm btn-outline-primary"
                 });
 
                 grid.Rows.Add(row);

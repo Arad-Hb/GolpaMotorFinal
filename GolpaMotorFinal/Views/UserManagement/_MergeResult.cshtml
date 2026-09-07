@@ -1,13 +1,14 @@
 ﻿@model GolpaMotorFinal.Models.ViewModels.UserManagement.MergeAccountsComplexViewModel
 @using GolpaMotorFinal.Helpers
+@using GolpaMotorFinal.Models.ViewModels.UserManagement
 
 @if (Model.SearchedUser != null)
 {
-    <div class="merge-user-row mb-2">
+    <div class="merge-user-row">
         <img src="@ImageHelper.ToThumbnail(Model.SearchedUser.ProfileImageUrl)" alt="" class="modal-avatar" />
-        <div class="flex-grow-1 small">
+        <div class="modal-identity-text">
             <strong>@Model.SearchedUser.FullName</strong>
-            <div class="text-muted">@Model.SearchedUser.PhoneNumber · امتیاز @Model.SearchedUser.RemainedPoints</div>
+            <div class="text-muted">@Model.SearchedUser.PhoneNumber</div>
         </div>
         <div class="form-check m-0">
             <input class="form-check-input select-user"
@@ -18,8 +19,14 @@
             <label class="form-check-label small" for="mergeUser_@Model.SearchedUser.UserID">انتخاب</label>
         </div>
     </div>
+
+    @await Html.PartialAsync("_UserStatBoxes", UserStatBoxesViewModel.From(
+        Model.SearchedUser.TotalEarnedPoints,
+        Model.SearchedUser.TotalSettledPoints,
+        Model.SearchedUser.RemainedPoints,
+        Model.SearchedUser.TotalRegisteredCards))
 }
 else
 {
-    <div class="alert alert-warning py-1 px-2 mb-2 small">هیچ حسابی یافت نشد</div>
+    <div class="alert alert-warning py-1 px-2 mb-0 small">هیچ حسابی یافت نشد</div>
 }

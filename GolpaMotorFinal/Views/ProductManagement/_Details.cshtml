@@ -1,26 +1,23 @@
 ﻿@model DomainModel.ViewModels.Product.ProductDetailsModel
 @using GolpaMotorFinal.Helpers
 
-<div class="modal-compact d-flex gap-3 align-items-start">
-    <img src="@ImageHelper.Fix(Model.ImageUrl)" alt="" class="modal-thumb" />
-    <div class="flex-grow-1">
-        <div class="d-flex align-items-center gap-2 mb-2">
-            <strong>@Model.ProductName</strong>
-            @if (Model.IsAvailable)
-            {
-                <span class="badge bg-success">موجود</span>
-            }
-            else
-            {
-                <span class="badge bg-danger">ناموجود</span>
-            }
+<div class="modal-compact product-details-compact">
+    <div class="modal-identity">
+        <img src="@ImageHelper.Fix(Model.ImageUrl)" alt="" class="modal-thumb" />
+        <div class="modal-identity-text">
+            <div class="fw-semibold">@Model.ProductName</div>
+            <div class="text-muted small">امتیاز @Model.ProductPoint · گارانتی @Model.WarrantyCount</div>
         </div>
-        <dl class="modal-kv mb-2">
-            <dt>امتیاز</dt><dd>@Model.ProductPoint</dd>
-            <dt>گارانتی</dt><dd>@Model.WarrantyCount</dd>
-        </dl>
-        <p class="small text-muted mb-0">
-            @(string.IsNullOrWhiteSpace(Model.Description) ? "توضیحی ثبت نشده است" : Model.Description)
-        </p>
+        @if (Model.IsAvailable)
+        {
+            <span class="badge bg-success">موجود</span>
+        }
+        else
+        {
+            <span class="badge bg-danger">ناموجود</span>
+        }
     </div>
+    <p class="modal-desc">
+        @(string.IsNullOrWhiteSpace(Model.Description) ? "توضیحی ثبت نشده است" : Model.Description)
+    </p>
 </div>

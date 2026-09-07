@@ -7,6 +7,9 @@
         public string FullName { get; set; }
         public string PhoneNumber { get; set; }
         public string? ProfileImageUrl { get; set; }
+        public int TotalEarnedPoints { get; set; }
+        public int TotalSettledPoints { get; set; }
         public int RemainedPoints { get; set; }
+        public int TotalRegisteredCards { get; set; }
     }
 }

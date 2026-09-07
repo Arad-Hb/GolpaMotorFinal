@@ -27,5 +27,9 @@ namespace DomainModel.ViewModels.Product
         [Display(Name = "موجود می باشد")]
         public bool IsAvailable { get; set; }
 
+        public int RegisteredCardCount { get; set; }
+
+        public int UnregisteredCardCount { get; set; }
+
     }
 }

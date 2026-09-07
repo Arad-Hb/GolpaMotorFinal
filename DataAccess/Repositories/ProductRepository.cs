@@ -139,7 +139,9 @@ namespace DataAccess.Repositories
                     ProductName = x.ProductName,
                     ImageUrl = x.ImageUrl ?? string.Empty,
                     ProductPoint = x.ProductPoint,
-                    IsAvailable = x.IsAvailable
+                    IsAvailable = x.IsAvailable,
+                    RegisteredCardCount = x.WarrantyCards.Count(w => w.IsRegistered),
+                    UnregisteredCardCount = x.WarrantyCards.Count(w => !w.IsRegistered)
                 })
                 .ToListAsync();
         }
@@ -216,7 +218,9 @@ namespace DataAccess.Repositories
                     ProductName = product.ProductName,
                     ProductPoint = product.ProductPoint,
                     IsAvailable = product.IsAvailable,
-                    ImageUrl = product.ImageUrl
+                    ImageUrl = product.ImageUrl,
+                    RegisteredCardCount = product.WarrantyCards.Count(w => w.IsRegistered),
+                    UnregisteredCardCount = product.WarrantyCards.Count(w => !w.IsRegistered)
                 })
                 .ToListAsync();
 

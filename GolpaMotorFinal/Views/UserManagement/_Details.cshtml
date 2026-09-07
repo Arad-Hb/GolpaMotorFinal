@@ -1,10 +1,11 @@
 ﻿@model DomainModel.ViewModels.User.UserDetailsModel
 @using GolpaMotorFinal.Helpers
+@using GolpaMotorFinal.Models.ViewModels.UserManagement
 
 <div class="modal-compact user-details-compact">
-    <div class="d-flex align-items-center gap-2 mb-2">
+    <div class="modal-identity">
         <img src="@ImageHelper.ToThumbnail(@Model.ProfileImageUrl)" alt="" class="modal-avatar" />
-        <div class="flex-grow-1">
+        <div class="modal-identity-text">
             <div class="fw-semibold">@Model.FirstName @Model.LastName</div>
             <div class="text-muted small">@Model.RoleName</div>
         </div>
@@ -18,7 +19,7 @@
         }
     </div>
 
-    <dl class="modal-kv mb-2">
+    <dl class="modal-kv">
         <dt>موبایل</dt><dd>@Model.PhoneNumber</dd>
         <dt>ایمیل</dt><dd>@Model.Email</dd>
         <dt>استان</dt><dd>@Model.Province</dd>
@@ -26,15 +27,14 @@
         <dt>آدرس</dt><dd>@Model.Address</dd>
         <dt>کد پستی</dt><dd>@Model.PostalCode</dd>
         <dt>ثبت‌نام</dt><dd>@Model.RegisterDate.ToString("yyyy/MM/dd")</dd>
-        <dt>کارت</dt><dd>@Model.CreditCartNumber</dd>
+        <dt>کارت بانکی</dt><dd>@Model.CreditCartNumber</dd>
         <dt>شبا</dt><dd>@Model.IBAN</dd>
         <dt>حساب</dt><dd>@Model.AccountNumber</dd>
     </dl>
 
-    <div class="modal-stat-row">
-        <div><span>کل</span><strong>@Model.TotalEarnedPoints</strong></div>
-        <div><span>مصرف</span><strong>@Model.TotalSettledPoints</strong></div>
-        <div><span>مانده</span><strong>@Model.RemainedPoints</strong></div>
-        <div><span>کارت</span><strong>@Model.TotalRegisteredCards</strong></div>
-    </div>
+    @await Html.PartialAsync("_UserStatBoxes", UserStatBoxesViewModel.From(
+        Model.TotalEarnedPoints,
+        Model.TotalSettledPoints,
+        Model.RemainedPoints,
+        Model.TotalRegisteredCards))
 </div>

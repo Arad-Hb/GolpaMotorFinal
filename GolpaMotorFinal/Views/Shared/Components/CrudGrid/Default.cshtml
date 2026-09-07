@@ -2,12 +2,12 @@
 @model CrudGridViewModel
 
 <div class="table-responsive" data-grid="@Model.GridId">
-    <table class="table table-bordered table-hover align-middle">
+    <table class="table table-hover align-middle">
         <thead class="table-dark">
             <tr>
                 @if (Model.ShowRowNumber)
                 {
-                    <th style="width:60px">#</th>
+                    <th class="table-num">#</th>
                 }
                 @foreach (var header in Model.Headers)
                 {
@@ -28,7 +28,7 @@
                     <tr>
                         @if (Model.ShowRowNumber)
                         {
-                            <td>@rowNumber</td>
+                            <td class="table-num">@rowNumber</td>
                         }
                         @foreach (var column in row.Columns)
                         {
@@ -40,9 +40,7 @@
                                             ? column.ImageUrl
                                             : column.Value?.ToString();
                                         <img src="@(string.IsNullOrWhiteSpace(imageSrc) ? "/images/imageUsers/noimage.jpg" : imageSrc)"
-                                             class="rounded"
-                                             width="45"
-                                             height="45"
+                                             style="width:50px;height:50px;object-fit:cover;border-radius:6px;"
                                              alt="" />
                                         break;
                                     case GridColumnType.Boolean:
@@ -64,7 +62,7 @@
                         }
                         @if (Model.Rows.Any(r => r.Actions.Count > 0))
                         {
-                            <td>
+                            <td class="table-actions">
                                 @foreach (var action in row.Actions)
                                 {
                                     <button type="button"

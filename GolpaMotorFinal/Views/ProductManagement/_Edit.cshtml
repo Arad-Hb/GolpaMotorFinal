@@ -23,7 +23,7 @@
         <textarea asp-for="Description" class="form-control"></textarea>
     </div>
     <div class="mt-3">
-        <img src="@ImageHelper.Fix(Model?.ExistingImageUrl)" class="image-preview img-thumbnail" width="150" />
+        <img src="@ImageHelper.Fix(Model?.ExistingImageUrl)" class="modal-thumb image-preview" alt="" />
     </div>
     <div class="mt-3">
         <input asp-for="ImageFile" type="file" class="form-control image-preview-input" accept="image/*" />

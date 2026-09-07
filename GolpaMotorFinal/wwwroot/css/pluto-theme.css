@@ -513,7 +513,7 @@ html[dir="rtl"] body.pluto-public {
 .pluto-admin table.table th.table-actions,
 .pluto-admin table.table td.table-actions {
     width: 168px;
-    min-width: 168px;
+    min-width: 176px;
     white-space: nowrap;
     vertical-align: middle;
 }
@@ -764,6 +764,121 @@ html[dir="rtl"] body.pluto-public {
 #generalModal .btn-close,
 #productModal .btn-close {
     filter: invert(1);
+}
+
+#generalModal .modal-dialog,
+#productModal .modal-dialog {
+    max-width: 560px;
+}
+
+#generalModal .modal-body,
+#productModal .modal-body {
+    padding: 14px 16px 16px;
+}
+
+.modal-compact {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.modal-identity,
+.merge-user-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.modal-identity-text {
+    flex: 1;
+    min-width: 0;
+    line-height: 1.35;
+}
+
+.modal-avatar,
+.modal-thumb {
+    width: 36px;
+    height: 36px;
+    object-fit: cover;
+    border-radius: 8px;
+    flex: 0 0 36px;
+    background: #eee;
+}
+
+.modal-kv {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 4px 12px;
+    margin: 0;
+    font-size: 13px;
+}
+
+.modal-kv dt {
+    color: var(--pluto-muted);
+    font-weight: 500;
+    margin: 0;
+}
+
+.modal-kv dd {
+    margin: 0;
+    text-align: start;
+    overflow-wrap: anywhere;
+}
+
+.modal-desc {
+    margin: 0;
+    font-size: 13px;
+    color: var(--pluto-muted);
+    line-height: 1.6;
+}
+
+.merge-search .search__field {
+    width: 100%;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.modal-stat-row {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.modal-stat-box {
+    border-radius: 8px;
+    padding: 8px 6px;
+    text-align: center;
+    color: #fff;
+    min-height: 58px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 2px;
+}
+
+.modal-stat-box span {
+    font-size: 11px;
+    opacity: .9;
+}
+
+.modal-stat-box strong {
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.modal-stat-total { background: #15283c; }
+.modal-stat-used { background: #ff5722; }
+.modal-stat-remain { background: #1ed085; }
+.modal-stat-card { background: #6f42c1; }
+
+@media (max-width: 576px) {
+    .modal-stat-row {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
 }
 
 /* Search box */

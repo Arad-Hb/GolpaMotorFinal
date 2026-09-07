@@ -2,68 +2,62 @@
 @using GolpaMotorFinal.Helpers
 
 <div class="table-responsive">
-<table class="table table-bordered table-hover align-middle">
-    <thead class="text-light" style="background-color:#1e3a8a">
-        <tr>
-            <th>عکس محصول</th>
-            <th>نام محصول</th>
-            <th>امتیاز</th>
-            <th>وضعیت</th>
-            <th>جزئیات</th>
-            <th>ویرایش</th>
-            <th>حذف</th>
-            <th>حذف عکس</th>
-        </tr>
-    </thead>
-    <tbody>
-        @if (Model.Items != null && Model.Items.Any())
-        {
-            foreach (var prod in Model.Items)
+    <table class="table table-hover align-middle">
+        <thead class="table-dark">
+            <tr>
+                <th>عکس</th>
+                <th>نام محصول</th>
+                <th class="table-num">امتیاز</th>
+                <th>وضعیت</th>
+                <th class="table-num">ثبت‌شده</th>
+                <th class="table-num">باقی‌مانده</th>
+                <th class="table-actions">عملیات</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.Items != null && Model.Items.Any())
+            {
+                foreach (var prod in Model.Items)
+                {
+                    <tr>
+                        <td>
+                            <img src="@ImageHelper.Fix(prod.ImageUrl)"
+                                 style="width:45px;height:45px;object-fit:cover;border-radius:6px;"
+                                 alt="" />
+                        </td>
+                        <td>@prod.ProductName</td>
+                        <td class="table-num">@prod.ProductPoint</td>
+                        <td>@(prod.IsAvailable ? "موجود" : "ناموجود")</td>
+                        <td class="table-num">@prod.RegisteredCardCount</td>
+                        <td class="table-num">@prod.UnregisteredCardCount</td>
+                        <td class="table-actions">
+                            <button type="button" class="btn btn-sm btn-outline-secondary btnDetails" title="جزئیات" data-id="@prod.ProductID">
+                                <i class="fa fa-eye"></i>
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-warning btnEdit" title="ویرایش" data-id="@prod.ProductID">
+                                <i class="fa fa-pen"></i>
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-danger btnDelete" title="حذف"
+                                    data-id="@prod.ProductID"
+                                    data-id-name="productID"
+                                    data-url="@Url.Action("Delete", "ProductManagement")">
+                                <i class="fa fa-trash"></i>
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-danger btnRemovePicture" title="حذف عکس" data-id="@prod.ProductID">
+                                <i class="fa fa-image"></i>
+                            </button>
+                        </td>
+                    </tr>
+                }
+            }
+            else
             {
                 <tr>
-                    <td>
-                        <img src="@ImageHelper.Fix(prod.ImageUrl)" style="width:90px;height:90px;object-fit:cover;border-radius:8px;" />
-                    </td>
-                    <td>@prod.ProductName</td>
-                    <td>@prod.ProductPoint</td>
-                    <td>
-                        @(prod.IsAvailable ? "موجود" : "ناموجود")
-                    </td>
-                    <td>
-                        <button type="button" class="btn btn-outline-secondary btn-sm btnDetails" title="جزئیات" data-id="@prod.ProductID">
-                            <i class="fa fa-eye"></i>
-                        </button>
-                    </td>
-                    <td>
-                        <button type="button" class="btn btn-outline-warning btn-sm btnEdit" title="ویرایش" data-id="@prod.ProductID">
-                            <i class="fa fa-pen"></i>
-                        </button>
-                    </td>
-                    <td>
-                        <button type="button" class="btn btn-outline-danger btn-sm btnDelete" title="حذف"
-                                data-id="@prod.ProductID"
-                                data-id-name="productID"
-                                data-url="@Url.Action("Delete", "ProductManagement")">
-                            <i class="fa fa-trash"></i>
-                        </button>
-                    </td>
-                    <td>
-                        <button type="button" class="btn btn-outline-danger btn-sm btnRemovePicture" title="حذف عکس" data-id="@prod.ProductID">
-                            <i class="fa fa-image"></i>
-                            <i class="fa fa-xmark"></i>
-                        </button>
-                    </td>
+                    <td colspan="7" class="text-center text-muted">محصولی یافت نشد</td>
                 </tr>
             }
-        }
-        else
-        {
-            <tr>
-                <td colspan="8" class="text-center text-muted">محصولی یافت نشد</td>
-            </tr>
-        }
-    </tbody>
-</table>
+        </tbody>
+    </table>
 </div>
 
 @if (Model.PageCount > 1)

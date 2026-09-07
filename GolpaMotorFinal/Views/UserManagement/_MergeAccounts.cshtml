@@ -1,5 +1,6 @@
 ﻿@model GolpaMotorFinal.Models.ViewModels.UserManagement.MergeAccountsComplexViewModel
 @using GolpaMotorFinal.Helpers
+@using GolpaMotorFinal.Models.ViewModels.UserManagement
 
 <form id="mergeForm"
       class="merge-form admin-form modal-compact"
@@ -12,16 +13,16 @@
     @Html.AntiForgeryToken()
     @Html.HiddenFor(m => m.CurrentUser.UserID)
 
-    <div class="merge-user-row mb-2">
+    <div class="merge-user-row">
         <img src="@ImageHelper.ToThumbnail(@Model.CurrentUser.ProfileImageUrl)" alt="" class="modal-avatar" />
-        <div class="flex-grow-1 small">
+        <div class="modal-identity-text">
             <strong>@Model.CurrentUser.FullName</strong>
-            <div class="text-muted">@Model.CurrentUser.PhoneNumber · امتیاز @Model.CurrentUser.RemainedPoints</div>
+            <div class="text-muted">@Model.CurrentUser.PhoneNumber</div>
         </div>
         <span class="badge bg-secondary">مبدأ</span>
     </div>
 
-    <div class="mb-2">
+    <div class="merge-search">
         @await Component.InvokeAsync("SearchBox", Model.Search)
     </div>
 
@@ -29,7 +30,13 @@
         @await Html.PartialAsync("_MergeResult", Model)
     </div>
 
-    <div class="d-flex gap-2 mt-2">
+    @await Html.PartialAsync("_UserStatBoxes", UserStatBoxesViewModel.From(
+        Model.CurrentUser.TotalEarnedPoints,
+        Model.CurrentUser.TotalSettledPoints,
+        Model.CurrentUser.RemainedPoints,
+        Model.CurrentUser.TotalRegisteredCards))
+
+    <div class="modal-actions">
         <button type="submit" class="main_bt flex-fill">تایید ادغام</button>
         <button type="button" class="btn btn-sm btn-secondary flex-fill cancel-modal">انصراف</button>
     </div>
