@@ -21,6 +21,7 @@ namespace GolpaMotorFinal.Controllers
         private readonly IWarrantyExcelService excelService;
         private readonly IWarrantyCardRepository warrantyCards;
         private readonly IProductRepository products;
+        private readonly IRewardRequestRepository rewardRequests;
 
         public WarrantyManagementController(
                ICardRegistrationRepository repo,
@@ -28,7 +29,8 @@ namespace GolpaMotorFinal.Controllers
                RoleManager<IdentityRole> roleManager,
                IWarrantyExcelService excelService,
                IWarrantyCardRepository warrantyCards,
-               IProductRepository products)
+               IProductRepository products,
+               IRewardRequestRepository rewardRequests)
         {
             this.repo = repo;
             this.userManager = userManager;
@@ -36,6 +38,7 @@ namespace GolpaMotorFinal.Controllers
             this.excelService = excelService;
             this.warrantyCards = warrantyCards;
             this.products = products;
+            this.rewardRequests = rewardRequests;
         }
 
         private async Task<IEnumerable<SelectListItem>> BindCustomerTypes()
@@ -311,6 +314,7 @@ namespace GolpaMotorFinal.Controllers
             }
 
             await repo.SaveChangesAsync();
+            await rewardRequests.RefreshEligibility(user.Id);
 
             var successCount = validCards.Count;
             var failCount = invalidCards.Count;

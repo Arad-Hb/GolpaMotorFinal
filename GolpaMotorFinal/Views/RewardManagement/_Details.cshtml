@@ -1,0 +1,16 @@
+@model DomainModel.ViewModels.Reward.RewardCatalogDetailsModel
+
+<div class="modal-compact">
+    <div class="fw-semibold mb-2">@Model.Title</div>
+    <p class="text-muted">@(string.IsNullOrWhiteSpace(Model.Description) ? "توضیحی ثبت نشده است" : Model.Description)</p>
+    <ul class="list-unstyled mb-0">
+        <li>حد نصاب: <strong>@Model.RequiredPoints</strong></li>
+        <li>نوع: @(Model.IsCashReward ? "نقدی" : "غیرنقدی")</li>
+        @if (Model.IsCashReward)
+        {
+            <li>مبلغ: <strong>@(Model.CashValue?.ToString("N0"))</strong></li>
+        }
+        <li>وضعیت: @(Model.IsActive ? "فعال" : "غیرفعال")</li>
+        <li>تعداد درخواست: @Model.RequestCount</li>
+    </ul>
+</div>

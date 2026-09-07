@@ -16,5 +16,8 @@ namespace DomainModel.Models
 
         public virtual ICollection<PointTransaction> PointTransactions { get; set; }
             = new HashSet<PointTransaction>();
+
+        public virtual ICollection<RewardRequest> RewardRequests { get; set; }
+            = new HashSet<RewardRequest>();
     }
 }

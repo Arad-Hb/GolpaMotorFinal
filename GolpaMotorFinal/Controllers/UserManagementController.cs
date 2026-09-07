@@ -41,6 +41,8 @@ namespace GolpaMotorFinal.Controllers
                 FullName = $"{u.FirstName ?? string.Empty} {u.LastName ?? string.Empty}".Trim(),
                 PhoneNumber = u.PhoneNumber ?? string.Empty,
                 ProfileImageUrl = u.ExistingProfileImageUrl ?? string.Empty,
+                IsEligibleForReward = u.IsEligibleForReward,
+                HasReceivedReward = u.HasReceivedReward,
                 Province = u.Province ?? string.Empty,
                 City = u.City ?? string.Empty
             }).ToList();

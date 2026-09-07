@@ -16,11 +16,17 @@ namespace DomainModel.Models
 
         public DateTime? RequestDate { get; set; }
 
+        public DateTime? ReviewedDate { get; set; }
+
         public bool IsComplete { get; set; }
+
+        public int RewardDeliveryStatusID { get; set; }
 
         public virtual ApplicationUser User { get; set; } = null!;
 
         public virtual RewardCatalog RewardCatalog { get; set; } = null!;
+
+        public virtual RewardDeliveryStatus RewardDeliveryStatus { get; set; } = null!;
 
         public virtual ICollection<PointTransaction> PointTransactions { get; set; }
             = new HashSet<PointTransaction>();

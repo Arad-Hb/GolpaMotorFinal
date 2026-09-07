@@ -25,6 +25,12 @@ namespace GolpaMotorFinal.Models.ViewModels.UserManagement
         [Display(Name = "امتیاز کسب شده")]
         public int? TotalEarnedPoints { get; set; }
 
+        [Display(Name = "واجد پاداش")]
+        public bool IsEligibleForReward { get; set; }
+
+        [Display(Name = "دریافت پاداش")]
+        public bool HasReceivedReward { get; set; }
+
         [Display(Name = "استان")]
         public string Province { get; set; }
 

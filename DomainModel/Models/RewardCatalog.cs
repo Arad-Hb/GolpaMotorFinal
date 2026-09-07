@@ -20,6 +20,8 @@ namespace DomainModel.Models
 
         public decimal? CashValue { get; set; }
 
+        public bool IsActive { get; set; } = true;
+
         public virtual ICollection<RewardRequest> RewardRequests { get; set; }
             = new HashSet<RewardRequest>();
     }

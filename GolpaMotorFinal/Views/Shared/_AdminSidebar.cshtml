@@ -38,26 +38,32 @@
         <ul class="list-unstyled components">
             <li class="@(IsActive("Admin", "Index") ? "active" : null)">
                 <a asp-controller="Admin" asp-action="Index">
-                    <i class="fa fa-gauge yellow_color"></i>
+                    <i class="fa fa-gauge orange_color"></i>
                     <span>داشبورد</span>
                 </a>
             </li>
             <li class="@(IsActive("WarrantyManagement") ? "active" : null)">
                 <a asp-controller="WarrantyManagement" asp-action="Index">
                     <i class="fa fa-shield-halved orange_color"></i>
-                    <span>گارانتی‌ها</span>
+                    <span>مدیریت کارت گارانتی‌</span>
                 </a>
             </li>
             <li class="@(IsActive("ProductManagement") ? "active" : null)">
                 <a asp-controller="ProductManagement" asp-action="Index">
                     <i class="fa fa-box purple_color"></i>
-                    <span>محصولات</span>
+                    <span>مدیریت محصولات</span>
                 </a>
             </li>
             <li class="@(IsActive("UserManagement", "Index") ? "active" : null)">
                 <a asp-controller="UserManagement" asp-action="Index">
                     <i class="fa fa-users blue1_color"></i>
-                    <span>کاربران</span>
+                    <span>مدیریت کاربران</span>
+                </a>
+            </li>
+            <li class="@(IsActive("RewardManagement", "Index") ? "active" : null)">
+                <a asp-controller="RewardManagement" asp-action="Index">
+                    <i class="fa fa-bitcoin text-bg-warning"></i>
+                    <span>مدیریت پاداش</span>
                 </a>
             </li>
             <li class="@(IsActive("UserManagement", "UserReport") ? "active" : null)">
@@ -68,7 +74,7 @@
             </li>
             <li class="@(IsActive("Admin", "Profile") ? "active" : null)">
                 <a asp-controller="Admin" asp-action="Profile">
-                    <i class="fa fa-user red_color"></i>
+                    <i class="fa fa-user text-light"></i>
                     <span>پروفایل</span>
                 </a>
             </li>

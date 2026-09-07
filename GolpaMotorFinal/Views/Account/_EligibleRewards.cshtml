@@ -1,0 +1,67 @@
+@model GolpaMotorFinal.Models.ViewModels.Account.EligibleRewardsDialogViewModel
+
+<div id="rewardRequestAlert" class="alert d-none"></div>
+<p>مانده امتیاز شما: <strong>@Model.RemainedPoints</strong></p>
+<p class="small text-muted">واجد شرایط: @(Model.IsEligibleForReward ? "بله" : "خیر") · دریافت قبلی: @(Model.HasReceivedReward ? "بله" : "خیر")</p>
+
+<h6 class="mt-3">پاداش‌های قابل درخواست</h6>
+@if (Model.Items.Any())
+{
+    <div class="table-responsive">
+        <table class="table table-sm align-middle">
+            <thead>
+                <tr>
+                    <th>عنوان</th>
+                    <th>حد نصاب</th>
+                    <th>نوع</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.Items)
+                {
+                    <tr>
+                        <td>
+                            <div>@item.Title</div>
+                            <div class="small text-muted">@item.Description</div>
+                        </td>
+                        <td>@item.RequiredPoints</td>
+                        <td>@(item.IsCashReward ? "نقدی" : "غیرنقدی")</td>
+                        <td>
+                            @if (item.HasPendingRequest)
+                            {
+                                <span class="badge bg-warning text-dark">در انتظار بررسی</span>
+                            }
+                            else
+                            {
+                                <button type="button" class="btn btn-sm btn-primary btnSubmitRewardRequest" data-id="@item.RewardCatalogID">درخواست</button>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+else
+{
+    <p class="text-muted">در حال حاضر پاداش واجد شرایطی برای شما وجود ندارد.</p>
+}
+
+<h6 class="mt-4">درخواست‌های قبلی</h6>
+@if (Model.RecentRequests.Any())
+{
+    <ul class="list-group">
+        @foreach (var req in Model.RecentRequests)
+        {
+            <li class="list-group-item d-flex justify-content-between">
+                <span>@req.CatalogTitle</span>
+                <span>@req.StatusTitle</span>
+            </li>
+        }
+    </ul>
+}
+else
+{
+    <p class="text-muted mb-0">درخواستی ثبت نشده است.</p>
+}

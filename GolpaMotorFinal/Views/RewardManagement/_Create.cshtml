@@ -1,0 +1,46 @@
+@model DomainModel.ViewModels.Reward.RewardCatalogAddEditModel
+
+<form id="frmCreateCatalog" class="admin-form">
+    @Html.AntiForgeryToken()
+    <div asp-validation-summary="ModelOnly" class="text-danger mb-2"></div>
+    <div class="row g-3">
+        <div class="col-12 col-md-6">
+            <label asp-for="Title" class="form-label">عنوان</label>
+            <input asp-for="Title" class="form-control" />
+            <span asp-validation-for="Title" class="text-danger small"></span>
+        </div>
+        <div class="col-12 col-md-6">
+            <label asp-for="RequiredPoints" class="form-label">حد نصاب امتیاز</label>
+            <input asp-for="RequiredPoints" class="form-control" />
+            <span asp-validation-for="RequiredPoints" class="text-danger small"></span>
+        </div>
+        <div class="col-12">
+            <label asp-for="Description" class="form-label">توضیحات</label>
+            <textarea asp-for="Description" class="form-control"></textarea>
+        </div>
+        <div class="col-12 col-md-6">
+            <div class="form-check mt-2">
+                <input asp-for="IsCashReward" class="form-check-input" />
+                <label asp-for="IsCashReward" class="form-check-label">پاداش نقدی</label>
+            </div>
+        </div>
+        <div class="col-12 col-md-6">
+            <label asp-for="CashValue" class="form-label">مبلغ نقدی</label>
+            <input asp-for="CashValue" class="form-control" />
+        </div>
+        <div class="col-12">
+            <div class="form-check">
+                <input asp-for="IsActive" class="form-check-input" />
+                <label asp-for="IsActive" class="form-check-label">فعال</label>
+            </div>
+        </div>
+    </div>
+    <div class="row g-2 mt-4">
+        <div class="col-12 col-md-6">
+            <button type="submit" class="btn btn-success w-100">ثبت</button>
+        </div>
+        <div class="col-12 col-md-6">
+            <button type="button" class="btn btn-secondary w-100" onclick="hideRewardModal()">انصراف</button>
+        </div>
+    </div>
+</form>

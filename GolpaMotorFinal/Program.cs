@@ -1,6 +1,7 @@
 ﻿
 using DataAccess.Repositories;
 using DataAccess.Services;
+using DomainModel.DataSeeder;
 using DomainModel.Models;
 using GolpaMotorFinal.FrameworkUI.Services;
 using Microsoft.AspNetCore.Identity;
@@ -41,6 +42,8 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ICardRegistrationRepository, CardRegistrationRepository>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IWarrantyCardRepository, WarrantyCardRepository>();
+builder.Services.AddScoped<IRewardCatalogRepository, RewardCatalogRepository>();
+builder.Services.AddScoped<IRewardRequestRepository, RewardRequestRepository>();
 
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IFileManager, FileManager>();
@@ -73,6 +76,12 @@ app.UseRouting();
 app.UseAuthentication();
 
 app.UseAuthorization();
+
+using (var scope = app.Services.CreateScope())
+{
+    await RewardDeliveryStatusSeeder.SeedAsync(scope.ServiceProvider);
+    await RewardCatalogSeeder.SeedAsync(scope.ServiceProvider);
+}
 
 app.MapControllerRoute(
     name: "default",

@@ -24,6 +24,8 @@
                         <th>شهر</th>
                         <th class="table-num">کارت</th>
                         <th class="table-num">امتیاز</th>
+                        <th>واجد پاداش</th>
+                        <th>دریافت پاداش</th>
                         <th class="table-actions">عملیات</th>
                     </tr>
                 </thead>
@@ -45,6 +47,8 @@
                                 <td>@item.City</td>
                                 <td class="table-num">@item.TotalRegisteredCards</td>
                                 <td class="table-num">@item.TotalEarnedPoints</td>
+                                <td>@(item.IsEligibleForReward ? "بله" : "خیر")</td>
+                                <td>@(item.HasReceivedReward ? "بله" : "خیر")</td>
                                 <td class="table-actions">
                                     <button type="button" class="btn btn-sm btn-outline-secondary open-modal"
                                         title="جزئیات"

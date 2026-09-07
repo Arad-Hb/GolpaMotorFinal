@@ -48,6 +48,12 @@ namespace DomainModel.Models.Configurations
                 .WithMany(x => x.Users)
                 .HasForeignKey(x => x.CityID)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Property(x => x.IsEligibleForReward)
+                .HasDefaultValue(false);
+
+            builder.Property(x => x.HasReceivedReward)
+                .HasDefaultValue(false);
         }
     }
 }

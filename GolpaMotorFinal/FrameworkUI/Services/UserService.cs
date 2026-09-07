@@ -144,6 +144,8 @@ namespace GolpaMotorFinal.FrameworkUI.Services
                     RoleName = roleName,
                     TotalRegisteredCards = u.TotalRegisteredCards,
                     TotalEarnedPoints = u.TotalEarnedPoints,
+                    IsEligibleForReward = u.IsEligibleForReward,
+                    HasReceivedReward = u.HasReceivedReward,
                     Province = u.Province ?? string.Empty,
                     City = u.City ?? string.Empty
                 });
@@ -238,7 +240,7 @@ namespace GolpaMotorFinal.FrameworkUI.Services
         public CrudGridViewModel BuildUserGrid(IEnumerable<UserListItemViewModel> users)
         {
             var grid = new CrudGridViewModel { GridId = "UserGrid" };
-            grid.Headers.AddRange(new[] { "تصویر", "نام", "موبایل", "شغل", "کارت", "امتیاز", "استان", "شهر" });
+            grid.Headers.AddRange(new[] { "تصویر", "نام", "موبایل", "شغل", "کارت", "امتیاز", "واجد پاداش", "دریافت پاداش", "استان", "شهر" });
 
             foreach (var item in users)
             {
@@ -249,6 +251,8 @@ namespace GolpaMotorFinal.FrameworkUI.Services
                 row.Columns.Add(Text(item.RoleName));
                 row.Columns.Add(Number(item.TotalRegisteredCards));
                 row.Columns.Add(Number(item.TotalEarnedPoints));
+                row.Columns.Add(Text(item.IsEligibleForReward ? "بله" : "خیر"));
+                row.Columns.Add(Text(item.HasReceivedReward ? "بله" : "خیر"));
                 row.Columns.Add(Text(item.Province));
                 row.Columns.Add(Text(item.City));
                 row.Actions.Add(new GridAction

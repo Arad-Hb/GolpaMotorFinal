@@ -1,0 +1,70 @@
+@model GolpaMotorFinal.Models.ViewModels.RewardManagement.RewardRequestListPageViewModel
+@using DomainModel.Models
+
+<div class="table-responsive">
+    <table class="table table-hover align-middle">
+        <thead class="table-dark">
+            <tr>
+                <th>کاربر</th>
+                <th>موبایل</th>
+                <th>پاداش</th>
+                <th class="table-num">حد نصاب</th>
+                <th class="table-num">مانده</th>
+                <th>تاریخ</th>
+                <th>وضعیت</th>
+                <th class="table-actions">عملیات</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.Items != null && Model.Items.Any())
+            {
+                foreach (var item in Model.Items)
+                {
+                    <tr>
+                        <td>@(string.IsNullOrWhiteSpace(item.UserFullName) ? "نامشخص" : item.UserFullName)</td>
+                        <td>@item.PhoneNumber</td>
+                        <td>@item.CatalogTitle</td>
+                        <td class="table-num">@item.RequiredPoints</td>
+                        <td class="table-num">@item.RemainedPoints</td>
+                        <td>@(item.RequestDate?.ToLocalTime().ToString("yyyy/MM/dd") ?? "-")</td>
+                        <td>@item.StatusTitle</td>
+                        <td class="table-actions">
+                            <button type="button" class="btn btn-sm btn-outline-secondary btnRequestDetails" title="جزئیات" data-id="@item.RewardRequestID">
+                                <i class="fa fa-eye"></i>
+                            </button>
+                            @if (!item.IsComplete && item.StatusTitle == RewardStatusTitles.Pending)
+                            {
+                                <button type="button" class="btn btn-sm btn-outline-success btnApproveRequest" title="تأیید" data-id="@item.RewardRequestID">
+                                    <i class="fa fa-check"></i>
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-danger btnRejectRequest" title="رد" data-id="@item.RewardRequestID">
+                                    <i class="fa fa-times"></i>
+                                </button>
+                            }
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="8" class="text-center text-muted">درخواستی یافت نشد</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@if (Model.PageCount > 1)
+{
+    <nav class="d-flex justify-content-center">
+        <ul class="pagination">
+            @for (var i = 0; i < Model.PageCount; i++)
+            {
+                <li class="page-item @(i == Model.PageIndex ? "active" : "")">
+                    <a class="page-link request-page" href="#" data-page="@i">@(i + 1)</a>
+                </li>
+            }
+        </ul>
+    </nav>
+}

@@ -1,0 +1,29 @@
+@model DomainModel.ViewModels.Reward.RewardRequestListItem
+@using DomainModel.Models
+
+<div class="modal-compact">
+    <div class="fw-semibold mb-2">@Model.CatalogTitle</div>
+    <ul class="list-unstyled">
+        <li>کاربر: <strong>@(string.IsNullOrWhiteSpace(Model.UserFullName) ? "نامشخص" : Model.UserFullName)</strong></li>
+        <li>موبایل: @Model.PhoneNumber</li>
+        <li>حد نصاب: @Model.RequiredPoints</li>
+        <li>مانده امتیاز: @Model.RemainedPoints</li>
+        <li>تاریخ درخواست: @(Model.RequestDate?.ToLocalTime().ToString("yyyy/MM/dd HH:mm") ?? "-")</li>
+        <li>وضعیت: <strong>@Model.StatusTitle</strong></li>
+        @if (Model.ReviewedDate.HasValue)
+        {
+            <li>تاریخ بررسی: @Model.ReviewedDate.Value.ToLocalTime().ToString("yyyy/MM/dd HH:mm")</li>
+        }
+    </ul>
+    @if (!Model.IsComplete && Model.StatusTitle == RewardStatusTitles.Pending)
+    {
+        <div class="row g-2 mt-3">
+            <div class="col-12 col-md-6">
+                <button type="button" class="btn btn-success w-100 btnApproveRequest" data-id="@Model.RewardRequestID">تأیید</button>
+            </div>
+            <div class="col-12 col-md-6">
+                <button type="button" class="btn btn-danger w-100 btnRejectRequest" data-id="@Model.RewardRequestID">رد</button>
+            </div>
+        </div>
+    }
+</div>

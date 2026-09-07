@@ -43,6 +43,10 @@ namespace DomainModel.Models
         public int? RemainedPoints { get; set; }
 
         public int? TotalRegisteredCards { get; set; }
+
+        public bool IsEligibleForReward { get; set; }
+
+        public bool HasReceivedReward { get; set; }
         // OTP
         public string? VerificationCodeHash { get; set; }
 

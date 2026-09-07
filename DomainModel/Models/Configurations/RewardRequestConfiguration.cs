@@ -21,6 +21,11 @@ namespace DomainModel.Models.Configurations
             builder.HasOne(x => x.RewardCatalog)
                 .WithMany(x => x.RewardRequests)
                 .HasForeignKey(x => x.RewardCatalogID);
+
+            builder.HasOne(x => x.RewardDeliveryStatus)
+                .WithMany(x => x.RewardRequests)
+                .HasForeignKey(x => x.RewardDeliveryStatusID)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

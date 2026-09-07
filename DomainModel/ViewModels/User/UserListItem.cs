@@ -22,6 +22,10 @@ namespace DomainModel.ViewModels.User
         public DateTime RegisterDate { get; set; }
         public int? RemainedPoints { get; set; }
 
+        public bool IsEligibleForReward { get; set; }
+
+        public bool HasReceivedReward { get; set; }
+
     }
 }
    

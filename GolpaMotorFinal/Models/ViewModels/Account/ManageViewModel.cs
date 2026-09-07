@@ -27,6 +27,8 @@ namespace GolpaMotorFinal.Models.ViewModels.Account
         public string? CurrentPassword { get; set; }
         public string? NewPassword { get; set; }
         public int RemainedPoints { get; set; }
+        public bool IsEligibleForReward { get; set; }
+        public bool HasReceivedReward { get; set; }
         public int TotalRegisteredCards { get; set; }
         public List<CustomerCardItem> Cards { get; set; } = new();
     }

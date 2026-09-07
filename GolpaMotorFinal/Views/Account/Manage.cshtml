@@ -14,6 +14,9 @@
                     <p class="text-muted mb-1">@Model.PhoneNumber</p>
                     <p class="mb-0">مانده امتیاز: <strong>@Model.RemainedPoints</strong></p>
                     <p>کارت ثبت‌شده: <strong>@Model.TotalRegisteredCards</strong></p>
+                    <p class="mb-1">واجد شرایط پاداش: <strong>@(Model.IsEligibleForReward ? "بله" : "خیر")</strong></p>
+                    <p>دریافت پاداش قبلی: <strong>@(Model.HasReceivedReward ? "بله" : "خیر")</strong></p>
+                    <button type="button" class="btn btn-warning mt-2" id="btnRequestReward">درخواست پاداش</button>
                 </div>
             </div>
         </div>
@@ -102,3 +105,52 @@
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="rewardRequestModal">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">درخواست پاداش</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="rewardRequestModalBody"></div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function antiForgeryToken() {
+            return $('input[name="__RequestVerificationToken"]').first().val();
+        }
+
+        function loadEligibleRewards(message, success) {
+            $("#rewardRequestModalBody").load("/Account/EligibleRewards", function () {
+                if (message) {
+                    const box = $("#rewardRequestAlert");
+                    box.removeClass("d-none alert-success alert-danger");
+                    box.addClass(success ? "alert-success" : "alert-danger");
+                    box.text(message);
+                }
+            });
+        }
+
+        $("#btnRequestReward").on("click", function () {
+            loadEligibleRewards();
+            bootstrap.Modal.getOrCreateInstance(document.getElementById("rewardRequestModal")).show();
+        });
+
+        $(document).on("click", ".btnSubmitRewardRequest", function () {
+            const id = $(this).data("id");
+            $.ajax({
+                url: "/Account/RequestReward",
+                type: "POST",
+                data: { rewardCatalogID: id },
+                headers: { RequestVerificationToken: antiForgeryToken() },
+                success: function (res) {
+                    loadEligibleRewards(res.message, res.success);
+                }
+            });
+        });
+    </script>
+}

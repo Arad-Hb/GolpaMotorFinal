@@ -19,16 +19,16 @@ namespace DomainModel.DataSeeder
 
             var items = new List<RewardCatalog>
         {
-            new() { Title="لباس کار", Description="لباس کار صنعتی", RequiredPoints=500, IsCashReward=false },
-            new() { Title="جعبه ابزار", Description="جعبه ابزار 24 پارچه", RequiredPoints=800, IsCashReward=false },
-            new() { Title="آچار بکس", Description="ست آچار بکس حرفه‌ای", RequiredPoints=1200, IsCashReward=false },
-            new() { Title="کارت هدیه 500 هزار تومانی", Description="واریز نقدی 500 هزار تومان", RequiredPoints=1000, IsCashReward=true, CashValue=500000 },
-            new() { Title="کارت هدیه 1 میلیون تومانی", Description="واریز نقدی 1 میلیون تومان", RequiredPoints=1800, IsCashReward=true, CashValue=1000000 },
-            new() { Title="کارت هدیه 2 میلیون تومانی", Description="واریز نقدی 2 میلیون تومان", RequiredPoints=3500, IsCashReward=true, CashValue=2000000 },
-            new() { Title="دریل شارژی", Description="دریل شارژی صنعتی", RequiredPoints=2500, IsCashReward=false },
-            new() { Title="مولتی متر", Description="مولتی متر دیجیتال", RequiredPoints=1500, IsCashReward=false },
-            new() { Title="بن خرید 200 هزار تومانی", Description="جایزه نقدی", RequiredPoints=400, IsCashReward=true, CashValue=200000 },
-            new() { Title="بن خرید 3 میلیون تومانی", Description="جایزه نقدی", RequiredPoints=5000, IsCashReward=true, CashValue=3000000 }
+            new() { Title="لباس کار", Description="لباس کار صنعتی", RequiredPoints=500, IsCashReward=false, IsActive=true },
+            new() { Title="جعبه ابزار", Description="جعبه ابزار 24 پارچه", RequiredPoints=800, IsCashReward=false, IsActive=true },
+            new() { Title="آچار بکس", Description="ست آچار بکس حرفه‌ای", RequiredPoints=1200, IsCashReward=false, IsActive=true },
+            new() { Title="کارت هدیه 500 هزار تومانی", Description="واریز نقدی 500 هزار تومان", RequiredPoints=1000, IsCashReward=true, CashValue=500000, IsActive=true },
+            new() { Title="کارت هدیه 1 میلیون تومانی", Description="واریز نقدی 1 میلیون تومان", RequiredPoints=1800, IsCashReward=true, CashValue=1000000, IsActive=true },
+            new() { Title="کارت هدیه 2 میلیون تومانی", Description="واریز نقدی 2 میلیون تومان", RequiredPoints=3500, IsCashReward=true, CashValue=2000000, IsActive=true },
+            new() { Title="دریل شارژی", Description="دریل شارژی صنعتی", RequiredPoints=2500, IsCashReward=false, IsActive=true },
+            new() { Title="مولتی متر", Description="مولتی متر دیجیتال", RequiredPoints=1500, IsCashReward=false, IsActive=true },
+            new() { Title="بن خرید 200 هزار تومانی", Description="جایزه نقدی", RequiredPoints=400, IsCashReward=true, CashValue=200000, IsActive=true },
+            new() { Title="بن خرید 3 میلیون تومانی", Description="جایزه نقدی", RequiredPoints=5000, IsCashReward=true, CashValue=3000000, IsActive=true }
         };
 
             await context.RewardCatalogs.AddRangeAsync(items);

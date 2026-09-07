@@ -1,4 +1,5 @@
-﻿using DataAccess.Services;
+﻿using DataAccess.Helpers;
+using DataAccess.Services;
 using DomainModel.Models;
 using DomainModel.ViewModels.User;
 using Framework.Common;
@@ -329,6 +330,10 @@ namespace DataAccess.Repositories
                 currentUser.RemainedPoints = earned - settled;
                 currentUser.TotalRegisteredCards = await db.CardRegistrations.CountAsync(x => x.UserID == currentUserID);
                 currentUser.IsActive = true;
+                if (sourceUser.HasReceivedReward)
+                    currentUser.HasReceivedReward = true;
+
+                await RewardEligibilityHelper.ApplyToUserAsync(db, currentUser);
 
                 sourceUser.IsActive = false;
                 sourceUser.IsDeleted = true;
@@ -336,6 +341,7 @@ namespace DataAccess.Repositories
                 sourceUser.TotalSettledPoints = 0;
                 sourceUser.RemainedPoints = 0;
                 sourceUser.TotalRegisteredCards = 0;
+                sourceUser.IsEligibleForReward = false;
 
                 await db.SaveChangesAsync();
                 await transaction.CommitAsync();
@@ -401,7 +407,9 @@ namespace DataAccess.Repositories
                    TotalEarnedPoints = x.TotalEarnedPoints ?? 0,
                    TotalSettledPoints = x.TotalSettledPoints ?? 0,
                    RemainedPoints = x.RemainedPoints ?? 0,
-                   TotalRegisteredCards = x.TotalRegisteredCards ?? 0
+                   TotalRegisteredCards = x.TotalRegisteredCards ?? 0,
+                   IsEligibleForReward = x.IsEligibleForReward,
+                   HasReceivedReward = x.HasReceivedReward
                })
                .FirstOrDefaultAsync();
 
@@ -442,7 +450,9 @@ namespace DataAccess.Repositories
                     TotalEarnedPoints = x.TotalEarnedPoints ?? 0,
                     TotalSettledPoints = x.TotalSettledPoints ?? 0,
                     RemainedPoints = x.RemainedPoints ?? 0,
-                    TotalRegisteredCards = x.TotalRegisteredCards ?? 0
+                    TotalRegisteredCards = x.TotalRegisteredCards ?? 0,
+                    IsEligibleForReward = x.IsEligibleForReward,
+                    HasReceivedReward = x.HasReceivedReward
                 })
                 .ToListAsync();
         }
@@ -493,7 +503,9 @@ namespace DataAccess.Repositories
                     TotalEarnedPoints = x.TotalEarnedPoints ?? 0,
                     TotalSettledPoints = x.TotalSettledPoints ?? 0,
                     RemainedPoints = x.RemainedPoints ?? 0,
-                    TotalRegisteredCards = x.TotalRegisteredCards ?? 0
+                    TotalRegisteredCards = x.TotalRegisteredCards ?? 0,
+                    IsEligibleForReward = x.IsEligibleForReward,
+                    HasReceivedReward = x.HasReceivedReward
                 })
                 .FirstOrDefaultAsync();
         }
@@ -557,6 +569,8 @@ namespace DataAccess.Repositories
                 PhoneNumber = u.PhoneNumber,
                 ExistingProfileImageUrl=u.ProfileImageUrl,
                 RemainedPoints= u.RemainedPoints?? 0,
+                IsEligibleForReward = u.IsEligibleForReward,
+                HasReceivedReward = u.HasReceivedReward,
             }).ToListAsync();
 
             var result=new UserListComplexModel { userList = users };

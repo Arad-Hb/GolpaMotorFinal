@@ -23,6 +23,9 @@ namespace DomainModel.Models.Configurations
 
             builder.Property(x => x.CashValue)
                 .HasPrecision(18, 2);
+
+            builder.Property(x => x.IsActive)
+                .HasDefaultValue(true);
         }
     }
 }

@@ -1,0 +1,276 @@
+@{
+    ViewData["Title"] = "مدیریت پاداش";
+    Layout = "_AdminLayout";
+}
+
+<div class="row column_title">
+    <div class="col-md-12">
+        <div class="page_title">
+            <h2>مدیریت پاداش</h2>
+        </div>
+    </div>
+</div>
+
+<ul class="nav nav-tabs mb-3" role="tablist">
+    <li class="nav-item">
+        <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#catalogTab" type="button">کاتالوگ پاداش</button>
+    </li>
+    <li class="nav-item">
+        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#requestTab" type="button">درخواست‌ها</button>
+    </li>
+</ul>
+
+<div class="tab-content">
+    <div class="tab-pane fade show active" id="catalogTab">
+        <div class="white_shd full margin_bottom_30">
+            <div class="full graph_head d-flex flex-wrap justify-content-between align-items-center gap-2">
+                <div class="heading1 margin_0"><h2>لیست پاداش‌ها</h2></div>
+                <button class="main_bt" id="btnAddCatalog"><i class="fa fa-plus ms-1"></i> افزودن پاداش</button>
+            </div>
+            <div class="padding_infor_info">
+                <div class="table_filter_bar">
+                    <input id="catalogSearch" class="form-control" placeholder="جستجوی عنوان پاداش..." />
+                    <button type="button" class="main_bt" id="btnSearchCatalog">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </button>
+                </div>
+                <form id="frmAntiForgery">
+                    @Html.AntiForgeryToken()
+                </form>
+                <div id="CatalogGrid"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="tab-pane fade" id="requestTab">
+        <div class="white_shd full margin_bottom_30">
+            <div class="full graph_head">
+                <div class="heading1 margin_0"><h2>درخواست‌های پاداش</h2></div>
+            </div>
+            <div class="padding_infor_info">
+                <div class="table_filter_bar">
+                    <input id="requestSearch" class="form-control" placeholder="جستجوی کاربر یا پاداش..." />
+                    <button type="button" class="main_bt" id="btnSearchRequest">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </button>
+                </div>
+                <div id="RequestGrid"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="rewardModal">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="rewardModalTitle">مدیریت پاداش</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="rewardModalBody"></div>
+        </div>
+    </div>
+</div>
+
+@section Scripts
+{
+    <script>
+        let catalogPage = 0;
+        let requestPage = 0;
+
+        $(function () {
+            LoadCatalogs();
+            LoadRequests();
+        });
+
+        function rewardModal() {
+            return bootstrap.Modal.getOrCreateInstance(document.getElementById("rewardModal"));
+        }
+
+        function showRewardModal(title) {
+            if (title) $("#rewardModalTitle").text(title);
+            rewardModal().show();
+        }
+
+        function hideRewardModal() {
+            rewardModal().hide();
+        }
+
+        function antiForgeryToken() {
+            return $('#frmAntiForgery input[name="__RequestVerificationToken"]').val();
+        }
+
+        function catalogListUrl(page) {
+            const title = $("#catalogSearch").val();
+            return "/RewardManagement/CatalogList?title=" + encodeURIComponent(title || "") + "&pageIndex=" + (page ?? catalogPage) + "&ts=" + new Date().getTime();
+        }
+
+        function requestListUrl(page) {
+            const term = $("#requestSearch").val();
+            return "/RewardManagement/RequestList?searchTerm=" + encodeURIComponent(term || "") + "&pageIndex=" + (page ?? requestPage) + "&ts=" + new Date().getTime();
+        }
+
+        function LoadCatalogs(page) {
+            if (typeof page === "number") catalogPage = page;
+            $("#CatalogGrid").load(catalogListUrl(catalogPage));
+        }
+
+        function LoadRequests(page) {
+            if (typeof page === "number") requestPage = page;
+            $("#RequestGrid").load(requestListUrl(requestPage));
+        }
+
+        $("#btnSearchCatalog").on("click", function () {
+            LoadCatalogs(0);
+        });
+
+        $("#btnSearchRequest").on("click", function () {
+            LoadRequests(0);
+        });
+
+        $(document).on("click", ".catalog-page", function (e) {
+            e.preventDefault();
+            LoadCatalogs(parseInt($(this).data("page"), 10) || 0);
+        });
+
+        $(document).on("click", ".request-page", function (e) {
+            e.preventDefault();
+            LoadRequests(parseInt($(this).data("page"), 10) || 0);
+        });
+
+        $(document).on("click", "#btnAddCatalog", function () {
+            $.get("/RewardManagement/Create", function (result) {
+                $("#rewardModalBody").html(result);
+                showRewardModal("افزودن پاداش");
+            });
+        });
+
+        $(document).on("submit", "#frmCreateCatalog", function (e) {
+            e.preventDefault();
+            var formData = new FormData(this);
+            $.ajax({
+                url: "/RewardManagement/Create",
+                type: "POST",
+                data: formData,
+                processData: false,
+                contentType: false,
+                headers: { RequestVerificationToken: $('input[name="__RequestVerificationToken"]', this).val() },
+                success: function (res) {
+                    if (res.success) {
+                        hideRewardModal();
+                        LoadCatalogs();
+                        toastSuccess(res.message);
+                    } else {
+                        toastError(res.message);
+                    }
+                }
+            });
+        });
+
+        $(document).on("click", ".btnEditCatalog", function () {
+            $.get("/RewardManagement/Edit", { rewardCatalogID: $(this).data("id") }, function (result) {
+                $("#rewardModalBody").html(result);
+                showRewardModal("ویرایش پاداش");
+            });
+        });
+
+        $(document).on("submit", "#frmEditCatalog", function (e) {
+            e.preventDefault();
+            var formData = new FormData(this);
+            $.ajax({
+                url: "/RewardManagement/Edit",
+                type: "POST",
+                data: formData,
+                processData: false,
+                contentType: false,
+                headers: { RequestVerificationToken: $('input[name="__RequestVerificationToken"]', this).val() },
+                success: function (res) {
+                    if (res.success) {
+                        hideRewardModal();
+                        LoadCatalogs();
+                        toastSuccess(res.message);
+                    } else {
+                        toastError(res.message);
+                    }
+                }
+            });
+        });
+
+        $(document).on("click", ".btnDetailsCatalog", function () {
+            $.get("/RewardManagement/Details", { rewardCatalogID: $(this).data("id") }, function (result) {
+                $("#rewardModalBody").html(result);
+                showRewardModal("جزئیات پاداش");
+            });
+        });
+
+        $(document).on("click", "#CatalogGrid .btnDeleteCatalog", async function (e) {
+            e.stopImmediatePropagation();
+            const ok = await confirmDelete("این پاداش غیرفعال خواهد شد.");
+            if (!ok) return;
+            const id = $(this).data("id");
+            $.ajax({
+                url: "/RewardManagement/Delete",
+                type: "POST",
+                data: { rewardCatalogID: id },
+                headers: { RequestVerificationToken: antiForgeryToken() },
+                success: function (res) {
+                    if (res.success) {
+                        LoadCatalogs();
+                        toastSuccess(res.message);
+                    } else {
+                        toastError(res.message);
+                    }
+                }
+            });
+        });
+
+        $(document).on("click", ".btnRequestDetails", function () {
+            $.get("/RewardManagement/RequestDetails", { rewardRequestID: $(this).data("id") }, function (result) {
+                $("#rewardModalBody").html(result);
+                showRewardModal("جزئیات درخواست");
+            });
+        });
+
+        $(document).on("click", ".btnApproveRequest", async function () {
+            const ok = await confirmDelete("این درخواست تأیید و امتیاز کاربر کسر شود؟");
+            if (!ok) return;
+            const id = $(this).data("id");
+            $.ajax({
+                url: "/RewardManagement/Approve",
+                type: "POST",
+                data: { rewardRequestID: id },
+                headers: { RequestVerificationToken: antiForgeryToken() },
+                success: function (res) {
+                    if (res.success) {
+                        hideRewardModal();
+                        LoadRequests();
+                        toastSuccess(res.message);
+                    } else {
+                        toastError(res.message);
+                    }
+                }
+            });
+        });
+
+        $(document).on("click", ".btnRejectRequest", async function () {
+            const ok = await confirmDelete("این درخواست رد شود؟");
+            if (!ok) return;
+            const id = $(this).data("id");
+            $.ajax({
+                url: "/RewardManagement/Reject",
+                type: "POST",
+                data: { rewardRequestID: id },
+                headers: { RequestVerificationToken: antiForgeryToken() },
+                success: function (res) {
+                    if (res.success) {
+                        hideRewardModal();
+                        LoadRequests();
+                        toastSuccess(res.message);
+                    } else {
+                        toastError(res.message);
+                    }
+                }
+            });
+        });
+    </script>
+}
