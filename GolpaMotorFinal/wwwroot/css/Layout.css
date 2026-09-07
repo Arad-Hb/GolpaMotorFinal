@@ -23,27 +23,6 @@ time, mark, audio, video {
     vertical-align: baseline;
 }
 
-@font-face {
-    font-family: 'FontAwesome';
-    src: url('../fonts/fontawesome-free-6.7.2-web/webfonts/fa-brands-400.ttf') format('truetype'), url('../fonts/fontawesome-free-6.7.2-web/webfonts/fa-brands-400.woff2') format('woff2'), url('../fonts/fontawesome-free-6.7.2-web/webfonts/fa-regular-400.ttf') format('truetype'), url('../fonts/fontawesome-free-6.7.2-web/webfonts/fa-regular-400.woff2') format('woff2'), url('../fonts/fontawesome-free-6.7.2-web/webfonts/fa-solid-900.ttf') format('truetype'), url('../fonts/fontawesome-free-6.7.2-web/webfonts/fa-solid-900.woff2') format('woff2'),url('../fonts/fontawesome-free-6.7.2-web/webfonts/fa-v4compatibility.ttf') format('truetype'),url('../fonts/fontawesome-free-6.7.2-web/webfonts/fa-v4compatibility.woff2') format('woff2');
-}
-
-@font-face {
-    font-family: 'VazirFD';
-    src: url('../fonts/vazir/Vazir-FD-WOL.woff2') format('woff2'), url('../fonts/vazir/Vazir-FD-WOL.woff') format('woff'), url('../fonts/vazir/Vazir-FD-WOL.ttf') format('truetype');
-    font-weight: normal;
-    font-style: normal;
-    font-display: swap;
-}
-
-@font-face {
-    font-family: 'VazirFD';
-    src: url('../fonts/vazir/Vazir-Bold-FD-WOL.woff2') format('woff2'), url('../fonts/vazir/Vazir-Bold-FD-WOL.woff') format('woff'), url('../fonts/vazir/Vazir-Bold-FD-WOL.ttf') format('truetype');
-    font-weight: 700;
-    font-style: normal;
-    font-display: swap;
-}
-
 :root {
     --navy: #04264e;
     --orange: #eb792d;

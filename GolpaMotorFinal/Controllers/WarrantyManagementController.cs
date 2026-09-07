@@ -67,32 +67,13 @@ namespace GolpaMotorFinal.Controllers
                 await roleManager.CreateAsync(new IdentityRole(roleName));
         }
 
-        public async Task<IActionResult> Index(long? productId, bool? isRegistered)
+        public async Task<IActionResult> Index(long? productId, bool? isRegistered, string? tab)
         {
             if (!User.IsInRole("Admin"))
                 return RedirectToAction(nameof(Register));
 
-            var vm = new WarrantyAdminIndexViewModel
-            {
-                ProductID = productId,
-                IsRegistered = isRegistered,
-                Products = await products.GetAll(),
-                Cards = await warrantyCards.SearchAsync(productId, isRegistered),
-                Stats = await products.GetStatistics()
-            };
-
-            if (TempData["ImportMessage"] is string importMsg)
-            {
-                vm.LastImport = new WarrantyExcelImportResult
-                {
-                    Success = TempData["ImportSuccess"] as bool? ?? false,
-                    Message = importMsg,
-                    Inserted = TempData["ImportInserted"] as int? ?? 0,
-                    Duplicate = TempData["ImportDuplicate"] as int? ?? 0,
-                    Empty = TempData["ImportEmpty"] as int? ?? 0
-                };
-            }
-
+            var vm = await BuildAdminIndex(productId, isRegistered);
+            vm.OpenTab = ResolveOpenTab(tab, vm.LastImport != null);
             return View(vm);
         }
 
@@ -117,7 +98,74 @@ namespace GolpaMotorFinal.Controllers
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Register(RegisterationCardViewModel request)
+        public Task<IActionResult> Register(RegisterationCardViewModel request)
+            => CompleteRegistration(request, fromAdmin: false);
+
+        [HttpPost]
+        [Authorize(Roles = "Admin")]
+        [ValidateAntiForgeryToken]
+        public Task<IActionResult> RegisterForCustomer(RegisterationCardViewModel request)
+            => CompleteRegistration(request, fromAdmin: true);
+
+        private static string ResolveOpenTab(string? tab, bool hasImport)
+        {
+            return tab switch
+            {
+                "register" => "register",
+                "excel" => "excel",
+                "generate" => "generate",
+                "cards" => "cards",
+                _ => hasImport ? "excel" : "cards"
+            };
+        }
+
+        private async Task<WarrantyAdminIndexViewModel> BuildAdminIndex(long? productId, bool? isRegistered, RegisterationCardViewModel? form = null)
+        {
+            form ??= new RegisterationCardViewModel();
+            EnsureOperation(form);
+            form.CustomerTypes = await BindCustomerTypes();
+
+            if (TempData["SuccessMessage"] is string success)
+                form.op!.ToSuccess(success);
+            else if (TempData["ErrorMessage"] is string error)
+                form.op!.ToFailed(error);
+
+            var vm = new WarrantyAdminIndexViewModel
+            {
+                ProductID = productId,
+                IsRegistered = isRegistered,
+                Products = await products.GetAll(),
+                Cards = await warrantyCards.SearchAsync(productId, isRegistered),
+                Stats = await products.GetStatistics(),
+                RegistrationCard = form
+            };
+
+            if (TempData["ImportMessage"] is string importMsg)
+            {
+                vm.LastImport = new WarrantyExcelImportResult
+                {
+                    Success = TempData["ImportSuccess"] as bool? ?? false,
+                    Message = importMsg,
+                    Inserted = TempData["ImportInserted"] as int? ?? 0,
+                    Duplicate = TempData["ImportDuplicate"] as int? ?? 0,
+                    Empty = TempData["ImportEmpty"] as int? ?? 0
+                };
+            }
+
+            return vm;
+        }
+
+        private async Task<IActionResult> FailRegistration(RegisterationCardViewModel request, bool fromAdmin)
+        {
+            if (!fromAdmin)
+                return await WarrantyForm(request);
+
+            var vm = await BuildAdminIndex(null, null, request);
+            vm.OpenTab = "register";
+            return View("Index", vm);
+        }
+
+        private async Task<IActionResult> CompleteRegistration(RegisterationCardViewModel request, bool fromAdmin)
         {
             var op = EnsureOperation(request);
 
@@ -125,7 +173,7 @@ namespace GolpaMotorFinal.Controllers
             {
                 op.ToFailed("اطلاعات وارد شده در فرم معتبر نیست.");
                 ModelState.AddModelError("", "اطلاعات وارد شده در فرم معتبر نیست.");
-                return await WarrantyForm(request);
+                return await FailRegistration(request, fromAdmin);
             }
 
             if (request.SerialNumber == null ||
@@ -135,7 +183,7 @@ namespace GolpaMotorFinal.Controllers
             {
                 op.ToFailed("اطلاعات کارت‌ها نامعتبر است.");
                 ModelState.AddModelError("", "اطلاعات کارت‌ها نامعتبر است.");
-                return await WarrantyForm(request);
+                return await FailRegistration(request, fromAdmin);
             }
 
             var validCards = new List<WarrantyCard>();
@@ -187,7 +235,7 @@ namespace GolpaMotorFinal.Controllers
                 foreach (var error in invalidCards)
                     ModelState.AddModelError("", error);
 
-                return await WarrantyForm(request);
+                return await FailRegistration(request, fromAdmin);
             }
 
             var user = await userManager.Users
@@ -215,7 +263,7 @@ namespace GolpaMotorFinal.Controllers
                         ModelState.AddModelError("", error.Description);
 
                     op.ToFailed("ایجاد کاربر ناموفق بود.");
-                    return await WarrantyForm(request);
+                    return await FailRegistration(request, fromAdmin);
                 }
             }
 
@@ -278,7 +326,9 @@ namespace GolpaMotorFinal.Controllers
                 TempData["SuccessMessage"] = $"{successCount} کارت با موفقیت ثبت شد.";
             }
 
-            return RedirectToAction(nameof(Register));
+            return fromAdmin
+                ? RedirectToAction(nameof(Index), new { tab = "register" })
+                : RedirectToAction(nameof(Register));
         }
 
         [HttpPost]

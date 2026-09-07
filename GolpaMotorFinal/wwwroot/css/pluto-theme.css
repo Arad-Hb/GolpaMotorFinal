@@ -1,5 +1,19 @@
 /* Pluto-inspired theme for Golpa Motor — RTL, Bootstrap 5, Vazir */
+@font-face {
+    font-family: 'VazirFD';
+    src: url('../fonts/vazir/Vazir-FD-WOL.woff') format('woff');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
 
+@font-face {
+    font-family: 'VazirFD';
+    src: url('../fonts/vazir/Vazir-Bold-FD-WOL.woff') format('woff');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
 :root {
     --pluto-navy: #15283c;
     --pluto-navy-2: #214162;
@@ -15,7 +29,7 @@
 
 html[dir="rtl"] body.pluto-admin,
 html[dir="rtl"] body.pluto-public {
-    font-family: 'VazirFD', 'Vazirmatn', Tahoma, sans-serif;
+    font-family: 'VazirFD', Tahoma, sans-serif;
     color: var(--pluto-text);
     background: var(--pluto-content);
 }
@@ -565,6 +579,7 @@ html[dir="rtl"] body.pluto-public {
     margin: 0;
     float: none;
     box-shadow: none;
+    padding:5px 10px;
 }
 
 .pluto-admin .table_filter_bar .search-component-page {

@@ -2,7 +2,7 @@
 @{
     ViewData["Title"] = "گارانتی‌ها";
     Layout = "_AdminLayout";
-    var openExcelTab = Model.LastImport != null;
+    var openTab = string.IsNullOrWhiteSpace(Model.OpenTab) ? "cards" : Model.OpenTab;
 }
 
 <div class="row column_title">
@@ -63,13 +63,14 @@
             <div class="tabbar padding_infor_info">
                 <nav>
                     <div class="nav nav-tabs" id="warrantyTab" role="tablist">
-                        <button class="nav-link @(openExcelTab ? "" : "active")" id="tab-cards" data-bs-toggle="tab" data-bs-target="#warranty-cards" type="button" role="tab">لیست کارت‌ها</button>
-                        <button class="nav-link @(openExcelTab ? "active" : "")" id="tab-excel" data-bs-toggle="tab" data-bs-target="#warranty-excel" type="button" role="tab">ورود اکسل</button>
-                        <button class="nav-link" id="tab-generate" data-bs-toggle="tab" data-bs-target="#warranty-generate" type="button" role="tab">تولید سریال</button>
+                        <button class="nav-link @(openTab == "cards" ? "active" : null)" id="tab-cards" data-bs-toggle="tab" data-bs-target="#warranty-cards" type="button" role="tab">لیست کارت‌ها</button>
+                        <button class="nav-link @(openTab == "register" ? "active" : null)" id="tab-register" data-bs-toggle="tab" data-bs-target="#warranty-form" type="button" role="tab">فرم ثبت کارت گارانتی</button>
+                        <button class="nav-link @(openTab == "excel" ? "active" : null)" id="tab-excel" data-bs-toggle="tab" data-bs-target="#warranty-excel" type="button" role="tab">ورود اکسل</button>
+                        <button class="nav-link @(openTab == "generate" ? "active" : null)" id="tab-generate" data-bs-toggle="tab" data-bs-target="#warranty-generate" type="button" role="tab">تولید سریال</button>
                     </div>
                 </nav>
                 <div class="tab-content pt-3" id="warrantyTabContent">
-                    <div class="tab-pane fade @(openExcelTab ? "" : "show active")" id="warranty-cards" role="tabpanel">
+                    <div class="tab-pane fade @(openTab == "cards" ? "show active" : null)" id="warranty-cards" role="tabpanel">
                         <form method="get" class="table_filter_bar admin-form">
                             <select name="productId" class="form-select">
                                 <option value="">همه محصولات</option>
@@ -121,7 +122,16 @@
                             </table>
                         </div>
                     </div>
-                    <div class="tab-pane fade @(openExcelTab ? "show active" : "")" id="warranty-excel" role="tabpanel">
+
+                    <div class="tab-pane fade @(openTab == "register" ? "show active" : null)" id="warranty-form" role="tabpanel">
+                        @{
+                            ViewData["RegisterAction"] = "RegisterForCustomer";
+                            ViewData["CustomerTypeLabel"] = "نقش مشتری";
+                        }
+                        @await Html.PartialAsync("_RegisterCardForm", Model.RegistrationCard)
+                    </div>
+
+                    <div class="tab-pane fade @(openTab == "excel" ? "show active" : null)" id="warranty-excel" role="tabpanel">
                         @if (Model.LastImport != null)
                         {
                             <div class="alert @(Model.LastImport.Success ? "alert-info" : "alert-danger")">
@@ -151,7 +161,7 @@
                             </div>
                         </form>
                     </div>
-                    <div class="tab-pane fade" id="warranty-generate" role="tabpanel">
+                    <div class="tab-pane fade @(openTab == "generate" ? "show active" : null)" id="warranty-generate" role="tabpanel">
                         <form asp-action="GenerateCodes" method="post" class="admin-form">
                             @Html.AntiForgeryToken()
                             <div class="row g-2 align-items-end">

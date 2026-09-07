@@ -10,8 +10,10 @@ namespace GolpaMotorFinal.Models.ViewModels.WarrantyManagement
         public List<ProductListItem> Products { get; set; } = new();
         public long? ProductID { get; set; }
         public bool? IsRegistered { get; set; }
-        public int GenerateCount { get; set; } = 10;
+        public int GenerateCount { get; set; } = 5;
         public ProductStatistics? Stats { get; set; }
         public WarrantyExcelImportResult? LastImport { get; set; }
+        public RegisterationCardViewModel RegistrationCard { get; set; } = new();
+        public string OpenTab { get; set; } = "cards";
     }
 }
