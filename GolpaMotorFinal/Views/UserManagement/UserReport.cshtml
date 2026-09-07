@@ -1,222 +1,35 @@
 ﻿@using GolpaMotorFinal.Models.ViewModels.CRUD
-@using GolpaMotorFinal.Models.ViewModels.UserManagement
 @model CrudGridViewModel
 
 @{
+    ViewData["Title"] = "گزارشات";
     Layout = "_AdminLayout";
 }
 
-<div class="card shadow-sm">
-
-    <div class="card-body">
-
-        <div id="UserReportGrid">
-            @await Component.InvokeAsync("CrudGrid", new { model = Model })
+<div class="row column_title">
+    <div class="col-md-12">
+        <div class="page_title">
+            <h2>گزارشات کاربران</h2>
         </div>
-
     </div>
-
 </div>
 
-
-
-
-
-
-
-
-
-
-
-
-@* @model List<GolpaMotorFinal.Models.ViewModels.UserManagement.UserReportViewModel>
-@{
-    Layout = "_AdminLayout";
-}
-
-
-<div class="container-fluid py-3" dir="rtl">
-
-    <!-- Header -->
-    <div class="row mb-3">
-        <div class="col-12">
-            <h3 class="fw-bold mb-1">گزارش‌ها و تحلیل‌ها</h3>
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb mb-0">
-                    <li class="breadcrumb-item">
-                        <a href="#" class="text-decoration-none">خانه</a>
-                    </li>
-                    <li class="breadcrumb-item active">گزارش‌ها و تحلیل‌ها</li>
-                </ol>
-            </nav>
+<div class="white_shd full margin_bottom_30">
+    <div class="full graph_head">
+        <div class="heading1 margin_0">
+            <h2>جدول امتیاز و کارت</h2>
         </div>
     </div>
-
-    <!-- Filters -->
-    <div class="card shadow-sm mb-4">
-        <div class="card-header bg-white">
-            <div class="d-flex justify-content-between align-items-center">
-                <button class="btn btn-sm btn-link text-decoration-none"
-                        data-bs-toggle="collapse"
-                        data-bs-target="#filtersSection">
-                    <i class="fa fa-chevron-up"></i>
-                </button>
-                <div class="fw-bold">
-                    فیلترها
-                    <i class="fa fa-funnel-dollar me-1"></i>
-                </div>
-            </div>
+    <div class="padding_infor_info">
+        <div class="table_filter_bar">
+            <input type="search"
+                   class="form-control table-filter-input"
+                   data-table-target="#UserReportGrid"
+                   placeholder="جستجو در جدول..."
+                   autocomplete="off" />
         </div>
-
-        <div class="collapse show" id="filtersSection">
-            <div class="card-body">
-                <div class="row g-3">
-
-                    <div class="col-12 col-md-6 col-lg-3">
-                        <label class="form-label">استان و شهر</label>
-                        <select class="form-select">
-                            <option>همه استان‌ها</option>
-                        </select>
-                    </div>
-
-                    <div class="col-12 col-md-6 col-lg-3">
-                        <label class="form-label">شغل</label>
-                        <select class="form-select">
-                            <option>همه مشاغل</option>
-                        </select>
-                    </div>
-
-                    <div class="col-12 col-md-6 col-lg-3">
-                        <label class="form-label">از تاریخ</label>
-                        <input type="date" class="form-control" />
-                    </div>
-
-                    <div class="col-12 col-md-6 col-lg-3">
-                        <label class="form-label">تا تاریخ</label>
-                        <input type="date" class="form-control" />
-                    </div>
-
-                </div>
-            </div>
+        <div class="table_section" id="UserReportGrid">
+            @await Component.InvokeAsync("CrudGrid", new { model = Model })
         </div>
     </div>
-
-    <!-- Table -->
-    <div class="card shadow-sm">
-        <div class="card-body">
-
-            <!-- Toolbar -->
-            <div class="d-flex justify-content-between align-items-center mb-3">
-
-                <div class="d-flex gap-2">
-                    <button class="btn btn-outline-success">
-                        <i class="bi bi-file-earmark-excel"></i>
-                        خروجی اکسل
-                    </button>
-
-                    <button class="btn btn-outline-primary">
-                        ستون‌ها
-                    </button>
-                </div>
-
-                <div class="text-muted">
-                    تعداد نتایج:
-                    <strong class="text-primary">@(Model?.Count() ?? 0)</strong>
-                </div>
-
-            </div>
-
-            <!-- Table -->
-            <div class="table-responsive">
-                <table class="table table-bordered table-hover align-middle text-nowrap">
-                    <thead class="table-dark">
-                        <tr>
-                            <th>ردیف</th>
-                            <th>نام مشتری</th>
-                            <th>شماره موبایل</th>
-                            <th>استان</th>
-                            <th>شهر</th>
-                            <th>کارت ثبت شده</th>
-                            <th>امتیاز کل</th>
-                            <th>امتیاز مصرف شده</th>
-                            <th>مانده امتیاز</th>
-                            <th>جزییات کاربر</th>
-                            <th>ادغام کاربر</th>
-                        </tr>
-                    </thead>
-
-                    <tbody>
-                        @if (Model != null && Model.Any())
-                        {
-                            int i = 1;
-
-                            foreach (var item in Model)
-                            {
-                                <tr>
-                                    <td>@i</td>
-                                    <td>@item.FullName</td>
-                                    <td>@item.PhoneNumber</td>
-                                    <td>@item.Province</td>
-                                    <td>@item.City</td>
-                                    <td>@item.TotalRegisteredCards</td>
-                                    <td>@item.TotalEarnedPoints</td>
-                                    <td>@item.TotalSettledPoints</td>
-                                    <td class="text-success fw-bold">@item.RemainedPoints</td>
-
-                                    <td class=" text-secondary fw-bold">
-                                        <button class="btn btn-sm btnUserDetails open-modal"
-                                                data-title="جزییات"
-                                                data-url="@Url.Action("Details", "UserManagement")"
-                                                data-id="@item.UserID">
-                                            <i class="fa fa-eye"></i>
-                                        </button>
-                                    </td>
-                                    <td class=" text-warning fw-bold">
-                                        <button class="btn btn-sm btnMergeAccounts open-modal"
-                                                data-title="ادغام کاربر"
-                                                data-url="@Url.Action("MergeAccounts", "UserManagement")"
-                                                data-id="@item.UserID">
-                                            <i class="fa fa-user-plus"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-                                i++;
-                            }
-                        }
-                        else
-                        {
-                            <tr>
-                                <td colspan="8" class="text-center text-muted">
-                                    هیچ داده‌ای برای نمایش وجود ندارد
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- Footer -->
-            <div class="d-flex justify-content-between align-items-center mt-3">
-
-                <div>
-                    <select class="form-select form-select-sm" style="width:auto;">
-                        <option>10</option>
-                        <option selected>20</option>
-                        <option>50</option>
-                    </select>
-                </div>
-
-                <nav>
-                    <ul class="pagination mb-0">
-                        <li class="page-item disabled"><a class="page-link">«</a></li>
-                        <li class="page-item active"><a class="page-link">1</a></li>
-                        <li class="page-item"><a class="page-link">2</a></li>
-                        <li class="page-item"><a class="page-link">»</a></li>
-                    </ul>
-                </nav>
-
-            </div>
-
-        </div>
-    </div>
-</div> *@
+</div>

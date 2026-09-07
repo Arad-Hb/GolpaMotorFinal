@@ -1,83 +1,44 @@
 @model GolpaMotorFinal.Models.ViewModels.Account.LoginViewModel
-
 @{
     ViewData["Title"] = "ورود";
+    ViewData["BodyClass"] = "inner_page login";
 }
 
-<div class="auth-page">
-
-    <div class="auth-card">
-
-        <div class="auth-logo">
-            <img src="~/images/pics/logo.png" alt="Golpa Motor" />
+<div class="full_container">
+    <div class="container">
+        <div class="center verticle_center py-5">
+            <div class="login_section">
+                <div class="logo_login">
+                    <div class="center">
+                        <img src="~/pluto/images/logo/logo-golpa.png" alt="گلپا" />
+                    </div>
+                </div>
+                <div class="login_form">
+                    <form asp-action="Login" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                        <div class="field">
+                            <label class="label_field" asp-for="Email">ایمیل</label>
+                            <input asp-for="Email" class="form-control" placeholder="ایمیل خود را وارد کنید" />
+                            <span asp-validation-for="Email" class="text-danger"></span>
+                        </div>
+                        <div class="field">
+                            <label class="label_field" asp-for="Password">رمز عبور</label>
+                            <input asp-for="Password" type="password" class="form-control" placeholder="رمز عبور را وارد کنید" />
+                            <span asp-validation-for="Password" class="text-danger"></span>
+                        </div>
+                        <div class="field field-row">
+                            <label class="form-check-label">
+                                <input asp-for="RememberMe" class="form-check-input" />
+                                مرا به خاطر بسپار
+                            </label>
+                            <a class="forgot" asp-action="ForgotPassword">رمز عبورم را فراموش کرده‌ام</a>
+                        </div>
+                        <div class="field">
+                            <button type="submit" class="main_bt">ورود</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
-
-        <h2 class="auth-title">فرم ورود</h2>
-
-        <form asp-action="Login" method="post">
-
-            <div asp-validation-summary="ModelOnly"
-                 class="text-danger mb-3"></div>
-
-            <div class="auth-input-group">
-
-                <label>
-                    <i class="fa fa-envelope"></i>
-                    ایمیل
-                </label>
-
-                <input asp-for="Email"
-                       class="form-control"
-                       placeholder="ایمیل خود را وارد کنید" />
-
-                <span asp-validation-for="Email"
-                      class="text-danger"></span>
-
-            </div>
-
-            <div class="auth-input-group">
-
-                <label>
-                    <i class="fa fa-lock"></i>
-                    رمز عبور
-                </label>
-
-                <input asp-for="Password"
-                       type="password"
-                       class="form-control"
-                       placeholder="رمز عبور را وارد کنید" />
-
-                <span asp-validation-for="Password"
-                      class="text-danger"></span>
-
-            </div>
-
-            <div class="auth-remember">
-
-                <input asp-for="RememberMe"
-                       class="form-check-input" />
-
-                <label asp-for="RememberMe">
-                    مرا به خاطر بسپار
-                </label>
-
-            </div>
-
-            <button type="submit"
-                    class="btn auth-btn">
-                ورود
-            </button>
-
-            <div class="auth-links">
-
-                <a asp-action="ForgotPassword">
-                    رمز عبورم را فراموش کرده‌ام
-                </a>
-
-            </div>
-
-        </form>
-
     </div>
-
 </div>

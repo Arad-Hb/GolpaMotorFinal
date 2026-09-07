@@ -17,6 +17,13 @@
 .table-actions .btn,
 .table-actions button {
     margin-inline: 2px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    flex: 0 0 32px;
 }
 
 #generalModal .modal-dialog {

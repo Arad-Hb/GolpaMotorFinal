@@ -1,0 +1,992 @@
+/* Pluto-inspired theme for Golpa Motor — RTL, Bootstrap 5, Vazir */
+
+:root {
+    --pluto-navy: #15283c;
+    --pluto-navy-2: #214162;
+    --pluto-content: #f8f8f8;
+    --pluto-green: #1ed085;
+    --pluto-orange: #ff5722;
+    --pluto-text: #455a64;
+    --pluto-muted: #898989;
+    --pluto-sidebar-w: 280px;
+    --pluto-sidebar-collapsed: 90px;
+    --pluto-topbar-h: 60px;
+}
+
+html[dir="rtl"] body.pluto-admin,
+html[dir="rtl"] body.pluto-public {
+    font-family: 'VazirFD', 'Vazirmatn', Tahoma, sans-serif;
+    color: var(--pluto-text);
+    background: var(--pluto-content);
+}
+
+.yellow_color { color: #ff9800 !important; }
+.blue1_color { color: #2196f3 !important; }
+.green_color { color: #009688 !important; }
+.red_color { color: #e91e63 !important; }
+.purple_color { color: #673ab7 !important; }
+.orange_color { color: var(--pluto-orange) !important; }
+.blue2_color { color: #03a9f4 !important; }
+
+/* ---------- Admin shell ---------- */
+.pluto-admin .full_container,
+.pluto-admin .inner_container {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+.pluto-admin .inner_container {
+    display: flex;
+    min-height: 100vh;
+}
+
+.pluto-admin #sidebar {
+    width: var(--pluto-sidebar-w);
+    min-width: var(--pluto-sidebar-w);
+    background: var(--pluto-navy) url("/pluto/images/layout/pattern_h.png");
+    color: #fff;
+    position: fixed;
+    inset-block-start: 0;
+    inset-inline-start: 0;
+    height: 100%;
+    z-index: 20;
+    overflow: auto;
+    box-shadow: 0 0 3px rgba(0, 0, 0, 0.4);
+    transition: transform 0.3s ease, width 0.3s ease, min-width 0.3s ease;
+}
+
+.pluto-admin #sidebar .logo_section img {
+    max-height: 42px;
+    width: auto;
+}
+
+.pluto-admin .sidebar-header {
+    padding: 16px 18px;
+}
+
+.pluto-admin .sidebar_user_info {
+    background: var(--pluto-navy-2);
+    padding: 16px 18px;
+}
+
+.pluto-admin .user_profle_side {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.pluto-admin .user_img img {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.pluto-admin .user_info h6 {
+    margin: 0;
+    font-size: 14px;
+    color: #fff;
+}
+
+.pluto-admin .user_info p {
+    margin: 0;
+    font-size: 12px;
+    color: var(--pluto-green);
+}
+
+.pluto-admin .sidebar_blog_2 h4 {
+    padding: 18px 22px 0;
+    font-size: 13px;
+    letter-spacing: 0.04em;
+    color: rgba(255, 255, 255, 0.55);
+}
+
+.pluto-admin #sidebar ul.components {
+    list-style: none;
+    margin: 0;
+    padding: 10px 0 30px;
+}
+
+.pluto-admin #sidebar ul.components li a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 22px;
+    color: rgba(255, 255, 255, 0.9);
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.pluto-admin #sidebar ul.components li a:hover,
+.pluto-admin #sidebar ul.components li.active > a {
+    background: rgba(255, 255, 255, 0.06);
+    color: #fff;
+}
+
+.pluto-admin #sidebar ul.components li a i {
+    width: 22px;
+    text-align: center;
+    font-size: 18px;
+}
+
+.pluto-admin #content {
+    width: 100%;
+    min-height: 100vh;
+    padding-inline-start: var(--pluto-sidebar-w);
+    padding-block-start: var(--pluto-topbar-h);
+    transition: padding 0.3s ease;
+}
+
+.pluto-admin .topbar {
+    position: fixed;
+    inset-block-start: 0;
+    inset-inline-start: var(--pluto-sidebar-w);
+    inset-inline-end: 0;
+    height: var(--pluto-topbar-h);
+    background: var(--pluto-navy);
+    z-index: 30;
+    display: flex;
+    align-items: stretch;
+    overflow: visible;
+    transition: inset-inline-start 0.3s ease;
+}
+
+.pluto-admin .topbar .full {
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.pluto-admin .sidebar_toggle {
+    border: none;
+    background: var(--pluto-orange);
+    color: #fff;
+    padding: 0 22px;
+    font-size: 20px;
+    height: 100%;
+    cursor: pointer;
+    position: relative;
+    z-index: 32;
+    flex: 0 0 auto;
+}
+
+.pluto-admin .sidebar_toggle i {
+    pointer-events: none;
+}
+
+.pluto-admin .topbar .logo_section {
+    padding-inline: 16px;
+}
+
+.pluto-admin .topbar .logo_section img {
+    height: 36px;
+    width: auto;
+}
+
+.pluto-admin .right_topbar {
+    margin-inline-start: auto;
+    display: flex;
+    align-items: stretch;
+}
+
+.pluto-admin .icon_info {
+    display: flex;
+    align-items: stretch;
+    overflow: visible;
+}
+
+.pluto-admin .icon_info > ul:not(.user_profile_dd) {
+    display: flex;
+    align-items: center;
+    list-style: none;
+    margin: 0;
+    padding: 0 10px;
+    gap: 8px;
+}
+
+.pluto-admin .icon_info > ul:not(.user_profile_dd) li a {
+    color: #fff;
+    font-size: 18px;
+    position: relative;
+    display: inline-flex;
+    width: 35px;
+    height: 35px;
+    align-items: center;
+    justify-content: center;
+}
+
+.pluto-admin .icon_info span.badge {
+    position: absolute;
+    inset-block-start: -4px;
+    inset-inline-end: -4px;
+    background: var(--pluto-orange);
+    color: #fff;
+    border-radius: 50%;
+    font-size: 10px;
+    width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.pluto-admin .user_profile_dd {
+    background: var(--pluto-orange);
+    padding-inline: 12px;
+    position: relative;
+    overflow: visible;
+    list-style: none;
+    margin: 0;
+    display: flex;
+    align-items: stretch;
+}
+
+.pluto-admin .user_profile_dd > li {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    position: relative;
+}
+
+.pluto-admin .user_profile_dd .dropdown-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #fff;
+    text-decoration: none;
+    height: 100%;
+    width: auto;
+    max-width: 220px;
+    padding-inline: 4px;
+}
+
+.pluto-admin .user_profile_dd .dropdown-toggle::after {
+    color: #fff;
+    margin-inline-start: 8px;
+    flex-shrink: 0;
+}
+
+.pluto-admin .user_profile_dd .name_user {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 140px;
+}
+
+.pluto-admin .user_profile_dd img {
+    width: 36px;
+    height: 36px;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.pluto-admin .dropdown-menu,
+.pluto-public .dropdown-menu {
+    min-width: 12.5rem;
+    max-width: min(90vw, 16rem);
+    padding: 0.4rem 0;
+    text-align: start;
+    overflow: visible;
+}
+
+.pluto-admin .user_profile_dd .dropdown-menu {
+    --bs-dropdown-min-width: 12.5rem;
+    position: absolute;
+    inset-inline-end: 0;
+    inset-inline-start: auto;
+    top: 100%;
+    margin-top: 0;
+    z-index: 1050;
+    border: none;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+}
+
+.pluto-admin .user_profile_dd .dropdown-item,
+.pluto-public .dropdown-item {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 8px;
+    width: 100%;
+    box-sizing: border-box;
+    white-space: nowrap;
+    text-align: start;
+    padding: 8px 16px;
+    font-size: 14px;
+    color: var(--pluto-navy);
+    overflow: hidden;
+}
+
+.pluto-admin .user_profile_dd .dropdown-item:hover,
+.pluto-public .dropdown-item:hover {
+    background: var(--pluto-green);
+    color: #fff;
+}
+
+.golpa-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: transparent;
+}
+
+.golpa-brand-mark {
+    height: 36px;
+    width: 36px;
+    object-fit: contain;
+    background: transparent;
+}
+
+.golpa-brand-name {
+    font-weight: 600;
+    font-size: 20px;
+    letter-spacing: 0.02em;
+    background: transparent;
+}
+
+.pluto-admin .golpa-brand-name,
+.logo_login .golpa-brand-name {
+    color: #fff;
+}
+
+.pluto-public .golpa-brand-name {
+    color: var(--pluto-navy);
+}
+
+@media (max-width: 767.98px) {
+    .pluto-admin .user_profile_dd .name_user {
+        display: none;
+    }
+
+    .pluto-admin .user_profile_dd .dropdown-toggle {
+        max-width: none;
+    }
+
+    .pluto-admin .user_profile_dd .dropdown-menu,
+    .pluto-public .dropdown-menu {
+        min-width: 10.5rem;
+        max-width: calc(100vw - 24px);
+    }
+}
+
+.pluto-admin.sidebar-collapsed #sidebar {
+    transform: translateX(100%);
+    pointer-events: none;
+}
+
+.pluto-admin.sidebar-collapsed #content {
+    padding-inline-start: 0;
+}
+
+.pluto-admin.sidebar-collapsed .topbar {
+    inset-inline-start: 0;
+}
+
+.pluto-admin .midde_cont {
+    padding: 20px 22px 30px;
+}
+
+.pluto-admin .page_title {
+    background: #fff;
+    padding: 14px 20px;
+    margin-bottom: 22px;
+    border-radius: 4px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+}
+
+.pluto-admin .page_title h2 {
+    margin: 0;
+    font-size: 22px;
+    color: var(--pluto-navy);
+    font-weight: 500;
+}
+
+.pluto-admin .white_shd {
+    background: #fff;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+    border-radius: 4px;
+    margin-bottom: 24px;
+}
+
+.pluto-admin .graph_head {
+    padding: 15px 20px;
+    border-bottom: 1px solid #eee;
+}
+
+.pluto-admin .heading1 h2 {
+    margin: 0;
+    font-size: 18px;
+    color: var(--pluto-navy);
+    font-weight: 400;
+}
+
+.pluto-admin .padding_infor_info {
+    padding: 18px 20px;
+}
+
+.pluto-admin .pluto-footer {
+    background: #fff;
+    padding: 16px;
+    text-align: center;
+    color: var(--pluto-muted);
+    margin-top: 10px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+}
+
+/* Dashboard counters */
+.counter_section {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: #fff;
+    border-radius: 5px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+    padding: 24px 22px;
+    min-height: 125px;
+    margin-bottom: 24px;
+}
+
+.couter_icon i {
+    font-size: 42px;
+    line-height: 1;
+}
+
+.couter_icon > div {
+    padding-inline-end: 18px;
+    border-inline-end: 1px solid rgba(21, 40, 60, 0.12);
+}
+
+.counter_no .total_no {
+    margin: 0;
+    font-size: 32px;
+    font-weight: 600;
+    color: var(--pluto-text);
+}
+
+.counter_no .head_couter {
+    margin: 0;
+    color: var(--pluto-muted);
+    font-size: 14px;
+}
+
+/* Tables */
+.pluto-admin table.table {
+    margin-bottom: 0;
+}
+
+.pluto-admin table.table thead th {
+    background: var(--pluto-navy);
+    color: #fff;
+    font-weight: 400;
+    border-color: var(--pluto-navy);
+    white-space: nowrap;
+}
+
+.pluto-admin table.table-hover tbody tr:hover {
+    background-color: rgba(30, 208, 133, 0.12);
+}
+
+.pluto-admin table.table th.table-num,
+.pluto-admin table.table td.table-num {
+    width: 52px;
+    max-width: 64px;
+    text-align: center;
+    white-space: nowrap;
+    padding-inline: 6px;
+}
+
+.pluto-admin table.table th.table-actions,
+.pluto-admin table.table td.table-actions {
+    width: 168px;
+    min-width: 168px;
+    white-space: nowrap;
+    vertical-align: middle;
+}
+
+.pluto-admin table.table td.table-actions {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 4px;
+}
+
+.table_filter_bar {
+    --filter-h: 38px;
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    gap: 8px;
+    margin-bottom: 14px;
+    width: 100%;
+    overflow-x: auto;
+}
+
+.pluto-admin .table_filter_bar .form-control,
+.pluto-admin .table_filter_bar .form-select,
+.pluto-admin .table_filter_bar .table-filter-input,
+.pluto-admin .table_filter_bar .search__input,
+.pluto-admin .table_filter_bar .main_bt,
+.pluto-admin .table_filter_bar .btn,
+.pluto-admin .table_filter_bar .search__button {
+    height: var(--filter-h) !important;
+    min-height: var(--filter-h) !important;
+    max-height: var(--filter-h);
+    padding-block: 0 !important;
+    padding-inline: 12px;
+    line-height: calc(var(--filter-h) - 2px);
+    font-size: 14px;
+    border-radius: 4px !important;
+    box-sizing: border-box;
+}
+
+.pluto-admin .table_filter_bar .form-select {
+    padding-inline: 2.25rem 12px;
+    background-size: 16px 12px;
+}
+
+.pluto-admin .table_filter_bar .form-control,
+.pluto-admin .table_filter_bar .form-select,
+.pluto-admin .table_filter_bar .table-filter-input {
+    flex: 1 1 0;
+    min-width: 140px;
+    width: auto;
+}
+
+.pluto-admin .table_filter_bar .main_bt,
+.pluto-admin .table_filter_bar .btn,
+.pluto-admin .table_filter_bar .search__button {
+    flex: 0 0 auto;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    float: none;
+    box-shadow: none;
+}
+
+.pluto-admin .table_filter_bar .search-component-page {
+    padding: 0;
+    width: auto;
+    max-width: none;
+    flex: 1 1 180px;
+    min-width: 160px;
+    margin: 0;
+}
+
+.pluto-admin .table_filter_bar .search,
+.pluto-admin .table_filter_bar .search__field {
+    display: flex;
+    align-items: stretch;
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    height: var(--filter-h);
+}
+
+.pluto-admin .table_filter_bar .search__field {
+    overflow: hidden;
+    position: relative;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background: #fff;
+}
+
+.pluto-admin .table_filter_bar .search__input {
+    flex: 1 1 auto;
+    min-width: 0;
+    width: auto;
+    border: none !important;
+    box-shadow: none !important;
+    padding-inline: 12px !important;
+}
+
+.pluto-admin .table_filter_bar .search__button {
+    position: static !important;
+    top: auto;
+    right: auto;
+    left: auto;
+    transform: none !important;
+    width: var(--filter-h) !important;
+    padding: 0 !important;
+    border-radius: 0 !important;
+}
+
+.pluto-admin .padding_infor_info:has(> .search-component-page) {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+}
+
+.pluto-admin .padding_infor_info:has(> .search-component-page) > .search-component-page {
+    --filter-h: 38px;
+    padding: 0;
+    margin: 0;
+    flex: 1 1 220px;
+    min-width: 180px;
+}
+
+.pluto-admin .padding_infor_info:has(> .search-component-page) > .table_filter_bar {
+    flex: 1 1 220px;
+    margin-bottom: 0;
+}
+
+.pluto-admin .padding_infor_info:has(> .search-component-page) > .table_section {
+    flex: 1 1 100%;
+    width: 100%;
+}
+
+.pluto-admin .padding_infor_info:has(> .search-component-page) .search,
+.pluto-admin .padding_infor_info:has(> .search-component-page) .search__field {
+    display: flex;
+    align-items: stretch;
+    width: 100%;
+    max-width: none;
+    height: 38px;
+}
+
+.pluto-admin .padding_infor_info:has(> .search-component-page) .search__field {
+    overflow: hidden;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.pluto-admin .padding_infor_info:has(> .search-component-page) .search__input,
+.pluto-admin .padding_infor_info:has(> .search-component-page) .search__button {
+    height: 38px !important;
+    min-height: 38px !important;
+    max-height: 38px;
+    border-radius: 4px !important;
+    box-shadow: none !important;
+}
+
+.pluto-admin .padding_infor_info:has(> .search-component-page) .search__input {
+    padding: 0 12px !important;
+    font-size: 14px;
+}
+
+.pluto-admin .padding_infor_info:has(> .search-component-page) .search__button {
+    position: static !important;
+    transform: none !important;
+    width: 38px !important;
+    padding: 0 !important;
+    border-radius: 0 !important;
+}
+
+/* Tab bar style 2 */
+.tabbar .nav-tabs {
+    border-bottom: 1px solid #eee;
+    flex-wrap: wrap;
+}
+
+.tabbar .nav-tabs .nav-link {
+    border-radius: 0;
+    padding: 8px 20px;
+    font-size: 14px;
+    color: var(--pluto-navy);
+}
+
+.tab_style2 .tabbar .nav-tabs .nav-link.active {
+    background: var(--pluto-orange);
+    color: #fff;
+    border-color: var(--pluto-orange);
+}
+
+/* Buttons */
+.main_bt,
+.pluto-admin .btn-success,
+.pluto-public .btn-success {
+    background: var(--pluto-green);
+    border-color: var(--pluto-green);
+    color: #fff;
+}
+
+.main_bt:hover,
+.pluto-admin .btn-success:hover,
+.pluto-public .btn-success:hover {
+    background: var(--pluto-orange);
+    border-color: var(--pluto-orange);
+    color: #fff;
+}
+
+.pluto-admin .btn-primary,
+.pluto-public .btn-primary {
+    background: var(--pluto-navy);
+    border-color: var(--pluto-navy);
+}
+
+.pluto-admin .btn-primary:hover,
+.pluto-public .btn-primary:hover {
+    background: var(--pluto-orange);
+    border-color: var(--pluto-orange);
+}
+
+/* Alerts — template-like solid tones */
+.alert-primary { background: #cce5ff; color: #004085; border-color: #b8daff; }
+.alert-secondary { background: #e2e3e5; color: #383d41; border-color: #d6d8db; }
+.alert-success { background: #d4edda; color: #155724; border-color: #c3e6cb; }
+.alert-danger { background: #f8d7da; color: #721c24; border-color: #f5c6cb; }
+.alert-warning { background: #fff3cd; color: #856404; border-color: #ffeeba; }
+.alert-info { background: #d1ecf1; color: #0c5460; border-color: #bee5eb; }
+.alert-light { background: #fefefe; color: #818182; border-color: #fdfdfe; }
+.alert-dark { background: #d6d8d9; color: #1b1e21; border-color: #c6c8ca; }
+
+/* Modal */
+#generalModal .modal-header,
+#productModal .modal-header {
+    background: var(--pluto-navy);
+    color: #fff;
+}
+
+#generalModal .modal-title,
+#productModal .modal-title {
+    color: #fff;
+}
+
+#generalModal .btn-close,
+#productModal .btn-close {
+    filter: invert(1);
+}
+
+/* Search box */
+.search__field {
+    display: flex;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    overflow: hidden;
+    background: #fff;
+}
+
+.search__input {
+    border: none;
+    padding: 8px 12px;
+    min-width: 180px;
+    flex: 1;
+}
+
+.search__button {
+    border: none;
+    background: var(--pluto-green);
+    color: #fff;
+    padding: 8px 14px;
+}
+
+.search__button:hover {
+    background: var(--pluto-orange);
+}
+
+/* Gallery product cards (home) */
+.gallery_section_inner .column {
+    background: #fff;
+    box-shadow: 0 0 13px -10px #000;
+    overflow: hidden;
+}
+
+.gallery_section_inner .column img,
+.gallery_section_inner .column .img-responsive {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    display: block;
+}
+
+.heading_section {
+    border-top: solid var(--pluto-green) 2px;
+    background: var(--pluto-navy);
+}
+
+.heading_section h4,
+.heading_section h6 {
+    color: #fff;
+    margin: 0;
+    font-weight: 300;
+    text-align: center;
+    padding: 12px 8px 4px;
+    font-size: 15px;
+}
+
+.heading_section .price,
+.heading_section small {
+    display: block;
+    text-align: center;
+    color: var(--pluto-green);
+    padding-bottom: 12px;
+    font-size: 13px;
+}
+
+.heading_section .main_bt {
+    display: block;
+    width: calc(100% - 24px);
+    margin: 0 12px 12px;
+    float: none;
+}
+
+/* Login */
+body.inner_page.login {
+    background: var(--pluto-content);
+}
+
+.login_section {
+    max-width: 640px;
+    background: #fff;
+    width: 100%;
+    box-shadow: 0 0 10px -8px #000;
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 24px auto;
+}
+
+.logo_login {
+    background: url("/pluto/images/layout/login_image.jpg") center/cover;
+    padding: 40px 0;
+    position: relative;
+}
+
+.logo_login::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(21, 40, 60, 0.8);
+}
+
+.logo_login .center {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    justify-content: center;
+}
+
+.logo_login img {
+    max-width: 210px;
+    height: auto;
+}
+
+.login_form {
+    padding: 36px 32px 40px;
+}
+
+.login_form .field {
+    margin-bottom: 18px;
+}
+
+.login_form .label_field {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 14px;
+}
+
+.login_form input.form-control {
+    border: none;
+    border-bottom: 2px solid #ddd;
+    border-radius: 0;
+    padding-inline: 0;
+}
+
+.login_form .field-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 10px;
+    align-items: center;
+}
+
+.login_form .forgot {
+    color: var(--pluto-orange);
+    text-decoration: none;
+    font-size: 13px;
+}
+
+/* Public navbar */
+.pluto-public .navbar {
+    background: #fff !important;
+}
+
+.pluto-public .navbar .logo-img {
+    height: 42px;
+    width: auto;
+}
+
+.pluto-public .navbar-nav .nav-link {
+    color: var(--pluto-navy);
+}
+
+.pluto-public .hero {
+    background: var(--pluto-navy);
+    color: #fff;
+    padding: 48px 0;
+}
+
+.pluto-public .hero h1,
+.pluto-public .hero p {
+    color: #fff;
+}
+
+.pluto-public .hero .text-muted {
+    color: rgba(255, 255, 255, 0.75) !important;
+}
+
+.pluto-public .category-card {
+    background: var(--pluto-navy);
+    color: #fff;
+    text-align: center;
+    padding: 28px 10px;
+    border-top: 3px solid var(--pluto-green);
+}
+
+.pluto-public .features {
+    background: #fff;
+    color: var(--pluto-navy);
+}
+
+.pluto-public .footer {
+    background: var(--pluto-navy);
+    color: #fff;
+}
+
+/* SweetAlert2 */
+.swal2-confirm {
+    background-color: var(--pluto-green) !important;
+}
+
+.swal2-cancel {
+    background-color: var(--pluto-orange) !important;
+}
+
+/* Responsive */
+@media (max-width: 991.98px) {
+    .pluto-admin #sidebar {
+        transform: translateX(100%);
+    }
+
+    .pluto-admin.sidebar-open #sidebar {
+        transform: translateX(0);
+        pointer-events: auto;
+        width: var(--pluto-sidebar-w);
+        min-width: var(--pluto-sidebar-w);
+    }
+
+    .pluto-admin #content,
+    .pluto-admin.sidebar-collapsed #content {
+        padding-inline-start: 0;
+    }
+
+    .pluto-admin .topbar,
+    .pluto-admin.sidebar-collapsed .topbar {
+        inset-inline-start: 0;
+    }
+
+    .pluto-admin .topbar .logo_section {
+        display: none;
+    }
+
+    .counter_no .total_no {
+        font-size: 26px;
+    }
+
+    .login_form {
+        padding: 24px 18px 28px;
+    }
+}

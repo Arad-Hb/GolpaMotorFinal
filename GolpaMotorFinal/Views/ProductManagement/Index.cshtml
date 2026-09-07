@@ -1,58 +1,78 @@
 ﻿@{
+    ViewData["Title"] = "محصولات";
     Layout = "_AdminLayout";
     var stats = ViewBag.Stats as DomainModel.ViewModels.Product.ProductStatistics;
 }
 
-<div class="mb-4">
-    <div class="page-title">مدیریت محصولات</div>
-    <div class="page-subtitle">جستجو، آمار و ویرایش محصولات</div>
-</div>
-
-<div class="row g-3 mb-4">
-    <div class="col-md-3">
-        <div class="card dashboard-card"><div class="card-body">
-            <h4>@(stats?.TotalProducts ?? 0)</h4>
-            <p>کل محصولات</p>
-        </div></div>
-    </div>
-    <div class="col-md-3">
-        <div class="card dashboard-card"><div class="card-body">
-            <h4>@(stats?.AvailableProducts ?? 0)</h4>
-            <p>موجود</p>
-        </div></div>
-    </div>
-    <div class="col-md-3">
-        <div class="card dashboard-card"><div class="card-body">
-            <h4>@(stats?.ProductsWithoutCards ?? 0)</h4>
-            <p>بدون کارت گارانتی</p>
-        </div></div>
-    </div>
-    <div class="col-md-3">
-        <div class="card dashboard-card"><div class="card-body">
-            <h4>@(stats?.TotalRegisteredPoints ?? 0)</h4>
-            <p>مجموع امتیاز ثبت‌شده</p>
-        </div></div>
+<div class="row column_title">
+    <div class="col-md-12">
+        <div class="page_title">
+            <h2>مدیریت محصولات</h2>
+        </div>
     </div>
 </div>
 
-<div class="d-flex flex-wrap gap-2 justify-content-between align-items-center mb-3">
-    <div class="input-group" style="max-width:360px">
-        <input id="productSearch" class="form-control" placeholder="جستجوی نام محصول..." />
-        <button type="button" class="btn btn-primary" id="btnSearchProduct">
-            <i class="fa-solid fa-magnifying-glass"></i>
-        </button>
+<div class="row column1">
+    <div class="col-md-6 col-lg-3">
+        <div class="full counter_section">
+            <div class="couter_icon"><div><i class="fa fa-boxes-stacked blue1_color"></i></div></div>
+            <div class="counter_no">
+                <p class="total_no">@(stats?.TotalProducts ?? 0)</p>
+                <p class="head_couter">کل محصولات</p>
+            </div>
+        </div>
     </div>
-    <button class="btn btn-success" id="btnAdd"><i class="fa fa-plus ms-1"></i> افزودن محصول</button>
+    <div class="col-md-6 col-lg-3">
+        <div class="full counter_section">
+            <div class="couter_icon"><div><i class="fa fa-check green_color"></i></div></div>
+            <div class="counter_no">
+                <p class="total_no">@(stats?.AvailableProducts ?? 0)</p>
+                <p class="head_couter">موجود</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+        <div class="full counter_section">
+            <div class="couter_icon"><div><i class="fa fa-triangle-exclamation red_color"></i></div></div>
+            <div class="counter_no">
+                <p class="total_no">@(stats?.ProductsWithoutCards ?? 0)</p>
+                <p class="head_couter">بدون کارت گارانتی</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+        <div class="full counter_section">
+            <div class="couter_icon"><div><i class="fa fa-gift purple_color"></i></div></div>
+            <div class="counter_no">
+                <p class="total_no">@(stats?.TotalRegisteredPoints ?? 0)</p>
+                <p class="head_couter">امتیاز ثبت‌شده</p>
+            </div>
+        </div>
+    </div>
 </div>
 
-<form id="frmAntiForgery">
-    @Html.AntiForgeryToken()
-</form>
-
-<div id="ProductGrid"></div>
+<div class="white_shd full margin_bottom_30">
+    <div class="full graph_head d-flex flex-wrap justify-content-between align-items-center gap-2">
+        <div class="heading1 margin_0"><h2>لیست محصولات</h2></div>
+        <button class="main_bt" id="btnAdd"><i class="fa fa-plus ms-1"></i> افزودن محصول</button>
+    </div>
+    <div class="padding_infor_info">
+        <div class="table_filter_bar">
+            <input id="productSearch" class="form-control" placeholder="جستجوی نام محصول..." />
+            <button type="button" class="main_bt" id="btnSearchProduct">
+                <i class="fa-solid fa-magnifying-glass"></i>
+            </button>
+            <input type="search" class="form-control table-filter-input" data-table-target="#ProductGrid" placeholder="فیلتر ردیف‌های جدول..." autocomplete="off" />
+        </div>
+        <form id="frmAntiForgery">
+            @Html.AntiForgeryToken()
+        </form>
+        <div id="ProductGrid"></div>
+    </div>
+</div>
 
 <div class="modal fade" id="productModal">
-    <div class="modal-dialog modal-lg modal-fullscreen-sm-down">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">مدیریت محصول</h5>

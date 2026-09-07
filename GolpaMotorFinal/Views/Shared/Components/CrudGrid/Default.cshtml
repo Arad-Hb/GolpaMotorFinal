@@ -15,7 +15,7 @@
                 }
                 @if (Model.Rows.Any(r => r.Actions.Count > 0))
                 {
-                    <th style="width:180px">عملیات</th>
+                    <th class="table-actions">عملیات</th>
                 }
             </tr>
         </thead>
@@ -32,7 +32,7 @@
                         }
                         @foreach (var column in row.Columns)
                         {
-                            <td class="@column.CssClass">
+                            <td class="@column.CssClass @(column.Type == GridColumnType.Number ? "table-num" : null)">
                                 @switch (column.Type)
                                 {
                                     case GridColumnType.Image:

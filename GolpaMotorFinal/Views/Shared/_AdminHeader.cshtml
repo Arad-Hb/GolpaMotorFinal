@@ -1,27 +1,51 @@
-@using GolpaMotorFinal.Helpers
-
-
+@using Microsoft.AspNetCore.Identity
+@using DomainModel.Models
+@inject UserManager<ApplicationUser> UserManager
+@{
+    var adminUser = await UserManager.GetUserAsync(User);
+    var displayName = string.Join(" ", new[] { adminUser?.FirstName, adminUser?.LastName }.Where(x => !string.IsNullOrWhiteSpace(x)));
+    if (string.IsNullOrWhiteSpace(displayName))
+        displayName = User.Identity?.Name ?? "مدیر";
+}
 <div class="topbar">
-    <div class="topbar-wrapper">
-        <div class="topbar-actions">
-            <div>
-                <i class="fa-solid fa-clock-o"></i>
-                <span> @Framework.Common.Extensions.DateTimeExtensions.ToPersianDate(DateTime.Now) </span>
-            </div>
-            <div class="profile-box">
-                <a asp-controller="Admin" asp-action="Profile" class="text-decoration-none text-reset d-flex align-items-center gap-2">
-                <div>
-                    <div class="profile-name">
-                        @User.Identity?.Name
-                    </div>
-                    <div class="profile-role">
-                        مدیر سیستم
-                    </div>
-                </div>
-                <img src="~/images/pics/admin.jpg" class="profile-image" alt="admin">
-                </a>
+    <div class="full">
+        <button type="button" id="sidebarCollapse" class="sidebar_toggle" aria-label="منو" aria-controls="sidebar">
+            <i class="fa fa-bars" aria-hidden="true"></i>
+        </button>
+        <div class="logo_section">
+            <a asp-controller="Admin" asp-action="Index" class="text-decoration-none">
+                <partial name="_PlutoBrand" />
+            </a>
+        </div>
+        <div class="right_topbar">
+            <div class="icon_info">
+                <ul>
+                    <li>
+                        <a href="#" title="@Framework.Common.Extensions.DateTimeExtensions.ToPersianDate(DateTime.Now)">
+                            <i class="fa fa-clock"></i>
+                        </a>
+                    </li>
+                </ul>
+                <ul class="user_profile_dd">
+                    <li class="dropdown">
+                        <a class="dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" data-bs-display="static" aria-expanded="false">
+                            <img class="rounded-circle" src="@(string.IsNullOrWhiteSpace(adminUser?.ProfileImageUrl) ? "/pluto/images/layout/user_img.jpg" : adminUser.ProfileImageUrl)" alt="" />
+                            <span class="name_user">@displayName</span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a class="dropdown-item" asp-controller="Admin" asp-action="Profile">پروفایل من</a>
+                            </li>
+                            <li>
+                                <form asp-controller="Account" asp-action="Logout" method="post" class="m-0">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="dropdown-item">خروج <i class="fa fa-right-from-bracket"></i></button>
+                                </form>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
             </div>
         </div>
     </div>
-
 </div>

@@ -1,0 +1,12 @@
+@model string
+@{
+    var placeholder = ViewData["FilterPlaceholder"] as string ?? "جستجو در جدول...";
+    var extraClass = ViewData["FilterClass"] as string ?? "";
+}
+<div class="table_filter_bar @extraClass">
+    <input type="search"
+           class="form-control table-filter-input"
+           data-table-target="#@Model"
+           placeholder="@placeholder"
+           autocomplete="off" />
+</div>

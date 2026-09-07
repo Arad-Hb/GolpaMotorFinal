@@ -22,9 +22,9 @@
                         <th>شغل</th>
                         <th>استان</th>
                         <th>شهر</th>
-                        <th>کارت ثبت شده</th>
-                        <th>امتیاز کسب شده</th>
-                        <th>عملیات</th>
+                        <th class="table-num">کارت</th>
+                        <th class="table-num">امتیاز</th>
+                        <th class="table-actions">عملیات</th>
                     </tr>
                 </thead>
 
@@ -43,8 +43,8 @@
                                 <td>@item.RoleName</td>
                                 <td>@item.Province</td>
                                 <td>@item.City</td>
-                                <td>@item.TotalRegisteredCards</td>
-                                <td>@item.TotalEarnedPoints</td>
+                                <td class="table-num">@item.TotalRegisteredCards</td>
+                                <td class="table-num">@item.TotalEarnedPoints</td>
                                 <td class="table-actions">
                                     <button type="button" class="btn btn-sm btn-outline-secondary open-modal"
                                         title="جزئیات"

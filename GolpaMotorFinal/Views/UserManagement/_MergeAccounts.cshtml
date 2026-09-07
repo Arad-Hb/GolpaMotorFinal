@@ -2,7 +2,7 @@
 @using GolpaMotorFinal.Helpers
 
 <form id="mergeForm"
-      class="merge-form admin-form"
+      class="merge-form admin-form modal-compact"
       asp-controller="UserManagement"
       asp-action="MergeAccounts"
       method="post"
@@ -10,85 +10,27 @@
       data-grid-id="@(ViewBag.GridId ?? "UserGrid")">
 
     @Html.AntiForgeryToken()
-
     @Html.HiddenFor(m => m.CurrentUser.UserID)
 
-    <div class="row justify-content-center">
-        <div class="col-12 col-xl-11">
-
-            <div class="card shadow-sm">
-
-                <div class="card-header bg-white text-center border-bottom">
-                    <h2 class="fw-bold mb-0">
-                        ادغام حساب‌های کاربری
-                    </h2>
-                </div>
-
-                <div class="card-body">
-                    <h5 class="text-primary mb-3">حساب اصلی</h5>
-
-                    <div class="card mb-4">
-                        <div class="card-body">
-
-                            <div class="row align-items-center">
-
-                                <div class="col-auto">
-                                    <img src="@ImageHelper.ToThumbnail(@Model.CurrentUser.ProfileImageUrl)"
-                                         style="width:60px;height:60px;border-radius:50%;object-fit:cover;" />
-                                </div>
-
-                                <div class="col">
-
-                                    <div class="mb-1">
-                                        <span class="text-muted">نام:</span>
-                                        <strong>@Model.CurrentUser.FullName</strong>
-                                    </div>
-
-                                    <div class="mb-1">
-                                        <span class="text-muted">موبایل:</span>
-                                        <strong>@Model.CurrentUser.PhoneNumber</strong>
-                                    </div>
-                                    <div>
-                                        <span class="text-muted">امتیاز:</span>
-                                        <strong class="text-primary">@Model.CurrentUser.RemainedPoints</strong>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="mb-4">
-                        <label class="form-label fw-semibold">
-                            افزودن شماره جدید
-                        </label>
-                        @await Component.InvokeAsync("SearchBox",Model.Search)
-                    </div>
-
-                    <div id="mergeResultContainer">
-                        @await Html.PartialAsync("_MergeResult", Model)
-                    </div>
-
-                    <div class="row g-2 mt-4">
-
-                        <div class="col-12 col-md-6">
-                            <button type="submit" class="btn btn-success w-100">
-                                تایید ادغام
-                            </button>
-                        </div>
-
-                        <div class="col-12 col-md-6">
-                            <button type="button" class="btn btn-secondary w-100 cancel-modal">
-                                انصراف
-                            </button>
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </div>
-
+    <div class="merge-user-row mb-2">
+        <img src="@ImageHelper.ToThumbnail(@Model.CurrentUser.ProfileImageUrl)" alt="" class="modal-avatar" />
+        <div class="flex-grow-1 small">
+            <strong>@Model.CurrentUser.FullName</strong>
+            <div class="text-muted">@Model.CurrentUser.PhoneNumber · امتیاز @Model.CurrentUser.RemainedPoints</div>
         </div>
+        <span class="badge bg-secondary">مبدأ</span>
     </div>
 
+    <div class="mb-2">
+        @await Component.InvokeAsync("SearchBox", Model.Search)
+    </div>
+
+    <div id="mergeResultContainer">
+        @await Html.PartialAsync("_MergeResult", Model)
+    </div>
+
+    <div class="d-flex gap-2 mt-2">
+        <button type="submit" class="main_bt flex-fill">تایید ادغام</button>
+        <button type="button" class="btn btn-sm btn-secondary flex-fill cancel-modal">انصراف</button>
+    </div>
 </form>

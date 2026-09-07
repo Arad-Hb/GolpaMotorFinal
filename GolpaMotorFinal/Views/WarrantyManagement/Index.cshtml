@@ -2,160 +2,181 @@
 @{
     ViewData["Title"] = "گارانتی‌ها";
     Layout = "_AdminLayout";
+    var openExcelTab = Model.LastImport != null;
 }
 
-<div class="mb-4">
-    <div class="page-title">مدیریت کارت‌های گارانتی</div>
-    <div class="page-subtitle">لیست، تولید سریال و ورود از اکسل</div>
-</div>
-
-<div class="row g-3 mb-4">
-    <div class="col-md-3">
-        <div class="card dashboard-card"><div class="card-body">
-            <h4>@(Model.Stats?.RegisteredCards ?? 0)</h4>
-            <p>ثبت‌شده</p>
-        </div></div>
-    </div>
-    <div class="col-md-3">
-        <div class="card dashboard-card"><div class="card-body">
-            <h4>@(Model.Stats?.UnregisteredCards ?? 0)</h4>
-            <p>باقی‌مانده</p>
-        </div></div>
-    </div>
-    <div class="col-md-3">
-        <div class="card dashboard-card"><div class="card-body">
-            <h4>@(Model.Stats?.ProductsWithoutCards ?? 0)</h4>
-            <p>محصول بدون کارت</p>
-        </div></div>
-    </div>
-    <div class="col-md-3">
-        <div class="card dashboard-card"><div class="card-body">
-            <h4>@(Model.Stats?.TotalRegisteredPoints ?? 0)</h4>
-            <p>امتیاز ثبت‌شده</p>
-        </div></div>
+<div class="row column_title">
+    <div class="col-md-12">
+        <div class="page_title">
+            <h2>مدیریت کارت‌های گارانتی</h2>
+        </div>
     </div>
 </div>
 
-@if (Model.LastImport != null)
-{
-    <div class="alert @(Model.LastImport.Success ? "alert-info" : "alert-danger")">
-        @Model.LastImport.Message
+<div class="row column1">
+    <div class="col-md-6 col-lg-3">
+        <div class="full counter_section">
+            <div class="couter_icon"><div><i class="fa fa-check green_color"></i></div></div>
+            <div class="counter_no">
+                <p class="total_no">@(Model.Stats?.RegisteredCards ?? 0)</p>
+                <p class="head_couter">ثبت‌شده</p>
+            </div>
+        </div>
     </div>
-}
+    <div class="col-md-6 col-lg-3">
+        <div class="full counter_section">
+            <div class="couter_icon"><div><i class="fa fa-clock yellow_color"></i></div></div>
+            <div class="counter_no">
+                <p class="total_no">@(Model.Stats?.UnregisteredCards ?? 0)</p>
+                <p class="head_couter">باقی‌مانده</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+        <div class="full counter_section">
+            <div class="couter_icon"><div><i class="fa fa-box red_color"></i></div></div>
+            <div class="counter_no">
+                <p class="total_no">@(Model.Stats?.ProductsWithoutCards ?? 0)</p>
+                <p class="head_couter">محصول بدون کارت</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+        <div class="full counter_section">
+            <div class="couter_icon"><div><i class="fa fa-gift purple_color"></i></div></div>
+            <div class="counter_no">
+                <p class="total_no">@(Model.Stats?.TotalRegisteredPoints ?? 0)</p>
+                <p class="head_couter">امتیاز ثبت‌شده</p>
+            </div>
+        </div>
+    </div>
+</div>
 
-<div class="card mb-4">
-    <div class="card-body admin-form">
-        <h5 class="mb-3">ورود از اکسل</h5>
-        <form asp-action="UploadExcel" method="post" enctype="multipart/form-data">
-            @Html.AntiForgeryToken()
-            <div class="row g-2 align-items-end">
-                <div class="col-12 col-md-4">
-                    <label class="form-label">محصول</label>
-                    <select name="ProductID" class="form-select" required>
-                        <option value="">انتخاب محصول</option>
-                        @foreach (var item in Model.Products)
+<div class="white_shd full margin_bottom_30">
+    <div class="full graph_head">
+        <div class="heading1 margin_0">
+            <h2>عملیات گارانتی</h2>
+        </div>
+    </div>
+    <div class="full inner_elements">
+        <div class="tab_style2">
+            <div class="tabbar padding_infor_info">
+                <nav>
+                    <div class="nav nav-tabs" id="warrantyTab" role="tablist">
+                        <button class="nav-link @(openExcelTab ? "" : "active")" id="tab-cards" data-bs-toggle="tab" data-bs-target="#warranty-cards" type="button" role="tab">لیست کارت‌ها</button>
+                        <button class="nav-link @(openExcelTab ? "active" : "")" id="tab-excel" data-bs-toggle="tab" data-bs-target="#warranty-excel" type="button" role="tab">ورود اکسل</button>
+                        <button class="nav-link" id="tab-generate" data-bs-toggle="tab" data-bs-target="#warranty-generate" type="button" role="tab">تولید سریال</button>
+                    </div>
+                </nav>
+                <div class="tab-content pt-3" id="warrantyTabContent">
+                    <div class="tab-pane fade @(openExcelTab ? "" : "show active")" id="warranty-cards" role="tabpanel">
+                        <form method="get" class="table_filter_bar admin-form">
+                            <select name="productId" class="form-select">
+                                <option value="">همه محصولات</option>
+                                @foreach (var item in Model.Products)
+                                {
+                                    <option value="@item.ProductID" selected="@(Model.ProductID == item.ProductID)">@item.ProductName</option>
+                                }
+                            </select>
+                            <select name="isRegistered" class="form-select">
+                                <option value="">همه وضعیت‌ها</option>
+                                <option value="true" selected="@(Model.IsRegistered == true)">ثبت‌شده</option>
+                                <option value="false" selected="@(Model.IsRegistered == false)">ثبت‌نشده</option>
+                            </select>
+                            <button class="main_bt" type="submit">فیلتر</button>
+                            <input type="search" class="form-control table-filter-input" data-table-target="#warrantyCardsTable" placeholder="جستجو در جدول..." autocomplete="off" />
+                        </form>
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle" id="warrantyCardsTable">
+                                <thead>
+                                    <tr>
+                                        <th>سریال</th>
+                                        <th>رمز</th>
+                                        <th>محصول</th>
+                                        <th>وضعیت</th>
+                                        <th>اعتبار (ماه)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (Model.Cards.Any())
+                                    {
+                                        foreach (var card in Model.Cards)
+                                        {
+                                            <tr>
+                                                <td>@card.SerialNumber</td>
+                                                <td>@card.ScratchedCode</td>
+                                                <td>@card.ProductName</td>
+                                                <td>@(card.IsRegistered ? "ثبت‌شده" : "آزاد")</td>
+                                                <td>@card.ValidityMonths</td>
+                                            </tr>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <tr>
+                                            <td colspan="5" class="text-center text-muted">کارتی یافت نشد</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade @(openExcelTab ? "show active" : "")" id="warranty-excel" role="tabpanel">
+                        @if (Model.LastImport != null)
                         {
-                            <option value="@item.ProductID">@item.ProductName</option>
+                            <div class="alert @(Model.LastImport.Success ? "alert-info" : "alert-danger")">
+                                @Model.LastImport.Message
+                            </div>
                         }
-                    </select>
-                </div>
-                <div class="col-12 col-md-5">
-                    <label class="form-label">فایل اکسل</label>
-                    <input type="file" name="ExcelFile" accept=".xlsx,.xls" class="form-control" required />
-                </div>
-                <div class="col-12 col-md-3">
-                    <button type="submit" class="btn btn-success w-100">آپلود اکسل</button>
+                        <form asp-action="UploadExcel" method="post" enctype="multipart/form-data" class="admin-form">
+                            @Html.AntiForgeryToken()
+                            <div class="row g-2 align-items-end">
+                                <div class="col-12 col-md-4">
+                                    <label class="form-label">محصول</label>
+                                    <select name="ProductID" class="form-select" required>
+                                        <option value="">انتخاب محصول</option>
+                                        @foreach (var item in Model.Products)
+                                        {
+                                            <option value="@item.ProductID">@item.ProductName</option>
+                                        }
+                                    </select>
+                                </div>
+                                <div class="col-12 col-md-5">
+                                    <label class="form-label">فایل اکسل</label>
+                                    <input type="file" name="ExcelFile" accept=".xlsx,.xls" class="form-control" required />
+                                </div>
+                                <div class="col-12 col-md-3">
+                                    <button type="submit" class="main_bt w-100">آپلود اکسل</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="tab-pane fade" id="warranty-generate" role="tabpanel">
+                        <form asp-action="GenerateCodes" method="post" class="admin-form">
+                            @Html.AntiForgeryToken()
+                            <div class="row g-2 align-items-end">
+                                <div class="col-12 col-md-4">
+                                    <label class="form-label">محصول</label>
+                                    <select name="productId" class="form-select" required>
+                                        <option value="">انتخاب محصول</option>
+                                        @foreach (var item in Model.Products)
+                                        {
+                                            <option value="@item.ProductID">@item.ProductName</option>
+                                        }
+                                    </select>
+                                </div>
+                                <div class="col-12 col-md-4">
+                                    <label class="form-label">تعداد</label>
+                                    <input type="number" name="count" class="form-control" value="@Model.GenerateCount" min="1" max="200" />
+                                </div>
+                                <div class="col-12 col-md-4">
+                                    <button type="submit" class="main_bt w-100">تولید سریال</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
-        </form>
-    </div>
-</div>
-
-<div class="card mb-4">
-    <div class="card-body admin-form">
-        <h5 class="mb-3">تولید کد گارانتی</h5>
-        <form asp-action="GenerateCodes" method="post">
-            @Html.AntiForgeryToken()
-            <div class="row g-2 align-items-end">
-                <div class="col-12 col-md-4">
-                    <label class="form-label">محصول</label>
-                    <select name="productId" class="form-select" required>
-                        <option value="">انتخاب محصول</option>
-                        @foreach (var item in Model.Products)
-                        {
-                            <option value="@item.ProductID">@item.ProductName</option>
-                        }
-                    </select>
-                </div>
-                <div class="col-12 col-md-4">
-                    <label class="form-label">تعداد</label>
-                    <input type="number" name="count" class="form-control" value="@Model.GenerateCount" min="1" max="200" />
-                </div>
-                <div class="col-12 col-md-4">
-                    <button type="submit" class="btn btn-primary w-100">تولید سریال</button>
-                </div>
-            </div>
-        </form>
-    </div>
-</div>
-
-<div class="card">
-    <div class="card-body">
-        <form method="get" class="row g-2 mb-3 admin-form">
-            <div class="col-12 col-md-4">
-                <select name="productId" class="form-select" asp-for="ProductID">
-                    <option value="">همه محصولات</option>
-                    @foreach (var item in Model.Products)
-                    {
-                        <option value="@item.ProductID" selected="@(Model.ProductID == item.ProductID)">@item.ProductName</option>
-                    }
-                </select>
-            </div>
-            <div class="col-12 col-md-4">
-                <select name="isRegistered" class="form-select">
-                    <option value="">همه وضعیت‌ها</option>
-                    <option value="true" selected="@(Model.IsRegistered == true)">ثبت‌شده</option>
-                    <option value="false" selected="@(Model.IsRegistered == false)">ثبت‌نشده</option>
-                </select>
-            </div>
-            <div class="col-12 col-md-4">
-                <button class="btn btn-outline-primary w-100" type="submit">فیلتر</button>
-            </div>
-        </form>
-
-        <div class="table-responsive">
-            <table class="table table-hover align-middle">
-                <thead class="table-dark">
-                    <tr>
-                        <th>سریال</th>
-                        <th>رمز</th>
-                        <th>محصول</th>
-                        <th>وضعیت</th>
-                        <th>اعتبار (ماه)</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @if (Model.Cards.Any())
-                    {
-                        foreach (var card in Model.Cards)
-                        {
-                            <tr>
-                                <td>@card.SerialNumber</td>
-                                <td>@card.ScratchedCode</td>
-                                <td>@card.ProductName</td>
-                                <td>@(card.IsRegistered ? "ثبت‌شده" : "آزاد")</td>
-                                <td>@card.ValidityMonths</td>
-                            </tr>
-                        }
-                    }
-                    else
-                    {
-                        <tr>
-                            <td colspan="5" class="text-center text-muted">کارتی یافت نشد</td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
         </div>
     </div>
 </div>

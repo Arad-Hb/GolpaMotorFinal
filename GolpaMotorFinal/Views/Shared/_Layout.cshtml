@@ -4,22 +4,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@ViewData["Title"] - گلپا موتور</title>
-    <link href="~/lib/bootstrap-5.3.8-dist/css/bootstrap.min.css" rel="stylesheet" />
-    <link href="~/fonts/fontawesome-free-6.7.2-web/css/fontawesome.min.css" rel="stylesheet" />
+    <link href="~/lib/bootstrap-5.3.8-dist/css/bootstrap.rtl.min.css" rel="stylesheet" />
     <link href="~/fonts/fontawesome-free-6.7.2-web/css/all.min.css" rel="stylesheet" />
     <link href="~/fonts/vazirmatn-master/vazirmatn-font-face.css" rel="stylesheet" />
     <link href="~/css/Layout.css" rel="stylesheet" />
     <link href="~/css/account.css" rel="stylesheet" />
     <link href="~/css/admin-forms.css" rel="stylesheet" />
+    <link href="~/css/pluto-theme.css" rel="stylesheet" />
 
     @RenderSection("Styles", required: false)
-
 </head>
-<body>
-    <nav class="navbar navbar-expand-lg bg-white shadow-sm">
+@{
+    var extraBody = ViewData["BodyClass"] as string;
+}
+<body class="pluto-public @extraBody">
+    <nav class="navbar navbar-expand-lg shadow-sm">
         <div class="container">
             <a asp-controller="Home" asp-action="Index" class="logo-wrapper">
-                <img src="~/images/pics/logo.png" alt="گلپا موتور" class="logo-img">
+                <img src="~/pluto/images/logo/logo-golpa.png" alt="گلپا" class="logo-img">
             </a>
             <button class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#nav">
                 <i class="fa-solid fa-bars"></i>
@@ -67,7 +69,7 @@
     </main>
     <footer class="footer">
         <div class="container text-center">
-            <h5>Golpa Motor</h5>
+            <h5>گلپا موتور</h5>
             <p>© تمامی حقوق محفوظ است</p>
         </div>
     </footer>

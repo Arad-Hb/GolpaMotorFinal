@@ -1,3 +1,36 @@
+$(document).on("keydown", ".search__input, #productSearch", function (e) {
+    if (e.key !== "Enter") return;
+    e.preventDefault();
+    const btn = $(this).closest(".search").find(".search__button");
+    if (btn.length) btn.trigger("click");
+    else $("#btnSearchProduct").trigger("click");
+});
+
+$(document).on("click", "#sidebarCollapse, .sidebar_toggle", function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+    const body = document.body;
+    if (window.matchMedia("(max-width: 991.98px)").matches) {
+        body.classList.toggle("sidebar-open");
+        body.classList.remove("sidebar-collapsed");
+    } else {
+        body.classList.toggle("sidebar-collapsed");
+        body.classList.remove("sidebar-open");
+    }
+});
+
+$(document).on("input", ".table-filter-input", function () {
+    const query = ($(this).val() || "").toString().trim().toLowerCase();
+    const target = $(this).data("table-target");
+    const $root = target ? $(target) : $(this).closest(".white_shd, .card, .table_section, .tab-pane").find("table").first();
+    const $table = $root.is("table") ? $root : $root.find("table").first();
+    $table.find("tbody tr").each(function () {
+        const rowText = ($(this).text() || "").toLowerCase();
+        const emptyRow = $(this).find("td").length <= 1 && rowText.indexOf("یافت") !== -1;
+        $(this).toggle(!query || emptyRow || rowText.indexOf(query) !== -1);
+    });
+});
+
 function refreshGrid(targetId, targetUrl, closeOnSuccess = true, afterRefresh) {
     if (!targetUrl) {
         if (closeOnSuccess) {

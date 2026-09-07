@@ -1,30 +1,77 @@
-<div class="sidebar">
-
-    <h4 class="text-white mb-4">
-        پنل مدیریت
-    </h4>
-    <a asp-controller="Admin" asp-action="Index">
-        <i class="fa-solid fa-chart-line"></i>
-        داشبورد
-    </a>
-    <a asp-controller="WarrantyManagement" asp-action="Index">
-        <i class="fa-solid fa-shield-halved"></i>
-        گارانتی ها
-    </a>
-    <a asp-controller="ProductManagement" asp-action="Index">
-        <i class="fa-solid fa-box"></i>
-        محصولات
-    </a>
-    <a asp-controller="UserManagement" asp-action="Index">
-        <i class="fa-solid fa-users"></i>
-        کاربران
-    </a>
-    <a asp-controller="UserManagement" asp-action="UserReport">
-        <i class="fa-solid fa-chart-pie"></i>
-        گزارشات
-    </a>
-    <a asp-controller="Admin" asp-action="Profile">
-        <i class="fa-solid fa-user"></i>
-        پروفایل
-    </a>
-</div>
+@using Microsoft.AspNetCore.Identity
+@using DomainModel.Models
+@inject UserManager<ApplicationUser> UserManager
+@{
+    var adminUser = await UserManager.GetUserAsync(User);
+    var displayName = string.Join(" ", new[] { adminUser?.FirstName, adminUser?.LastName }.Where(x => !string.IsNullOrWhiteSpace(x)));
+    if (string.IsNullOrWhiteSpace(displayName))
+        displayName = User.Identity?.Name ?? "مدیر";
+    var controller = ViewContext.RouteData.Values["controller"]?.ToString();
+    var action = ViewContext.RouteData.Values["action"]?.ToString();
+    bool IsActive(string c, string a = "Index") =>
+        string.Equals(controller, c, StringComparison.OrdinalIgnoreCase) &&
+        string.Equals(action, a, StringComparison.OrdinalIgnoreCase);
+}
+<nav id="sidebar">
+    <div class="sidebar_blog_1">
+        <div class="sidebar-header">
+            <div class="logo_section">
+                <a asp-controller="Admin" asp-action="Index">
+                    <img src="~/pluto/images/logo/logo-golpa.png" alt="Golpa" />
+                </a>
+            </div>
+        </div>
+        <div class="sidebar_user_info">
+            <div class="user_profle_side">
+                <div class="user_img">
+                    <img src="@(string.IsNullOrWhiteSpace(adminUser?.ProfileImageUrl) ? "/pluto/images/layout/user_img.jpg" : adminUser.ProfileImageUrl)" alt="" />
+                </div>
+                <div class="user_info">
+                    <h6>@displayName</h6>
+                    <p>آنلاین</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="sidebar_blog_2">
+        <h4>عمومی</h4>
+        <ul class="list-unstyled components">
+            <li class="@(IsActive("Admin", "Index") ? "active" : null)">
+                <a asp-controller="Admin" asp-action="Index">
+                    <i class="fa fa-gauge yellow_color"></i>
+                    <span>داشبورد</span>
+                </a>
+            </li>
+            <li class="@(IsActive("WarrantyManagement") ? "active" : null)">
+                <a asp-controller="WarrantyManagement" asp-action="Index">
+                    <i class="fa fa-shield-halved orange_color"></i>
+                    <span>گارانتی‌ها</span>
+                </a>
+            </li>
+            <li class="@(IsActive("ProductManagement") ? "active" : null)">
+                <a asp-controller="ProductManagement" asp-action="Index">
+                    <i class="fa fa-box purple_color"></i>
+                    <span>محصولات</span>
+                </a>
+            </li>
+            <li class="@(IsActive("UserManagement", "Index") ? "active" : null)">
+                <a asp-controller="UserManagement" asp-action="Index">
+                    <i class="fa fa-users blue1_color"></i>
+                    <span>کاربران</span>
+                </a>
+            </li>
+            <li class="@(IsActive("UserManagement", "UserReport") ? "active" : null)">
+                <a asp-controller="UserManagement" asp-action="UserReport">
+                    <i class="fa fa-chart-pie green_color"></i>
+                    <span>گزارشات</span>
+                </a>
+            </li>
+            <li class="@(IsActive("Admin", "Profile") ? "active" : null)">
+                <a asp-controller="Admin" asp-action="Profile">
+                    <i class="fa fa-user red_color"></i>
+                    <span>پروفایل</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+</nav>

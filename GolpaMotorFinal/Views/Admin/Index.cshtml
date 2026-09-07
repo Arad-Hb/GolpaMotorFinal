@@ -5,66 +5,85 @@
     var top = ViewBag.TopRegistrars as List<DomainModel.ViewModels.Product.NamedCountItem>;
 }
 
-<div class="mb-4">
-    <div class="page-title">داشبورد مدیریت گارانتی</div>
-    <div class="page-subtitle">آمار زنده فروشگاه</div>
-</div>
-
-<div class="row g-4 mb-4">
-    <div class="col-xl-3 col-md-6">
-        <div class="card dashboard-card">
-            <div class="card-body">
-                <div class="stat-icon bg-success">
-                    <i class="fa-solid fa-shield-halved"></i>
-                </div>
-                <h3>@(stats?.RegisteredCards ?? 0)</h3>
-                <p>گارانتی ثبت شده</p>
-            </div>
-        </div>
-    </div>
-    <div class="col-xl-3 col-md-6">
-        <div class="card dashboard-card">
-            <div class="card-body">
-                <div class="stat-icon bg-warning">
-                    <i class="fa-solid fa-clock"></i>
-                </div>
-                <h3>@(stats?.UnregisteredCards ?? 0)</h3>
-                <p>گارانتی باقی مانده</p>
-            </div>
-        </div>
-    </div>
-    <div class="col-xl-3 col-md-6">
-        <div class="card dashboard-card">
-            <div class="card-body">
-                <div class="stat-icon bg-danger">
-                    <i class="fa-solid fa-triangle-exclamation"></i>
-                </div>
-                <h3>@(stats?.ProductsWithoutCards ?? 0)</h3>
-                <p>محصول بدون گارانتی</p>
-            </div>
-        </div>
-    </div>
-    <div class="col-xl-3 col-md-6">
-        <div class="card dashboard-card">
-            <div class="card-body">
-                <div class="stat-icon bg-purple">
-                    <i class="fa-solid fa-gift"></i>
-                </div>
-                <h3>@(stats?.TotalRegisteredPoints ?? 0)</h3>
-                <p>مجموع امتیاز ثبت‌شده</p>
-            </div>
+<div class="row column_title">
+    <div class="col-md-12">
+        <div class="page_title">
+            <h2>داشبورد</h2>
         </div>
     </div>
 </div>
 
-<div class="row g-4">
-    <div class="col-lg-12">
-        <div class="main-card p-4">
-            <div class="section-title mb-3">
-                <i class="fa-solid fa-users"></i>
-                بیشترین ثبت‌کننده گارانتی
+<div class="row column1">
+    <div class="col-md-6 col-lg-3">
+        <div class="full counter_section">
+            <div class="couter_icon">
+                <div>
+                    <i class="fa fa-shield-halved green_color"></i>
+                </div>
             </div>
-            <table class="table">
+            <div class="counter_no">
+                <p class="total_no">@(stats?.RegisteredCards ?? 0)</p>
+                <p class="head_couter">گارانتی ثبت‌شده</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+        <div class="full counter_section">
+            <div class="couter_icon">
+                <div>
+                    <i class="fa fa-clock yellow_color"></i>
+                </div>
+            </div>
+            <div class="counter_no">
+                <p class="total_no">@(stats?.UnregisteredCards ?? 0)</p>
+                <p class="head_couter">گارانتی باقی‌مانده</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+        <div class="full counter_section">
+            <div class="couter_icon">
+                <div>
+                    <i class="fa fa-triangle-exclamation red_color"></i>
+                </div>
+            </div>
+            <div class="counter_no">
+                <p class="total_no">@(stats?.ProductsWithoutCards ?? 0)</p>
+                <p class="head_couter">محصول بدون گارانتی</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+        <div class="full counter_section">
+            <div class="couter_icon">
+                <div>
+                    <i class="fa fa-gift purple_color"></i>
+                </div>
+            </div>
+            <div class="counter_no">
+                <p class="total_no">@(stats?.TotalRegisteredPoints ?? 0)</p>
+                <p class="head_couter">امتیاز ثبت‌شده</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="white_shd full margin_bottom_30">
+    <div class="full graph_head">
+        <div class="heading1 margin_0">
+            <h2>بیشترین ثبت‌کننده گارانتی</h2>
+        </div>
+    </div>
+    <div class="table_section padding_infor_info">
+        <div class="table_filter_bar">
+            <input type="search"
+                   class="form-control table-filter-input"
+                   data-table-target="#topRegistrarsTable"
+                   placeholder="جستجو در جدول..."
+                   autocomplete="off" />
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle" id="topRegistrarsTable">
                 <thead>
                     <tr>
                         <th>کاربر</th>

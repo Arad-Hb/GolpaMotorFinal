@@ -5,8 +5,10 @@
     Layout = "_AdminLayout";
 }
 
-<div class="mb-3">
-    <div class="page-title">پروفایل مدیر</div>
+<div class="row column_title">
+    <div class="col-md-12">
+        <div class="page_title"><h2>پروفایل مدیر</h2></div>
+    </div>
 </div>
 
 @if (TempData["SuccessMessage"] != null)
@@ -14,8 +16,8 @@
     <div class="alert alert-success">@TempData["SuccessMessage"]</div>
 }
 
-<div class="card">
-    <div class="card-body admin-form">
+<div class="white_shd full margin_bottom_30">
+    <div class="padding_infor_info admin-form">
         <form asp-action="Profile" method="post" enctype="multipart/form-data">
             @Html.AntiForgeryToken()
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
@@ -47,7 +49,7 @@
                     <input asp-for="NewPassword" type="password" class="form-control" />
                 </div>
             </div>
-            <button type="submit" class="btn btn-primary mt-4">ذخیره</button>
+            <button type="submit" class="main_bt mt-4">ذخیره</button>
         </form>
     </div>
 </div>

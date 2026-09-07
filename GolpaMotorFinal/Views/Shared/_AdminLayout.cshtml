@@ -1,50 +1,38 @@
-
 @{
     Layout = null;
 }
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@ViewData["Title"]</title>
-    <link href="~/lib/bootstrap-5.3.8-dist/css/bootstrap.min.css" rel="stylesheet" />
-    <link href="~/fonts/fontawesome-free-6.7.2-web/css/fontawesome.min.css" rel="stylesheet" />
+    <title>@(ViewData["Title"] ?? "پنل مدیریت") - گلپا</title>
+    <link href="~/lib/bootstrap-5.3.8-dist/css/bootstrap.rtl.min.css" rel="stylesheet" />
     <link href="~/fonts/fontawesome-free-6.7.2-web/css/all.min.css" rel="stylesheet" />
-    <link href="~/css/adminlayout.css" rel="stylesheet" />
-    <link href="~/css/account.css" rel="stylesheet" />
-    <link href="~/css/admin-forms.css" rel="stylesheet" />
     <link href="~/fonts/vazirmatn-master/vazirmatn-font-face.css" rel="stylesheet" />
+    <link href="~/css/admin-forms.css" rel="stylesheet" />
+    <link href="~/css/account.css" rel="stylesheet" />
     <link href="~/lib/sweetalert2/dist/sweetalert2.css" rel="stylesheet" />
-
-
+    <link href="~/css/pluto-theme.css" rel="stylesheet" />
     @RenderSection("Styles", false)
-
 </head>
-
-<body>
-    <div class="d-flex">
-
-        <partial name="_AdminSidebar" />
-
-        <div class="main w-100">
-
-            <partial name="_AdminHeader" />
-
-            <div class="content p-4">
-                @RenderBody()
+<body class="dashboard dashboard_1 pluto-admin">
+    <div class="full_container">
+        <div class="inner_container">
+            <partial name="_AdminSidebar" />
+            <div id="content">
+                <partial name="_AdminHeader" />
+                <div class="midde_cont">
+                    <div class="container-fluid">
+                        @RenderBody()
+                    </div>
+                    <partial name="_AdminFooter" />
+                </div>
             </div>
-
-            <partial name="_AdminFooter" />
-
         </div>
     </div>
-    <div>
 
-        <partial name="_GeneralModal" />
-
-    </div>
+    <partial name="_GeneralModal" />
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap-5.3.8-dist/js/bootstrap.bundle.js"></script>
@@ -52,53 +40,27 @@
     <script src="~/js/modal.js"></script>
     <script src="~/js/AdminLayout.js"></script>
     <form id="antiforgery-form" class="d-none">@Html.AntiForgeryToken()</form>
-
     <script>
-
-        //---Dynamic General SearchBox viewcomponents---\\
-
         $(document).on("click", ".search__button", function (e) {
-
             e.preventDefault();
-        
             var searchBox = $(this).closest(".search");
-        
             var componentId = searchBox.data("component-id");
             var url = searchBox.data("action");
             var target = searchBox.data("target");
-        
             var input = $("#searchInput-" + componentId);
-        
             $.ajax({
-        
                 url: url,
                 type: "POST",
-        
                 data: {
-                    __RequestVerificationToken:
-                        $('input[name="__RequestVerificationToken"]').first().val(),
-        
+                    __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').first().val(),
                     [input.attr("name")]: input.val()
                 },
-        
                 success: function (html) {
-        
                     $("#" + target).html(html);
-        
-                },
-        
-                error: function (xhr) {
-        
-                    console.log(xhr.responseText);
-        
                 }
-        
             });
-        
         });
     </script>
-
     @RenderSection("Scripts", false)
-
 </body>
 </html>
