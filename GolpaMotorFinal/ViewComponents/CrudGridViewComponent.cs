@@ -5,7 +5,7 @@ namespace GolpaMotorFinal.ViewComponents
 {
     public class CrudGridViewComponent : ViewComponent
     {
-        public IViewComponentResult Invoke<T>(CrudGridViewModel model)
+        public IViewComponentResult Invoke(CrudGridViewModel model)
         {
             return View(model);
         }

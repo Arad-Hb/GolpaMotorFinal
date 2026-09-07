@@ -11,7 +11,7 @@
     <div class="card-body">
 
         <div id="UserReportGrid">
-            @await Component.InvokeAsync("CrudGrid", Model)
+            @await Component.InvokeAsync("CrudGrid", new { model = Model })
         </div>
 
     </div>

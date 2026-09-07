@@ -126,7 +126,7 @@ namespace GolpaMotorFinal.Controllers
         {
             var users = await service.GetUserReport();
             var grid = service.BuildUserReportGrid(users);
-            return ViewComponent("CrudGrid", grid);
+            return ViewComponent("CrudGrid", new { model = grid });
         }
 
         [HttpGet]
