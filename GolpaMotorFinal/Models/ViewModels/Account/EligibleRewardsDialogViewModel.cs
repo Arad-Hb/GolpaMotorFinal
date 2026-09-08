@@ -15,5 +15,11 @@ namespace GolpaMotorFinal.Models.ViewModels.Account
         public bool HasReceivedReward { get; set; }
         public List<UserEligibleRewardItem> Items { get; set; } = new();
         public List<RewardRequestListItem> RecentRequests { get; set; } = new();
+        public int RewardPage { get; set; }
+        public int RewardPageCount { get; set; }
+        public int RewardRecordCount { get; set; }
+        public int HistoryPage { get; set; }
+        public int HistoryPageCount { get; set; }
+        public int HistoryRecordCount { get; set; }
     }
 }

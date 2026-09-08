@@ -14,6 +14,7 @@ namespace GolpaMotorFinal.FrameworkUI.Services
         Task<UserAddEditViewModel?> GetForEdit(string userID);
         Task<List<UserListItemViewModel>> GetUsers();
         Task<List<UserReportViewModel>> GetUserReport();
+        Task<(List<UserReportViewModel> Users, int PageIndex, int PageCount, int RecordCount)> GetUserReportPage(int pageIndex);
         Task<MergeAccountsViewModel> GetUserMergeAccounts(string userID);
         Task<MergeAccountsViewModel> GetMergeSearchResult(string sm);
         Task<OperationResult> MergeUsers(MergeAccountsViewModel model);

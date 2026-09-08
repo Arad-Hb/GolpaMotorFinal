@@ -1,5 +1,4 @@
 @using GolpaMotorFinal.Models.ViewModels.CRUD
-@using GolpaMotorFinal.Models.ViewModels
 @model CrudIndexViewModel
 
 <div class="row column_title">
@@ -45,8 +44,3 @@
         </div>
     </div>
 </div>
-
-@{
-    var pager = new PaginationViewModel { GridId = Model.GridId };
-}
-@await Component.InvokeAsync("Pagination", pager)

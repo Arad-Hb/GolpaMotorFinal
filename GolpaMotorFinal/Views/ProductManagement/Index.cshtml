@@ -110,17 +110,16 @@
         }
 
         function LoadProducts(page) {
-            if (typeof page === "number") currentPage = page;
+            if (typeof page !== "number") {
+                const fromPager = parseInt($("#ProductGrid .crud-pagination").attr("data-page-index"), 10);
+                page = Number.isNaN(fromPager) ? currentPage : fromPager;
+            }
+            currentPage = page;
             $("#ProductGrid").load(productListUrl(currentPage));
         }
 
         $("#btnSearchProduct").on("click", function () {
             LoadProducts(0);
-        });
-
-        $(document).on("click", ".product-page", function (e) {
-            e.preventDefault();
-            LoadProducts(parseInt($(this).data("page"), 10) || 0);
         });
 
         $(document).on("click", "#btnAdd", function () {

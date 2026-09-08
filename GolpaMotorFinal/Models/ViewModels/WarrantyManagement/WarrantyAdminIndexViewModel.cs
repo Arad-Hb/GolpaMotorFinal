@@ -7,6 +7,9 @@ namespace GolpaMotorFinal.Models.ViewModels.WarrantyManagement
     public class WarrantyAdminIndexViewModel
     {
         public List<WarrantyCardListItem> Cards { get; set; } = new();
+        public int PageIndex { get; set; }
+        public int PageCount { get; set; }
+        public int RecordCount { get; set; }
         public List<ProductListItem> Products { get; set; } = new();
         public long? ProductID { get; set; }
         public bool? IsRegistered { get; set; }

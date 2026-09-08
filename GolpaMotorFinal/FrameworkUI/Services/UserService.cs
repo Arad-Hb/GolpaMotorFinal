@@ -3,6 +3,7 @@ using DomainModel.ViewModels.User;
 using Framework.Common;
 using GolpaMotorFinal.Models.ViewModels.UserManagement;
 using GolpaMotorFinal.Models.ViewModels.CRUD;
+using GolpaMotorFinal.Models.ViewModels;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
 
@@ -190,6 +191,33 @@ namespace GolpaMotorFinal.FrameworkUI.Services
             })
             .ToList();
         }
+
+        public async Task<(List<UserReportViewModel> Users, int PageIndex, int PageCount, int RecordCount)> GetUserReportPage(int pageIndex)
+        {
+            var result = await repo.Search(new UserSearchModel
+            {
+                PageIndex = pageIndex,
+                PageSize = PaginationViewModel.DefaultPageSize
+            });
+            var sm = result.sm ?? new UserSearchModel();
+            var users = (result.userList ?? new List<UserListItem>()).Select(u => new UserReportViewModel
+            {
+                UserID = u.UserID,
+                FullName = $"{u.FirstName ?? string.Empty} {u.LastName ?? string.Empty}".Trim(),
+                PhoneNumber = u.PhoneNumber ?? string.Empty,
+                RoleName = u.RoleName ?? string.Empty,
+                TotalRegisteredCards = u.TotalRegisteredCards,
+                TotalEarnedPoints = u.TotalEarnedPoints,
+                TotalSettledPoints = u.TotalSettledPoints,
+                RemainedPoints = u.RemainedPoints,
+                ProfileImageUrl = u.ExistingProfileImageUrl ?? string.Empty,
+                Province = u.Province ?? string.Empty,
+                City = u.City ?? string.Empty
+            }).ToList();
+
+            return (users, sm.PageIndex, sm.PageCount, sm.RecordCount);
+        }
+
         public async Task<MergeAccountsViewModel> GetUserMergeAccounts(string userID)
         {
             var user = await repo.GetDetails(userID);

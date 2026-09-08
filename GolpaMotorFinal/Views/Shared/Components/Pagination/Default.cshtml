@@ -3,18 +3,24 @@
 <div class="crud-pagination d-flex flex-wrap justify-content-between align-items-center gap-2 mt-3"
      data-grid-id="@Model.GridId"
      data-component="@Model.ComponentName"
+     data-list-url="@Model.ListUrl"
+     data-page-param="@Model.PageParameter"
+     data-page-index="@Model.PageIndex"
      data-page-size="@Model.PageSize">
 
     <div class="d-flex align-items-center gap-2">
-        <label class="text-muted small mb-0">تعداد در صفحه:</label>
-        <select class="form-select form-select-sm crud-page-size"
-                style="width:auto"
-                data-grid-id="@Model.GridId">
-            @foreach (var size in Model.PageSizeOptions)
-            {
-                <option value="@size" selected="@(size == Model.PageSize)">@size</option>
-            }
-        </select>
+        @if (Model.ShowPageSizeSelector)
+        {
+            <label class="text-muted small mb-0">تعداد در صفحه:</label>
+            <select class="form-select form-select-sm crud-page-size"
+                    style="width:auto"
+                    data-grid-id="@Model.GridId">
+                @foreach (var size in Model.PageSizeOptions)
+                {
+                    <option value="@size" selected="@(size == Model.PageSize)">@size</option>
+                }
+            </select>
+        }
         <span class="text-muted small">
             @Model.RecordCount رکورد
         </span>
@@ -24,18 +30,18 @@
     {
         <nav>
             <ul class="pagination pagination-sm mb-0">
-                <li class="page-item @(Model.PageIndex <= 1 ? "disabled" : "")">
+                <li class="page-item @(Model.PageIndex <= 0 ? "disabled" : "")">
                     <a class="page-link" href="#" data-page="@(Model.PageIndex - 1)">قبلی</a>
                 </li>
 
-                @for (int i = 1; i <= Model.PageCount; i++)
+                @for (int i = 0; i < Model.PageCount; i++)
                 {
                     <li class="page-item @(i == Model.PageIndex ? "active" : "")">
-                        <a class="page-link" href="#" data-page="@i">@i</a>
+                        <a class="page-link" href="#" data-page="@i">@(i + 1)</a>
                     </li>
                 }
 
-                <li class="page-item @(Model.PageIndex >= Model.PageCount ? "disabled" : "")">
+                <li class="page-item @(Model.PageIndex >= Model.PageCount - 1 ? "disabled" : "")">
                     <a class="page-link" href="#" data-page="@(Model.PageIndex + 1)">بعدی</a>
                 </li>
             </ul>

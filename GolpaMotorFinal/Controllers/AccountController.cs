@@ -5,6 +5,7 @@ using DomainModel.ViewModels.User;
 using GolpaMotorFinal.FrameworkUI.Services;
 using GolpaMotorFinal.Models;
 using GolpaMotorFinal.Models.ViewModels.Account;
+using GolpaMotorFinal.Models.ViewModels;
 using GolpaMotorFinal.Models.ViewModels.UserManagement;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -493,9 +494,25 @@ namespace GolpaMotorFinal.Controllers
             return RedirectToAction(nameof(Manage));
         }
 
-        private async Task<ManageViewModel> BuildManageModel(ApplicationUser user)
+        private async Task<ManageViewModel> BuildManageModel(ApplicationUser user, int cardPage = 0)
         {
             var cards = await cardRepository.GetByUserAsync(user.Id);
+            var mapped = cards.Select(c => new CustomerCardItem
+            {
+                SerialNumber = c.SerialNumber,
+                ProductName = c.WarrantyCard?.Product?.ProductName ?? "-",
+                CreatedAt = c.CreatedAt,
+                Points = c.WarrantyCard?.Product?.ProductPoint ?? c.EarnedPionts
+            }).ToList();
+
+            var pageSize = PaginationViewModel.DefaultPageSize;
+            var count = mapped.Count;
+            var pageCount = count == 0 ? 1 : (int)Math.Ceiling(count / (double)pageSize);
+            if (cardPage < 0)
+                cardPage = 0;
+            if (cardPage >= pageCount)
+                cardPage = pageCount - 1;
+
             return new ManageViewModel
             {
                 Email = user.Email ?? string.Empty,
@@ -510,14 +527,23 @@ namespace GolpaMotorFinal.Controllers
                 TotalRegisteredCards = cards.Count,
                 IsEligibleForReward = user.IsEligibleForReward,
                 HasReceivedReward = user.HasReceivedReward,
-                Cards = cards.Select(c => new CustomerCardItem
-                {
-                    SerialNumber = c.SerialNumber,
-                    ProductName = c.WarrantyCard?.Product?.ProductName ?? "-",
-                    CreatedAt = c.CreatedAt,
-                    Points = c.WarrantyCard?.Product?.ProductPoint ?? c.EarnedPionts
-                }).ToList()
+                Cards = mapped.Skip(cardPage * pageSize).Take(pageSize).ToList(),
+                CardPage = cardPage,
+                CardPageCount = pageCount,
+                CardRecordCount = count
             };
+        }
+
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> ManageCards(int pageIndex = 0)
+        {
+            var user = await userManager.GetUserAsync(User);
+            if (user == null)
+                return Unauthorized();
+
+            var vm = await BuildManageModel(user, pageIndex);
+            return PartialView("_ManageCardsTable", vm);
         }
 
         [HttpGet]

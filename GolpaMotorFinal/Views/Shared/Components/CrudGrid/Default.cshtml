@@ -22,7 +22,7 @@
         <tbody>
             @if (Model.Rows.Any())
             {
-                int rowNumber = 1;
+                int rowNumber = Model.StartRowNumber > 0 ? Model.StartRowNumber : 1;
                 foreach (var row in Model.Rows)
                 {
                     <tr>
@@ -92,3 +92,8 @@
         </tbody>
     </table>
 </div>
+
+@if (Model.Pager != null)
+{
+    @await Component.InvokeAsync("Pagination", Model.Pager)
+}

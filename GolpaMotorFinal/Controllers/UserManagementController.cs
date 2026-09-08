@@ -5,6 +5,7 @@ using GolpaMotorFinal.FrameworkUI.Services;
 using GolpaMotorFinal.Models.ViewModels.Account;
 using GolpaMotorFinal.Models.ViewModels.UserManagement;
 using GolpaMotorFinal.Models.ViewModels.CRUD;
+using GolpaMotorFinal.Models.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -30,35 +31,16 @@ namespace GolpaMotorFinal.Controllers
             this.rewardRequests = rewardRequests;
         }
 
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
-            var model = await service.GetUsers();
-            return View(model);
+            return View();
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Search([FromForm(Name = "Search.SearchTerm")] string? searchTerm)
+        public IActionResult Search([FromForm(Name = "Search.SearchTerm")] string? searchTerm)
         {
-            var sm = new UserSearchModel { PhoneNumber = searchTerm, SearchTerm = searchTerm };
-            var result = await repo.Search(sm);
-
-            var users = result.userList.Select(u => new UserListItemViewModel
-            {
-                UserID = u.UserID,
-                FullName = $"{u.FirstName ?? string.Empty} {u.LastName ?? string.Empty}".Trim(),
-                PhoneNumber = u.PhoneNumber ?? string.Empty,
-                ProfileImageUrl = u.ExistingProfileImageUrl ?? string.Empty,
-                RoleName = u.RoleName ?? string.Empty,
-                TotalRegisteredCards = u.TotalRegisteredCards,
-                TotalEarnedPoints = u.TotalEarnedPoints,
-                IsEligibleForReward = u.IsEligibleForReward,
-                HasReceivedReward = u.HasReceivedReward,
-                Province = u.Province ?? string.Empty,
-                City = u.City ?? string.Empty
-            }).ToList();
-
-            return ViewComponent("UserList", users);
+            return ViewComponent("UserList", new { searchTerm, pageIndex = 0 });
         }
 
         [HttpGet]
@@ -135,10 +117,10 @@ namespace GolpaMotorFinal.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> UserReportGrid()
+        public async Task<IActionResult> UserReportGrid(int pageIndex = 0)
         {
-            var users = await service.GetUserReport();
-            var grid = service.BuildUserReportGrid(users);
+            var page = await service.GetUserReportPage(pageIndex);
+            var grid = AttachUserReportPager(service.BuildUserReportGrid(page.Users), page.PageIndex, page.PageCount, page.RecordCount);
             return ViewComponent("CrudGrid", new { model = grid });
         }
 
@@ -380,7 +362,7 @@ namespace GolpaMotorFinal.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> EligibleRewards(string userID)
+        public async Task<IActionResult> EligibleRewards(string userID, int rewardPage = 0, int historyPage = 0)
         {
             if (string.IsNullOrWhiteSpace(userID))
                 return NotFound();
@@ -390,6 +372,12 @@ namespace GolpaMotorFinal.Controllers
             var user = await repo.GetDetails(userID);
             if (user == null)
                 return NotFound();
+
+            var pageSize = PaginationViewModel.DefaultPageSize;
+            var allItems = await rewardRequests.GetEligibleCatalogsForUser(user.UserID);
+            var allRequests = await rewardRequests.GetUserRequests(user.UserID);
+            var rewards = SlicePage(allItems, rewardPage, pageSize);
+            var history = SlicePage(allRequests, historyPage, pageSize);
 
             var vm = new EligibleRewardsDialogViewModel
             {
@@ -402,8 +390,14 @@ namespace GolpaMotorFinal.Controllers
                 TotalRegisteredCards = user.TotalRegisteredCards,
                 IsEligibleForReward = user.IsEligibleForReward,
                 HasReceivedReward = user.HasReceivedReward,
-                Items = await rewardRequests.GetEligibleCatalogsForUser(user.UserID),
-                RecentRequests = await rewardRequests.GetUserRequests(user.UserID)
+                Items = rewards.Items,
+                RecentRequests = history.Items,
+                RewardPage = rewards.PageIndex,
+                RewardPageCount = rewards.PageCount,
+                RewardRecordCount = rewards.RecordCount,
+                HistoryPage = history.PageIndex,
+                HistoryPageCount = history.PageCount,
+                HistoryRecordCount = history.RecordCount
             };
 
             return PartialView("_EligibleRewards", vm);
@@ -421,138 +415,47 @@ namespace GolpaMotorFinal.Controllers
         }
 
         [HttpGet]
-        public IActionResult Grid()
+        public IActionResult Grid(string? searchTerm, int pageIndex = 0)
         {
-            return ViewComponent("UserList");
+            return ViewComponent("UserList", new { searchTerm, pageIndex });
         }
 
 
         [HttpGet]
-        public async Task<IActionResult> UserReport()
+        public async Task<IActionResult> UserReport(int pageIndex = 0)
         {
-
-            var users = await service.GetUserReport();
-
-            var grid = service.BuildUserReportGrid(users);
-
+            var page = await service.GetUserReportPage(pageIndex);
+            var grid = AttachUserReportPager(service.BuildUserReportGrid(page.Users), page.PageIndex, page.PageCount, page.RecordCount);
             return View(grid);
-            //        var users = await service.GetUserReport();
-
-            //        var grid = new CrudGridViewModel
-            //        {
-            //            Items = users.Cast<object>(),
-
-            //            Columns =
-            //{
-            //    new GridColumn
-            //    {
-            //        Header = "نام",
-            //        PropertyName = nameof(UserReportViewModel.FullName)
-            //    },
-
-            //    new GridColumn
-            //    {
-            //        Header = "موبایل",
-            //        PropertyName = nameof(UserReportViewModel.PhoneNumber)
-            //    },
-
-            //    new GridColumn
-            //    {
-            //        Header = "استان",
-            //        PropertyName = nameof(UserReportViewModel.Province)
-            //    },
-
-            //    new GridColumn
-            //    {
-            //        Header = "شهر",
-            //        PropertyName = nameof(UserReportViewModel.City)
-            //    },
-
-            //    new GridColumn
-            //    {
-            //        Header = "تصویر",
-            //        PropertyName = nameof(UserReportViewModel.ProfileImageUrl),
-            //        Type = GridColumnType.Image
-            //    }
-            //},
-
-            //            Actions =
-            //{
-            //    new GridAction
-            //    {
-            //        Title = "جزئیات",
-            //        Icon = "fa fa-eye",
-            //        CssClass = "btn btn-sm btn-secondary",
-            //        Url = Url.Action("Details","UserManagement"),
-            //        IdProperty = nameof(UserReportViewModel.UserID)
-            //    },
-
-            //    new GridAction
-            //    {
-            //        Title = "ادغام",
-            //        Icon = "fa fa-user-plus",
-            //        CssClass = "btn btn-sm btn-warning",
-            //        Url = Url.Action("MergeAccounts","UserManagement"),
-            //        IdProperty = nameof(UserReportViewModel.UserID)
-            //    }
-            //}
-            //        };
-
-
-
-            //        grid.Columns.Add(new()
-            //        {
-            //            Header = "کارت ثبت شده",
-            //            Value = x => x.TotalRegisteredCards
-            //        });
-
-            //        grid.Columns.Add(new()
-            //        {
-            //            Header = "امتیاز کسب شده",
-            //            Value = x => x.TotalEarnedPoints
-            //        });
-
-            //        grid.Columns.Add(new()
-            //        {
-            //            Header = "امتیاز تسویه شده",
-            //            Value = x => x.TotalSettledPoints
-            //        });
-
-            //        grid.Columns.Add(new()
-            //        {
-            //            Header = "مانده امتیاز",
-            //            Value = x => x.RemainedPoints,
-            //            CssClass = "fw-bold text-success"
-            //        });
-
-            //        grid.Actions.Add(new()
-            //        {
-            //            Title = "جزئیات",
-            //            Icon = "fa fa-eye",
-            //            CssClass = "btn btn-sm btn-secondary open-modal",
-            //            Url = Url.Action("Details", "UserManagement"),
-            //            Id = x => x.UserID
-            //        });
-
-            //        grid.Actions.Add(new()
-            //        {
-            //            Title = "ادغام",
-            //            Icon = "fa fa-user-plus",
-            //            CssClass = "btn btn-sm btn-warning open-modal",
-            //            Url = Url.Action("MergeAccounts", "UserManagement"),
-            //            Id = x => x.UserID
-            //        });
-
-            //        return View(grid);
         }
 
+        private static CrudGridViewModel AttachUserReportPager(CrudGridViewModel grid, int pageIndex, int pageCount, int recordCount)
+        {
+            grid.StartRowNumber = pageIndex * PaginationViewModel.DefaultPageSize + 1;
+            grid.Pager = PaginationViewModel.For(
+                "UserReportGrid",
+                pageIndex,
+                pageCount,
+                recordCount,
+                "/UserManagement/UserReportGrid");
+            return grid;
+        }
 
-        //[HttpGet]
-        //public async Task<IActionResult> UserReport()
-        //{
-        //    var model = await service.GetUserReport();
-        //    return View(model);
-        //}
+        private static (List<T> Items, int PageIndex, int PageCount, int RecordCount) SlicePage<T>(List<T> source, int pageIndex, int pageSize)
+        {
+            var count = source?.Count ?? 0;
+            if (pageSize <= 0)
+                pageSize = PaginationViewModel.DefaultPageSize;
+            var pageCount = count == 0 ? 1 : (int)Math.Ceiling(count / (double)pageSize);
+            if (pageIndex < 0)
+                pageIndex = 0;
+            if (pageIndex >= pageCount)
+                pageIndex = pageCount - 1;
+            var items = count == 0
+                ? new List<T>()
+                : source!.Skip(pageIndex * pageSize).Take(pageSize).ToList();
+            return (items, pageIndex, pageCount, count);
+        }
 
     }
 

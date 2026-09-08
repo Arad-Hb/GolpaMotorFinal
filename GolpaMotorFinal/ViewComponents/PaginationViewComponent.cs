@@ -7,8 +7,8 @@ namespace GolpaMotorFinal.ViewComponents
     {
         public IViewComponentResult Invoke(PaginationViewModel model)
         {
-            if (model.PageCount <= 1 && model.RecordCount <= model.PageSize)
-                return Content("");
+            if (model.PageSize <= 0)
+                model.PageSize = PaginationViewModel.DefaultPageSize;
 
             return View(model);
         }

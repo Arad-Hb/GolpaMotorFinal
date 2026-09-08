@@ -44,7 +44,7 @@ namespace DataAccess.Repositories
             return new HashSet<string>(list, StringComparer.OrdinalIgnoreCase);
         }
 
-        public async Task<List<WarrantyCardListItem>> SearchAsync(long? productId, bool? isRegistered)
+        public async Task<(List<WarrantyCardListItem> Items, int Total)> SearchAsync(long? productId, bool? isRegistered, int pageIndex = 0, int pageSize = 10)
         {
             var query = db.WarrantyCards.Include(x => x.Product).AsQueryable();
 
@@ -54,9 +54,20 @@ namespace DataAccess.Repositories
             if (isRegistered.HasValue)
                 query = query.Where(x => x.IsRegistered == isRegistered.Value);
 
-            return await query
+            if (pageSize <= 0)
+                pageSize = 10;
+            if (pageIndex < 0)
+                pageIndex = 0;
+
+            var total = await query.CountAsync();
+            var pageCount = pageSize == 0 ? 1 : (int)Math.Ceiling(total / (double)pageSize);
+            if (pageCount > 0 && pageIndex >= pageCount)
+                pageIndex = pageCount - 1;
+
+            var items = await query
                 .OrderByDescending(x => x.WarrantyCardID)
-                .Take(200)
+                .Skip(pageIndex * pageSize)
+                .Take(pageSize)
                 .Select(x => new WarrantyCardListItem
                 {
                     WarrantyCardID = x.WarrantyCardID,
@@ -67,6 +78,8 @@ namespace DataAccess.Repositories
                     ValidityMonths = x.ValidityMonths
                 })
                 .ToListAsync();
+
+            return (items, total);
         }
     }
 }

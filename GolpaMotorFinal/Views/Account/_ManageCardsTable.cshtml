@@ -1,0 +1,48 @@
+@model GolpaMotorFinal.Models.ViewModels.Account.ManageViewModel
+@{
+    var rowNumber = Model.CardPage * PaginationViewModel.DefaultPageSize;
+    var listUrl = Url.Action("ManageCards", "Account") ?? "/Account/ManageCards";
+}
+
+<div class="table-responsive">
+    <table class="table table-hover align-middle">
+        <thead>
+            <tr>
+                <th class="table-num">#</th>
+                <th>سریال</th>
+                <th>محصول</th>
+                <th>امتیاز</th>
+                <th>تاریخ</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.Cards.Any())
+            {
+                foreach (var card in Model.Cards)
+                {
+                    rowNumber++;
+                    <tr>
+                        <td class="table-num">@rowNumber</td>
+                        <td>@card.SerialNumber</td>
+                        <td>@card.ProductName</td>
+                        <td>@card.Points</td>
+                        <td>@card.CreatedAt.ToLocalTime().ToString("yyyy/MM/dd")</td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="5" class="text-center text-muted">کارتی ثبت نشده است</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@await Component.InvokeAsync("Pagination", PaginationViewModel.For(
+    "manageCardsGrid",
+    Model.CardPage,
+    Model.CardPageCount,
+    Model.CardRecordCount,
+    listUrl))

@@ -1,9 +1,14 @@
 @model GolpaMotorFinal.Models.ViewModels.RewardManagement.RewardCatalogListPageViewModel
+@{
+    var rowNumber = Model.PageIndex * PaginationViewModel.DefaultPageSize;
+    var listUrl = Url.Action("CatalogList", "RewardManagement", new { title = Model.Title }) ?? "/RewardManagement/CatalogList";
+}
 
 <div class="table-responsive">
     <table class="table table-hover align-middle">
         <thead class="table-dark">
             <tr>
+                <th class="table-num">#</th>
                 <th>عنوان</th>
                 <th class="table-num">حد نصاب</th>
                 <th>نوع</th>
@@ -18,7 +23,9 @@
             {
                 foreach (var item in Model.Items)
                 {
+                    rowNumber++;
                     <tr>
+                        <td class="table-num">@rowNumber</td>
                         <td>@item.Title</td>
                         <td class="table-num">@item.RequiredPoints</td>
                         <td>@(item.IsCashReward ? "نقدی" : "غیرنقدی")</td>
@@ -42,23 +49,16 @@
             else
             {
                 <tr>
-                    <td colspan="7" class="text-center text-muted">پاداشی یافت نشد</td>
+                    <td colspan="8" class="text-center text-muted">پاداشی یافت نشد</td>
                 </tr>
             }
         </tbody>
     </table>
 </div>
 
-@if (Model.PageCount > 1)
-{
-    <nav class="d-flex justify-content-center">
-        <ul class="pagination">
-            @for (var i = 0; i < Model.PageCount; i++)
-            {
-                <li class="page-item @(i == Model.PageIndex ? "active" : "")">
-                    <a class="page-link catalog-page" href="#" data-page="@i">@(i + 1)</a>
-                </li>
-            }
-        </ul>
-    </nav>
-}
+@await Component.InvokeAsync("Pagination", PaginationViewModel.For(
+    "CatalogGrid",
+    Model.PageIndex,
+    Model.PageCount,
+    Model.RecordCount,
+    listUrl))

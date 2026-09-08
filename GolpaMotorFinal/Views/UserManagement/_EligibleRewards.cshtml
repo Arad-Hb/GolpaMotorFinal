@@ -1,4 +1,10 @@
 @model GolpaMotorFinal.Models.ViewModels.Account.EligibleRewardsDialogViewModel
+@{
+    var rewardRow = Model.RewardPage * PaginationViewModel.DefaultPageSize;
+    var historyRow = Model.HistoryPage * PaginationViewModel.DefaultPageSize;
+    var rewardUrl = Url.Action("EligibleRewards", "UserManagement", new { userID = Model.UserID, historyPage = Model.HistoryPage }) ?? "/UserManagement/EligibleRewards";
+    var historyUrl = Url.Action("EligibleRewards", "UserManagement", new { userID = Model.UserID, rewardPage = Model.RewardPage }) ?? "/UserManagement/EligibleRewards";
+}
 
 <div id="rewardRequestAlert" class="alert d-none"></div>
 
@@ -35,22 +41,25 @@
 </div>
 
 <h6 class="mt-3">پاداش‌های قابل درخواست</h6>
-@if (Model.Items.Any())
-{
-    <div class="table-responsive">
-        <table class="table table-sm align-middle">
-            <thead>
-                <tr>
-                    <th>عنوان</th>
-                    <th>حد نصاب</th>
-                    <th>نوع</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var item in Model.Items)
+<div class="table-responsive">
+    <table class="table table-sm align-middle">
+        <thead>
+            <tr>
+                <th class="table-num">#</th>
+                <th>عنوان</th>
+                <th>حد نصاب</th>
+                <th>نوع</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.Items.Any())
+            {
+                foreach (var item in Model.Items)
                 {
+                    rewardRow++;
                     <tr>
+                        <td class="table-num">@rewardRow</td>
                         <td>
                             <div>@item.Title</div>
                             <div class="small text-muted">@item.Description</div>
@@ -74,29 +83,60 @@
                         </td>
                     </tr>
                 }
-            </tbody>
-        </table>
-    </div>
-}
-else
-{
-    <p class="text-muted">در حال حاضر پاداش واجد شرایطی برای این مشتری وجود ندارد.</p>
-}
+            }
+            else
+            {
+                <tr>
+                    <td colspan="5" class="text-muted">در حال حاضر پاداش واجد شرایطی برای این مشتری وجود ندارد.</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+@await Component.InvokeAsync("Pagination", PaginationViewModel.For(
+    "generalModalBody",
+    Model.RewardPage,
+    Model.RewardPageCount,
+    Model.RewardRecordCount,
+    rewardUrl,
+    pageParameter: "rewardPage"))
 
 <h6 class="mt-4">درخواست‌های قبلی</h6>
-@if (Model.RecentRequests.Any())
-{
-    <ul class="list-group">
-        @foreach (var req in Model.RecentRequests)
-        {
-            <li class="list-group-item d-flex justify-content-between">
-                <span>@req.CatalogTitle</span>
-                <span>@req.StatusTitle</span>
-            </li>
-        }
-    </ul>
-}
-else
-{
-    <p class="text-muted mb-0">درخواستی ثبت نشده است.</p>
-}
+<div class="table-responsive">
+    <table class="table table-sm align-middle">
+        <thead>
+            <tr>
+                <th class="table-num">#</th>
+                <th>عنوان</th>
+                <th>وضعیت</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.RecentRequests.Any())
+            {
+                foreach (var req in Model.RecentRequests)
+                {
+                    historyRow++;
+                    <tr>
+                        <td class="table-num">@historyRow</td>
+                        <td>@req.CatalogTitle</td>
+                        <td>@req.StatusTitle</td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="3" class="text-muted">درخواستی ثبت نشده است.</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+@await Component.InvokeAsync("Pagination", PaginationViewModel.For(
+    "generalModalBody",
+    Model.HistoryPage,
+    Model.HistoryPageCount,
+    Model.HistoryRecordCount,
+    historyUrl,
+    pageParameter: "historyPage"))

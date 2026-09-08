@@ -111,12 +111,20 @@
         }
 
         function LoadCatalogs(page) {
-            if (typeof page === "number") catalogPage = page;
+            if (typeof page !== "number") {
+                const fromPager = parseInt($("#CatalogGrid .crud-pagination").attr("data-page-index"), 10);
+                page = Number.isNaN(fromPager) ? catalogPage : fromPager;
+            }
+            catalogPage = page;
             $("#CatalogGrid").load(catalogListUrl(catalogPage));
         }
 
         function LoadRequests(page) {
-            if (typeof page === "number") requestPage = page;
+            if (typeof page !== "number") {
+                const fromPager = parseInt($("#RequestGrid .crud-pagination").attr("data-page-index"), 10);
+                page = Number.isNaN(fromPager) ? requestPage : fromPager;
+            }
+            requestPage = page;
             $("#RequestGrid").load(requestListUrl(requestPage));
         }
 
@@ -126,16 +134,6 @@
 
         $("#btnSearchRequest").on("click", function () {
             LoadRequests(0);
-        });
-
-        $(document).on("click", ".catalog-page", function (e) {
-            e.preventDefault();
-            LoadCatalogs(parseInt($(this).data("page"), 10) || 0);
-        });
-
-        $(document).on("click", ".request-page", function (e) {
-            e.preventDefault();
-            LoadRequests(parseInt($(this).data("page"), 10) || 0);
         });
 
         $(document).on("click", "#btnAddCatalog", function () {

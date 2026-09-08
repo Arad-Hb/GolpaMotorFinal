@@ -87,39 +87,8 @@
                             <button class="main_bt" type="submit">فیلتر</button>
                             <input type="search" class="form-control table-filter-input" data-table-target="#warrantyCardsTable" placeholder="جستجو در جدول..." autocomplete="off" />
                         </form>
-                        <div class="table-responsive">
-                            <table class="table table-hover align-middle" id="warrantyCardsTable">
-                                <thead>
-                                    <tr>
-                                        <th>سریال</th>
-                                        <th>رمز</th>
-                                        <th>محصول</th>
-                                        <th>وضعیت</th>
-                                        <th>اعتبار (ماه)</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @if (Model.Cards.Any())
-                                    {
-                                        foreach (var card in Model.Cards)
-                                        {
-                                            <tr>
-                                                <td>@card.SerialNumber</td>
-                                                <td>@card.ScratchedCode</td>
-                                                <td>@card.ProductName</td>
-                                                <td>@(card.IsRegistered ? "ثبت‌شده" : "آزاد")</td>
-                                                <td>@card.ValidityMonths</td>
-                                            </tr>
-                                        }
-                                    }
-                                    else
-                                    {
-                                        <tr>
-                                            <td colspan="5" class="text-center text-muted">کارتی یافت نشد</td>
-                                        </tr>
-                                    }
-                                </tbody>
-                            </table>
+                        <div id="warrantyCardsGrid">
+                            @await Html.PartialAsync("_WarrantyCardTable", Model)
                         </div>
                     </div>
 

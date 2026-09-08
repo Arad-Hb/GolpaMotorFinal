@@ -67,37 +67,8 @@
             <div class="card">
                 <div class="card-body">
                     <h5 class="mb-3">کارت‌های ثبت‌شده</h5>
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle">
-                            <thead>
-                                <tr>
-                                    <th>سریال</th>
-                                    <th>محصول</th>
-                                    <th>امتیاز</th>
-                                    <th>تاریخ</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @if (Model.Cards.Any())
-                                {
-                                    foreach (var card in Model.Cards)
-                                    {
-                                        <tr>
-                                            <td>@card.SerialNumber</td>
-                                            <td>@card.ProductName</td>
-                                            <td>@card.Points</td>
-                                            <td>@card.CreatedAt.ToLocalTime().ToString("yyyy/MM/dd")</td>
-                                        </tr>
-                                    }
-                                }
-                                else
-                                {
-                                    <tr>
-                                        <td colspan="4" class="text-center text-muted">کارتی ثبت نشده است</td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
+                    <div id="manageCardsGrid">
+                        @await Html.PartialAsync("_ManageCardsTable", Model)
                     </div>
                 </div>
             </div>

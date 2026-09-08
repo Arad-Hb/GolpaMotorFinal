@@ -526,8 +526,7 @@ namespace DataAccess.Repositories
 
         public async Task<UserListComplexModel> Search(UserSearchModel sm)
         {
-
-            var q = db.Users.AsQueryable();
+            var q = db.Users.Where(u => !u.IsDeleted).AsQueryable();
 
             if (!string.IsNullOrEmpty(sm.FirstName))
             {
@@ -552,31 +551,45 @@ namespace DataAccess.Repositories
             {
                 q = q.Where(u => u.Email.Contains(sm.Email));
             }
-            var users = await q.Select(u => new UserListItem
-            {
-                UserID = u.Id,
-                FirstName = u.FirstName,
-                LastName = u.LastName,
-                Email = u.Email,
-                PhoneNumber = u.PhoneNumber,
-                ExistingProfileImageUrl = u.ProfileImageUrl,
-                RemainedPoints = u.RemainedPoints ?? 0,
-                TotalRegisteredCards = u.TotalRegisteredCards ?? 0,
-                TotalEarnedPoints = u.TotalEarnedPoints ?? 0,
-                Province = u.Province != null ? u.Province.Name : string.Empty,
-                City = u.City != null ? u.City.Name : string.Empty,
-                RoleName = u.UserCustomerTypes
-                    .Select(c => c.CustomerType.Title)
-                    .FirstOrDefault() ?? string.Empty,
-                IsEligibleForReward = u.IsEligibleForReward,
-                HasReceivedReward = u.HasReceivedReward,
-            }).ToListAsync();
 
-            var result=new UserListComplexModel { userList = users };
+            if (sm.PageSize <= 0)
+                sm.PageSize = 10;
 
-            return result;
-        
-         }
+            sm.RecordCount = await q.CountAsync();
+            var pageCount = sm.PageCount;
+            var pageIndex = sm.PageIndex < 0 ? 0 : sm.PageIndex;
+            if (pageCount > 0 && pageIndex >= pageCount)
+                pageIndex = pageCount - 1;
+            sm.PageIndex = pageIndex;
+
+            var users = await q
+                .OrderByDescending(u => u.RegisterDate)
+                .Skip(pageIndex * sm.PageSize)
+                .Take(sm.PageSize)
+                .Select(u => new UserListItem
+                {
+                    UserID = u.Id,
+                    FirstName = u.FirstName,
+                    LastName = u.LastName,
+                    Email = u.Email,
+                    PhoneNumber = u.PhoneNumber ?? string.Empty,
+                    ExistingProfileImageUrl = u.ProfileImageUrl,
+                    RemainedPoints = u.RemainedPoints ?? 0,
+                    TotalRegisteredCards = u.TotalRegisteredCards ?? 0,
+                    TotalEarnedPoints = u.TotalEarnedPoints ?? 0,
+                    TotalSettledPoints = u.TotalSettledPoints ?? 0,
+                    Province = u.Province != null ? u.Province.Name : string.Empty,
+                    City = u.City != null ? u.City.Name : string.Empty,
+                    RoleName = u.UserCustomerTypes
+                        .Select(c => c.CustomerType.Title)
+                        .FirstOrDefault() ?? string.Empty,
+                    IsEligibleForReward = u.IsEligibleForReward,
+                    HasReceivedReward = u.HasReceivedReward,
+                })
+                .ToListAsync();
+
+            return new UserListComplexModel { userList = users, sm = sm };
+        }
 
     }
 }

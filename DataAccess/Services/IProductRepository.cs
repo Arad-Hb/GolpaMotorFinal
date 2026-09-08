@@ -21,6 +21,7 @@ namespace DataAccess.Services
         Task<ProductListComplexModel> Search(ProductSearchModel sm);
         Task RemoveImage(long productID);
         Task<ProductStatistics> GetStatistics();
-        Task<List<NamedCountItem>> GetTopRegistrars(int take = 5); 
+        Task<List<NamedCountItem>> GetTopRegistrars(int take = 5);
+        Task<(List<NamedCountItem> Items, int Total)> GetTopRegistrarsPage(int pageIndex, int pageSize = 10); 
     }
 }

@@ -4,6 +4,7 @@ using Framework.Common;
 using GolpaMotorFinal.FrameworkUI.Services;
 using GolpaMotorFinal.Models.ViewModels.ProductManagement;
 using GolpaMotorFinal.Models.ViewModels.WarrantyManagement;
+using GolpaMotorFinal.Models.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -76,12 +77,12 @@ namespace GolpaMotorFinal.Controllers
                 await roleManager.CreateAsync(new IdentityRole(roleName));
         }
 
-        public async Task<IActionResult> Index(long? productId, bool? isRegistered, string? tab)
+        public async Task<IActionResult> Index(long? productId, bool? isRegistered, string? tab, int pageIndex = 0)
         {
             if (!User.IsInRole("Admin"))
                 return RedirectToAction(nameof(Register));
 
-            var vm = await BuildAdminIndex(productId, isRegistered);
+            var vm = await BuildAdminIndex(productId, isRegistered, pageIndex: pageIndex);
             vm.OpenTab = ResolveOpenTab(tab, vm.LastImport != null);
             return View(vm);
         }
@@ -128,7 +129,7 @@ namespace GolpaMotorFinal.Controllers
             };
         }
 
-        private async Task<WarrantyAdminIndexViewModel> BuildAdminIndex(long? productId, bool? isRegistered, RegisterationCardViewModel? form = null)
+        private async Task<WarrantyAdminIndexViewModel> BuildAdminIndex(long? productId, bool? isRegistered, RegisterationCardViewModel? form = null, int pageIndex = 0)
         {
             form ??= new RegisterationCardViewModel();
             EnsureOperation(form);
@@ -139,12 +140,19 @@ namespace GolpaMotorFinal.Controllers
             else if (TempData["ErrorMessage"] is string error)
                 form.op!.ToFailed(error);
 
+            var pageSize = PaginationViewModel.DefaultPageSize;
+            var search = await warrantyCards.SearchAsync(productId, isRegistered, pageIndex, pageSize);
+            var pageCount = pageSize <= 0 ? 1 : (int)Math.Ceiling(search.Total / (double)pageSize);
+
             var vm = new WarrantyAdminIndexViewModel
             {
                 ProductID = productId,
                 IsRegistered = isRegistered,
                 Products = await products.GetAll(),
-                Cards = await warrantyCards.SearchAsync(productId, isRegistered),
+                Cards = search.Items,
+                PageIndex = pageIndex,
+                PageCount = pageCount,
+                RecordCount = search.Total,
                 Stats = await products.GetStatistics(),
                 RegistrationCard = form
             };
@@ -162,6 +170,24 @@ namespace GolpaMotorFinal.Controllers
             }
 
             return vm;
+        }
+
+        [HttpGet]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> CardList(long? productId, bool? isRegistered, int pageIndex = 0)
+        {
+            var search = await warrantyCards.SearchAsync(productId, isRegistered, pageIndex, PaginationViewModel.DefaultPageSize);
+            var pageSize = PaginationViewModel.DefaultPageSize;
+            var vm = new WarrantyAdminIndexViewModel
+            {
+                ProductID = productId,
+                IsRegistered = isRegistered,
+                Cards = search.Items,
+                PageIndex = pageIndex,
+                PageCount = pageSize <= 0 ? 1 : (int)Math.Ceiling(search.Total / (double)pageSize),
+                RecordCount = search.Total
+            };
+            return PartialView("_WarrantyCardTable", vm);
         }
 
         private async Task<IActionResult> FailRegistration(RegisterationCardViewModel request, bool fromAdmin)

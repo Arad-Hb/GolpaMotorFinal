@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using DomainModel.Models;
 using GolpaMotorFinal.FrameworkUI.Services;
 using GolpaMotorFinal.Models.ViewModels.Admin;
+using GolpaMotorFinal.Models.ViewModels;
 using DataAccess.Services;
 
 namespace GolpaMotorFinal.Controllers
@@ -29,13 +30,35 @@ namespace GolpaMotorFinal.Controllers
             this.fileManager = fileManager;
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int pageIndex = 0)
         {
             var stats = await products.GetStatistics();
-            var top = await products.GetTopRegistrars(5);
+            var pageSize = PaginationViewModel.DefaultPageSize;
+            var page = await products.GetTopRegistrarsPage(pageIndex, pageSize);
             ViewBag.Stats = stats;
-            ViewBag.TopRegistrars = top;
+            ViewBag.TopRegistrars = new TopRegistrarsPageViewModel
+            {
+                Items = page.Items,
+                PageIndex = pageIndex,
+                PageCount = pageSize <= 0 ? 1 : (int)Math.Ceiling(page.Total / (double)pageSize),
+                RecordCount = page.Total
+            };
             return View();
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> TopRegistrars(int pageIndex = 0)
+        {
+            var pageSize = PaginationViewModel.DefaultPageSize;
+            var page = await products.GetTopRegistrarsPage(pageIndex, pageSize);
+            var vm = new TopRegistrarsPageViewModel
+            {
+                Items = page.Items,
+                PageIndex = pageIndex,
+                PageCount = pageSize <= 0 ? 1 : (int)Math.Ceiling(page.Total / (double)pageSize),
+                RecordCount = page.Total
+            };
+            return PartialView("_TopRegistrarsTable", vm);
         }
 
         [HttpGet]

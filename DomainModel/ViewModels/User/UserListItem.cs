@@ -17,5 +17,6 @@
         public string? RoleName { get; set; }
         public bool IsEligibleForReward { get; set; }
         public bool HasReceivedReward { get; set; }
+        public int? TotalSettledPoints { get; set; }
     }
 }

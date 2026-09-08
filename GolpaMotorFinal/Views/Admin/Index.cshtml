@@ -2,7 +2,6 @@
     ViewData["Title"] = "داشبورد";
     Layout = "_AdminLayout";
     var stats = ViewBag.Stats as DomainModel.ViewModels.Product.ProductStatistics;
-    var top = ViewBag.TopRegistrars as List<DomainModel.ViewModels.Product.NamedCountItem>;
 }
 
 <div class="row column_title">
@@ -81,34 +80,9 @@
                    data-table-target="#topRegistrarsTable"
                    placeholder="جستجو در جدول..."
                    autocomplete="off" />
-        </div>
-        <div class="table-responsive">
-            <table class="table table-hover align-middle" id="topRegistrarsTable">
-                <thead>
-                    <tr>
-                        <th>کاربر</th>
-                        <th>تعداد</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @if (top != null && top.Any())
-                    {
-                        foreach (var item in top)
-                        {
-                            <tr>
-                                <td>@item.Name</td>
-                                <td>@item.Count</td>
-                            </tr>
-                        }
-                    }
-                    else
-                    {
-                        <tr>
-                            <td colspan="2" class="text-muted text-center">هنوز ثبتی وجود ندارد</td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
+                        </div>
+                        <div id="topRegistrarsGrid">
+                            @await Html.PartialAsync("_TopRegistrarsTable", ViewBag.TopRegistrars as GolpaMotorFinal.Models.ViewModels.Admin.TopRegistrarsPageViewModel)
+                        </div>
     </div>
 </div>

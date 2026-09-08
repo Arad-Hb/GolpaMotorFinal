@@ -1,0 +1,44 @@
+@model GolpaMotorFinal.Models.ViewModels.Admin.TopRegistrarsPageViewModel
+@{
+    var rowNumber = Model.PageIndex * PaginationViewModel.DefaultPageSize;
+    var listUrl = Url.Action("TopRegistrars", "Admin") ?? "/Admin/TopRegistrars";
+}
+
+<div class="table-responsive">
+    <table class="table table-hover align-middle" id="topRegistrarsTable">
+        <thead>
+            <tr>
+                <th class="table-num">#</th>
+                <th>کاربر</th>
+                <th>تعداد</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.Items != null && Model.Items.Any())
+            {
+                foreach (var item in Model.Items)
+                {
+                    rowNumber++;
+                    <tr>
+                        <td class="table-num">@rowNumber</td>
+                        <td>@item.Name</td>
+                        <td>@item.Count</td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="3" class="text-muted text-center">هنوز ثبتی وجود ندارد</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@await Component.InvokeAsync("Pagination", PaginationViewModel.For(
+    "topRegistrarsGrid",
+    Model.PageIndex,
+    Model.PageCount,
+    Model.RecordCount,
+    listUrl))

@@ -1,0 +1,50 @@
+@model GolpaMotorFinal.Models.ViewModels.WarrantyManagement.WarrantyAdminIndexViewModel
+@{
+    var rowNumber = Model.PageIndex * PaginationViewModel.DefaultPageSize;
+    var listUrl = Url.Action("CardList", "WarrantyManagement", new { productId = Model.ProductID, isRegistered = Model.IsRegistered }) ?? "/WarrantyManagement/CardList";
+}
+
+<div class="table-responsive">
+    <table class="table table-hover align-middle" id="warrantyCardsTable">
+        <thead>
+            <tr>
+                <th class="table-num">#</th>
+                <th>سریال</th>
+                <th>رمز</th>
+                <th>محصول</th>
+                <th>وضعیت</th>
+                <th>اعتبار (ماه)</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.Cards.Any())
+            {
+                foreach (var card in Model.Cards)
+                {
+                    rowNumber++;
+                    <tr>
+                        <td class="table-num">@rowNumber</td>
+                        <td>@card.SerialNumber</td>
+                        <td>@card.ScratchedCode</td>
+                        <td>@card.ProductName</td>
+                        <td>@(card.IsRegistered ? "ثبت‌شده" : "آزاد")</td>
+                        <td>@card.ValidityMonths</td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="6" class="text-center text-muted">کارتی یافت نشد</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@await Component.InvokeAsync("Pagination", PaginationViewModel.For(
+    "warrantyCardsGrid",
+    Model.PageIndex,
+    Model.PageCount,
+    Model.RecordCount,
+    listUrl))

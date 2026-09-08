@@ -31,5 +31,8 @@ namespace GolpaMotorFinal.Models.ViewModels.Account
         public bool HasReceivedReward { get; set; }
         public int TotalRegisteredCards { get; set; }
         public List<CustomerCardItem> Cards { get; set; } = new();
+        public int CardPage { get; set; }
+        public int CardPageCount { get; set; }
+        public int CardRecordCount { get; set; }
     }
 }

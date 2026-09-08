@@ -283,5 +283,45 @@ namespace DataAccess.Repositories
                 return new NamedCountItem { Name = name, Count = g.Count };
             }).ToList();
         }
+
+        public async Task<(List<NamedCountItem> Items, int Total)> GetTopRegistrarsPage(int pageIndex, int pageSize = 10)
+        {
+            if (pageSize <= 0)
+                pageSize = 10;
+            if (pageIndex < 0)
+                pageIndex = 0;
+
+            var groupedQuery = db.CardRegistrations
+                .GroupBy(x => x.UserID)
+                .Select(g => new { UserID = g.Key, Count = g.Count() });
+
+            var total = await groupedQuery.CountAsync();
+            var pageCount = (int)Math.Ceiling(total / (double)pageSize);
+            if (pageCount > 0 && pageIndex >= pageCount)
+                pageIndex = pageCount - 1;
+
+            var grouped = await groupedQuery
+                .OrderByDescending(x => x.Count)
+                .Skip(pageIndex * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            var userIds = grouped.Select(x => x.UserID).ToList();
+            var users = await db.Users
+                .Where(x => userIds.Contains(x.Id))
+                .Select(x => new { x.Id, x.FirstName, x.LastName, x.UserName })
+                .ToListAsync();
+
+            var items = grouped.Select(g =>
+            {
+                var user = users.FirstOrDefault(u => u.Id == g.UserID);
+                var name = $"{user?.FirstName} {user?.LastName}".Trim();
+                if (string.IsNullOrWhiteSpace(name))
+                    name = user?.UserName ?? "نامشخص";
+                return new NamedCountItem { Name = name, Count = g.Count };
+            }).ToList();
+
+            return (items, total);
+        }
     }
 }
