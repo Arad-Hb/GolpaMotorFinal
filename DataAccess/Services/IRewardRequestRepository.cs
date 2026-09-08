@@ -13,5 +13,6 @@ namespace DataAccess.Services
         Task<List<RewardRequestListItem>> GetUserRequests(string userId);
         Task<List<UserEligibleRewardItem>> GetEligibleCatalogsForUser(string userId);
         Task RefreshEligibility(string userId);
+        Task<int> GetAvailablePoints(string userId);
     }
 }

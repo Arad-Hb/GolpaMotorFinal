@@ -36,6 +36,7 @@ namespace DataAccess.Helpers
             user.TotalEarnedPoints = earned;
             user.TotalSettledPoints = settled;
             user.RemainedPoints = earned - settled;
+            user.TotalRegisteredCards = await db.CardRegistrations.CountAsync(x => x.UserID == userId);
 
             await ApplyToUserAsync(db, user);
 

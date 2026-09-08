@@ -1,4 +1,5 @@
 ﻿using GolpaMotorFinal.Models.ViewModels.CRUD;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using System.ComponentModel.DataAnnotations;
 
 namespace GolpaMotorFinal.Models.ViewModels.UserManagement
@@ -34,10 +35,24 @@ namespace GolpaMotorFinal.Models.ViewModels.UserManagement
         public int? CityID { get; set; }
 
         [Display(Name = "آدرس")]
+        [StringLength(500)]
         public string? Address { get; set; }
 
         [Display(Name = "کد پستی")]
+        [StringLength(20)]
         public string? PostalCode { get; set; }
+
+        [Display(Name = "شماره کارت")]
+        [StringLength(20)]
+        public string? CreditCartNumber { get; set; }
+
+        [Display(Name = "شماره شبا")]
+        [StringLength(50)]
+        public string? IBAN { get; set; }
+
+        [Display(Name = "شماره حساب")]
+        [StringLength(50)]
+        public string? AccountNumber { get; set; }
 
         [Display(Name = "فعال")]
         public bool IsActive { get; set; }
@@ -50,6 +65,10 @@ namespace GolpaMotorFinal.Models.ViewModels.UserManagement
 
         // عکس جدید
         public IFormFile? ProfileImage { get; set; }
+
+        public IEnumerable<SelectListItem> Provinces { get; set; } = new List<SelectListItem>();
+
+        public IEnumerable<SelectListItem> Cities { get; set; } = new List<SelectListItem>();
 
         public CrudFormViewModel CrudFormViewModel { get; set; } = new();
 

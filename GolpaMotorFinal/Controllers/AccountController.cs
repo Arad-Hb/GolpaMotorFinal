@@ -23,22 +23,19 @@ namespace GolpaMotorFinal.Controllers
         private readonly IUserRepository userRepository;
         private readonly ICardRegistrationRepository cardRepository;
         private readonly IFileManager fileManager;
-        private readonly IRewardRequestRepository rewardRequestRepository;
 
         public AccountController(
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
             IUserRepository userRepository,
             ICardRegistrationRepository cardRepository,
-            IFileManager fileManager,
-            IRewardRequestRepository rewardRequestRepository)
+            IFileManager fileManager)
         {
             this.userManager = userManager;
             this.signInManager = signInManager;
             this.userRepository = userRepository;
             this.cardRepository = cardRepository;
             this.fileManager = fileManager;
-            this.rewardRequestRepository = rewardRequestRepository;
         }
         private async Task<SelectList> BindProvince()
         {
@@ -521,38 +518,6 @@ namespace GolpaMotorFinal.Controllers
                     Points = c.WarrantyCard?.Product?.ProductPoint ?? c.EarnedPionts
                 }).ToList()
             };
-        }
-
-        [HttpGet]
-        [Authorize]
-        public async Task<IActionResult> EligibleRewards()
-        {
-            var user = await userManager.GetUserAsync(User);
-            if (user == null)
-                return Unauthorized();
-
-            var vm = new EligibleRewardsDialogViewModel
-            {
-                RemainedPoints = user.RemainedPoints ?? 0,
-                IsEligibleForReward = user.IsEligibleForReward,
-                HasReceivedReward = user.HasReceivedReward,
-                Items = await rewardRequestRepository.GetEligibleCatalogsForUser(user.Id),
-                RecentRequests = await rewardRequestRepository.GetUserRequests(user.Id)
-            };
-            return PartialView("_EligibleRewards", vm);
-        }
-
-        [HttpPost]
-        [Authorize]
-        [ValidateAntiForgeryToken]
-        public async Task<JsonResult> RequestReward(int rewardCatalogID)
-        {
-            var user = await userManager.GetUserAsync(User);
-            if (user == null)
-                return Json(new { success = false, message = "ورود لازم است" });
-
-            var result = await rewardRequestRepository.CreateRequest(user.Id, rewardCatalogID);
-            return Json(new { success = result.Success, message = result.Message });
         }
 
         [HttpGet]

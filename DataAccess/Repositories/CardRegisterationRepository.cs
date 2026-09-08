@@ -20,13 +20,18 @@ namespace DataAccess.Repositories
             this.db = db;
         }
 
-        public async Task<WarrantyCard?> GetBySerialAsync(string serial, string code)
+        public async Task<(WarrantyCard? Card, bool IsAmbiguous)> GetByScratchedCodeAsync(string code)
         {
-            return await db.WarrantyCards
+            var matches = await db.WarrantyCards
                 .Include(x => x.Product)
-                .FirstOrDefaultAsync(x =>
-                    x.SerialNumber == serial &&
-                    x.ScratchedCode == code);
+                .Where(x => x.ScratchedCode == code)
+                .Take(2)
+                .ToListAsync();
+
+            if (matches.Count > 1)
+                return (null, true);
+
+            return (matches.Count == 1 ? matches[0] : null, false);
         }
 
         public async Task<bool> IsCardAlreadyRegisteredByUserAsync(int CustomerTypeId, string userId)

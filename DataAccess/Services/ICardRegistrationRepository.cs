@@ -9,7 +9,7 @@ namespace DataAccess.Services
 {
     public interface ICardRegistrationRepository
     {
-        Task<WarrantyCard?> GetBySerialAsync(string serial, string code);
+        Task<(WarrantyCard? Card, bool IsAmbiguous)> GetByScratchedCodeAsync(string code);
         Task<bool> IsRegisteredAsync(long cardId);
         Task AddRegistration(CardRegistration entity);
         Task AddTransaction(PointTransaction entity);

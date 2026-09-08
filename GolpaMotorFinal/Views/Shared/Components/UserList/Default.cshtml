@@ -26,6 +26,7 @@
                         <th class="table-num">امتیاز</th>
                         <th>واجد پاداش</th>
                         <th>دریافت پاداش</th>
+                        <th>درخواست پاداش</th>
                         <th class="table-actions">عملیات</th>
                     </tr>
                 </thead>
@@ -49,6 +50,16 @@
                                 <td class="table-num">@item.TotalEarnedPoints</td>
                                 <td>@(item.IsEligibleForReward ? "بله" : "خیر")</td>
                                 <td>@(item.HasReceivedReward ? "بله" : "خیر")</td>
+                                <td>
+                                    <button type="button" class="btn btn-sm btn-outline-success open-modal"
+                                            title="ثبت درخواست پاداش"
+                                            data-url='@Url.Action("EligibleRewards", "UserManagement")'
+                                            data-title="درخواست پاداش مشتری"
+                                            data-id="@item.UserID"
+                                            data-id-name="userID">
+                                        <i class="fa fa-gift"></i>
+                                    </button>
+                                </td>
                                 <td class="table-actions">
                                     <button type="button" class="btn btn-sm btn-outline-secondary open-modal"
                                         title="جزئیات"
@@ -92,7 +103,7 @@
                     else
                     {
                         <tr>
-                            <td colspan="13" class="text-center text-muted">
+                            <td colspan="12" class="text-center text-muted">
                                 هیچ کاربری یافت نشد
                             </td>
                         </tr>

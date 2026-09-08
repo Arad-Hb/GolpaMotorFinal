@@ -97,14 +97,6 @@ namespace DataAccess.Repositories
             user.AccountNumber = model.AccountNumber?.Trim();
 
             user.IsActive = model.IsActive;
-
-            user.TotalEarnedPoints = model.TotalEarnedPoints ?? 0;
-            user.TotalSettledPoints = model.TotalSettledPoints ?? 0;
-            user.TotalRegisteredCards = model.TotalRegisteredCards ?? 0;
-
-            user.RemainedPoints =
-                (user.TotalEarnedPoints ?? 0) -
-                (user.TotalSettledPoints ?? 0);
         }
 
         private UserAddEditModel ToViewModel(ApplicationUser model)
@@ -567,8 +559,15 @@ namespace DataAccess.Repositories
                 LastName = u.LastName,
                 Email = u.Email,
                 PhoneNumber = u.PhoneNumber,
-                ExistingProfileImageUrl=u.ProfileImageUrl,
-                RemainedPoints= u.RemainedPoints?? 0,
+                ExistingProfileImageUrl = u.ProfileImageUrl,
+                RemainedPoints = u.RemainedPoints ?? 0,
+                TotalRegisteredCards = u.TotalRegisteredCards ?? 0,
+                TotalEarnedPoints = u.TotalEarnedPoints ?? 0,
+                Province = u.Province != null ? u.Province.Name : string.Empty,
+                City = u.City != null ? u.City.Name : string.Empty,
+                RoleName = u.UserCustomerTypes
+                    .Select(c => c.CustomerType.Title)
+                    .FirstOrDefault() ?? string.Empty,
                 IsEligibleForReward = u.IsEligibleForReward,
                 HasReceivedReward = u.HasReceivedReward,
             }).ToListAsync();

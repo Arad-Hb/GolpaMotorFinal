@@ -27,11 +27,11 @@ namespace DataAccess.Repositories
             if (user == null)
                 return new List<UserEligibleRewardItem>();
 
-            var remained = user.RemainedPoints ?? 0;
             var pendingStatusId = await RewardEligibilityHelper.GetStatusIdAsync(db, RewardStatusTitles.Pending);
+            var available = await ComputeAvailablePointsAsync(userId, user.RemainedPoints ?? 0, pendingStatusId);
 
             return await db.RewardCatalogs
-                .Where(x => x.IsActive && x.RequiredPoints <= remained)
+                .Where(x => x.IsActive && x.RequiredPoints <= available)
                 .OrderBy(x => x.RequiredPoints)
                 .Select(x => new UserEligibleRewardItem
                 {
@@ -100,6 +100,16 @@ namespace DataAccess.Repositories
             return result;
         }
 
+        public async Task<int> GetAvailablePoints(string userId)
+        {
+            var user = await db.Users.FirstOrDefaultAsync(x => x.Id == userId && !x.IsDeleted);
+            if (user == null)
+                return 0;
+
+            var pendingStatusId = await RewardEligibilityHelper.GetStatusIdAsync(db, RewardStatusTitles.Pending);
+            return await ComputeAvailablePointsAsync(userId, user.RemainedPoints ?? 0, pendingStatusId);
+        }
+
         public async Task<OperationResult> CreateRequest(string userId, int rewardCatalogId)
         {
             var op = new OperationResult("Create Reward Request");
@@ -114,13 +124,35 @@ namespace DataAccess.Repositories
                 if (catalog == null)
                     return op.ToFailed("پاداش فعال یافت نشد");
 
-                var remained = user.RemainedPoints ?? 0;
-                if (remained < catalog.RequiredPoints)
-                    return op.ToFailed("امتیاز شما به حد نصاب این پاداش نرسیده است");
+                if (catalog.IsCashReward)
+                {
+                    var hasFinancial =
+                        !string.IsNullOrWhiteSpace(user.CreditCartNumber) ||
+                        !string.IsNullOrWhiteSpace(user.IBAN) ||
+                        !string.IsNullOrWhiteSpace(user.AccountNumber);
+
+                    if (!hasFinancial)
+                        return op.ToFailed("برای این درخواست ابتدا باید یکی از شماره کارت، شبا یا شماره حساب را در ویرایش کاربر تکمیل کنید. پس از تکمیل اطلاعات، اجازه درخواست پاداش نقدی را خواهید داشت.");
+                }
+                else
+                {
+                    var hasShipping =
+                        user.ProvinceID.HasValue &&
+                        user.CityID.HasValue &&
+                        !string.IsNullOrWhiteSpace(user.Address) &&
+                        !string.IsNullOrWhiteSpace(user.PostalCode);
+
+                    if (!hasShipping)
+                        return op.ToFailed("برای درخواست پاداش غیرنقدی ابتدا باید استان، شهر، آدرس و کد پستی را در ویرایش کاربر تکمیل کنید. پس از تکمیل اطلاعات، اجازه درخواست را خواهید داشت.");
+                }
 
                 var pendingStatusId = await RewardEligibilityHelper.GetStatusIdAsync(db, RewardStatusTitles.Pending);
                 if (pendingStatusId == 0)
                     return op.ToFailed("وضعیت درخواست پاداش در سیستم تعریف نشده است");
+
+                var available = await ComputeAvailablePointsAsync(userId, user.RemainedPoints ?? 0, pendingStatusId);
+                if (available < catalog.RequiredPoints)
+                    return op.ToFailed("امتیاز مشتری به حد نصاب این پاداش نرسیده است");
 
                 var hasOpen = await db.RewardRequests.AnyAsync(x =>
                     x.UserID == userId &&
@@ -258,6 +290,21 @@ namespace DataAccess.Repositories
                 RewardDeliveryStatusID = x.RewardDeliveryStatusID,
                 StatusTitle = x.RewardDeliveryStatus.Title
             });
+        }
+
+        private async Task<int> ComputeAvailablePointsAsync(string userId, int remained, int pendingStatusId)
+        {
+            if (pendingStatusId == 0)
+                return remained;
+
+            var locked = await db.RewardRequests
+                .Where(x =>
+                    x.UserID == userId &&
+                    !x.IsComplete &&
+                    x.RewardDeliveryStatusID == pendingStatusId)
+                .SumAsync(x => (int?)x.RewardCatalog.RequiredPoints) ?? 0;
+
+            return Math.Max(0, remained - locked);
         }
     }
 }

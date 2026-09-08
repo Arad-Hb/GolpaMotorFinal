@@ -6,12 +6,6 @@ namespace GolpaMotorFinal.Models.ViewModels.WarrantyManagement
 {
     public class RegisterationCardViewModel
     {
-        [StringLength(50, MinimumLength = 3, ErrorMessage = "شماره سریال باید بین ۳ تا 50 کاراکتر باشد.")]
-        [Required(ErrorMessage = "شماره سریال اجباری است.")]
-        [Display(Name = "شماره سریال")]
-        public List<string> SerialNumber { get; set; } = new List<string>();
-
-        [StringLength(50, MinimumLength = 3, ErrorMessage = "رمز باید بین ۳ تا 50 کاراکتر باشد.")]
         [Required(ErrorMessage = "رمز اجباری است.")]
         [Display(Name = "رمز")]
         public List<string> ScratchedCode { get; set; } = new List<string>();
@@ -28,5 +22,7 @@ namespace GolpaMotorFinal.Models.ViewModels.WarrantyManagement
         [Required(ErrorMessage = "لطفا نقش خود را انتخاب کنید.")]
         public int? CustomerTypeId { get; set; }
         public IEnumerable<SelectListItem> CustomerTypes { get; set; } = Enumerable.Empty<SelectListItem>();
+
+        public int? RateLimitRetryAfterSeconds { get; set; }
     }
 }

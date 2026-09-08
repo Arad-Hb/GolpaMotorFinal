@@ -1,8 +1,38 @@
 @model GolpaMotorFinal.Models.ViewModels.Account.EligibleRewardsDialogViewModel
 
 <div id="rewardRequestAlert" class="alert d-none"></div>
-<p>مانده امتیاز شما: <strong>@Model.RemainedPoints</strong></p>
-<p class="small text-muted">واجد شرایط: @(Model.IsEligibleForReward ? "بله" : "خیر") · دریافت قبلی: @(Model.HasReceivedReward ? "بله" : "خیر")</p>
+
+<div class="mb-3">
+    <div class="fw-semibold">@(string.IsNullOrWhiteSpace(Model.CustomerName) ? "مشتری" : Model.CustomerName)</div>
+    <div class="text-muted small">@Model.PhoneNumber</div>
+</div>
+
+<div class="d-flex flex-wrap gap-3 mb-3">
+    <div>
+        <span class="text-muted small d-block">امتیاز کسب‌شده</span>
+        <strong>@Model.TotalEarnedPoints</strong>
+    </div>
+    <div>
+        <span class="text-muted small d-block">امتیاز تسویه‌شده</span>
+        <strong>@Model.TotalSettledPoints</strong>
+    </div>
+    <div>
+        <span class="text-muted small d-block">مانده قابل استفاده</span>
+        <strong>@Model.RemainedPoints</strong>
+    </div>
+    <div>
+        <span class="text-muted small d-block">کارت‌های ثبت‌شده</span>
+        <strong>@Model.TotalRegisteredCards</strong>
+    </div>
+    <div>
+        <span class="text-muted small d-block">واجد شرایط</span>
+        <strong>@(Model.IsEligibleForReward ? "بله" : "خیر")</strong>
+    </div>
+    <div>
+        <span class="text-muted small d-block">دریافت قبلی</span>
+        <strong>@(Model.HasReceivedReward ? "بله" : "خیر")</strong>
+    </div>
+</div>
 
 <h6 class="mt-3">پاداش‌های قابل درخواست</h6>
 @if (Model.Items.Any())
@@ -34,7 +64,12 @@
                             }
                             else
                             {
-                                <button type="button" class="btn btn-sm btn-primary btnSubmitRewardRequest" data-id="@item.RewardCatalogID">درخواست</button>
+                                <button type="button"
+                                        class="btn btn-sm btn-primary btnSubmitRewardRequest"
+                                        data-id="@item.RewardCatalogID"
+                                        data-user-id="@Model.UserID">
+                                    ثبت درخواست
+                                </button>
                             }
                         </td>
                     </tr>
@@ -45,7 +80,7 @@
 }
 else
 {
-    <p class="text-muted">در حال حاضر پاداش واجد شرایطی برای شما وجود ندارد.</p>
+    <p class="text-muted">در حال حاضر پاداش واجد شرایطی برای این مشتری وجود ندارد.</p>
 }
 
 <h6 class="mt-4">درخواست‌های قبلی</h6>

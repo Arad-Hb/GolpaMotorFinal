@@ -80,3 +80,50 @@ $(document).on("click", ".open-modal", function () {
 $(document).on("click", ".cancel-modal", function () {
     closeModal();
 });
+
+$(document).on("change", ".js-user-province", function () {
+    const provinceId = $(this).val();
+    const $city = $(this).closest("form").find(".js-user-city");
+    $city.empty().append($("<option>").val("").text("انتخاب شهر"));
+    if (!provinceId) return;
+
+    $.get("/UserManagement/GetCitiesByProvince", { provinceId: provinceId }, function (res) {
+        if (!res || !res.success || !res.data) return;
+        res.data.forEach(function (city) {
+            const id = city.cityID ?? city.cityId ?? city.CityID;
+            const name = city.name ?? city.Name;
+            $city.append($("<option>").val(id).text(name));
+        });
+    });
+});
+
+$(document).on("click", ".btnSubmitRewardRequest", function () {
+    const button = $(this);
+    const catalogId = button.data("id");
+    const userId = button.data("user-id");
+    if (!catalogId || !userId) return;
+
+    button.prop("disabled", true);
+    $.ajax({
+        url: "/UserManagement/RequestReward",
+        type: "POST",
+        data: { userID: userId, rewardCatalogID: catalogId },
+        headers: { RequestVerificationToken: token() },
+        success: function (res) {
+            $.get("/UserManagement/EligibleRewards", { userID: userId }, function (html) {
+                const body = document.getElementById("generalModalBody");
+                if (body) body.innerHTML = html;
+                const box = $("#rewardRequestAlert");
+                if (res && res.message && box.length) {
+                    box.removeClass("d-none alert-success alert-danger");
+                    box.addClass(res.success ? "alert-success" : "alert-danger");
+                    box.text(res.message);
+                }
+            });
+        },
+        error: function () {
+            button.prop("disabled", false);
+            toastError("خطا در ثبت درخواست پاداش");
+        }
+    });
+});

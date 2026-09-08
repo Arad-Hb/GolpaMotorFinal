@@ -3,8 +3,8 @@
 @{
     var actionName = ViewData["RegisterAction"] as string ?? "Register";
     var typeLabel = ViewData["CustomerTypeLabel"] as string ?? "نقش شما";
-    var serials = Model.SerialNumber is { Count: > 0 } ? Model.SerialNumber : new List<string> { "" };
-    var codes = Model.ScratchedCode ?? new List<string>();
+    var codes = Model.ScratchedCode is { Count: > 0 } ? Model.ScratchedCode : new List<string> { "" };
+    var cardCount = codes.Count > 10 ? 10 : codes.Count;
 }
 
 @if (Model.op != null && !string.IsNullOrWhiteSpace(Model.op.Message))
@@ -18,35 +18,27 @@
     <div class="alert alert-warning">@failedCards</div>
 }
 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-<form asp-action="@actionName" asp-controller="WarrantyManagement" method="post" class="admin-form">
+<form asp-action="@actionName" asp-controller="WarrantyManagement" method="post" class="admin-form" id="warrantyRegisterForm">
     @Html.AntiForgeryToken()
-    <div id="warrantyContainer" data-next-index="@serials.Count">
-        @for (var i = 0; i < serials.Count; i++)
+    <div id="warrantyContainer" data-next-index="@cardCount" data-max-cards="10">
+        @for (var i = 0; i < cardCount; i++)
         {
-            var code = i < codes.Count ? codes[i] : "";
             <div class="card mb-3 warranty-row">
                 <div class="card-body">
                     <div class="row g-3 align-items-end">
-                        <div class="col-12 col-md-5">
-                            <label class="form-label">شماره سریال</label>
-                            <input type="text"
-                                   name="SerialNumber[@i]"
-                                   value="@serials[i]"
-                                   class="form-control"
-                                   placeholder="شماره سریال را وارد کنید" />
-                        </div>
-                        <div class="col-12 col-md-5">
+                        <div class="col-12 col-md-10">
                             <label class="form-label">رمز</label>
                             <input type="text"
                                    name="ScratchedCode[@i]"
-                                   value="@code"
+                                   value="@codes[i]"
                                    class="form-control"
+                                   maxlength="50"
                                    placeholder="رمز را وارد کنید" />
                         </div>
                         @if (i > 0)
                         {
                             <div class="col-12 col-md-2">
-                                <button type="button" class="btn text-danger remove-row">حذف</button>
+                                <button type="button" class="btn text-danger remove-row"><i class="fa fa-trash"></i></button>
                             </div>
                         }
                     </div>
@@ -55,7 +47,7 @@
         }
     </div>
     <div class="mb-4 d-flex justify-content-between align-items-center px-2 text-success">
-        <span>افزودن چند کارت گارانتی </span>
+        <span>افزودن چند کارت گارانتی (حداکثر ۱۰ کارت)</span>
         <button type="button" id="btnAddWarranty" class="btn btn-add-extra-warranty">
             <i class="fa fa-plus-circle text-success"></i>
         </button>
@@ -117,7 +109,8 @@
         </div>
     </div>
     <div class="d-grid mt-4">
-        <button type="submit" class="btn btn-lg text-light fw-bold" style="background-color:#04264e">
+        <button type="submit" id="btnRegisterWarranty" class="btn btn-lg text-light fw-bold" style="background-color:#04264e"
+                data-retry-after="@Model.RateLimitRetryAfterSeconds">
             ثبت و فعال‌سازی گارانتی
         </button>
     </div>
@@ -126,33 +119,108 @@
     (function () {
         var container = document.getElementById("warrantyContainer");
         var addBtn = document.getElementById("btnAddWarranty");
+        var form = document.getElementById("warrantyRegisterForm");
+        var submitBtn = document.getElementById("btnRegisterWarranty");
         if (!container || !addBtn || addBtn.dataset.bound === "1") return;
         addBtn.dataset.bound = "1";
-        var index = parseInt(container.getAttribute("data-next-index") || "1", 10);
+
+        var maxCards = parseInt(container.getAttribute("data-max-cards") || "10", 10);
+        var lockStorageKey = "warrantyRegisterLockUntil";
+        var defaultLabel = "ثبت و فعال‌سازی گارانتی";
+        var lockTimer = null;
+
+        function rowCount() {
+            return container.querySelectorAll(".warranty-row").length;
+        }
+
+        function reindexRows() {
+            var rows = container.querySelectorAll(".warranty-row");
+            rows.forEach(function (row, i) {
+                var input = row.querySelector("input[type='text']");
+                if (input) input.name = "ScratchedCode[" + i + "]";
+            });
+        }
+
+        function syncAddButton() {
+            addBtn.disabled = rowCount() >= maxCards;
+        }
+
         addBtn.addEventListener("click", function () {
-            container.insertAdjacentHTML("beforeend", `
-                <div class="card mb-3 warranty-row">
-                    <div class="card-body">
-                        <div class="row g-3 align-items-end">
-                            <div class="col-md-5">
-                                <label class="form-label">شماره سریال</label>
-                                <input type="text" name="SerialNumber[${index}]" class="form-control" placeholder="شماره سریال را وارد کنید" />
-                            </div>
-                            <div class="col-md-5">
-                                <label class="form-label">رمز</label>
-                                <input type="text" name="ScratchedCode[${index}]" class="form-control" placeholder="رمز را وارد کنید" />
-                            </div>
-                            <div class="col-2">
-                                <button type="button" class="btn text-danger remove-row">حذف</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>`);
-            index++;
+            if (rowCount() >= maxCards) return;
+            var index = rowCount();
+            container.insertAdjacentHTML("beforeend",
+                '<div class="card mb-3 warranty-row">' +
+                    '<div class="card-body">' +
+                        '<div class="row g-3 align-items-end">' +
+                            '<div class="col-12 col-md-10">' +
+                                '<label class="form-label">رمز</label>' +
+                                '<input type="text" name="ScratchedCode[' + index + ']" class="form-control" maxlength="50" placeholder="رمز را وارد کنید" />' +
+                            '</div>' +
+                            '<div class="col-12 col-md-2">' +
+                                '<button type="button" class="btn text-danger remove-row"><i class="fa fa-trash"></i></button>' +
+                            '</div>' +
+                        '</div>' +
+                    '</div>' +
+                '</div>');
+            syncAddButton();
         });
+
         document.addEventListener("click", function (e) {
             var btn = e.target.closest(".remove-row");
-            if (btn) btn.closest(".warranty-row").remove();
+            if (!btn || !container.contains(btn)) return;
+            var row = btn.closest(".warranty-row");
+            if (row) row.remove();
+            reindexRows();
+            syncAddButton();
         });
+
+        function remainingLockSeconds() {
+            try {
+                var until = parseInt(sessionStorage.getItem(lockStorageKey) || "0", 10);
+                if (!until) return 0;
+                return Math.max(0, Math.ceil((until - Date.now()) / 1000));
+            } catch (e) {
+                return 0;
+            }
+        }
+
+        function setLockUntil(seconds) {
+            if (!seconds || seconds <= 0) return;
+            try {
+                sessionStorage.setItem(lockStorageKey, String(Date.now() + seconds * 1000));
+            } catch (e) { }
+        }
+
+        function applyLockUi() {
+            if (!submitBtn) return;
+            var remaining = remainingLockSeconds();
+            if (lockTimer) {
+                clearInterval(lockTimer);
+                lockTimer = null;
+            }
+            if (remaining <= 0) {
+                submitBtn.disabled = false;
+                submitBtn.textContent = defaultLabel;
+                try { sessionStorage.removeItem(lockStorageKey); } catch (e) { }
+                return;
+            }
+            submitBtn.disabled = true;
+            submitBtn.textContent = "لطفاً " + remaining + " ثانیه صبر کنید";
+            lockTimer = setInterval(applyLockUi, 1000);
+        }
+
+        if (form && submitBtn) {
+            form.addEventListener("submit", function () {
+                if (submitBtn.disabled) return;
+                setLockUntil(60);
+                applyLockUi();
+            });
+        }
+
+        var serverRetry = submitBtn ? parseInt(submitBtn.getAttribute("data-retry-after") || "", 10) : 0;
+        if (serverRetry > 0) setLockUntil(serverRetry);
+
+        applyLockUi();
+        syncAddButton();
     })();
 </script>

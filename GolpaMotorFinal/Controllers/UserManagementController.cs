@@ -2,6 +2,7 @@
 using DataAccess.Services;
 using DomainModel.ViewModels.User;
 using GolpaMotorFinal.FrameworkUI.Services;
+using GolpaMotorFinal.Models.ViewModels.Account;
 using GolpaMotorFinal.Models.ViewModels.UserManagement;
 using GolpaMotorFinal.Models.ViewModels.CRUD;
 using Microsoft.AspNetCore.Authorization;
@@ -15,11 +16,18 @@ namespace GolpaMotorFinal.Controllers
         private readonly IUserRepository repo;
         private readonly IUserService service;
         private readonly IFileManager fileManager;
-        public UserManagementController(IUserRepository repo, IUserService service, IFileManager _fileManager)
+        private readonly IRewardRequestRepository rewardRequests;
+
+        public UserManagementController(
+            IUserRepository repo,
+            IUserService service,
+            IFileManager _fileManager,
+            IRewardRequestRepository rewardRequests)
         {
             this.repo = repo;
             this.service = service;
             this.fileManager = _fileManager;
+            this.rewardRequests = rewardRequests;
         }
 
         public async Task<IActionResult> Index()
@@ -41,6 +49,9 @@ namespace GolpaMotorFinal.Controllers
                 FullName = $"{u.FirstName ?? string.Empty} {u.LastName ?? string.Empty}".Trim(),
                 PhoneNumber = u.PhoneNumber ?? string.Empty,
                 ProfileImageUrl = u.ExistingProfileImageUrl ?? string.Empty,
+                RoleName = u.RoleName ?? string.Empty,
+                TotalRegisteredCards = u.TotalRegisteredCards,
+                TotalEarnedPoints = u.TotalEarnedPoints,
                 IsEligibleForReward = u.IsEligibleForReward,
                 HasReceivedReward = u.HasReceivedReward,
                 Province = u.Province ?? string.Empty,
@@ -318,6 +329,9 @@ namespace GolpaMotorFinal.Controllers
                 CityID = vm.CityID,
                 Address = vm.Address,
                 PostalCode = vm.PostalCode,
+                CreditCartNumber = vm.CreditCartNumber,
+                IBAN = vm.IBAN,
+                AccountNumber = vm.AccountNumber,
                 IsActive = vm.IsActive,
                 IsDeleted = vm.IsDeleted,
                 ProfileImageUrl= vm.ProfileImageUrl
@@ -338,6 +352,22 @@ namespace GolpaMotorFinal.Controllers
         }
 
         [HttpGet]
+        public async Task<JsonResult> GetCitiesByProvince(int provinceId)
+        {
+            var cities = await repo.GetCitiesByProvinceId(provinceId);
+            if (cities == null || !cities.Any())
+            {
+                return Json(new { success = false, data = Array.Empty<object>(), message = "شهری یافت نشد" });
+            }
+
+            return Json(new
+            {
+                success = true,
+                data = cities.Select(c => new { cityID = c.CityID, name = c.Name })
+            });
+        }
+
+        [HttpGet]
         public async Task<IActionResult> Details(string userID)
         {
             var user = await repo.GetDetails(userID);
@@ -347,6 +377,47 @@ namespace GolpaMotorFinal.Controllers
 
 
             return PartialView("_Details", user);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> EligibleRewards(string userID)
+        {
+            if (string.IsNullOrWhiteSpace(userID))
+                return NotFound();
+
+            await rewardRequests.RefreshEligibility(userID);
+
+            var user = await repo.GetDetails(userID);
+            if (user == null)
+                return NotFound();
+
+            var vm = new EligibleRewardsDialogViewModel
+            {
+                UserID = user.UserID,
+                CustomerName = $"{user.FirstName} {user.LastName}".Trim(),
+                PhoneNumber = user.PhoneNumber,
+                TotalEarnedPoints = user.TotalEarnedPoints,
+                TotalSettledPoints = user.TotalSettledPoints,
+                RemainedPoints = await rewardRequests.GetAvailablePoints(user.UserID),
+                TotalRegisteredCards = user.TotalRegisteredCards,
+                IsEligibleForReward = user.IsEligibleForReward,
+                HasReceivedReward = user.HasReceivedReward,
+                Items = await rewardRequests.GetEligibleCatalogsForUser(user.UserID),
+                RecentRequests = await rewardRequests.GetUserRequests(user.UserID)
+            };
+
+            return PartialView("_EligibleRewards", vm);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<JsonResult> RequestReward(string userID, int rewardCatalogID)
+        {
+            if (string.IsNullOrWhiteSpace(userID))
+                return Json(new { success = false, message = "کاربر نامعتبر است." });
+
+            var result = await rewardRequests.CreateRequest(userID, rewardCatalogID);
+            return Json(new { success = result.Success, message = result.Message });
         }
 
         [HttpGet]

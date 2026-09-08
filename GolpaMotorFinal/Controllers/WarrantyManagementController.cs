@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using System.Security.Cryptography;
 
 namespace GolpaMotorFinal.Controllers
@@ -22,6 +23,9 @@ namespace GolpaMotorFinal.Controllers
         private readonly IWarrantyCardRepository warrantyCards;
         private readonly IProductRepository products;
         private readonly IRewardRequestRepository rewardRequests;
+        private readonly IMemoryCache cache;
+        private const int MaxCardsPerRequest = 10;
+        private const int RegisterAttemptWindowSeconds = 60;
 
         public WarrantyManagementController(
                ICardRegistrationRepository repo,
@@ -30,7 +34,8 @@ namespace GolpaMotorFinal.Controllers
                IWarrantyExcelService excelService,
                IWarrantyCardRepository warrantyCards,
                IProductRepository products,
-               IRewardRequestRepository rewardRequests)
+               IRewardRequestRepository rewardRequests,
+               IMemoryCache cache)
         {
             this.repo = repo;
             this.userManager = userManager;
@@ -39,6 +44,7 @@ namespace GolpaMotorFinal.Controllers
             this.warrantyCards = warrantyCards;
             this.products = products;
             this.rewardRequests = rewardRequests;
+            this.cache = cache;
         }
 
         private async Task<IEnumerable<SelectListItem>> BindCustomerTypes()
@@ -168,9 +174,49 @@ namespace GolpaMotorFinal.Controllers
             return View("Index", vm);
         }
 
+        private string GetRegistrationRateLimitKey()
+        {
+            var userId = userManager.GetUserId(User);
+            if (!string.IsNullOrWhiteSpace(userId))
+                return $"warranty-reg:{userId}";
+
+            var ip = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+            return $"warranty-reg:{ip}";
+        }
+
+        private bool TryConsumeRegistrationAttempt(out int retryAfterSeconds)
+        {
+            var key = GetRegistrationRateLimitKey();
+            var now = DateTime.UtcNow;
+
+            if (cache.TryGetValue(key, out DateTime lastAttemptUtc))
+            {
+                var elapsed = (int)(now - lastAttemptUtc).TotalSeconds;
+                var remaining = RegisterAttemptWindowSeconds - elapsed;
+                if (remaining > 0)
+                {
+                    retryAfterSeconds = remaining;
+                    return false;
+                }
+            }
+
+            cache.Set(key, now, TimeSpan.FromSeconds(RegisterAttemptWindowSeconds));
+            retryAfterSeconds = 0;
+            return true;
+        }
+
         private async Task<IActionResult> CompleteRegistration(RegisterationCardViewModel request, bool fromAdmin)
         {
             var op = EnsureOperation(request);
+
+            if (!TryConsumeRegistrationAttempt(out var retryAfterSeconds))
+            {
+                request.RateLimitRetryAfterSeconds = retryAfterSeconds;
+                var message = $"لطفاً {retryAfterSeconds} ثانیه صبر کنید و سپس دوباره تلاش کنید.";
+                op.ToFailed(message);
+                ModelState.AddModelError("", message);
+                return await FailRegistration(request, fromAdmin);
+            }
 
             if (!ModelState.IsValid)
             {
@@ -179,44 +225,51 @@ namespace GolpaMotorFinal.Controllers
                 return await FailRegistration(request, fromAdmin);
             }
 
-            if (request.SerialNumber == null ||
-                request.ScratchedCode == null ||
-                request.SerialNumber.Count == 0 ||
-                request.SerialNumber.Count != request.ScratchedCode.Count)
+            if (request.ScratchedCode == null || request.ScratchedCode.Count == 0)
             {
                 op.ToFailed("اطلاعات کارت‌ها نامعتبر است.");
                 ModelState.AddModelError("", "اطلاعات کارت‌ها نامعتبر است.");
                 return await FailRegistration(request, fromAdmin);
             }
 
+            if (request.ScratchedCode.Count > MaxCardsPerRequest)
+            {
+                op.ToFailed("حداکثر ۱۰ کارت گارانتی در هر درخواست قابل ثبت است.");
+                ModelState.AddModelError("", "حداکثر ۱۰ کارت گارانتی در هر درخواست قابل ثبت است.");
+                return await FailRegistration(request, fromAdmin);
+            }
+
             var validCards = new List<WarrantyCard>();
             var invalidCards = new List<string>();
+            var seenCodes = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-            for (int i = 0; i < request.SerialNumber.Count; i++)
+            for (int i = 0; i < request.ScratchedCode.Count; i++)
             {
-                var serial = request.SerialNumber[i]?.Trim();
                 var scratchedCode = request.ScratchedCode[i]?.Trim();
 
-                if (string.IsNullOrWhiteSpace(serial) ||
-                    string.IsNullOrWhiteSpace(scratchedCode))
+                if (string.IsNullOrWhiteSpace(scratchedCode))
                 {
-                    invalidCards.Add($"ردیف {i + 1}: شماره سریال یا رمز وارد نشده است.");
+                    invalidCards.Add($"ردیف {i + 1}: رمز وارد نشده است.");
                     continue;
                 }
 
-                var card = await repo.GetBySerialAsync(serial, scratchedCode);
-
-                if (card == null)
+                if (!seenCodes.Add(scratchedCode))
                 {
-                    invalidCards.Add(
-                        $"ردیف {i + 1}: سریال {serial} و رمز وارد شده معتبر نیستند.");
+                    invalidCards.Add($"ردیف {i + 1}: این رمز تکراری است.");
+                    continue;
+                }
+
+                var (card, isAmbiguous) = await repo.GetByScratchedCodeAsync(scratchedCode);
+
+                if (isAmbiguous || card == null)
+                {
+                    invalidCards.Add($"ردیف {i + 1}: رمز وارد شده معتبر نیست.");
                     continue;
                 }
 
                 if (card.Product == null)
                 {
-                    invalidCards.Add(
-                        $"ردیف {i + 1}: محصول مرتبط با سریال {serial} یافت نشد.");
+                    invalidCards.Add($"ردیف {i + 1}: محصول مرتبط با این کارت یافت نشد.");
                     continue;
                 }
 
@@ -224,8 +277,7 @@ namespace GolpaMotorFinal.Controllers
 
                 if (alreadyRegistered)
                 {
-                    invalidCards.Add(
-                        $"ردیف {i + 1}: کارت با سریال {serial} قبلاً ثبت شده است.");
+                    invalidCards.Add($"ردیف {i + 1}: این کارت قبلاً ثبت شده است.");
                     continue;
                 }
 

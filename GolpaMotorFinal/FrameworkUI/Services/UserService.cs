@@ -3,6 +3,7 @@ using DomainModel.ViewModels.User;
 using Framework.Common;
 using GolpaMotorFinal.Models.ViewModels.UserManagement;
 using GolpaMotorFinal.Models.ViewModels.CRUD;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 
 namespace GolpaMotorFinal.FrameworkUI.Services
@@ -104,6 +105,11 @@ namespace GolpaMotorFinal.FrameworkUI.Services
                 RefreshGridUrl = "Grid"
             };
 
+            var provinces = await repo.GetProvinces();
+            var cities = user.ProvinceID.HasValue
+                ? await repo.GetCitiesByProvinceId(user.ProvinceID.Value)
+                : new List<DomainModel.Models.City>();
+
             var vm = new UserAddEditViewModel
             {
                 UserID = user.UserID,
@@ -115,9 +121,14 @@ namespace GolpaMotorFinal.FrameworkUI.Services
                 CityID = user.CityID,
                 Address = user.Address,
                 PostalCode = user.PostalCode,
+                CreditCartNumber = user.CreditCartNumber,
+                IBAN = user.IBAN,
+                AccountNumber = user.AccountNumber,
                 IsActive = user.IsActive,
                 IsDeleted = user.IsDeleted,
                 ProfileImageUrl = user.ProfileImageUrl,
+                Provinces = new SelectList(provinces, "ProvinceID", "Name", user.ProvinceID),
+                Cities = new SelectList(cities, "CityID", "Name", user.CityID),
                 CrudFormViewModel = form
             };
 

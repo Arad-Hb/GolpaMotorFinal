@@ -35,6 +35,7 @@ builder.Services.ConfigureApplicationCookie(options =>
 });
 
 builder.Services.AddControllersWithViews();
+builder.Services.AddMemoryCache();
 
 ExcelPackage.License.SetNonCommercialOrganization("GolpaMotorFinal");
 
