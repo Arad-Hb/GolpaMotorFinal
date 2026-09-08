@@ -16,7 +16,6 @@
 
                 <thead class="table-dark">
                     <tr>
-                        <th>عکس</th>
                         <th>نام</th>
                         <th>موبایل</th>
                         <th>شغل</th>
@@ -26,7 +25,6 @@
                         <th class="table-num">امتیاز</th>
                         <th>واجد پاداش</th>
                         <th>دریافت پاداش</th>
-                        <th>درخواست پاداش</th>
                         <th class="table-actions">عملیات</th>
                     </tr>
                 </thead>
@@ -37,10 +35,6 @@
                         foreach (var item in Model)
                         {
                             <tr>
-                                <td>
-                                    <img src="@ImageHelper.ToThumbnail(item.ProfileImageUrl)" 
-                                         style="width:50px;height:50px;object-fit:cover;border-radius:6px;" />
-                                </td>
                                 <td>@item.FullName</td>
                                 <td>@item.PhoneNumber</td>
                                 <td>@item.RoleName</td>
@@ -50,7 +44,7 @@
                                 <td class="table-num">@item.TotalEarnedPoints</td>
                                 <td>@(item.IsEligibleForReward ? "بله" : "خیر")</td>
                                 <td>@(item.HasReceivedReward ? "بله" : "خیر")</td>
-                                <td>
+                                <td class="table-actions">
                                     <button type="button" class="btn btn-sm btn-outline-success open-modal"
                                             title="ثبت درخواست پاداش"
                                             data-url='@Url.Action("EligibleRewards", "UserManagement")'
@@ -59,8 +53,6 @@
                                             data-id-name="userID">
                                         <i class="fa fa-gift"></i>
                                     </button>
-                                </td>
-                                <td class="table-actions">
                                     <button type="button" class="btn btn-sm btn-outline-secondary open-modal"
                                         title="جزئیات"
                                         data-url='@Url.Action("Details", "UserManagement")'

@@ -144,7 +144,7 @@ namespace GolpaMotorFinal.FrameworkUI.Services
 
             foreach (var u in users)
             {
-                var roleName = await repo.GetUserRoleById(u.UserID);
+                //var roleName = await repo.GetUserRoleById(u.UserID);
 
                 result.Add(new UserListItemViewModel
                 {
@@ -152,7 +152,8 @@ namespace GolpaMotorFinal.FrameworkUI.Services
                     ProfileImageUrl = u.ProfileImageUrl,
                     FullName = $"{u.FirstName ?? string.Empty} {u.LastName ?? string.Empty}".Trim(),
                     PhoneNumber = u.PhoneNumber ?? string.Empty,
-                    RoleName = roleName,
+                    //RoleName = roleName,
+                    RoleName = u.RoleName ?? string.Empty,
                     TotalRegisteredCards = u.TotalRegisteredCards,
                     TotalEarnedPoints = u.TotalEarnedPoints,
                     IsEligibleForReward = u.IsEligibleForReward,
