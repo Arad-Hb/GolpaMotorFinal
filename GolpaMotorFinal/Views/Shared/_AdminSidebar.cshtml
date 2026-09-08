@@ -14,13 +14,6 @@
 }
 <nav id="sidebar">
     <div class="sidebar_blog_1">
-        <div class="sidebar-header">
-            <div class="logo_section">
-                <a asp-controller="Admin" asp-action="Index">
-                    <img src="~/pluto/images/logo/logo-golpa.png" alt="Golpa" />
-                </a>
-            </div>
-        </div>
         <div class="sidebar_user_info">
             <div class="user_profle_side">
                 <div class="user_img">
@@ -38,7 +31,7 @@
         <ul class="list-unstyled components">
             <li class="@(IsActive("Admin", "Index") ? "active" : null)">
                 <a asp-controller="Admin" asp-action="Index">
-                    <i class="fa fa-gauge orange_color"></i>
+                    <i class="fa fa-gauge blue2_color"></i>
                     <span>داشبورد</span>
                 </a>
             </li>
@@ -62,7 +55,7 @@
             </li>
             <li class="@(IsActive("RewardManagement", "Index") ? "active" : null)">
                 <a asp-controller="RewardManagement" asp-action="Index">
-                    <i class="fa fa-bitcoin text-bg-warning"></i>
+                    <i class="fa fa-coins text-warning"></i>
                     <span>مدیریت پاداش</span>
                 </a>
             </li>
