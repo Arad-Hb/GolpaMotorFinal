@@ -123,12 +123,6 @@ body {
     width: 250px;
 }
 
-/*.auth-buttons {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-right: 150px;
-}*/
 .auth-buttons {
     display: flex;
     align-items: center;
@@ -172,7 +166,8 @@ body {
     }
 
 .logout-btn {
-    height: 42px;
+    
+    height: 50px;
     border-radius: 50px;
     padding: 0 16px;
     font-size: 14px;

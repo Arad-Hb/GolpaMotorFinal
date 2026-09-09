@@ -4,14 +4,16 @@ namespace GolpaMotorFinal.Models.ViewModels.Account
 {
     public class LoginViewModel
     {
-        [Required]
+        
         [EmailAddress]
         [Display(Name = "ایمیل")]
+        [Required(ErrorMessage = "ایمیل الزامی است")]
         public string Email { get; set; } = null!;
 
-        [Required]
+       
         [DataType(DataType.Password)]
         [Display(Name = "رمز ورود")]
+        [Required(ErrorMessage = "رمز ورود الزامی است")]
         public string Password { get; set; } = null!;
 
         [Display(Name = "مرا به خاطر بسپار")]

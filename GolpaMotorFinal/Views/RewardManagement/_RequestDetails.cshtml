@@ -17,13 +17,9 @@
     </ul>
     @if (!Model.IsComplete && Model.StatusTitle == RewardStatusTitles.Pending)
     {
-        <div class="row g-2 mt-3">
-            <div class="col-12 col-md-6">
-                <button type="button" class="btn btn-success w-100 btnApproveRequest" data-id="@Model.RewardRequestID">تأیید</button>
-            </div>
-            <div class="col-12 col-md-6">
-                <button type="button" class="btn btn-danger w-100 btnRejectRequest" data-id="@Model.RewardRequestID">رد</button>
-            </div>
+        <div class="form-actions">
+            <button type="button" class="main_bt btnApproveRequest" data-id="@Model.RewardRequestID">تأیید</button>
+            <button type="button" class="btn btn-danger btnRejectRequest" data-id="@Model.RewardRequestID">رد</button>
         </div>
     }
 </div>

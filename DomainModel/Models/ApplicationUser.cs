@@ -24,7 +24,7 @@ namespace DomainModel.Models
         public string? ProfileImageUrl { get; set; }
 
         public bool IsActive { get; set; }
-        public bool IsDeleted {  get; set; } //جدید 
+        public bool IsDeleted {  get; set; } 
 
         public bool IsConfirmedCode { get; set; }
 

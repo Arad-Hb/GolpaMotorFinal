@@ -32,12 +32,8 @@
         <input asp-for="IsAvailable" class="form-check-input" />
         <label asp-for="IsAvailable" class="form-check-label">موجود</label>
     </div>
-    <div class="row g-2 mt-4">
-        <div class="col-12 col-md-6">
-            <button type="submit" class="btn btn-warning w-100">ویرایش</button>
-        </div>
-        <div class="col-12 col-md-6">
-            <button type="button" class="btn btn-secondary w-100" onclick="hideProductModal()">انصراف</button>
-        </div>
+    <div class="form-actions">
+        <button type="submit" class="main_bt">ویرایش</button>
+        <button type="button" class="btn btn-secondary" onclick="hideProductModal()">انصراف</button>
     </div>
 </form>

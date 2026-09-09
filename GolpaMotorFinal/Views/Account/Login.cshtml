@@ -16,14 +16,33 @@
                 <div class="login_form">
                     <form asp-action="Login" method="post">
                         <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
-                        <div class="field">
-                            <label class="label_field" asp-for="Email">ایمیل</label>
-                            <input asp-for="Email" class="form-control" placeholder="ایمیل خود را وارد کنید" />
+
+                        <div class="login-field-group mb-3">
+                            <div class="login-field">
+                                <label class="label_field login-field__icon login-field__icon--user" asp-for="Email">
+                                    <i class="fa-solid fa-user" aria-hidden="true"></i>
+                                </label>
+                                <input asp-for="Email" type="text"
+                                       autocomplete="on"  class="form-control" 
+                                       placeholder="ایمیل خود را وارد کنید" required />
+                               
+                            </div>
                             <span asp-validation-for="Email" class="text-danger"></span>
                         </div>
-                        <div class="field">
-                            <label class="label_field" asp-for="Password">رمز عبور</label>
-                            <input asp-for="Password" type="password" class="form-control" placeholder="رمز عبور را وارد کنید" />
+
+                        <div class="login-field-group mb-3">
+                            <div class="login-field">
+                                <label class="label_field login-field__icon login-field__icon--lock" asp-for="Password">
+                                    <i class="fa-solid fa-lock" aria-hidden="true"></i>
+                                </label>
+                                <input asp-for="Password" type="password" 
+                                       class="form-control" placeholder="رمز عبور را وارد کنید" required />
+                                
+                                <button type="button" class="login-field__eye" id="toggle-password"
+                                        aria-label="نمایش رمز عبور" aria-pressed="false">
+                                    <i class="fa-solid fa-eye" id="toggle-password-icon" aria-hidden="true"></i>
+                                </button>
+                            </div>
                             <span asp-validation-for="Password" class="text-danger"></span>
                         </div>
                         <div class="field field-row">
@@ -42,3 +61,22 @@
         </div>
     </div>
 </div>
+
+<script>
+    document.getElementById('toggle-password').addEventListener('click', function () {
+    var passwordInput = document.getElementById('Password');
+    var passwordIcon = document.getElementById('toggle-password-icon');
+    if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            passwordIcon.classList.remove('fa-eye');
+            passwordIcon.classList.add('fa-eye-slash');
+            this.setAttribute('aria-pressed', 'true');
+        }
+    else {
+            passwordInput.type = 'password';
+            passwordIcon.classList.remove('fa-eye-slash');
+            passwordIcon.classList.add('fa-eye');
+            this.setAttribute('aria-pressed', 'false');
+        }
+    });
+</script>
