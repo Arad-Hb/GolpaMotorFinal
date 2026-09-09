@@ -524,6 +524,11 @@ namespace DataAccess.Repositories
             return await db.Cities.Where(c => c.ProvinceID == provinceId).ToListAsync();
         }
 
+        public async Task<List<CustomerType>> GetCustomerTypes()
+        {
+            return await db.CustomerTypes.OrderBy(x => x.Title).ToListAsync();
+        }
+
         public async Task<UserListComplexModel> Search(UserSearchModel sm)
         {
             var q = db.Users.Where(u => !u.IsDeleted).AsQueryable();
@@ -550,6 +555,40 @@ namespace DataAccess.Repositories
             if (!string.IsNullOrEmpty(sm.Email))
             {
                 q = q.Where(u => u.Email.Contains(sm.Email));
+            }
+            if (sm.CustomerTypeID.HasValue && sm.CustomerTypeID.Value > 0)
+            {
+                q = q.Where(u => u.UserCustomerTypes.Any(t => t.CustomerTypeID == sm.CustomerTypeID.Value));
+            }
+            if (sm.ProvinceID.HasValue && sm.ProvinceID.Value > 0)
+            {
+                q = q.Where(u => u.ProvinceID == sm.ProvinceID.Value);
+            }
+            if (sm.CityID.HasValue && sm.CityID.Value > 0)
+            {
+                q = q.Where(u => u.CityID == sm.CityID.Value);
+            }
+            if (sm.PointsFrom.HasValue)
+            {
+                q = q.Where(u => (u.RemainedPoints ?? 0) >= sm.PointsFrom.Value);
+            }
+            if (sm.PointsTo.HasValue)
+            {
+                q = q.Where(u => (u.RemainedPoints ?? 0) <= sm.PointsTo.Value);
+            }
+            if (sm.IsEligibleForReward.HasValue)
+            {
+                q = q.Where(u => u.IsEligibleForReward == sm.IsEligibleForReward.Value);
+            }
+            if (sm.HasReceivedReward.HasValue)
+            {
+                q = q.Where(u => u.HasReceivedReward == sm.HasReceivedReward.Value);
+            }
+            if (sm.CardFrom.HasValue || sm.CardTo.HasValue)
+            {
+                var from = sm.CardFrom ?? DateTime.MinValue;
+                var to = sm.CardTo?.Date.AddDays(1) ?? DateTime.MaxValue;
+                q = q.Where(u => u.CardRegistrations.Any(c => c.CreatedAt >= from && c.CreatedAt < to));
             }
 
             if (sm.PageSize <= 0)

@@ -1,0 +1,35 @@
+@model List<DomainModel.ViewModels.Reports.WarrantyProductStatusRow>
+<div class="table-responsive">
+    <table class="table table-hover align-middle">
+        <thead class="table-dark">
+            <tr>
+                <th>محصول</th>
+                <th class="table-num">کل کارت</th>
+                <th class="table-num">ثبت‌شده</th>
+                <th class="table-num">آزاد</th>
+                <th class="table-num">منقضی</th>
+                <th class="table-num">تا ۱۰ روز</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.Any())
+            {
+                foreach (var row in Model)
+                {
+                    <tr>
+                        <td>@row.ProductName</td>
+                        <td class="table-num">@row.TotalCards</td>
+                        <td class="table-num">@row.Registered</td>
+                        <td class="table-num">@row.Unregistered</td>
+                        <td class="table-num">@row.Expired</td>
+                        <td class="table-num">@row.ExpiringSoon</td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr><td colspan="6" class="text-center text-muted">داده‌ای یافت نشد</td></tr>
+            }
+        </tbody>
+    </table>
+</div>

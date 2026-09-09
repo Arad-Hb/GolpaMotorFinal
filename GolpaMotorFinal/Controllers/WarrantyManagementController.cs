@@ -141,7 +141,14 @@ namespace GolpaMotorFinal.Controllers
                 form.op!.ToFailed(error);
 
             var pageSize = PaginationViewModel.DefaultPageSize;
-            var search = await warrantyCards.SearchAsync(productId, isRegistered, pageIndex, pageSize);
+            var filter = new WarrantyCardSearchModel
+            {
+                ProductID = productId,
+                IsRegistered = isRegistered,
+                PageIndex = pageIndex,
+                PageSize = pageSize
+            };
+            var search = await warrantyCards.SearchAsync(filter);
             var pageCount = pageSize <= 0 ? 1 : (int)Math.Ceiling(search.Total / (double)pageSize);
 
             var vm = new WarrantyAdminIndexViewModel
@@ -174,16 +181,26 @@ namespace GolpaMotorFinal.Controllers
 
         [HttpGet]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> CardList(long? productId, bool? isRegistered, int pageIndex = 0)
+        public async Task<IActionResult> CardList(WarrantyCardSearchModel sm)
         {
-            var search = await warrantyCards.SearchAsync(productId, isRegistered, pageIndex, PaginationViewModel.DefaultPageSize);
+            sm ??= new WarrantyCardSearchModel();
+            sm.RegisteredFrom = PersianDate.ParseOrNull(sm.RegisteredFromJalali);
+            sm.RegisteredTo = PersianDate.ParseOrNull(sm.RegisteredToJalali);
+            sm.PageSize = PaginationViewModel.DefaultPageSize;
+            var search = await warrantyCards.SearchAsync(sm);
             var pageSize = PaginationViewModel.DefaultPageSize;
             var vm = new WarrantyAdminIndexViewModel
             {
-                ProductID = productId,
-                IsRegistered = isRegistered,
+                ProductID = sm.ProductID,
+                IsRegistered = sm.IsRegistered,
+                SearchTerm = sm.SearchTerm,
+                ValidityPreset = sm.ValidityPreset,
+                RemainingDaysFrom = sm.RemainingDaysFrom,
+                RemainingDaysTo = sm.RemainingDaysTo,
+                RegisteredFromJalali = sm.RegisteredFromJalali,
+                RegisteredToJalali = sm.RegisteredToJalali,
                 Cards = search.Items,
-                PageIndex = pageIndex,
+                PageIndex = sm.PageIndex,
                 PageCount = pageSize <= 0 ? 1 : (int)Math.Ceiling(search.Total / (double)pageSize),
                 RecordCount = search.Total
             };

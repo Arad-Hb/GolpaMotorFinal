@@ -11,7 +11,7 @@ namespace DataAccess.Services
         Task AddAsync(WarrantyCard card);
         Task<bool> SerialExistsAsync(string serialNumber);
         Task<HashSet<string>> GetSerialsAsync();
-        Task<(List<WarrantyCardListItem> Items, int Total)> SearchAsync(long? productId, bool? isRegistered, int pageIndex = 0, int pageSize = 10);
+        Task<(List<WarrantyCardListItem> Items, int Total)> SearchAsync(WarrantyCardSearchModel search);
     }
 
     public class WarrantyCardListItem
@@ -22,5 +22,8 @@ namespace DataAccess.Services
         public string ProductName { get; set; } = string.Empty;
         public bool IsRegistered { get; set; }
         public int ValidityMonths { get; set; }
+        public DateTime? RegisteredAt { get; set; }
+        public int? RemainingDays { get; set; }
+        public string RemainingText { get; set; } = string.Empty;
     }
 }

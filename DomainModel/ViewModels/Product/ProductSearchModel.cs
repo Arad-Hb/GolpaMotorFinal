@@ -24,5 +24,17 @@ namespace DomainModel.ViewModels.Product
         public bool? IsDeleted { get; set; }
         public bool? IsAvailable { get; set; }
 
+        public int? PointsFrom { get; set; }
+
+        public int? PointsTo { get; set; }
+
+        public int? RegisteredFrom { get; set; }
+
+        public int? RegisteredTo { get; set; }
+
+        public int? RemainingFrom { get; set; }
+
+        public int? RemainingTo { get; set; }
+
     }
 }

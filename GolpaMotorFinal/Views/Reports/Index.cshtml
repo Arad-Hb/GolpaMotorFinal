@@ -1,0 +1,109 @@
+@using DomainModel.ViewModels.Product
+@{
+    ViewData["Title"] = "گزارشات";
+    Layout = "_AdminLayout";
+    var yearNow = Framework.Common.PersianDate.GetYear(DateTime.Today);
+    var products = ViewBag.Products as IEnumerable<ProductListItem> ?? Enumerable.Empty<ProductListItem>();
+}
+
+<div class="row column_title">
+    <div class="col-md-12">
+        <div class="page_title"><h2>گزارشات</h2></div>
+    </div>
+</div>
+
+<ul class="nav nav-tabs mb-3" role="tablist">
+    <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#reportUsers" type="button">گزارش کاربران</button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#reportWarranty" type="button">گزارش کارت گارانتی</button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#reportProducts" type="button">گزارش محصول</button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#reportRewards" type="button">گزارش پاداش</button></li>
+</ul>
+
+<div class="tab-content">
+    <div class="tab-pane fade show active" id="reportUsers">
+        <div class="white_shd full margin_bottom_30">
+            <div class="padding_infor_info">
+                @{
+                    ViewData["FilterUrl"] = "/Reports/Users";
+                    ViewData["FilterTarget"] = "#UserReportGrid";
+                }
+                @await Html.PartialAsync("~/Views/UserManagement/_UserFilterBar.cshtml")
+                <div id="UserReportGrid"></div>
+            </div>
+        </div>
+    </div>
+    <div class="tab-pane fade" id="reportWarranty">
+        <div class="white_shd full margin_bottom_30">
+            <div class="padding_infor_info">
+                <form class="table_filter_bar" data-filter-bar data-url="/Reports/Warranty" data-target="#WarrantyReportGrid">
+                    <select name="productId" class="form-select">
+                        <option value="">همه محصولات</option>
+                        @foreach (var p in products)
+                        {
+                            <option value="@p.ProductID">@p.ProductName</option>
+                        }
+                    </select>
+                    <input type="text" name="fromJalali" class="form-control js-jalali" placeholder="از تاریخ" autocomplete="off" />
+                    <input type="text" name="toJalali" class="form-control js-jalali" placeholder="تا تاریخ" autocomplete="off" />
+                    <button type="button" class="main_bt" data-filter-reset title="بازنشانی"><i class="fa-solid fa-rotate-left"></i></button>
+                </form>
+                <div id="WarrantyReportGrid"></div>
+            </div>
+        </div>
+    </div>
+    <div class="tab-pane fade" id="reportProducts">
+        <div class="white_shd full margin_bottom_30">
+            <div class="padding_infor_info">
+                <form class="table_filter_bar" data-filter-bar data-url="/Reports/Products" data-target="#ProductReportGrid">
+                    <select name="year" class="form-select">
+                        <option value="">همه سال‌ها</option>
+                        @for (var y = yearNow; y >= yearNow - 7; y--)
+                        {
+                            <option value="@y">@y</option>
+                        }
+                    </select>
+                    <select name="month" class="form-select">
+                        <option value="">همه ماه‌ها</option>
+                        <option value="1">فروردین</option>
+                        <option value="2">اردیبهشت</option>
+                        <option value="3">خرداد</option>
+                        <option value="4">تیر</option>
+                        <option value="5">مرداد</option>
+                        <option value="6">شهریور</option>
+                        <option value="7">مهر</option>
+                        <option value="8">آبان</option>
+                        <option value="9">آذر</option>
+                        <option value="10">دی</option>
+                        <option value="11">بهمن</option>
+                        <option value="12">اسفند</option>
+                    </select>
+                    <button type="button" class="main_bt" data-filter-reset title="بازنشانی"><i class="fa-solid fa-rotate-left"></i></button>
+                </form>
+                <div id="ProductReportGrid"></div>
+            </div>
+        </div>
+    </div>
+    <div class="tab-pane fade" id="reportRewards">
+        <div class="white_shd full margin_bottom_30">
+            <div class="padding_infor_info">
+                <form class="table_filter_bar" data-filter-bar data-url="/Reports/Rewards" data-target="#RewardReportGrid">
+                    <input type="text" name="fromJalali" class="form-control js-jalali" placeholder="از تاریخ" autocomplete="off" />
+                    <input type="text" name="toJalali" class="form-control js-jalali" placeholder="تا تاریخ" autocomplete="off" />
+                    <button type="button" class="main_bt" data-filter-reset title="بازنشانی"><i class="fa-solid fa-rotate-left"></i></button>
+                </form>
+                <div id="RewardReportGrid"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(function () {
+            applyTableFilter($("#reportUsers [data-filter-bar]"), 0);
+            applyTableFilter($("#reportWarranty [data-filter-bar]"), 0);
+            applyTableFilter($("#reportProducts [data-filter-bar]"), 0);
+            applyTableFilter($("#reportRewards [data-filter-bar]"), 0);
+        });
+    </script>
+}

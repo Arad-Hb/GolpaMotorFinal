@@ -1,7 +1,16 @@
 @model GolpaMotorFinal.Models.ViewModels.RewardManagement.RewardCatalogListPageViewModel
+@using GolpaMotorFinal.Helpers
 @{
+    var f = Model.Filter ?? new DomainModel.ViewModels.Reward.RewardCatalogSearchModel();
     var rowNumber = Model.PageIndex * PaginationViewModel.DefaultPageSize;
-    var listUrl = Url.Action("CatalogList", "RewardManagement", new { title = Model.Title }) ?? "/RewardManagement/CatalogList";
+    var listUrl = FilterUrl.Combine("/RewardManagement/CatalogList", new
+    {
+        f.Title,
+        f.IsCashReward,
+        f.IsActive,
+        f.RequiredFrom,
+        f.RequiredTo
+    });
 }
 
 <div class="table-responsive">

@@ -1,4 +1,5 @@
 using DomainModel.ViewModels.Reward;
+using GolpaMotorFinal.Models.ViewModels;
 
 namespace GolpaMotorFinal.Models.ViewModels.RewardManagement
 {
@@ -8,7 +9,6 @@ namespace GolpaMotorFinal.Models.ViewModels.RewardManagement
         public int PageIndex { get; set; }
         public int PageCount { get; set; }
         public int RecordCount { get; set; }
-        public string? SearchTerm { get; set; }
-        public int? StatusId { get; set; }
+        public RewardRequestSearchModel Filter { get; set; } = new();
     }
 }

@@ -199,6 +199,30 @@ namespace DataAccess.Repositories
             {
                 query = query.Where(p => p.IsAvailable == searchModel.IsAvailable.Value);
             }
+            if (searchModel.PointsFrom.HasValue)
+            {
+                query = query.Where(p => p.ProductPoint >= searchModel.PointsFrom.Value);
+            }
+            if (searchModel.PointsTo.HasValue)
+            {
+                query = query.Where(p => p.ProductPoint <= searchModel.PointsTo.Value);
+            }
+            if (searchModel.RegisteredFrom.HasValue)
+            {
+                query = query.Where(p => p.WarrantyCards.Count(w => w.IsRegistered) >= searchModel.RegisteredFrom.Value);
+            }
+            if (searchModel.RegisteredTo.HasValue)
+            {
+                query = query.Where(p => p.WarrantyCards.Count(w => w.IsRegistered) <= searchModel.RegisteredTo.Value);
+            }
+            if (searchModel.RemainingFrom.HasValue)
+            {
+                query = query.Where(p => p.WarrantyCards.Count(w => !w.IsRegistered) >= searchModel.RemainingFrom.Value);
+            }
+            if (searchModel.RemainingTo.HasValue)
+            {
+                query = query.Where(p => p.WarrantyCards.Count(w => !w.IsRegistered) <= searchModel.RemainingTo.Value);
+            }
 
             // 6. Count کل رکوردها (قبل از paging)
             var totalCount = await query.CountAsync();

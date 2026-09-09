@@ -1,5 +1,7 @@
 using DataAccess.Services;
 using DomainModel.ViewModels.Reward;
+using Framework.Common;
+using GolpaMotorFinal.Models.ViewModels;
 using GolpaMotorFinal.Models.ViewModels.RewardManagement;
 using Microsoft.AspNetCore.Mvc;
 
@@ -15,24 +17,20 @@ namespace GolpaMotorFinal.ViewComponents
             this.repo = repo;
         }
 
-        public async Task<IViewComponentResult> InvokeAsync(string? searchTerm = null, int? statusId = null, int pageIndex = 0)
+        public async Task<IViewComponentResult> InvokeAsync(RewardRequestSearchModel? sm = null)
         {
-            var search = new RewardRequestSearchModel
-            {
-                SearchTerm = searchTerm,
-                RewardDeliveryStatusID = statusId,
-                PageIndex = pageIndex,
-                PageSize = 10
-            };
-            var result = await repo.Search(search);
+            sm ??= new RewardRequestSearchModel();
+            sm.RequestFrom = PersianDate.ParseOrNull(sm.RequestFromJalali);
+            sm.RequestTo = PersianDate.ParseOrNull(sm.RequestToJalali);
+            sm.PageSize = PaginationViewModel.DefaultPageSize;
+            var result = await repo.Search(sm);
             var vm = new RewardRequestListPageViewModel
             {
                 Items = result.RequestList,
                 PageIndex = result.sm.PageIndex,
                 PageCount = result.sm.PageCount,
                 RecordCount = result.sm.RecordCount,
-                SearchTerm = searchTerm,
-                StatusId = statusId
+                Filter = result.sm ?? sm
             };
             return View(vm);
         }

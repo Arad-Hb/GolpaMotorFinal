@@ -1,0 +1,7 @@
+@model GolpaMotorFinal.Models.ViewModels.CRUD.CrudGridViewModel
+@using GolpaMotorFinal.Models.ViewModels
+@await Component.InvokeAsync("CrudGrid", new { model = Model })
+@if (ViewBag.Pager is PaginationViewModel pager)
+{
+    @await Html.PartialAsync("~/Views/Shared/Components/Pagination/Default.cshtml", pager)
+}

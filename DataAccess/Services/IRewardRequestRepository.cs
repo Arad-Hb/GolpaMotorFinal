@@ -1,3 +1,4 @@
+using DomainModel.Models;
 using DomainModel.ViewModels.Reward;
 using Framework.Common;
 
@@ -14,5 +15,6 @@ namespace DataAccess.Services
         Task<List<UserEligibleRewardItem>> GetEligibleCatalogsForUser(string userId);
         Task RefreshEligibility(string userId);
         Task<int> GetAvailablePoints(string userId);
+        Task<List<RewardDeliveryStatus>> GetStatuses();
     }
 }

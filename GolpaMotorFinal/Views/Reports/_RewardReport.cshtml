@@ -1,0 +1,33 @@
+@model List<DomainModel.ViewModels.Reports.RewardPopularityRow>
+<div class="table-responsive">
+    <table class="table table-hover align-middle">
+        <thead class="table-dark">
+            <tr>
+                <th>پاداش</th>
+                <th class="table-num">کل درخواست</th>
+                <th class="table-num">تأیید</th>
+                <th class="table-num">رد</th>
+                <th class="table-num">در انتظار</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.Any())
+            {
+                foreach (var row in Model)
+                {
+                    <tr>
+                        <td>@row.Title</td>
+                        <td class="table-num">@row.RequestCount</td>
+                        <td class="table-num">@row.ApprovedCount</td>
+                        <td class="table-num">@row.RejectedCount</td>
+                        <td class="table-num">@row.PendingCount</td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr><td colspan="5" class="text-center text-muted">داده‌ای یافت نشد</td></tr>
+            }
+        </tbody>
+    </table>
+</div>

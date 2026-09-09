@@ -1,3 +1,5 @@
+using DomainModel.ViewModels.User;
+
 namespace GolpaMotorFinal.Models.ViewModels.UserManagement
 {
     public class UserListPageViewModel
@@ -6,6 +8,6 @@ namespace GolpaMotorFinal.Models.ViewModels.UserManagement
         public int PageIndex { get; set; }
         public int PageCount { get; set; }
         public int RecordCount { get; set; }
-        public string? SearchTerm { get; set; }
+        public UserSearchModel Filter { get; set; } = new();
     }
 }

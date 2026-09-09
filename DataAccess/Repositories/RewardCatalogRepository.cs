@@ -195,6 +195,12 @@ namespace DataAccess.Repositories
             if (searchModel.IsCashReward.HasValue)
                 query = query.Where(x => x.IsCashReward == searchModel.IsCashReward.Value);
 
+            if (searchModel.RequiredFrom.HasValue)
+                query = query.Where(x => x.RequiredPoints >= searchModel.RequiredFrom.Value);
+
+            if (searchModel.RequiredTo.HasValue)
+                query = query.Where(x => x.RequiredPoints <= searchModel.RequiredTo.Value);
+
             var totalCount = await query.CountAsync();
             var pageIndex = searchModel.PageIndex < 0 ? 0 : searchModel.PageIndex;
             var pageSize = searchModel.PageSize <= 0 ? 10 : searchModel.PageSize;

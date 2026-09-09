@@ -1,7 +1,18 @@
 @model GolpaMotorFinal.Models.ViewModels.WarrantyManagement.WarrantyAdminIndexViewModel
+@using GolpaMotorFinal.Helpers
 @{
     var rowNumber = Model.PageIndex * PaginationViewModel.DefaultPageSize;
-    var listUrl = Url.Action("CardList", "WarrantyManagement", new { productId = Model.ProductID, isRegistered = Model.IsRegistered }) ?? "/WarrantyManagement/CardList";
+    var listUrl = FilterUrl.Combine("/WarrantyManagement/CardList", new
+    {
+        SearchTerm = Model.SearchTerm,
+        ProductID = Model.ProductID,
+        IsRegistered = Model.IsRegistered,
+        ValidityPreset = Model.ValidityPreset,
+        RemainingDaysFrom = Model.RemainingDaysFrom,
+        RemainingDaysTo = Model.RemainingDaysTo,
+        RegisteredFromJalali = Model.RegisteredFromJalali,
+        RegisteredToJalali = Model.RegisteredToJalali
+    });
 }
 
 <div class="table-responsive">
@@ -14,6 +25,7 @@
                 <th>محصول</th>
                 <th>وضعیت</th>
                 <th>اعتبار (ماه)</th>
+                <th>اعتبار باقی‌مانده</th>
             </tr>
         </thead>
         <tbody>
@@ -29,13 +41,14 @@
                         <td>@card.ProductName</td>
                         <td>@(card.IsRegistered ? "ثبت‌شده" : "آزاد")</td>
                         <td>@card.ValidityMonths</td>
+                        <td>@card.RemainingText</td>
                     </tr>
                 }
             }
             else
             {
                 <tr>
-                    <td colspan="6" class="text-center text-muted">کارتی یافت نشد</td>
+                    <td colspan="7" class="text-center text-muted">کارتی یافت نشد</td>
                 </tr>
             }
         </tbody>

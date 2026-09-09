@@ -1,5 +1,6 @@
 ﻿using DataAccess.Services;
 using DomainModel.Models;
+using Framework.Common;
 using Microsoft.EntityFrameworkCore;
 
 namespace DataAccess.Repositories
@@ -44,27 +45,88 @@ namespace DataAccess.Repositories
             return new HashSet<string>(list, StringComparer.OrdinalIgnoreCase);
         }
 
-        public async Task<(List<WarrantyCardListItem> Items, int Total)> SearchAsync(long? productId, bool? isRegistered, int pageIndex = 0, int pageSize = 10)
+        public async Task<(List<WarrantyCardListItem> Items, int Total)> SearchAsync(WarrantyCardSearchModel search)
         {
-            var query = db.WarrantyCards.Include(x => x.Product).AsQueryable();
+            search ??= new WarrantyCardSearchModel();
+            var query = db.WarrantyCards.AsQueryable();
 
-            if (productId.HasValue && productId.Value > 0)
-                query = query.Where(x => x.ProductID == productId.Value);
+            if (search.ProductID.HasValue && search.ProductID.Value > 0)
+                query = query.Where(x => x.ProductID == search.ProductID.Value);
 
-            if (isRegistered.HasValue)
-                query = query.Where(x => x.IsRegistered == isRegistered.Value);
+            if (search.IsRegistered.HasValue)
+                query = query.Where(x => x.IsRegistered == search.IsRegistered.Value);
 
-            if (pageSize <= 0)
-                pageSize = 10;
-            if (pageIndex < 0)
-                pageIndex = 0;
+            if (!string.IsNullOrWhiteSpace(search.SearchTerm))
+            {
+                var term = search.SearchTerm.Trim();
+                query = query.Where(x =>
+                    x.SerialNumber.Contains(term) ||
+                    x.ScratchedCode.Contains(term) ||
+                    x.Product.ProductName.Contains(term) ||
+                    x.CardRegistrations.Any(r => r.CustomerPhoneNumber.Contains(term)));
+            }
 
-            var total = await query.CountAsync();
+            if (search.RegisteredFrom.HasValue || search.RegisteredTo.HasValue)
+            {
+                var from = search.RegisteredFrom ?? DateTime.MinValue;
+                var to = search.RegisteredTo?.Date.AddDays(1) ?? DateTime.MaxValue;
+                query = query.Where(x => x.CardRegistrations.Any(r => r.CreatedAt >= from && r.CreatedAt < to));
+            }
+
+            var today = DateTime.Today;
+            var filtered = query.Select(x => new
+            {
+                x.WarrantyCardID,
+                x.SerialNumber,
+                x.ScratchedCode,
+                ProductName = x.Product.ProductName,
+                x.IsRegistered,
+                x.ValidityMonths,
+                RegisteredAt = x.CardRegistrations.Select(r => (DateTime?)r.CreatedAt).Min()
+            });
+
+            var needsValidity = !string.IsNullOrWhiteSpace(search.ValidityPreset) ||
+                search.RemainingDaysFrom.HasValue ||
+                search.RemainingDaysTo.HasValue;
+
+            if (needsValidity)
+            {
+                filtered = filtered.Where(x => x.IsRegistered && x.RegisteredAt != null);
+                if (search.ValidityPreset == "expired")
+                    filtered = filtered.Where(x => EF.Functions.DateDiffDay(today, x.RegisteredAt!.Value.AddMonths(x.ValidityMonths)) < 0);
+                else if (search.ValidityPreset == "d10")
+                    filtered = filtered.Where(x =>
+                        EF.Functions.DateDiffDay(today, x.RegisteredAt!.Value.AddMonths(x.ValidityMonths)) >= 0 &&
+                        EF.Functions.DateDiffDay(today, x.RegisteredAt!.Value.AddMonths(x.ValidityMonths)) <= 10);
+                else if (search.ValidityPreset == "d30")
+                    filtered = filtered.Where(x =>
+                        EF.Functions.DateDiffDay(today, x.RegisteredAt!.Value.AddMonths(x.ValidityMonths)) >= 0 &&
+                        EF.Functions.DateDiffDay(today, x.RegisteredAt!.Value.AddMonths(x.ValidityMonths)) <= 30);
+
+                if (search.RemainingDaysFrom.HasValue)
+                {
+                    var fromDays = search.RemainingDaysFrom.Value;
+                    filtered = filtered.Where(x =>
+                        EF.Functions.DateDiffDay(today, x.RegisteredAt!.Value.AddMonths(x.ValidityMonths)) >= fromDays);
+                }
+                if (search.RemainingDaysTo.HasValue)
+                {
+                    var toDays = search.RemainingDaysTo.Value;
+                    filtered = filtered.Where(x =>
+                        EF.Functions.DateDiffDay(today, x.RegisteredAt!.Value.AddMonths(x.ValidityMonths)) <= toDays);
+                }
+            }
+
+            var pageSize = search.PageSize <= 0 ? 10 : search.PageSize;
+            var pageIndex = search.PageIndex < 0 ? 0 : search.PageIndex;
+
+            var total = await filtered.CountAsync();
             var pageCount = pageSize == 0 ? 1 : (int)Math.Ceiling(total / (double)pageSize);
             if (pageCount > 0 && pageIndex >= pageCount)
                 pageIndex = pageCount - 1;
+            search.PageIndex = pageIndex;
 
-            var items = await query
+            var rows = await filtered
                 .OrderByDescending(x => x.WarrantyCardID)
                 .Skip(pageIndex * pageSize)
                 .Take(pageSize)
@@ -73,13 +135,22 @@ namespace DataAccess.Repositories
                     WarrantyCardID = x.WarrantyCardID,
                     SerialNumber = x.SerialNumber,
                     ScratchedCode = x.ScratchedCode,
-                    ProductName = x.Product.ProductName,
+                    ProductName = x.ProductName,
                     IsRegistered = x.IsRegistered,
-                    ValidityMonths = x.ValidityMonths
+                    ValidityMonths = x.ValidityMonths,
+                    RegisteredAt = x.RegisteredAt
                 })
                 .ToListAsync();
 
-            return (items, total);
+            foreach (var item in rows)
+            {
+                item.RemainingDays = WarrantyValidity.RemainingDays(item.RegisteredAt, item.ValidityMonths, today);
+                item.RemainingText = item.IsRegistered
+                    ? WarrantyValidity.Format(item.RemainingDays)
+                    : "شروع‌نشده";
+            }
+
+            return (rows, total);
         }
     }
 }

@@ -1,6 +1,10 @@
+@using DomainModel.Models
+@using DomainModel.ViewModels.Reward
 @{
     ViewData["Title"] = "مدیریت پاداش";
     Layout = "_AdminLayout";
+    var statuses = ViewBag.Statuses as IEnumerable<RewardDeliveryStatus> ?? Enumerable.Empty<RewardDeliveryStatus>();
+    var catalogs = ViewBag.Catalogs as IEnumerable<RewardCatalogListItem> ?? Enumerable.Empty<RewardCatalogListItem>();
 }
 
 <div class="row column_title">
@@ -28,12 +32,27 @@
                 <button class="main_bt" id="btnAddCatalog"><i class="fa fa-plus ms-1"></i> افزودن پاداش</button>
             </div>
             <div class="padding_infor_info">
-                <div class="table_filter_bar">
-                    <input id="catalogSearch" class="form-control" placeholder="جستجوی عنوان پاداش..." />
-                    <button type="button" class="main_bt" id="btnSearchCatalog">
-                        <i class="fa-solid fa-magnifying-glass"></i>
-                    </button>
-                </div>
+                <form class="table_filter_bar" data-filter-bar data-url="/RewardManagement/CatalogList" data-target="#CatalogGrid">
+                    @{
+                        ViewData["SearchPlaceholder"] = "جستجوی عنوان پاداش...";
+                        ViewData["SearchName"] = "Title";
+                    }
+                    @await Html.PartialAsync("_FilterSearchReset")
+                    <select name="IsCashReward" class="form-select">
+                        <option value="">نوع پاداش</option>
+                        <option value="true">نقدی</option>
+                        <option value="false">غیرنقدی</option>
+                    </select>
+                    <select name="IsActive" class="form-select">
+                        <option value="">وضعیت</option>
+                        <option value="true">فعال</option>
+                        <option value="false">غیرفعال</option>
+                    </select>
+                    <div class="filter-range">
+                        <input type="number" name="RequiredFrom" class="form-control" placeholder="حد نصاب از" />
+                        <input type="number" name="RequiredTo" class="form-control" placeholder="حد نصاب تا" />
+                    </div>
+                </form>
                 <form id="frmAntiForgery">
                     @Html.AntiForgeryToken()
                 </form>
@@ -48,12 +67,29 @@
                 <div class="heading1 margin_0"><h2>درخواست‌های پاداش</h2></div>
             </div>
             <div class="padding_infor_info">
-                <div class="table_filter_bar">
-                    <input id="requestSearch" class="form-control" placeholder="جستجوی کاربر یا پاداش..." />
-                    <button type="button" class="main_bt" id="btnSearchRequest">
-                        <i class="fa-solid fa-magnifying-glass"></i>
-                    </button>
-                </div>
+                <form class="table_filter_bar" data-filter-bar data-url="/RewardManagement/RequestList" data-target="#RequestGrid">
+                    @{
+                        ViewData["SearchPlaceholder"] = "جستجوی کاربر یا پاداش...";
+                        ViewData["SearchName"] = "SearchTerm";
+                    }
+                    @await Html.PartialAsync("_FilterSearchReset")
+                    <select name="RewardDeliveryStatusID" class="form-select">
+                        <option value="">همه وضعیت‌ها</option>
+                        @foreach (var status in statuses)
+                        {
+                            <option value="@status.RewardDeliveryStatusID">@status.Title</option>
+                        }
+                    </select>
+                    <select name="RewardCatalogID" class="form-select">
+                        <option value="">همه پاداش‌ها</option>
+                        @foreach (var cat in catalogs)
+                        {
+                            <option value="@cat.RewardCatalogID">@cat.Title</option>
+                        }
+                    </select>
+                    <input type="text" name="RequestFromJalali" class="form-control js-jalali" placeholder="از تاریخ" autocomplete="off" />
+                    <input type="text" name="RequestToJalali" class="form-control js-jalali" placeholder="تا تاریخ" autocomplete="off" />
+                </form>
                 <div id="RequestGrid"></div>
             </div>
         </div>
@@ -101,40 +137,16 @@
         }
 
         function catalogListUrl(page) {
-            const title = $("#catalogSearch").val();
-            return "/RewardManagement/CatalogList?title=" + encodeURIComponent(title || "") + "&pageIndex=" + (page ?? catalogPage) + "&ts=" + new Date().getTime();
-        }
-
-        function requestListUrl(page) {
-            const term = $("#requestSearch").val();
-            return "/RewardManagement/RequestList?searchTerm=" + encodeURIComponent(term || "") + "&pageIndex=" + (page ?? requestPage) + "&ts=" + new Date().getTime();
+            return "/RewardManagement/CatalogList";
         }
 
         function LoadCatalogs(page) {
-            if (typeof page !== "number") {
-                const fromPager = parseInt($("#CatalogGrid .crud-pagination").attr("data-page-index"), 10);
-                page = Number.isNaN(fromPager) ? catalogPage : fromPager;
-            }
-            catalogPage = page;
-            $("#CatalogGrid").load(catalogListUrl(catalogPage));
+            applyTableFilter($("#CatalogGrid").closest(".padding_infor_info").find("[data-filter-bar]"), page);
         }
 
         function LoadRequests(page) {
-            if (typeof page !== "number") {
-                const fromPager = parseInt($("#RequestGrid .crud-pagination").attr("data-page-index"), 10);
-                page = Number.isNaN(fromPager) ? requestPage : fromPager;
-            }
-            requestPage = page;
-            $("#RequestGrid").load(requestListUrl(requestPage));
+            applyTableFilter($("#RequestGrid").closest(".padding_infor_info").find("[data-filter-bar]"), page);
         }
-
-        $("#btnSearchCatalog").on("click", function () {
-            LoadCatalogs(0);
-        });
-
-        $("#btnSearchRequest").on("click", function () {
-            LoadRequests(0);
-        });
 
         $(document).on("click", "#btnAddCatalog", function () {
             $.get("/RewardManagement/Create", function (result) {

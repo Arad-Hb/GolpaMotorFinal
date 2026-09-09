@@ -22,20 +22,30 @@
         </button>
     </div>
     <div class="padding_infor_info">
-        <div class="table_filter_bar">
             @{
-                var sbModel = ViewData["SearchBoxModel"] as SearchBoxViewModel;
-                if (sbModel != null)
+                var filterPartial = ViewData["FilterPartial"] as string;
+                if (!string.IsNullOrWhiteSpace(filterPartial))
                 {
-                    @await Component.InvokeAsync("SearchBox", sbModel)
+                    @await Html.PartialAsync(filterPartial)
+                }
+                else
+                {
+                    <div class="table_filter_bar">
+                        @{
+                            var sbModel = ViewData["SearchBoxModel"] as SearchBoxViewModel;
+                            if (sbModel != null)
+                            {
+                                @await Component.InvokeAsync("SearchBox", sbModel)
+                            }
+                        }
+                        <input type="search"
+                               class="form-control table-filter-input"
+                               data-table-target="#@Model.GridId"
+                               placeholder="جستجو در جدول..."
+                               autocomplete="off" />
+                    </div>
                 }
             }
-            <input type="search"
-                   class="form-control table-filter-input"
-                   data-table-target="#@Model.GridId"
-                   placeholder="جستجو در جدول..."
-                   autocomplete="off" />
-        </div>
 
         <div class="table_section">
             <div id="@Model.GridId">

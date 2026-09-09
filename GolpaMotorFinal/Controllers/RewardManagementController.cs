@@ -19,21 +19,23 @@ namespace GolpaMotorFinal.Controllers
             this.requestRepo = requestRepo;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
+            ViewBag.Catalogs = await catalogRepo.GetAll();
+            ViewBag.Statuses = await requestRepo.GetStatuses();
             return View();
         }
 
         [HttpGet]
-        public IActionResult CatalogList(string? title, int pageIndex = 0)
+        public IActionResult CatalogList(RewardCatalogSearchModel sm)
         {
-            return ViewComponent("RewardCatalogList", new { title, pageIndex });
+            return ViewComponent("RewardCatalogList", new { sm });
         }
 
         [HttpGet]
-        public IActionResult RequestList(string? searchTerm, int? statusId, int pageIndex = 0)
+        public IActionResult RequestList(RewardRequestSearchModel sm)
         {
-            return ViewComponent("RewardRequestList", new { searchTerm, statusId, pageIndex });
+            return ViewComponent("RewardRequestList", new { sm });
         }
 
         [HttpGet]

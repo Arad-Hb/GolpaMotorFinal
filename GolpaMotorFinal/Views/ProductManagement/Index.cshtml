@@ -57,13 +57,30 @@
         <button class="main_bt" id="btnAdd"><i class="fa fa-plus ms-1"></i> افزودن محصول</button>
     </div>
     <div class="padding_infor_info">
-        <div class="table_filter_bar">
-            <input id="productSearch" class="form-control" placeholder="جستجوی نام محصول..." />
-            <button type="button" class="main_bt" id="btnSearchProduct">
-                <i class="fa-solid fa-magnifying-glass"></i>
-            </button>
-            <input type="search" class="form-control table-filter-input" data-table-target="#ProductGrid" placeholder="فیلتر ردیف‌های جدول..." autocomplete="off" />
-        </div>
+        <form class="table_filter_bar" data-filter-bar data-url="/ProductManagement/ProductList" data-target="#ProductGrid">
+            @{
+                ViewData["SearchPlaceholder"] = "جستجوی نام محصول...";
+                ViewData["SearchName"] = "ProductName";
+            }
+            @await Html.PartialAsync("_FilterSearchReset")
+            <select name="IsAvailable" class="form-select">
+                <option value="">وضعیت موجودی</option>
+                <option value="true">موجود</option>
+                <option value="false">ناموجود</option>
+            </select>
+            <div class="filter-range">
+                <input type="number" name="RegisteredFrom" class="form-control" placeholder="ثبت‌شده از" />
+                <input type="number" name="RegisteredTo" class="form-control" placeholder="ثبت‌شده تا" />
+            </div>
+            <div class="filter-range">
+                <input type="number" name="RemainingFrom" class="form-control" placeholder="باقی‌مانده از" />
+                <input type="number" name="RemainingTo" class="form-control" placeholder="باقی‌مانده تا" />
+            </div>
+            <div class="filter-range">
+                <input type="number" name="PointsFrom" class="form-control" placeholder="امتیاز از" />
+                <input type="number" name="PointsTo" class="form-control" placeholder="امتیاز تا" />
+            </div>
+        </form>
         <form id="frmAntiForgery">
             @Html.AntiForgeryToken()
         </form>
@@ -105,22 +122,12 @@
         }
 
         function productListUrl(page) {
-            const name = $("#productSearch").val();
-            return "/ProductManagement/ProductList?productName=" + encodeURIComponent(name || "") + "&pageIndex=" + (page ?? currentPage) + "&ts=" + new Date().getTime();
+            return "/ProductManagement/ProductList";
         }
 
         function LoadProducts(page) {
-            if (typeof page !== "number") {
-                const fromPager = parseInt($("#ProductGrid .crud-pagination").attr("data-page-index"), 10);
-                page = Number.isNaN(fromPager) ? currentPage : fromPager;
-            }
-            currentPage = page;
-            $("#ProductGrid").load(productListUrl(currentPage));
+            applyTableFilter($("#ProductGrid").closest(".padding_infor_info").find("[data-filter-bar]"), page);
         }
-
-        $("#btnSearchProduct").on("click", function () {
-            LoadProducts(0);
-        });
 
         $(document).on("click", "#btnAdd", function () {
             $.get("/ProductManagement/Create", function (result) {

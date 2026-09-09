@@ -18,13 +18,17 @@ namespace GolpaMotorFinal.Controllers
         private readonly SignInManager<ApplicationUser> signInManager;
         private readonly IFileManager fileManager;
 
+        private readonly IReportRepository reports;
+
         public AdminController(
             IProductRepository products,
+            IReportRepository reports,
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
             IFileManager fileManager)
         {
             this.products = products;
+            this.reports = reports;
             this.userManager = userManager;
             this.signInManager = signInManager;
             this.fileManager = fileManager;
@@ -36,6 +40,8 @@ namespace GolpaMotorFinal.Controllers
             var pageSize = PaginationViewModel.DefaultPageSize;
             var page = await products.GetTopRegistrarsPage(pageIndex, pageSize);
             ViewBag.Stats = stats;
+            ViewBag.TopProducts = await reports.GetTopProducts(5);
+            ViewBag.TopRewards = await reports.GetTopRewards(5);
             ViewBag.TopRegistrars = new TopRegistrarsPageViewModel
             {
                 Items = page.Items,

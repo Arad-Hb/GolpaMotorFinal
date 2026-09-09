@@ -22,5 +22,6 @@ namespace DataAccess.Services
         Task RemoveImage(string userID);
         Task<List<Province>> GetProvinces();
         Task<List<City>> GetCitiesByProvinceId(int provinceId);
+        Task<List<CustomerType>> GetCustomerTypes();
     }
 }

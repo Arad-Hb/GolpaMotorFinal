@@ -1,5 +1,6 @@
 using DataAccess.Services;
 using DomainModel.ViewModels.Reward;
+using GolpaMotorFinal.Models.ViewModels;
 using GolpaMotorFinal.Models.ViewModels.RewardManagement;
 using Microsoft.AspNetCore.Mvc;
 
@@ -15,22 +16,18 @@ namespace GolpaMotorFinal.ViewComponents
             this.repo = repo;
         }
 
-        public async Task<IViewComponentResult> InvokeAsync(string? title = null, int pageIndex = 0)
+        public async Task<IViewComponentResult> InvokeAsync(RewardCatalogSearchModel? sm = null)
         {
-            var search = new RewardCatalogSearchModel
-            {
-                Title = title,
-                PageIndex = pageIndex,
-                PageSize = 10
-            };
-            var result = await repo.Search(search);
+            sm ??= new RewardCatalogSearchModel();
+            sm.PageSize = PaginationViewModel.DefaultPageSize;
+            var result = await repo.Search(sm);
             var vm = new RewardCatalogListPageViewModel
             {
                 Items = result.CatalogList,
                 PageIndex = result.sm.PageIndex,
                 PageCount = result.sm.PageCount,
                 RecordCount = result.sm.RecordCount,
-                Title = title
+                Filter = result.sm ?? sm
             };
             return View(vm);
         }

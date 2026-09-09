@@ -19,6 +19,28 @@ namespace DomainModel.ViewModels.User
         public string? SearchTerm { get; set; }
 
         public bool? IsActive { get; set; }
-        
+
+        public int? CustomerTypeID { get; set; }
+
+        public int? ProvinceID { get; set; }
+
+        public int? CityID { get; set; }
+
+        public int? PointsFrom { get; set; }
+
+        public int? PointsTo { get; set; }
+
+        public bool? IsEligibleForReward { get; set; }
+
+        public bool? HasReceivedReward { get; set; }
+
+        public DateTime? CardFrom { get; set; }
+
+        public DateTime? CardTo { get; set; }
+
+        public string? CardFromJalali { get; set; }
+
+        public string? CardToJalali { get; set; }
+
     }
 }

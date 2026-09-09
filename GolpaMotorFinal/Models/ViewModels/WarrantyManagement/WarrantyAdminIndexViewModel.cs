@@ -13,6 +13,12 @@ namespace GolpaMotorFinal.Models.ViewModels.WarrantyManagement
         public List<ProductListItem> Products { get; set; } = new();
         public long? ProductID { get; set; }
         public bool? IsRegistered { get; set; }
+        public string? SearchTerm { get; set; }
+        public string? ValidityPreset { get; set; }
+        public int? RemainingDaysFrom { get; set; }
+        public int? RemainingDaysTo { get; set; }
+        public string? RegisteredFromJalali { get; set; }
+        public string? RegisteredToJalali { get; set; }
         public int GenerateCount { get; set; } = 5;
         public ProductStatistics? Stats { get; set; }
         public WarrantyExcelImportResult? LastImport { get; set; }

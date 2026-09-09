@@ -1,8 +1,18 @@
 @model GolpaMotorFinal.Models.ViewModels.RewardManagement.RewardRequestListPageViewModel
 @using DomainModel.Models
+@using GolpaMotorFinal.Helpers
 @{
+    var f = Model.Filter ?? new DomainModel.ViewModels.Reward.RewardRequestSearchModel();
     var rowNumber = Model.PageIndex * PaginationViewModel.DefaultPageSize;
-    var listUrl = Url.Action("RequestList", "RewardManagement", new { searchTerm = Model.SearchTerm, statusId = Model.StatusId }) ?? "/RewardManagement/RequestList";
+    var listUrl = FilterUrl.Combine("/RewardManagement/RequestList", new
+    {
+        f.SearchTerm,
+        statusId = f.RewardDeliveryStatusID,
+        RewardDeliveryStatusID = f.RewardDeliveryStatusID,
+        f.RewardCatalogID,
+        f.RequestFromJalali,
+        f.RequestToJalali
+    });
 }
 
 <div class="table-responsive">

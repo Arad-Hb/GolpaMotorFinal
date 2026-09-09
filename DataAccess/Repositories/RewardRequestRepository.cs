@@ -84,6 +84,18 @@ namespace DataAccess.Repositories
                     (x.User.PhoneNumber != null && x.User.PhoneNumber.Contains(term)));
             }
 
+            if (searchModel.RewardCatalogID.HasValue && searchModel.RewardCatalogID.Value > 0)
+                query = query.Where(x => x.RewardCatalogID == searchModel.RewardCatalogID.Value);
+
+            if (searchModel.RequestFrom.HasValue)
+                query = query.Where(x => x.RequestDate != null && x.RequestDate >= searchModel.RequestFrom.Value);
+
+            if (searchModel.RequestTo.HasValue)
+            {
+                var to = searchModel.RequestTo.Value.Date.AddDays(1);
+                query = query.Where(x => x.RequestDate != null && x.RequestDate < to);
+            }
+
             var totalCount = await query.CountAsync();
             var pageIndex = searchModel.PageIndex < 0 ? 0 : searchModel.PageIndex;
             var pageSize = searchModel.PageSize <= 0 ? 10 : searchModel.PageSize;
@@ -108,6 +120,11 @@ namespace DataAccess.Repositories
 
             var pendingStatusId = await RewardEligibilityHelper.GetStatusIdAsync(db, RewardStatusTitles.Pending);
             return await ComputeAvailablePointsAsync(userId, user.RemainedPoints ?? 0, pendingStatusId);
+        }
+
+        public async Task<List<RewardDeliveryStatus>> GetStatuses()
+        {
+            return await db.RewardDeliveryStatuses.OrderBy(x => x.RewardDeliveryStatusID).ToListAsync();
         }
 
         public async Task<OperationResult> CreateRequest(string userId, int rewardCatalogId)

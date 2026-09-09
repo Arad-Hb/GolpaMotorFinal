@@ -1,5 +1,5 @@
-using DataAccess.Services;
 using DomainModel.ViewModels.User;
+using GolpaMotorFinal.Helpers;
 using GolpaMotorFinal.Models.ViewModels;
 using GolpaMotorFinal.Models.ViewModels.UserManagement;
 using Microsoft.AspNetCore.Mvc;
@@ -9,22 +9,18 @@ namespace GolpaMotorFinal.ViewComponents
     [ViewComponent(Name = "UserList")]
     public class UserListViewComponent : ViewComponent
     {
-        private readonly IUserRepository repo;
+        private readonly DataAccess.Services.IUserRepository repo;
 
-        public UserListViewComponent(IUserRepository repo)
+        public UserListViewComponent(DataAccess.Services.IUserRepository repo)
         {
             this.repo = repo;
         }
 
-        public async Task<IViewComponentResult> InvokeAsync(string? searchTerm = null, int pageIndex = 0)
+        public async Task<IViewComponentResult> InvokeAsync(UserSearchModel? sm = null)
         {
-            var result = await repo.Search(new UserSearchModel
-            {
-                SearchTerm = searchTerm,
-                PhoneNumber = string.IsNullOrWhiteSpace(searchTerm) ? null : searchTerm,
-                PageIndex = pageIndex,
-                PageSize = PaginationViewModel.DefaultPageSize
-            });
+            sm ??= new UserSearchModel();
+            sm.PageSize = PaginationViewModel.DefaultPageSize;
+            var result = await repo.Search(sm);
 
             var items = (result.userList ?? new List<UserListItem>()).Select(u => new UserListItemViewModel
             {
@@ -41,14 +37,14 @@ namespace GolpaMotorFinal.ViewComponents
                 City = u.City ?? string.Empty
             }).ToList();
 
-            var sm = result.sm ?? new UserSearchModel();
+            var filter = result.sm ?? sm;
             return View(new UserListPageViewModel
             {
                 Items = items,
-                PageIndex = sm.PageIndex,
-                PageCount = sm.PageCount,
-                RecordCount = sm.RecordCount,
-                SearchTerm = searchTerm
+                PageIndex = filter.PageIndex,
+                PageCount = filter.PageCount,
+                RecordCount = filter.RecordCount,
+                Filter = filter
             });
         }
     }

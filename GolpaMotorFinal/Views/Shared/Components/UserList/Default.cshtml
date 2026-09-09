@@ -1,8 +1,21 @@
 ﻿@model GolpaMotorFinal.Models.ViewModels.UserManagement.UserListPageViewModel
 @using GolpaMotorFinal.Helpers
 @{
+    var f = Model.Filter ?? new DomainModel.ViewModels.User.UserSearchModel();
     var rowNumber = Model.PageIndex * PaginationViewModel.DefaultPageSize;
-    var listUrl = Url.Action("Grid", "UserManagement", new { searchTerm = Model.SearchTerm }) ?? "/UserManagement/Grid";
+    var listUrl = FilterUrl.Combine("/UserManagement/Grid", new
+    {
+        f.SearchTerm,
+        f.CustomerTypeID,
+        f.ProvinceID,
+        f.CityID,
+        f.PointsFrom,
+        f.PointsTo,
+        f.IsEligibleForReward,
+        f.HasReceivedReward,
+        f.CardFromJalali,
+        f.CardToJalali
+    });
 }
 
 <div class="main-card">

@@ -1,0 +1,31 @@
+@model List<DomainModel.ViewModels.Reports.ProductPopularityRow>
+<div class="table-responsive">
+    <table class="table table-hover align-middle">
+        <thead class="table-dark">
+            <tr>
+                <th>محصول</th>
+                <th class="table-num">سال</th>
+                <th class="table-num">ماه</th>
+                <th class="table-num">تعداد ثبت</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.Any())
+            {
+                foreach (var row in Model)
+                {
+                    <tr>
+                        <td>@row.ProductName</td>
+                        <td class="table-num">@row.JalaliYear</td>
+                        <td class="table-num">@row.JalaliMonth</td>
+                        <td class="table-num">@row.Count</td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr><td colspan="4" class="text-center text-muted">داده‌ای یافت نشد</td></tr>
+            }
+        </tbody>
+    </table>
+</div>

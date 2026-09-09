@@ -1,6 +1,7 @@
 ﻿using DataAccess.Repositories;
 using DataAccess.Services;
 using DomainModel.ViewModels.User;
+using Framework.Common;
 using GolpaMotorFinal.FrameworkUI.Services;
 using GolpaMotorFinal.Models.ViewModels.Account;
 using GolpaMotorFinal.Models.ViewModels.UserManagement;
@@ -31,16 +32,33 @@ namespace GolpaMotorFinal.Controllers
             this.rewardRequests = rewardRequests;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
+            ViewBag.CustomerTypes = await repo.GetCustomerTypes();
+            ViewBag.Provinces = await repo.GetProvinces();
             return View();
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Search([FromForm(Name = "Search.SearchTerm")] string? searchTerm)
+        public IActionResult Search(UserSearchModel sm)
         {
-            return ViewComponent("UserList", new { searchTerm, pageIndex = 0 });
+            BindUserFilter(sm);
+            return ViewComponent("UserList", new { sm });
+        }
+
+        [HttpGet]
+        public IActionResult Grid(UserSearchModel sm)
+        {
+            BindUserFilter(sm);
+            return ViewComponent("UserList", new { sm });
+        }
+
+        private static void BindUserFilter(UserSearchModel sm)
+        {
+            sm ??= new UserSearchModel();
+            sm.CardFrom = PersianDate.ParseOrNull(sm.CardFromJalali);
+            sm.CardTo = PersianDate.ParseOrNull(sm.CardToJalali);
         }
 
         [HttpGet]
@@ -117,9 +135,10 @@ namespace GolpaMotorFinal.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> UserReportGrid(int pageIndex = 0)
+        public async Task<IActionResult> UserReportGrid(UserSearchModel sm)
         {
-            var page = await service.GetUserReportPage(pageIndex);
+            BindUserFilter(sm);
+            var page = await service.GetUserReportPage(sm);
             var grid = AttachUserReportPager(service.BuildUserReportGrid(page.Users), page.PageIndex, page.PageCount, page.RecordCount);
             return ViewComponent("CrudGrid", new { model = grid });
         }
@@ -415,18 +434,9 @@ namespace GolpaMotorFinal.Controllers
         }
 
         [HttpGet]
-        public IActionResult Grid(string? searchTerm, int pageIndex = 0)
+        public IActionResult UserReport()
         {
-            return ViewComponent("UserList", new { searchTerm, pageIndex });
-        }
-
-
-        [HttpGet]
-        public async Task<IActionResult> UserReport(int pageIndex = 0)
-        {
-            var page = await service.GetUserReportPage(pageIndex);
-            var grid = AttachUserReportPager(service.BuildUserReportGrid(page.Users), page.PageIndex, page.PageCount, page.RecordCount);
-            return View(grid);
+            return RedirectToAction("Index", "Reports");
         }
 
         private static CrudGridViewModel AttachUserReportPager(CrudGridViewModel grid, int pageIndex, int pageCount, int recordCount)

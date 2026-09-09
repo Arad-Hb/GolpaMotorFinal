@@ -11,5 +11,9 @@ namespace DomainModel.ViewModels.Reward
         public bool? IsActive { get; set; }
 
         public bool? IsCashReward { get; set; }
+
+        public int? RequiredFrom { get; set; }
+
+        public int? RequiredTo { get; set; }
     }
 }

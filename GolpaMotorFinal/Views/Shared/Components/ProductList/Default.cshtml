@@ -1,8 +1,19 @@
 ﻿@model GolpaMotorFinal.Models.ViewModels.ProductManagement.ProductListPageViewModel
 @using GolpaMotorFinal.Helpers
 @{
+    var f = Model.Filter ?? new DomainModel.ViewModels.Product.ProductSearchModel();
     var rowNumber = Model.PageIndex * PaginationViewModel.DefaultPageSize;
-    var listUrl = Url.Action("ProductList", "ProductManagement", new { productName = Model.ProductName }) ?? "/ProductManagement/ProductList";
+    var listUrl = FilterUrl.Combine("/ProductManagement/ProductList", new
+    {
+        f.ProductName,
+        f.IsAvailable,
+        f.PointsFrom,
+        f.PointsTo,
+        f.RegisteredFrom,
+        f.RegisteredTo,
+        f.RemainingFrom,
+        f.RemainingTo
+    });
 }
 
 <div class="table-responsive">

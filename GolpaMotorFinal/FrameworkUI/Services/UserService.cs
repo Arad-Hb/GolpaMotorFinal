@@ -192,14 +192,12 @@ namespace GolpaMotorFinal.FrameworkUI.Services
             .ToList();
         }
 
-        public async Task<(List<UserReportViewModel> Users, int PageIndex, int PageCount, int RecordCount)> GetUserReportPage(int pageIndex)
+        public async Task<(List<UserReportViewModel> Users, int PageIndex, int PageCount, int RecordCount)> GetUserReportPage(UserSearchModel? sm = null)
         {
-            var result = await repo.Search(new UserSearchModel
-            {
-                PageIndex = pageIndex,
-                PageSize = PaginationViewModel.DefaultPageSize
-            });
-            var sm = result.sm ?? new UserSearchModel();
+            sm ??= new UserSearchModel();
+            sm.PageSize = PaginationViewModel.DefaultPageSize;
+            var result = await repo.Search(sm);
+            var page = result.sm ?? sm;
             var users = (result.userList ?? new List<UserListItem>()).Select(u => new UserReportViewModel
             {
                 UserID = u.UserID,
@@ -215,7 +213,7 @@ namespace GolpaMotorFinal.FrameworkUI.Services
                 City = u.City ?? string.Empty
             }).ToList();
 
-            return (users, sm.PageIndex, sm.PageCount, sm.RecordCount);
+            return (users, page.PageIndex, page.PageCount, page.RecordCount);
         }
 
         public async Task<MergeAccountsViewModel> GetUserMergeAccounts(string userID)

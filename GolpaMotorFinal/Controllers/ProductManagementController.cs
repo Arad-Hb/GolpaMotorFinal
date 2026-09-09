@@ -24,9 +24,9 @@ namespace GolpaMotorFinal.Controllers
         }
 
         [HttpGet]
-        public IActionResult ProductList(string? productName, int pageIndex = 0)
+        public IActionResult ProductList(ProductSearchModel sm)
         {
-            return ViewComponent("ProductList", new { productName, pageIndex });
+            return ViewComponent("ProductList", new { sm });
         }
 
         [HttpGet]

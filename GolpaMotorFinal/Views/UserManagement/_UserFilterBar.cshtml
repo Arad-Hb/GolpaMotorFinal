@@ -1,0 +1,45 @@
+@using DomainModel.Models
+@{
+    var types = ViewBag.CustomerTypes as IEnumerable<CustomerType> ?? Enumerable.Empty<CustomerType>();
+    var provinces = ViewBag.Provinces as IEnumerable<Province> ?? Enumerable.Empty<Province>();
+}
+<form class="table_filter_bar" data-filter-bar data-url="@(ViewData["FilterUrl"] as string ?? "/UserManagement/Grid")" data-target="@(ViewData["FilterTarget"] as string ?? "#UserGrid")">
+    @{
+        ViewData["SearchPlaceholder"] = "نام، فامیلی یا موبایل";
+        ViewData["SearchName"] = "SearchTerm";
+    }
+    @await Html.PartialAsync("_FilterSearchReset")
+    <select name="CustomerTypeID" class="form-select">
+        <option value="">همه نقش‌ها</option>
+        @foreach (var type in types)
+        {
+            <option value="@type.CustomerTypeID">@type.Title</option>
+        }
+    </select>
+    <select name="ProvinceID" class="form-select">
+        <option value="">همه استان‌ها</option>
+        @foreach (var p in provinces)
+        {
+            <option value="@p.ProvinceID">@p.Name</option>
+        }
+    </select>
+    <select name="CityID" class="form-select">
+        <option value="">همه شهرها</option>
+    </select>
+    <div class="filter-range">
+        <input type="number" name="PointsFrom" class="form-control" placeholder="امتیاز از" />
+        <input type="number" name="PointsTo" class="form-control" placeholder="امتیاز تا" />
+    </div>
+    <select name="IsEligibleForReward" class="form-select">
+        <option value="">واجد پاداش</option>
+        <option value="true">بله</option>
+        <option value="false">خیر</option>
+    </select>
+    <select name="HasReceivedReward" class="form-select">
+        <option value="">پاداش گرفته</option>
+        <option value="true">بله</option>
+        <option value="false">خیر</option>
+    </select>
+    <input type="text" name="CardFromJalali" class="form-control js-jalali" placeholder="ثبت کارت از" autocomplete="off" />
+    <input type="text" name="CardToJalali" class="form-control js-jalali" placeholder="ثبت کارت تا" autocomplete="off" />
+</form>
