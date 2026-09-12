@@ -87,8 +87,14 @@
                             <option value="@cat.RewardCatalogID">@cat.Title</option>
                         }
                     </select>
-                    <input type="text" name="RequestFromJalali" class="form-control js-jalali" placeholder="از تاریخ" autocomplete="off" />
-                    <input type="text" name="RequestToJalali" class="form-control js-jalali" placeholder="تا تاریخ" autocomplete="off" />
+                    @{
+                        ViewData["DateFromName"] = "RequestFromJalali";
+                        ViewData["DateToName"] = "RequestToJalali";
+                        ViewData["DateEmptyLabel"] = "تاریخ درخواست";
+                        ViewData["DateFromPlaceholder"] = "از تاریخ";
+                        ViewData["DateToPlaceholder"] = "تا تاریخ";
+                    }
+                    @await Html.PartialAsync("_DateRangeFilter")
                 </form>
                 <div id="RequestGrid"></div>
             </div>

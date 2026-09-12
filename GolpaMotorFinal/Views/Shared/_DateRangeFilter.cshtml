@@ -1,0 +1,19 @@
+@{
+    var fromName = ViewData["DateFromName"] as string ?? "fromJalali";
+    var toName = ViewData["DateToName"] as string ?? "toJalali";
+    var emptyLabel = ViewData["DateEmptyLabel"] as string ?? "انتخاب تاریخ";
+    var fromPlaceholder = ViewData["DateFromPlaceholder"] as string ?? "از تاریخ";
+    var toPlaceholder = ViewData["DateToPlaceholder"] as string ?? "تا تاریخ";
+}
+<div class="date-range js-date-range" data-empty-label="@emptyLabel">
+    <div class="date-range__control">
+        <button type="button" class="date-range__nav" data-dir="-1" aria-label="بازه قبلی"><i class="fa-solid fa-chevron-right"></i></button>
+        <button type="button" class="date-range__trigger" aria-haspopup="dialog">
+            <i class="fa-solid fa-calendar-days"></i>
+            <span class="date-range__label">@emptyLabel</span>
+        </button>
+        <button type="button" class="date-range__nav" data-dir="1" aria-label="بازه بعدی"><i class="fa-solid fa-chevron-left"></i></button>
+    </div>
+    <input type="text" name="@fromName" class="form-control js-jalali js-date-from js-date-range-input" placeholder="@fromPlaceholder" autocomplete="off" tabindex="-1" aria-hidden="true" />
+    <input type="text" name="@toName" class="form-control js-jalali js-date-to js-date-range-input" placeholder="@toPlaceholder" autocomplete="off" tabindex="-1" aria-hidden="true" />
+</div>

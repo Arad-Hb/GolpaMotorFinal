@@ -1,5 +1,6 @@
 (function () {
     const months = ["فروردین", "اردیبهشت", "خرداد", "تیر", "مرداد", "شهریور", "مهر", "آبان", "آذر", "دی", "بهمن", "اسفند"];
+    const weekDays = ["ش", "ی", "د", "س", "چ", "پ", "ج"];
 
     function div(a, b) { return Math.trunc(a / b); }
 
@@ -64,6 +65,16 @@
 
     function pad(n) { return (n < 10 ? "0" : "") + n; }
 
+    function jalaliLeap(jy) {
+        return (((jy - 474) % 2820) + 474 + 38) * 682 % 2816 < 682;
+    }
+
+    function daysInMonth(jy, jm) {
+        if (jm <= 6) return 31;
+        if (jm <= 11) return 30;
+        return jalaliLeap(jy) ? 30 : 29;
+    }
+
     function parseJalali(val) {
         var parts = (val || "").replace(/-/g, "/").split("/");
         if (parts.length !== 3) return null;
@@ -72,23 +83,112 @@
         return { jy: y, jm: m, jd: d };
     }
 
-    function closePickers() {
-        $(".jdp-popup").remove();
+    function formatJ(j) {
+        if (!j) return "";
+        return j.jy + "/" + pad(j.jm) + "/" + pad(j.jd);
     }
 
-    function renderPicker($input) {
+    function sameDay(a, b) {
+        return a && b && a.jy === b.jy && a.jm === b.jm && a.jd === b.jd;
+    }
+
+    function jToDate(j) {
+        var g = jalaliToGregorian(j.jy, j.jm, j.jd);
+        return new Date(g.gy, g.gm - 1, g.gd);
+    }
+
+    function dateToJ(d) {
+        return gregorianToJalali(d.getFullYear(), d.getMonth() + 1, d.getDate());
+    }
+
+    function todayJ() {
+        return dateToJ(new Date());
+    }
+
+    function addDays(j, n) {
+        var d = jToDate(j);
+        d.setDate(d.getDate() + n);
+        return dateToJ(d);
+    }
+
+    function addMonths(j, n) {
+        var m = j.jm + n;
+        var y = j.jy;
+        while (m < 1) { m += 12; y--; }
+        while (m > 12) { m -= 12; y++; }
+        return { jy: y, jm: m, jd: Math.min(j.jd, daysInMonth(y, m)) };
+    }
+
+    function cmpJ(a, b) {
+        if (a.jy !== b.jy) return a.jy - b.jy;
+        if (a.jm !== b.jm) return a.jm - b.jm;
+        return a.jd - b.jd;
+    }
+
+    function inRange(day, from, to) {
+        if (!from || !to) return false;
+        return cmpJ(day, from) >= 0 && cmpJ(day, to) <= 0;
+    }
+
+    function monthStartOffset(jy, jm) {
+        var gDay = jToDate({ jy: jy, jm: jm, jd: 1 }).getDay();
+        return (gDay + 1) % 7;
+    }
+
+    function getPresets() {
+        var today = todayJ();
+        var yesterday = addDays(today, -1);
+        var gDow = jToDate(today).getDay();
+        var daysSinceSat = (gDow + 1) % 7;
+        var thisWeekStart = addDays(today, -daysSinceSat);
+        var lastWeekStart = addDays(thisWeekStart, -7);
+        var lastWeekEnd = addDays(thisWeekStart, -1);
+        var prev = today.jm === 1 ? { jy: today.jy - 1, jm: 12 } : { jy: today.jy, jm: today.jm - 1 };
+        var lastMonthStart = { jy: prev.jy, jm: prev.jm, jd: 1 };
+        var lastMonthEnd = { jy: prev.jy, jm: prev.jm, jd: daysInMonth(prev.jy, prev.jm) };
+        return [
+            { key: "today", label: "امروز", from: today, to: today },
+            { key: "yesterday", label: "دیروز", from: yesterday, to: yesterday },
+            { key: "lastWeek", label: "هفته گذشته", from: lastWeekStart, to: lastWeekEnd },
+            { key: "lastMonth", label: "ماه گذشته", from: lastMonthStart, to: lastMonthEnd },
+            { key: "last3Months", label: "سه ماه گذشته", from: addMonths(today, -3), to: today },
+            { key: "lastYear", label: "یک سال گذشته", from: addMonths(today, -12), to: today }
+        ];
+    }
+
+    function presetLabelFor(from, to) {
+        if (!from || !to) return "";
+        var list = getPresets();
+        for (var i = 0; i < list.length; i++) {
+            if (sameDay(list[i].from, from) && sameDay(list[i].to, to)) return list[i].label;
+        }
+        return formatJ(from) + " – " + formatJ(to);
+    }
+
+    function closePickers() {
+        $(".jdp-popup, .date-range-popup").remove();
+        $(".date-range.is-open").removeClass("is-open");
+    }
+
+    function renderSinglePicker($input) {
         closePickers();
         var current = parseJalali($input.val());
-        var now = new Date();
-        var todayJ = gregorianToJalali(now.getFullYear(), now.getMonth() + 1, now.getDate());
-        var y = current ? current.jy : todayJ.jy;
-        var m = current ? current.jm : todayJ.jm;
+        var today = todayJ();
+        var y = current ? current.jy : today.jy;
+        var m = current ? current.jm : today.jm;
         var popup = $('<div class="jdp-popup"></div>');
         function draw() {
-            var daysInMonth = m <= 6 ? 31 : (m <= 11 ? 30 : 29);
-            var html = '<div class="jdp-head"><button type="button" class="jdp-nav" data-dir="-1">&lt;</button><span>' + months[m - 1] + " " + y + '</span><button type="button" class="jdp-nav" data-dir="1">&gt;</button></div><div class="jdp-grid">';
-            for (var d = 1; d <= daysInMonth; d++) {
-                html += '<button type="button" class="jdp-day" data-d="' + d + '">' + d + "</button>";
+            var dim = daysInMonth(y, m);
+            var offset = monthStartOffset(y, m);
+            var html = '<div class="jdp-head"><button type="button" class="jdp-nav" data-dir="-1">&lt;</button><span>' + months[m - 1] + " " + y + '</span><button type="button" class="jdp-nav" data-dir="1">&gt;</button></div>';
+            html += '<div class="jdp-week">';
+            weekDays.forEach(function (w) { html += "<span>" + w + "</span>"; });
+            html += '</div><div class="jdp-grid">';
+            for (var i = 0; i < offset; i++) html += "<span></span>";
+            for (var d = 1; d <= dim; d++) {
+                var isToday = y === today.jy && m === today.jm && d === today.jd;
+                var selected = current && current.jy === y && current.jm === m && current.jd === d;
+                html += '<button type="button" class="jdp-day' + (isToday ? " is-today" : "") + (selected ? " is-selected" : "") + '" data-d="' + d + '">' + d + "</button>";
             }
             html += "</div>";
             popup.html(html);
@@ -105,17 +205,263 @@
             draw();
         });
         popup.on("click", ".jdp-day", function () {
-            $input.val(y + "/" + pad(m) + "/" + pad(parseInt($(this).data("d"), 10))).trigger("change");
+            $input.val(formatJ({ jy: y, jm: m, jd: parseInt($(this).data("d"), 10) })).trigger("change");
             closePickers();
         });
     }
 
-    $(document).on("focus click", ".js-jalali", function (e) {
+    function emptyLabel($wrap) {
+        return $wrap.attr("data-empty-label") || "انتخاب تاریخ";
+    }
+
+    function updateTrigger($wrap) {
+        var $from = $wrap.find(".js-date-from");
+        var $to = $wrap.find(".js-date-to");
+        var from = parseJalali($from.val());
+        var to = parseJalali($to.val());
+        var text = (!from || !to) ? emptyLabel($wrap) : presetLabelFor(from, to);
+        $wrap.find(".date-range__label").text(text);
+        $wrap.toggleClass("has-value", !!(from && to));
+    }
+
+    function applyRange($wrap, from, to, triggerChange) {
+        if (from && to && cmpJ(from, to) > 0) {
+            var tmp = from;
+            from = to;
+            to = tmp;
+        }
+        $wrap.find(".js-date-from").val(from ? formatJ(from) : "");
+        $wrap.find(".js-date-to").val(to ? formatJ(to) : "");
+        updateTrigger($wrap);
+        if (triggerChange) {
+            $wrap.find(".js-date-to").trigger("change");
+        }
+    }
+
+    function calendarHtml(y, m, from, to) {
+        var today = todayJ();
+        var dim = daysInMonth(y, m);
+        var offset = monthStartOffset(y, m);
+        var html = '<div class="date-range-cal" data-y="' + y + '" data-m="' + m + '">';
+        html += '<div class="date-range-cal__head"><button type="button" class="date-range-cal__nav" data-dir="-1" aria-label="ماه قبل"><i class="fa-solid fa-chevron-right"></i></button>';
+        html += "<strong>" + months[m - 1] + " " + y + "</strong>";
+        html += '<button type="button" class="date-range-cal__nav" data-dir="1" aria-label="ماه بعد"><i class="fa-solid fa-chevron-left"></i></button></div>';
+        html += '<div class="date-range-cal__week">';
+        weekDays.forEach(function (w) { html += "<span>" + w + "</span>"; });
+        html += "</div><div class=\"date-range-cal__grid\">";
+        for (var i = 0; i < offset; i++) html += "<span class=\"date-range-cal__pad\"></span>";
+        var rangeFrom = from;
+        var rangeEnd = to;
+        if (rangeFrom && rangeEnd && cmpJ(rangeFrom, rangeEnd) > 0) {
+            var sw = rangeFrom;
+            rangeFrom = rangeEnd;
+            rangeEnd = sw;
+        }
+        for (var d = 1; d <= dim; d++) {
+            var day = { jy: y, jm: m, jd: d };
+            var cls = "date-range-cal__day";
+            if (sameDay(day, today)) cls += " is-today";
+            if (from && sameDay(day, from)) cls += " is-start";
+            if (to && sameDay(day, to)) cls += " is-end";
+            if (from && !to && sameDay(day, from)) cls += " is-end";
+            if (rangeFrom && rangeEnd && inRange(day, rangeFrom, rangeEnd)) cls += " is-in-range";
+            html += '<button type="button" class="' + cls + '" data-d="' + d + '">' + d + "</button>";
+        }
+        html += "</div></div>";
+        return html;
+    }
+
+    function nextMonth(y, m) {
+        m++;
+        if (m > 12) { m = 1; y++; }
+        return { y: y, m: m };
+    }
+
+    function prevMonth(y, m) {
+        m--;
+        if (m < 1) { m = 12; y--; }
+        return { y: y, m: m };
+    }
+
+    function openRangePopup($wrap) {
+        closePickers();
+        $wrap.addClass("is-open");
+        var from = parseJalali($wrap.find(".js-date-from").val());
+        var to = parseJalali($wrap.find(".js-date-to").val());
+        var pickStart = from;
+        var pickEnd = to;
+        var view = from || todayJ();
+        var left = { y: view.jy, m: view.jm };
+        var right = nextMonth(left.y, left.m);
+        if (to && (to.jy !== view.jy || to.jm !== view.jm)) {
+            right = { y: to.jy, m: to.jm };
+            if (right.y === left.y && right.m === left.m) right = nextMonth(left.y, left.m);
+        }
+        var popup = $('<div class="date-range-popup" dir="rtl"></div>');
+
+        function draw() {
+            var presets = getPresets();
+            var html = '<div class="date-range-popup__presets">';
+            presets.forEach(function (p) {
+                var active = pickStart && pickEnd && sameDay(p.from, pickStart) && sameDay(p.to, pickEnd);
+                html += '<button type="button" class="date-range-popup__preset' + (active ? " is-active" : "") + '" data-key="' + p.key + '">' + p.label + "</button>";
+            });
+            html += "</div>";
+            html += '<div class="date-range-popup__cals">';
+            html += calendarHtml(left.y, left.m, pickStart, pickEnd);
+            html += calendarHtml(right.y, right.m, pickStart, pickEnd);
+            html += "</div>";
+            popup.html(html);
+        }
+
+        function position() {
+            var rect = $wrap.find(".date-range__trigger")[0].getBoundingClientRect();
+            var pw = popup.outerWidth();
+            var ph = popup.outerHeight();
+            var top = rect.bottom + 8;
+            if (top + ph > window.innerHeight - 8) top = Math.max(8, rect.top - ph - 8);
+            var rightPos = window.innerWidth - rect.right;
+            if (rect.right - pw < 8) rightPos = Math.max(8, window.innerWidth - pw - 8);
+            popup.css({ top: top + "px", right: rightPos + "px", left: "auto" });
+        }
+
+        draw();
+        $("body").append(popup);
+        position();
+
+        popup.on("click", ".date-range-popup__preset", function (e) {
+            e.stopPropagation();
+            var key = $(this).data("key");
+            var p = getPresets().filter(function (x) { return x.key === key; })[0];
+            if (!p) return;
+            pickStart = p.from;
+            pickEnd = p.to;
+            left = { y: pickStart.jy, m: pickStart.jm };
+            right = { y: pickEnd.jy, m: pickEnd.jm };
+            if (right.y === left.y && right.m === left.m) right = nextMonth(left.y, left.m);
+            applyRange($wrap, pickStart, pickEnd, true);
+            closePickers();
+        });
+
+        popup.on("click", ".date-range-cal__nav", function (e) {
+            e.stopPropagation();
+            var $cal = $(this).closest(".date-range-cal");
+            var isLeft = $cal.index() === 0;
+            var dir = parseInt($(this).data("dir"), 10);
+            if (isLeft) {
+                left = dir < 0 ? prevMonth(left.y, left.m) : nextMonth(left.y, left.m);
+                var leftIdx = left.y * 12 + left.m;
+                var rightIdx = right.y * 12 + right.m;
+                if (leftIdx >= rightIdx) right = nextMonth(left.y, left.m);
+            } else {
+                right = dir < 0 ? prevMonth(right.y, right.m) : nextMonth(right.y, right.m);
+                var lIdx = left.y * 12 + left.m;
+                var rIdx = right.y * 12 + right.m;
+                if (rIdx <= lIdx) left = prevMonth(right.y, right.m);
+            }
+            draw();
+        });
+
+        popup.on("click", ".date-range-cal__day", function (e) {
+            e.stopPropagation();
+            var $cal = $(this).closest(".date-range-cal");
+            var day = { jy: parseInt($cal.data("y"), 10), jm: parseInt($cal.data("m"), 10), jd: parseInt($(this).data("d"), 10) };
+            if (!pickStart || pickEnd) {
+                pickStart = day;
+                pickEnd = null;
+                draw();
+                return;
+            }
+            pickEnd = day;
+            applyRange($wrap, pickStart, pickEnd, true);
+            closePickers();
+        });
+
+        $(window).off("resize.dateRange").on("resize.dateRange", position);
+    }
+
+    function shiftRange($wrap, dir) {
+        var from = parseJalali($wrap.find(".js-date-from").val());
+        var to = parseJalali($wrap.find(".js-date-to").val());
+        if (!from || !to) {
+            var t = todayJ();
+            applyRange($wrap, t, t, true);
+            return;
+        }
+        var span = Math.round((jToDate(to) - jToDate(from)) / 86400000) || 1;
+        applyRange($wrap, addDays(from, dir * span), addDays(to, dir * span), true);
+    }
+
+    function initDateRange($wrap) {
+        if ($wrap.data("rangeReady")) return;
+        $wrap.data("rangeReady", true);
+        $wrap.addClass("date-range");
+        var $inputs = $wrap.find("input.js-jalali");
+        if ($inputs.length < 2) return;
+        $inputs.eq(0).addClass("js-date-from js-date-range-input").attr({ tabindex: "-1", "aria-hidden": "true" });
+        $inputs.eq(1).addClass("js-date-to js-date-range-input").attr({ tabindex: "-1", "aria-hidden": "true" });
+        if (!$wrap.find(".date-range__trigger").length) {
+            $wrap.prepend(
+                '<div class="date-range__control">' +
+                '<button type="button" class="date-range__nav" data-dir="-1" aria-label="بازه قبلی"><i class="fa-solid fa-chevron-right"></i></button>' +
+                '<button type="button" class="date-range__trigger" aria-haspopup="dialog">' +
+                '<i class="fa-solid fa-calendar-days"></i>' +
+                '<span class="date-range__label"></span>' +
+                "</button>" +
+                '<button type="button" class="date-range__nav" data-dir="1" aria-label="بازه بعدی"><i class="fa-solid fa-chevron-left"></i></button>' +
+                "</div>"
+            );
+        }
+        updateTrigger($wrap);
+    }
+
+    function wrapDatePairs(root) {
+        var $root = $(root || document);
+        $root.find(".js-date-range").each(function () {
+            initDateRange($(this));
+        });
+        var leftover = $root.find("input.js-jalali").not(".js-date-range-input").get();
+        for (var i = 0; i < leftover.length - 1; i++) {
+            var $a = $(leftover[i]);
+            var $b = $(leftover[i + 1]);
+            if (!$a.length || !$b.length) continue;
+            if ($a.parent()[0] !== $b.parent()[0]) continue;
+            if ($a.closest(".date-range, .js-date-range").length) continue;
+            var $w = $('<div class="date-range js-date-range" data-empty-label="انتخاب تاریخ"></div>');
+            $a.before($w);
+            $w.append($a).append($b);
+            initDateRange($w);
+            i++;
+        }
+    }
+
+    function bootDateRanges() {
+        wrapDatePairs(document);
+    }
+    $(bootDateRanges);
+    if (document.readyState !== "loading") bootDateRanges();
+
+    $(document).on("focus click", ".js-jalali:not(.js-date-range-input)", function (e) {
         e.stopPropagation();
-        renderPicker($(this));
+        renderSinglePicker($(this));
     });
+
+    $(document).on("click", ".date-range__trigger", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var $wrap = $(this).closest(".date-range");
+        if ($wrap.hasClass("is-open")) closePickers();
+        else openRangePopup($wrap);
+    });
+
+    $(document).on("click", ".date-range__nav", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        shiftRange($(this).closest(".date-range"), parseInt($(this).data("dir"), 10));
+    });
+
     $(document).on("click", function () { closePickers(); });
-    $(document).on("click", ".jdp-popup, .js-jalali", function (e) { e.stopPropagation(); });
+    $(document).on("click", ".jdp-popup, .js-jalali, .date-range-popup, .date-range", function (e) { e.stopPropagation(); });
 
     function serializeBar($bar) {
         var data = {};
@@ -174,6 +520,7 @@
         if ($city.length) {
             $city.html('<option value="">همه شهرها</option>');
         }
+        $bar.find(".date-range").each(function () { updateTrigger($(this)); });
         applyFilter($bar, 0);
     });
 

@@ -43,8 +43,14 @@
                             <option value="@p.ProductID">@p.ProductName</option>
                         }
                     </select>
-                    <input type="text" name="fromJalali" class="form-control js-jalali" placeholder="از تاریخ" autocomplete="off" />
-                    <input type="text" name="toJalali" class="form-control js-jalali" placeholder="تا تاریخ" autocomplete="off" />
+                    @{
+                        ViewData["DateFromName"] = "fromJalali";
+                        ViewData["DateToName"] = "toJalali";
+                        ViewData["DateEmptyLabel"] = "بازه تاریخ";
+                        ViewData["DateFromPlaceholder"] = "از تاریخ";
+                        ViewData["DateToPlaceholder"] = "تا تاریخ";
+                    }
+                    @await Html.PartialAsync("_DateRangeFilter")
                     <button type="button" class="main_bt" data-filter-reset title="بازنشانی"><i class="fa-solid fa-rotate-left"></i></button>
                 </form>
                 <div id="WarrantyReportGrid"></div>
@@ -87,8 +93,14 @@
         <div class="white_shd full margin_bottom_30">
             <div class="padding_infor_info">
                 <form class="table_filter_bar" data-filter-bar data-url="/Reports/Rewards" data-target="#RewardReportGrid">
-                    <input type="text" name="fromJalali" class="form-control js-jalali" placeholder="از تاریخ" autocomplete="off" />
-                    <input type="text" name="toJalali" class="form-control js-jalali" placeholder="تا تاریخ" autocomplete="off" />
+                    @{
+                        ViewData["DateFromName"] = "fromJalali";
+                        ViewData["DateToName"] = "toJalali";
+                        ViewData["DateEmptyLabel"] = "بازه تاریخ";
+                        ViewData["DateFromPlaceholder"] = "از تاریخ";
+                        ViewData["DateToPlaceholder"] = "تا تاریخ";
+                    }
+                    @await Html.PartialAsync("_DateRangeFilter")
                     <button type="button" class="main_bt" data-filter-reset title="بازنشانی"><i class="fa-solid fa-rotate-left"></i></button>
                 </form>
                 <div id="RewardReportGrid"></div>
