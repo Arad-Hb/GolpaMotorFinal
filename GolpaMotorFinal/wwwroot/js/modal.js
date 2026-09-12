@@ -52,6 +52,7 @@ function openModal(url, title, id, idName, extra) {
 
     $.get(url, data, function (result) {
         document.getElementById("generalModalBody").innerHTML = result;
+        if (window.initAdminSelects) window.initAdminSelects(document.getElementById("generalModalBody"));
     }).fail(function () {
         document.getElementById("generalModalBody").innerHTML =
             '<div class="alert alert-danger">خطا در بارگذاری فرم</div>';
@@ -85,6 +86,7 @@ $(document).on("change", ".js-user-province", function () {
     const provinceId = $(this).val();
     const $city = $(this).closest("form").find(".js-user-city");
     $city.empty().append($("<option>").val("").text("انتخاب شهر"));
+    if (window.refreshFilterSelect) window.refreshFilterSelect($city);
     if (!provinceId) return;
 
     $.get("/UserManagement/GetCitiesByProvince", { provinceId: provinceId }, function (res) {
@@ -94,6 +96,7 @@ $(document).on("change", ".js-user-province", function () {
             const name = city.name ?? city.Name;
             $city.append($("<option>").val(id).text(name));
         });
+        if (window.refreshFilterSelect) window.refreshFilterSelect($city);
     });
 });
 

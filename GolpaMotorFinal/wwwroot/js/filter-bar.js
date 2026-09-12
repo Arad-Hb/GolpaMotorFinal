@@ -166,8 +166,8 @@
     }
 
     function closePickers() {
-        $(".jdp-popup, .date-range-popup, .num-range-popup").remove();
-        $(".date-range.is-open, .num-range.is-open").removeClass("is-open");
+        $(".jdp-popup, .date-range-popup, .num-range-popup, .filter-select-popup").remove();
+        $(".date-range.is-open, .num-range.is-open, .filter-select.is-open").removeClass("is-open");
     }
 
     function renderSinglePicker($input) {
@@ -438,6 +438,7 @@
     function bootDateRanges() {
         wrapDatePairs(document);
         wrapNumPairs(document);
+        wrapFilterSelects(document);
     }
     $(bootDateRanges);
     if (document.readyState !== "loading") bootDateRanges();
@@ -592,6 +593,111 @@
         else applyNumRange($wrap, null, to + step, true);
     }
 
+    function updateFilterSelect($wrap) {
+        var $sel = $wrap.find("select");
+        var $opt = $sel.find("option:selected");
+        if (!$opt.length) $opt = $sel.find("option").first();
+        $wrap.find(".filter-select__label").text($.trim($opt.text() || ""));
+        $wrap.toggleClass("has-value", !!$sel.val());
+    }
+
+    function initFilterSelect($select) {
+        if ($select.data("selectReady") || $select.closest(".filter-select").length) return;
+        $select.data("selectReady", true);
+        var $wrap = $('<div class="filter-select"></div>');
+        $select.before($wrap);
+        $wrap.append($select);
+        $wrap.append(
+            '<button type="button" class="filter-select__trigger" aria-haspopup="listbox">' +
+            '<span class="filter-select__label"></span>' +
+            '<i class="fa-solid fa-chevron-down"></i>' +
+            "</button>"
+        );
+        if ($select.prop("disabled")) {
+            $wrap.addClass("is-disabled").find(".filter-select__trigger").prop("disabled", true);
+        }
+        if ($select.hasClass("form-select-sm") || $select.hasClass("crud-page-size")) {
+            $wrap.addClass("filter-select--sm");
+        }
+        updateFilterSelect($wrap);
+    }
+
+    function wrapFilterSelects(root) {
+        $(root || document).find("select.form-select, select.form-control").each(function () {
+            var $select = $(this);
+            if (this.multiple || ($select.attr("size") && $select.attr("size") !== "1")) return;
+            if ($select.closest(".swal2-container, .filter-select-popup").length) return;
+            initFilterSelect($select);
+        });
+    }
+
+    window.initAdminSelects = wrapFilterSelects;
+    window.refreshFilterSelect = function (el) {
+        var $wrap = $(el).closest(".filter-select");
+        if ($wrap.length) updateFilterSelect($wrap);
+    };
+
+    if (window.MutationObserver) {
+        var selectScanQueued = false;
+        var selectObserver = new MutationObserver(function () {
+            if (selectScanQueued) return;
+            selectScanQueued = true;
+            setTimeout(function () {
+                selectScanQueued = false;
+                wrapFilterSelects(document);
+            }, 0);
+        });
+        $(function () {
+            if (document.body) {
+                selectObserver.observe(document.body, { childList: true, subtree: true });
+            }
+        });
+    }
+
+    function openFilterSelect($wrap) {
+        closePickers();
+        $wrap.addClass("is-open");
+        var $sel = $wrap.find("select");
+        var popup = $('<div class="filter-select-popup" dir="rtl" role="listbox"></div>');
+        $sel.find("option").each(function () {
+            var $opt = $(this);
+            var active = this.selected ? " is-active" : "";
+            popup.append(
+                $('<button type="button" class="filter-select-popup__opt' + active + '"></button>')
+                    .attr("data-value", $opt.attr("value") || "")
+                    .text($.trim($opt.text() || ""))
+            );
+        });
+        $("body").append(popup);
+        var minW = Math.max($wrap.outerWidth(), 160);
+        popup.css("min-width", minW + "px");
+        positionFixedPopup($wrap.find(".filter-select__trigger"), popup);
+
+        popup.on("click", ".filter-select-popup__opt", function (e) {
+            e.stopPropagation();
+            var val = $(this).attr("data-value");
+            $sel.val(val).trigger("change");
+            $wrap.removeClass("is-invalid");
+            updateFilterSelect($wrap);
+            closePickers();
+        });
+        $(window).off("resize.filterSelect").on("resize.filterSelect", function () {
+            positionFixedPopup($wrap.find(".filter-select__trigger"), popup);
+        });
+    }
+
+    $(document).on("click", ".filter-select__trigger", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var $wrap = $(this).closest(".filter-select");
+        if ($wrap.hasClass("is-open")) closePickers();
+        else openFilterSelect($wrap);
+    });
+
+    $(document).on("invalid", "select", function () {
+        $(this).closest(".filter-select").addClass("is-invalid");
+    });
+
     $(document).on("click", ".num-range__trigger", function (e) {
         e.preventDefault();
         e.stopPropagation();
@@ -626,7 +732,7 @@
     });
 
     $(document).on("click", function () { closePickers(); });
-    $(document).on("click", ".jdp-popup, .js-jalali, .date-range-popup, .date-range, .num-range-popup, .num-range", function (e) { e.stopPropagation(); });
+    $(document).on("click", ".jdp-popup, .js-jalali, .date-range-popup, .date-range, .num-range-popup, .num-range, .filter-select-popup, .filter-select", function (e) { e.stopPropagation(); });
 
     function serializeBar($bar) {
         var data = {};
@@ -646,7 +752,9 @@
         var data = serializeBar($bar);
         data.pageIndex = page || 0;
         var qs = $.param(data);
-        $(target).load(url + (url.indexOf("?") >= 0 ? "&" : "?") + qs);
+        $(target).load(url + (url.indexOf("?") >= 0 ? "&" : "?") + qs, function () {
+            wrapFilterSelects(target);
+        });
     }
 
     window.applyTableFilter = applyFilter;
@@ -688,6 +796,7 @@
         }
         $bar.find(".date-range").each(function () { updateTrigger($(this)); });
         $bar.find(".num-range").each(function () { updateNumTrigger($(this)); });
+        $bar.find(".filter-select").each(function () { updateFilterSelect($(this)); });
         applyFilter($bar, 0);
     });
 
@@ -696,15 +805,18 @@
         var $city = $bar.find("[name=CityID]");
         var id = $(this).val();
         $city.html('<option value="">همه شهرها</option>');
+        updateFilterSelect($city.closest(".filter-select"));
         if (id) {
             $.get("/UserManagement/GetCitiesByProvince", { provinceId: id }, function (res) {
                 var list = res && res.data ? res.data : (Array.isArray(res) ? res : []);
                 list.forEach(function (c) {
                     $city.append($("<option>").val(c.cityID || c.CityID).text(c.name || c.Name));
                 });
+                updateFilterSelect($city.closest(".filter-select"));
                 applyFilter($bar, 0);
             });
         } else {
+            updateFilterSelect($city.closest(".filter-select"));
             applyFilter($bar, 0);
         }
     });

@@ -18,5 +18,7 @@ $(document).on("click", ".crud-pagination a.page-link", function (e) {
     const parsed = new URL(url, window.location.origin);
     parsed.searchParams.set(param, page);
     parsed.searchParams.set("_", Date.now().toString());
-    target.load(parsed.pathname + parsed.search);
+    target.load(parsed.pathname + parsed.search, function () {
+        if (window.initAdminSelects) window.initAdminSelects(target[0]);
+    });
 });
