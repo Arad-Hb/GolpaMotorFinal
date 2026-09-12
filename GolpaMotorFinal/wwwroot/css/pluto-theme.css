@@ -675,7 +675,9 @@ html[dir="rtl"] body.pluto-public {
 }
 
 .pluto-admin .table_filter_bar .date-range,
-.date-range {
+.pluto-admin .table_filter_bar .num-range,
+.date-range,
+.num-range {
     position: relative;
     display: inline-flex;
     flex: 0 0 auto;
@@ -683,7 +685,9 @@ html[dir="rtl"] body.pluto-public {
 }
 
 .js-date-range .js-jalali,
-.date-range .js-date-range-input {
+.date-range .js-date-range-input,
+.js-num-range input[type=number],
+.num-range .js-num-range-input {
     position: absolute !important;
     width: 1px !important;
     height: 1px !important;
@@ -694,7 +698,8 @@ html[dir="rtl"] body.pluto-public {
     pointer-events: none;
 }
 
-.date-range__control {
+.date-range__control,
+.num-range__control {
     display: flex;
     align-items: stretch;
     height: var(--filter-h, 38px);
@@ -705,12 +710,16 @@ html[dir="rtl"] body.pluto-public {
 }
 
 .date-range.is-open .date-range__control,
-.date-range.has-value .date-range__control {
+.date-range.has-value .date-range__control,
+.num-range.is-open .num-range__control,
+.num-range.has-value .num-range__control {
     border-color: var(--pluto-navy-2);
 }
 
 .date-range__nav,
-.date-range__trigger {
+.date-range__trigger,
+.num-range__nav,
+.num-range__trigger {
     border: 0;
     background: transparent;
     color: var(--pluto-navy);
@@ -718,7 +727,8 @@ html[dir="rtl"] body.pluto-public {
     height: 100%;
 }
 
-.date-range__nav {
+.date-range__nav,
+.num-range__nav {
     width: 28px;
     display: grid;
     place-items: center;
@@ -726,12 +736,14 @@ html[dir="rtl"] body.pluto-public {
     flex: 0 0 28px;
 }
 
-.date-range__nav:hover {
+.date-range__nav:hover,
+.num-range__nav:hover {
     background: #f4f6f8;
     color: var(--pluto-navy);
 }
 
-.date-range__trigger {
+.date-range__trigger,
+.num-range__trigger {
     display: inline-flex;
     align-items: center;
     gap: 8px;
@@ -742,16 +754,19 @@ html[dir="rtl"] body.pluto-public {
     white-space: nowrap;
 }
 
-.date-range__trigger i {
+.date-range__trigger i,
+.num-range__trigger i {
     color: var(--pluto-green);
     font-size: 14px;
 }
 
-.date-range__label {
+.date-range__label,
+.num-range__label {
     color: var(--pluto-navy);
 }
 
-.date-range:not(.has-value) .date-range__label {
+.date-range:not(.has-value) .date-range__label,
+.num-range:not(.has-value) .num-range__label {
     color: var(--pluto-muted);
     font-weight: 400;
 }
@@ -767,6 +782,84 @@ html[dir="rtl"] body.pluto-public {
     box-shadow: 0 18px 48px rgba(21, 40, 60, 0.18);
     overflow: hidden;
     min-width: 560px;
+}
+
+.num-range-popup {
+    position: fixed;
+    z-index: 1080;
+    min-width: 280px;
+    background: #fff;
+    border: 1px solid #e6eaee;
+    border-radius: 12px;
+    box-shadow: 0 18px 48px rgba(21, 40, 60, 0.18);
+    padding: 14px;
+}
+
+.num-range-popup__fields {
+    display: flex;
+    align-items: end;
+    gap: 8px;
+}
+
+.num-range-popup__field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1;
+    margin: 0;
+    font-size: 12px;
+    color: var(--pluto-muted);
+}
+
+.num-range-popup__field input {
+    height: 38px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 0 10px;
+    color: var(--pluto-navy);
+    font-size: 13px;
+    font-weight: 600;
+    width: 100%;
+}
+
+.num-range-popup__field input:focus {
+    outline: none;
+    border-color: var(--pluto-green);
+    box-shadow: 0 0 0 3px rgba(30, 208, 133, 0.16);
+}
+
+.num-range-popup__sep {
+    padding-bottom: 10px;
+    color: var(--pluto-muted);
+    font-size: 12px;
+}
+
+.num-range-popup__actions {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.num-range-popup__clear,
+.num-range-popup__apply {
+    border: 0;
+    border-radius: 6px;
+    height: 34px;
+    padding: 0 14px;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+.num-range-popup__clear {
+    background: #f4f6f8;
+    color: var(--pluto-navy);
+}
+
+.num-range-popup__apply {
+    background: var(--pluto-green);
+    color: #fff;
+    font-weight: 700;
 }
 
 .date-range-popup__presets {

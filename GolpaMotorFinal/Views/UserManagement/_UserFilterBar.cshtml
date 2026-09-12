@@ -26,10 +26,14 @@
     <select name="CityID" class="form-select">
         <option value="">همه شهرها</option>
     </select>
-    <div class="filter-range">
-        <input type="number" name="PointsFrom" class="form-control" placeholder="امتیاز از" />
-        <input type="number" name="PointsTo" class="form-control" placeholder="امتیاز تا" />
-    </div>
+    @{
+        ViewData["NumFromName"] = "PointsFrom";
+        ViewData["NumToName"] = "PointsTo";
+        ViewData["NumEmptyLabel"] = "امتیاز";
+        ViewData["NumFromPlaceholder"] = "حداقل امتیاز";
+        ViewData["NumToPlaceholder"] = "حداکثر امتیاز";
+    }
+    @await Html.PartialAsync("_NumberRangeFilter")
     <select name="IsEligibleForReward" class="form-select">
         <option value="">واجد پاداش</option>
         <option value="true">بله</option>

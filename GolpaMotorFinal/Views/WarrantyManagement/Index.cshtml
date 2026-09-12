@@ -96,10 +96,14 @@
                                 <option value="d10">تا ۱۰ روز مانده</option>
                                 <option value="d30">تا ۳۰ روز مانده</option>
                             </select>
-                            <div class="filter-range">
-                                <input type="number" name="RemainingDaysFrom" class="form-control" placeholder="روز از" />
-                                <input type="number" name="RemainingDaysTo" class="form-control" placeholder="روز تا" />
-                            </div>
+                            @{
+                                ViewData["NumFromName"] = "RemainingDaysFrom";
+                                ViewData["NumToName"] = "RemainingDaysTo";
+                                ViewData["NumEmptyLabel"] = "روز باقی‌مانده";
+                                ViewData["NumFromPlaceholder"] = "حداقل روز";
+                                ViewData["NumToPlaceholder"] = "حداکثر روز";
+                            }
+                            @await Html.PartialAsync("_NumberRangeFilter")
                             @{
                                 ViewData["DateFromName"] = "RegisteredFromJalali";
                                 ViewData["DateToName"] = "RegisteredToJalali";

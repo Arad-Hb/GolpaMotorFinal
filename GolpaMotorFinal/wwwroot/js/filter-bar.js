@@ -166,8 +166,8 @@
     }
 
     function closePickers() {
-        $(".jdp-popup, .date-range-popup").remove();
-        $(".date-range.is-open").removeClass("is-open");
+        $(".jdp-popup, .date-range-popup, .num-range-popup").remove();
+        $(".date-range.is-open, .num-range.is-open").removeClass("is-open");
     }
 
     function renderSinglePicker($input) {
@@ -437,9 +437,174 @@
 
     function bootDateRanges() {
         wrapDatePairs(document);
+        wrapNumPairs(document);
     }
     $(bootDateRanges);
     if (document.readyState !== "loading") bootDateRanges();
+
+    function numEmptyLabel($wrap) {
+        return $wrap.attr("data-empty-label") || "بازه عدد";
+    }
+
+    function parseNum(val) {
+        if (val === null || val === undefined || String(val).trim() === "") return null;
+        var n = Number(val);
+        return isNaN(n) ? null : n;
+    }
+
+    function numLabel(from, to, empty) {
+        if (from === null && to === null) return empty;
+        if (from !== null && to !== null) return from + " – " + to;
+        if (from !== null) return "از " + from;
+        return "تا " + to;
+    }
+
+    function updateNumTrigger($wrap) {
+        var from = parseNum($wrap.find(".js-num-from").val());
+        var to = parseNum($wrap.find(".js-num-to").val());
+        $wrap.find(".num-range__label").text(numLabel(from, to, numEmptyLabel($wrap)));
+        $wrap.toggleClass("has-value", from !== null || to !== null);
+    }
+
+    function applyNumRange($wrap, from, to, triggerChange) {
+        if (from !== null && to !== null && from > to) {
+            var tmp = from;
+            from = to;
+            to = tmp;
+        }
+        $wrap.find(".js-num-from").val(from === null ? "" : from);
+        $wrap.find(".js-num-to").val(to === null ? "" : to);
+        updateNumTrigger($wrap);
+        if (triggerChange) {
+            $wrap.find(".js-num-to").trigger("change");
+        }
+    }
+
+    function numStep($wrap) {
+        var step = parseNum($wrap.find(".js-num-from").attr("step"));
+        return step && step > 0 ? step : 1;
+    }
+
+    function initNumRange($wrap) {
+        if ($wrap.data("numReady")) return;
+        $wrap.data("numReady", true);
+        $wrap.addClass("num-range");
+        var $inputs = $wrap.find("input[type=number]");
+        if ($inputs.length < 2) return;
+        $inputs.eq(0).addClass("js-num-from js-num-range-input").attr({ tabindex: "-1", "aria-hidden": "true" });
+        $inputs.eq(1).addClass("js-num-to js-num-range-input").attr({ tabindex: "-1", "aria-hidden": "true" });
+        if (!$wrap.find(".num-range__trigger").length) {
+            $wrap.prepend(
+                '<div class="num-range__control">' +
+                '<button type="button" class="num-range__nav" data-dir="-1" aria-label="بازه قبلی"><i class="fa-solid fa-chevron-right"></i></button>' +
+                '<button type="button" class="num-range__trigger" aria-haspopup="dialog">' +
+                '<i class="fa-solid fa-sliders"></i>' +
+                '<span class="num-range__label"></span>' +
+                "</button>" +
+                '<button type="button" class="num-range__nav" data-dir="1" aria-label="بازه بعدی"><i class="fa-solid fa-chevron-left"></i></button>' +
+                "</div>"
+            );
+        }
+        updateNumTrigger($wrap);
+    }
+
+    function wrapNumPairs(root) {
+        var $root = $(root || document);
+        $root.find(".js-num-range, .filter-range").each(function () {
+            var $box = $(this);
+            if ($box.find("input[type=number]").length >= 2) initNumRange($box);
+        });
+    }
+
+    function positionFixedPopup($anchor, popup) {
+        var rect = $anchor[0].getBoundingClientRect();
+        var pw = popup.outerWidth();
+        var ph = popup.outerHeight();
+        var top = rect.bottom + 8;
+        if (top + ph > window.innerHeight - 8) top = Math.max(8, rect.top - ph - 8);
+        var rightPos = window.innerWidth - rect.right;
+        if (rect.right - pw < 8) rightPos = Math.max(8, window.innerWidth - pw - 8);
+        popup.css({ top: top + "px", right: rightPos + "px", left: "auto" });
+    }
+
+    function openNumPopup($wrap) {
+        closePickers();
+        $wrap.addClass("is-open");
+        var from = $wrap.find(".js-num-from").val();
+        var to = $wrap.find(".js-num-to").val();
+        var step = numStep($wrap);
+        var popup = $(
+            '<div class="num-range-popup" dir="rtl">' +
+            '<div class="num-range-popup__fields">' +
+            '<label class="num-range-popup__field"><span>حداقل</span><input type="number" class="num-range-popup__from" step="' + step + '" inputmode="numeric" /></label>' +
+            '<span class="num-range-popup__sep">تا</span>' +
+            '<label class="num-range-popup__field"><span>حداکثر</span><input type="number" class="num-range-popup__to" step="' + step + '" inputmode="numeric" /></label>' +
+            "</div>" +
+            '<div class="num-range-popup__actions">' +
+            '<button type="button" class="num-range-popup__clear">پاک کردن</button>' +
+            '<button type="button" class="num-range-popup__apply">اعمال</button>' +
+            "</div></div>"
+        );
+        popup.find(".num-range-popup__from").val(from);
+        popup.find(".num-range-popup__to").val(to);
+        $("body").append(popup);
+        positionFixedPopup($wrap.find(".num-range__trigger"), popup);
+        popup.find(".num-range-popup__from").trigger("focus").trigger("select");
+
+        function commit(apply) {
+            var nextFrom = parseNum(popup.find(".num-range-popup__from").val());
+            var nextTo = parseNum(popup.find(".num-range-popup__to").val());
+            applyNumRange($wrap, nextFrom, nextTo, apply);
+            closePickers();
+        }
+
+        popup.on("click", ".num-range-popup__apply", function (e) {
+            e.stopPropagation();
+            commit(true);
+        });
+        popup.on("click", ".num-range-popup__clear", function (e) {
+            e.stopPropagation();
+            applyNumRange($wrap, null, null, true);
+            closePickers();
+        });
+        popup.on("keydown", "input", function (e) {
+            if (e.key === "Enter") {
+                e.preventDefault();
+                commit(true);
+            }
+        });
+        $(window).off("resize.numRange").on("resize.numRange", function () {
+            positionFixedPopup($wrap.find(".num-range__trigger"), popup);
+        });
+    }
+
+    function shiftNumRange($wrap, dir) {
+        var from = parseNum($wrap.find(".js-num-from").val());
+        var to = parseNum($wrap.find(".js-num-to").val());
+        var step = numStep($wrap) * dir;
+        if (from === null && to === null) return;
+        if (from !== null && to !== null) {
+            var span = Math.abs(to - from) || Math.abs(step);
+            applyNumRange($wrap, from + dir * span, to + dir * span, true);
+            return;
+        }
+        if (from !== null) applyNumRange($wrap, from + step, null, true);
+        else applyNumRange($wrap, null, to + step, true);
+    }
+
+    $(document).on("click", ".num-range__trigger", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var $wrap = $(this).closest(".num-range");
+        if ($wrap.hasClass("is-open")) closePickers();
+        else openNumPopup($wrap);
+    });
+
+    $(document).on("click", ".num-range__nav", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        shiftNumRange($(this).closest(".num-range"), parseInt($(this).data("dir"), 10));
+    });
 
     $(document).on("focus click", ".js-jalali:not(.js-date-range-input)", function (e) {
         e.stopPropagation();
@@ -461,7 +626,7 @@
     });
 
     $(document).on("click", function () { closePickers(); });
-    $(document).on("click", ".jdp-popup, .js-jalali, .date-range-popup, .date-range", function (e) { e.stopPropagation(); });
+    $(document).on("click", ".jdp-popup, .js-jalali, .date-range-popup, .date-range, .num-range-popup, .num-range", function (e) { e.stopPropagation(); });
 
     function serializeBar($bar) {
         var data = {};
@@ -506,6 +671,7 @@
     $(document).on("change", "[data-filter-bar] select, [data-filter-bar] input[type=number], [data-filter-bar] .js-jalali", function () {
         var $bar = $(this).closest("[data-filter-bar]");
         if (this.name === "ProvinceID") return;
+        if ($(this).closest(".num-range-popup").length) return;
         applyFilter($bar, 0);
     });
 
@@ -521,6 +687,7 @@
             $city.html('<option value="">همه شهرها</option>');
         }
         $bar.find(".date-range").each(function () { updateTrigger($(this)); });
+        $bar.find(".num-range").each(function () { updateNumTrigger($(this)); });
         applyFilter($bar, 0);
     });
 

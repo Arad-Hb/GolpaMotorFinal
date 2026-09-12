@@ -48,10 +48,14 @@
                         <option value="true">فعال</option>
                         <option value="false">غیرفعال</option>
                     </select>
-                    <div class="filter-range">
-                        <input type="number" name="RequiredFrom" class="form-control" placeholder="حد نصاب از" />
-                        <input type="number" name="RequiredTo" class="form-control" placeholder="حد نصاب تا" />
-                    </div>
+                    @{
+                        ViewData["NumFromName"] = "RequiredFrom";
+                        ViewData["NumToName"] = "RequiredTo";
+                        ViewData["NumEmptyLabel"] = "حد نصاب";
+                        ViewData["NumFromPlaceholder"] = "حداقل حد نصاب";
+                        ViewData["NumToPlaceholder"] = "حداکثر حد نصاب";
+                    }
+                    @await Html.PartialAsync("_NumberRangeFilter")
                 </form>
                 <form id="frmAntiForgery">
                     @Html.AntiForgeryToken()

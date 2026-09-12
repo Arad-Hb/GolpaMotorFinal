@@ -1,0 +1,20 @@
+@{
+    var fromName = ViewData["NumFromName"] as string ?? "From";
+    var toName = ViewData["NumToName"] as string ?? "To";
+    var emptyLabel = ViewData["NumEmptyLabel"] as string ?? "بازه عدد";
+    var fromPlaceholder = ViewData["NumFromPlaceholder"] as string ?? "حداقل";
+    var toPlaceholder = ViewData["NumToPlaceholder"] as string ?? "حداکثر";
+    var step = ViewData["NumStep"] as string ?? "1";
+}
+<div class="num-range js-num-range" data-empty-label="@emptyLabel">
+    <div class="num-range__control">
+        <button type="button" class="num-range__nav" data-dir="-1" aria-label="بازه قبلی"><i class="fa-solid fa-chevron-right"></i></button>
+        <button type="button" class="num-range__trigger" aria-haspopup="dialog">
+            <i class="fa-solid fa-sliders"></i>
+            <span class="num-range__label">@emptyLabel</span>
+        </button>
+        <button type="button" class="num-range__nav" data-dir="1" aria-label="بازه بعدی"><i class="fa-solid fa-chevron-left"></i></button>
+    </div>
+    <input type="number" name="@fromName" class="form-control js-num-from js-num-range-input" placeholder="@fromPlaceholder" step="@step" inputmode="numeric" tabindex="-1" aria-hidden="true" />
+    <input type="number" name="@toName" class="form-control js-num-to js-num-range-input" placeholder="@toPlaceholder" step="@step" inputmode="numeric" tabindex="-1" aria-hidden="true" />
+</div>

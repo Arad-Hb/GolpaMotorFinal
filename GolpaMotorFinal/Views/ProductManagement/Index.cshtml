@@ -68,18 +68,30 @@
                 <option value="true">موجود</option>
                 <option value="false">ناموجود</option>
             </select>
-            <div class="filter-range">
-                <input type="number" name="RegisteredFrom" class="form-control" placeholder="ثبت‌شده از" />
-                <input type="number" name="RegisteredTo" class="form-control" placeholder="ثبت‌شده تا" />
-            </div>
-            <div class="filter-range">
-                <input type="number" name="RemainingFrom" class="form-control" placeholder="باقی‌مانده از" />
-                <input type="number" name="RemainingTo" class="form-control" placeholder="باقی‌مانده تا" />
-            </div>
-            <div class="filter-range">
-                <input type="number" name="PointsFrom" class="form-control" placeholder="امتیاز از" />
-                <input type="number" name="PointsTo" class="form-control" placeholder="امتیاز تا" />
-            </div>
+            @{
+                ViewData["NumFromName"] = "RegisteredFrom";
+                ViewData["NumToName"] = "RegisteredTo";
+                ViewData["NumEmptyLabel"] = "ثبت‌شده";
+                ViewData["NumFromPlaceholder"] = "حداقل ثبت‌شده";
+                ViewData["NumToPlaceholder"] = "حداکثر ثبت‌شده";
+            }
+            @await Html.PartialAsync("_NumberRangeFilter")
+            @{
+                ViewData["NumFromName"] = "RemainingFrom";
+                ViewData["NumToName"] = "RemainingTo";
+                ViewData["NumEmptyLabel"] = "باقی‌مانده";
+                ViewData["NumFromPlaceholder"] = "حداقل باقی‌مانده";
+                ViewData["NumToPlaceholder"] = "حداکثر باقی‌مانده";
+            }
+            @await Html.PartialAsync("_NumberRangeFilter")
+            @{
+                ViewData["NumFromName"] = "PointsFrom";
+                ViewData["NumToName"] = "PointsTo";
+                ViewData["NumEmptyLabel"] = "امتیاز";
+                ViewData["NumFromPlaceholder"] = "حداقل امتیاز";
+                ViewData["NumToPlaceholder"] = "حداکثر امتیاز";
+            }
+            @await Html.PartialAsync("_NumberRangeFilter")
         </form>
         <form id="frmAntiForgery">
             @Html.AntiForgeryToken()
