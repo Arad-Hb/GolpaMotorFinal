@@ -1,3 +1,5 @@
+using GolpaMotorFinal.Models.ViewModels;
+
 namespace GolpaMotorFinal.Models.ViewModels.CRUD
 {
     public class CrudIndexViewModel
@@ -8,6 +10,8 @@ namespace GolpaMotorFinal.Models.ViewModels.CRUD
         public string CreateUrl { get; set; } = string.Empty;
         public string CreateTitle { get; set; } = "افزودن";
         public string CreateButtonText { get; set; } = "افزودن";
+        public string ListHeading { get; set; } = "لیست";
         public BreadcrumbViewModel? Breadcrumb { get; set; }
+        public bool ShowCreate => !string.IsNullOrWhiteSpace(CreateUrl);
     }
 }

@@ -823,4 +823,13 @@
             applyFilter($bar, 0);
         }
     });
+
+    $(function () {
+        $("[data-filter-bar]").each(function () {
+            var target = $(this).attr("data-target");
+            if (!target) return;
+            var $t = $(target);
+            if ($t.length && $.trim($t.html()) === "") applyFilter($(this), 0);
+        });
+    });
 })();

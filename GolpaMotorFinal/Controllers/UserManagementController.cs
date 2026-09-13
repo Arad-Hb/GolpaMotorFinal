@@ -3,6 +3,7 @@ using DataAccess.Services;
 using DomainModel.ViewModels.User;
 using Framework.Common;
 using GolpaMotorFinal.FrameworkUI.Services;
+using GolpaMotorFinal.Helpers;
 using GolpaMotorFinal.Models.ViewModels;
 using GolpaMotorFinal.Models.ViewModels.Account;
 using GolpaMotorFinal.Models.ViewModels.CRUD;
@@ -42,17 +43,59 @@ namespace GolpaMotorFinal.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Search(UserSearchModel sm)
+        public async Task<IActionResult> Search(UserSearchModel sm)
         {
-            BindUserFilter(sm);
-            return ViewComponent("UserList", new { sm });
+            return await UserGrid(sm);
         }
 
         [HttpGet]
-        public IActionResult Grid(UserSearchModel sm)
+        public async Task<IActionResult> Grid(UserSearchModel sm)
+        {
+            return await UserGrid(sm);
+        }
+
+        private async Task<IActionResult> UserGrid(UserSearchModel sm)
         {
             BindUserFilter(sm);
-            return ViewComponent("UserList", new { sm });
+            sm.PageSize = PaginationViewModel.DefaultPageSize;
+            var result = await repo.Search(sm);
+            var items = (result.userList ?? new List<UserListItem>()).Select(u => new UserListItemViewModel
+            {
+                UserID = u.UserID,
+                FullName = $"{u.FirstName ?? string.Empty} {u.LastName ?? string.Empty}".Trim(),
+                PhoneNumber = u.PhoneNumber ?? string.Empty,
+                ProfileImageUrl = u.ExistingProfileImageUrl ?? string.Empty,
+                RoleName = u.RoleName ?? string.Empty,
+                TotalRegisteredCards = u.TotalRegisteredCards,
+                TotalEarnedPoints = u.TotalEarnedPoints,
+                IsEligibleForReward = u.IsEligibleForReward,
+                HasReceivedReward = u.HasReceivedReward,
+                Province = u.Province ?? string.Empty,
+                City = u.City ?? string.Empty
+            }).ToList();
+
+            var filter = result.sm ?? sm;
+            var grid = service.BuildUserGrid(items);
+            CrudGridPager.Attach(
+                grid,
+                "UserGrid",
+                filter.PageIndex,
+                filter.PageCount,
+                filter.RecordCount,
+                FilterUrl.Combine("/UserManagement/Grid", new
+                {
+                    filter.SearchTerm,
+                    filter.CustomerTypeID,
+                    filter.ProvinceID,
+                    filter.CityID,
+                    filter.PointsFrom,
+                    filter.PointsTo,
+                    filter.IsEligibleForReward,
+                    filter.HasReceivedReward,
+                    filter.CardFromJalali,
+                    filter.CardToJalali
+                }));
+            return ViewComponent("CrudGrid", new { model = grid });
         }
 
         private static void BindUserFilter(UserSearchModel sm)
@@ -452,14 +495,7 @@ namespace GolpaMotorFinal.Controllers
 
         private static CrudGridViewModel AttachUserReportPager(CrudGridViewModel grid, int pageIndex, int pageCount, int recordCount)
         {
-            grid.StartRowNumber = pageIndex * PaginationViewModel.DefaultPageSize + 1;
-            grid.Pager = PaginationViewModel.For(
-                "UserReportGrid",
-                pageIndex,
-                pageCount,
-                recordCount,
-                "/UserManagement/UserReportGrid");
-            return grid;
+            return CrudGridPager.Attach(grid, "UserReportGrid", pageIndex, pageCount, recordCount, "/UserManagement/UserReportGrid");
         }
 
         private static (List<T> Items, int PageIndex, int PageCount, int RecordCount) SlicePage<T>(List<T> source, int pageIndex, int pageSize)

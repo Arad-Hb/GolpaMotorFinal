@@ -1,11 +1,8 @@
 using DataAccess.Services;
-using DomainModel.ViewModels.Reports;
 using DomainModel.ViewModels.User;
 using Framework.Common;
 using GolpaMotorFinal.FrameworkUI.Services;
 using GolpaMotorFinal.Helpers;
-using GolpaMotorFinal.Models.ViewModels;
-using GolpaMotorFinal.Models.ViewModels.CRUD;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -46,8 +43,8 @@ namespace GolpaMotorFinal.Controllers
             sm.CardTo = PersianDate.ParseOrNull(sm.CardToJalali);
             var page = await users.GetUserReportPage(sm);
             var grid = users.BuildUserReportGrid(page.Users);
-            grid.GridId = "UserReportGrid";
-            var pager = PaginationViewModel.For(
+            CrudGridPager.Attach(
+                grid,
                 "UserReportGrid",
                 page.PageIndex,
                 page.PageCount,
@@ -65,33 +62,58 @@ namespace GolpaMotorFinal.Controllers
                     sm.CardFromJalali,
                     sm.CardToJalali
                 }));
-            ViewBag.Pager = pager;
-            return PartialView("_UserReportGrid", grid);
+            return ViewComponent("CrudGrid", new { model = grid });
         }
 
         [HttpGet]
-        public async Task<IActionResult> Warranty(long? productId, string? fromJalali, string? toJalali)
+        public async Task<IActionResult> Warranty(long? productId, string? fromJalali, string? toJalali, int pageIndex = 0)
         {
             var from = PersianDate.ParseOrNull(fromJalali);
             var to = PersianDate.ParseOrNull(toJalali);
-            var rows = await reports.GetWarrantyByProduct(productId, from, to);
-            return PartialView("_WarrantyReport", rows);
+            var page = CrudGridPager.Slice(await reports.GetWarrantyByProduct(productId, from, to), pageIndex);
+            var grid = AdminListGrids.BuildWarrantyReportGrid(page.Items);
+            CrudGridPager.Attach(
+                grid,
+                "WarrantyReportGrid",
+                page.PageIndex,
+                page.PageCount,
+                page.RecordCount,
+                FilterUrl.Combine("/Reports/Warranty", new { productId, fromJalali, toJalali }));
+            return ViewComponent("CrudGrid", new { model = grid });
         }
 
         [HttpGet]
-        public async Task<IActionResult> Products(int? year, int? month)
+        public async Task<IActionResult> Products(int? year, int? month, int pageIndex = 0)
         {
-            var rows = await reports.GetProductPopularity(jalaliYear: year, jalaliMonth: month);
-            return PartialView("_ProductReport", rows);
+            var page = CrudGridPager.Slice(await reports.GetProductPopularity(jalaliYear: year, jalaliMonth: month), pageIndex);
+            var grid = AdminListGrids.BuildProductReportGrid(page.Items);
+            CrudGridPager.Attach(
+                grid,
+                "ProductReportGrid",
+                page.PageIndex,
+                page.PageCount,
+                page.RecordCount,
+                FilterUrl.Combine("/Reports/Products", new { year, month }));
+            return ViewComponent("CrudGrid", new { model = grid });
         }
 
         [HttpGet]
-        public async Task<IActionResult> Rewards(string? fromJalali, string? toJalali)
+        public async Task<IActionResult> Rewards(string? fromJalali, string? toJalali, int pageIndex = 0)
         {
-            var rows = await reports.GetRewardPopularity(
-                PersianDate.ParseOrNull(fromJalali),
-                PersianDate.ParseOrNull(toJalali));
-            return PartialView("_RewardReport", rows);
+            var page = CrudGridPager.Slice(
+                await reports.GetRewardPopularity(
+                    PersianDate.ParseOrNull(fromJalali),
+                    PersianDate.ParseOrNull(toJalali)),
+                pageIndex);
+            var grid = AdminListGrids.BuildRewardReportGrid(page.Items);
+            CrudGridPager.Attach(
+                grid,
+                "RewardReportGrid",
+                page.PageIndex,
+                page.PageCount,
+                page.RecordCount,
+                FilterUrl.Combine("/Reports/Rewards", new { fromJalali, toJalali }));
+            return ViewComponent("CrudGrid", new { model = grid });
         }
     }
 }

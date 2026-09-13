@@ -1,5 +1,8 @@
 ﻿using DataAccess.Services;
 using DomainModel.ViewModels.Reward;
+using Framework.Common;
+using GolpaMotorFinal.Helpers;
+using GolpaMotorFinal.Models.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -27,15 +30,55 @@ namespace GolpaMotorFinal.Controllers
         }
 
         [HttpGet]
-        public IActionResult CatalogList(RewardCatalogSearchModel sm)
+        public async Task<IActionResult> CatalogList(RewardCatalogSearchModel sm)
         {
-            return ViewComponent("RewardCatalogList", new { sm });
+            sm ??= new RewardCatalogSearchModel();
+            sm.PageSize = PaginationViewModel.DefaultPageSize;
+            var result = await catalogRepo.Search(sm);
+            var filter = result.sm ?? sm;
+            var grid = AdminListGrids.BuildRewardCatalogGrid(result.CatalogList ?? new List<RewardCatalogListItem>());
+            CrudGridPager.Attach(
+                grid,
+                "CatalogGrid",
+                filter.PageIndex,
+                filter.PageCount,
+                filter.RecordCount,
+                FilterUrl.Combine("/RewardManagement/CatalogList", new
+                {
+                    filter.Title,
+                    filter.IsCashReward,
+                    filter.IsActive,
+                    filter.RequiredFrom,
+                    filter.RequiredTo
+                }));
+            return ViewComponent("CrudGrid", new { model = grid });
         }
 
         [HttpGet]
-        public IActionResult RequestList(RewardRequestSearchModel sm)
+        public async Task<IActionResult> RequestList(RewardRequestSearchModel sm)
         {
-            return ViewComponent("RewardRequestList", new { sm });
+            sm ??= new RewardRequestSearchModel();
+            sm.RequestFrom = PersianDate.ParseOrNull(sm.RequestFromJalali);
+            sm.RequestTo = PersianDate.ParseOrNull(sm.RequestToJalali);
+            sm.PageSize = PaginationViewModel.DefaultPageSize;
+            var result = await requestRepo.Search(sm);
+            var filter = result.sm ?? sm;
+            var grid = AdminListGrids.BuildRewardRequestGrid(result.RequestList ?? new List<RewardRequestListItem>());
+            CrudGridPager.Attach(
+                grid,
+                "RequestGrid",
+                filter.PageIndex,
+                filter.PageCount,
+                filter.RecordCount,
+                FilterUrl.Combine("/RewardManagement/RequestList", new
+                {
+                    filter.SearchTerm,
+                    filter.RewardDeliveryStatusID,
+                    filter.RewardCatalogID,
+                    filter.RequestFromJalali,
+                    filter.RequestToJalali
+                }));
+            return ViewComponent("CrudGrid", new { model = grid });
         }
 
         [HttpGet]

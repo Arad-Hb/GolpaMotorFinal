@@ -1,5 +1,5 @@
-﻿@using GolpaMotorFinal.Models.ViewModels.CRUD
-@using DomainModel.Models
+﻿@using GolpaMotorFinal.Models.ViewModels
+@using GolpaMotorFinal.Models.ViewModels.CRUD
 @{
     Layout = "_AdminLayout";
 
@@ -7,10 +7,17 @@
     {
         Title = "مدیریت کاربران",
         GridId = "UserGrid",
-        ViewComponent = "UserList",
         CreateUrl = Url.Action("Create", "UserManagement") ?? "/UserManagement/Create",
         CreateTitle = "افزودن کاربر",
-        CreateButtonText = "افزودن"
+        CreateButtonText = "افزودن",
+        Breadcrumb = new BreadcrumbViewModel
+        {
+            Items =
+            {
+                new BreadcrumbItemViewModel { Title = "داشبورد", Url = Url.Action("Index", "Admin") },
+                new BreadcrumbItemViewModel { Title = "کاربران", Active = true }
+            }
+        }
     };
     ViewData["FilterPartial"] = "_UserFilterBar";
 }

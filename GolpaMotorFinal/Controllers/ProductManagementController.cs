@@ -1,6 +1,8 @@
 ﻿using DataAccess.Services;
 using DomainModel.ViewModels.Product;
 using GolpaMotorFinal.FrameworkUI.Services;
+using GolpaMotorFinal.Helpers;
+using GolpaMotorFinal.Models.ViewModels;
 using GolpaMotorFinal.Models.ViewModels.ProductManagement;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -24,9 +26,31 @@ namespace GolpaMotorFinal.Controllers
         }
 
         [HttpGet]
-        public IActionResult ProductList(ProductSearchModel sm)
+        public async Task<IActionResult> ProductList(ProductSearchModel sm)
         {
-            return ViewComponent("ProductList", new { sm });
+            sm ??= new ProductSearchModel();
+            sm.PageSize = PaginationViewModel.DefaultPageSize;
+            var result = await repo.Search(sm);
+            var filter = result.sm ?? sm;
+            var grid = AdminListGrids.BuildProductGrid(result.productList ?? new List<ProductListItem>());
+            CrudGridPager.Attach(
+                grid,
+                "ProductGrid",
+                filter.PageIndex,
+                filter.PageCount,
+                filter.RecordCount,
+                FilterUrl.Combine("/ProductManagement/ProductList", new
+                {
+                    filter.ProductName,
+                    filter.IsAvailable,
+                    filter.PointsFrom,
+                    filter.PointsTo,
+                    filter.RegisteredFrom,
+                    filter.RegisteredTo,
+                    filter.RemainingFrom,
+                    filter.RemainingTo
+                }));
+            return ViewComponent("CrudGrid", new { model = grid });
         }
 
         [HttpGet]

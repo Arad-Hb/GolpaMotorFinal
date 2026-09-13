@@ -1,6 +1,8 @@
 ﻿@using GolpaMotorFinal.Models.ViewModels.CRUD
 @model CrudGridViewModel
-
+@{
+    var hasActions = Model.Rows.Any(r => r.Actions.Any(a => a.Visible));
+}
 <div class="table-responsive" data-grid="@Model.GridId">
     <table class="table table-hover align-middle">
         <thead class="table-dark">
@@ -13,7 +15,7 @@
                 {
                     <th>@header</th>
                 }
-                @if (Model.Rows.Any(r => r.Actions.Count > 0))
+                @if (hasActions)
                 {
                     <th class="table-actions">عملیات</th>
                 }
@@ -60,19 +62,28 @@
                                 }
                             </td>
                         }
-                        @if (Model.Rows.Any(r => r.Actions.Count > 0))
+                        @if (hasActions)
                         {
                             <td class="table-actions">
-                                @foreach (var action in row.Actions)
+                                @foreach (var action in row.Actions.Where(a => a.Visible))
                                 {
+                                    var css = action.CssClass ?? "";
+                                    if (action.OpenModal && !action.IsDelete && !css.Contains("open-modal"))
+                                        css += " open-modal";
+                                    if (action.IsDelete && !css.Contains("btnDelete"))
+                                        css += " btnDelete";
                                     <button type="button"
-                                            class="@action.CssClass @(action.OpenModal ? "open-modal" : "")"
+                                            class="@css"
                                             title="@action.ActionText"
                                             data-title="@action.ActionText"
                                             data-url="@action.Url"
                                             data-id="@action.Id"
-                                            data-id-name="userID"
-                                            data-size="modal-lg">
+                                            data-id-name="@(action.IdName ?? "userID")"
+                                            data-size="@(action.Size ?? "modal-lg")"
+                                            data-grid-id="@action.GridId"
+                                            data-refresh-url="@action.RefreshUrl"
+                                            data-refresh-target-url="@action.RefreshUrl"
+                                            data-refresh-target-id="@action.RefreshTargetId">
                                         <i class="@action.Icon"></i>
                                     </button>
                                 }

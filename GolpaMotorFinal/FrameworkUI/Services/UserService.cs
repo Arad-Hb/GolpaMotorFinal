@@ -280,22 +280,32 @@ namespace GolpaMotorFinal.FrameworkUI.Services
 
         public CrudGridViewModel BuildUserGrid(IEnumerable<UserListItemViewModel> users)
         {
-            var grid = new CrudGridViewModel { GridId = "UserGrid" };
-            grid.Headers.AddRange(new[] { "نام", "موبایل", "شغل", "کارت", "امتیاز", "واجد پاداش", "دریافت پاداش", "استان", "شهر" });
+            var grid = new CrudGridViewModel { GridId = "UserGrid", EmptyMessage = "هیچ کاربری یافت نشد" };
+            grid.Headers.AddRange(new[] { "نام", "موبایل", "شغل", "استان", "شهر", "کارت", "امتیاز", "واجد پاداش", "دریافت پاداش" });
 
             foreach (var item in users)
             {
                 var row = new GridRow { Key = item.UserID };
-                
                 row.Columns.Add(Text(item.FullName));
                 row.Columns.Add(Text(item.PhoneNumber));
                 row.Columns.Add(Text(item.RoleName));
+                row.Columns.Add(Text(item.Province));
+                row.Columns.Add(Text(item.City));
                 row.Columns.Add(Number(item.TotalRegisteredCards));
                 row.Columns.Add(Number(item.TotalEarnedPoints));
                 row.Columns.Add(Text(item.IsEligibleForReward ? "بله" : "خیر"));
                 row.Columns.Add(Text(item.HasReceivedReward ? "بله" : "خیر"));
-                row.Columns.Add(Text(item.Province));
-                row.Columns.Add(Text(item.City));
+
+                row.Actions.Add(new GridAction
+                {
+                    ActionText = "ثبت درخواست پاداش",
+                    OpenModal = true,
+                    Icon = "fa fa-gift",
+                    Url = "/UserManagement/EligibleRewards",
+                    Id = item.UserID,
+                    IdName = "userID",
+                    CssClass = "btn btn-sm btn-outline-success"
+                });
                 row.Actions.Add(new GridAction
                 {
                     ActionText = "جزئیات",
@@ -303,7 +313,43 @@ namespace GolpaMotorFinal.FrameworkUI.Services
                     Icon = "fa fa-eye",
                     Url = "/UserManagement/Details",
                     Id = item.UserID,
+                    IdName = "userID",
                     CssClass = "btn btn-sm btn-outline-secondary"
+                });
+                row.Actions.Add(new GridAction
+                {
+                    ActionText = "ویرایش",
+                    OpenModal = true,
+                    Icon = "fa fa-pen",
+                    Url = "/UserManagement/Edit",
+                    Id = item.UserID,
+                    IdName = "userID",
+                    CssClass = "btn btn-sm btn-outline-warning"
+                });
+                row.Actions.Add(new GridAction
+                {
+                    ActionText = "ادغام حساب",
+                    OpenModal = true,
+                    Icon = "fa fa-user-plus",
+                    Url = "/UserManagement/MergeAccounts",
+                    Id = item.UserID,
+                    IdName = "userID",
+                    CssClass = "btn btn-sm btn-outline-primary",
+                    GridId = "UserGrid",
+                    RefreshUrl = "/UserManagement/Grid"
+                });
+                row.Actions.Add(new GridAction
+                {
+                    ActionText = "حذف",
+                    OpenModal = false,
+                    IsDelete = true,
+                    Icon = "fa fa-trash",
+                    Url = "/UserManagement/Delete",
+                    Id = item.UserID,
+                    IdName = "userID",
+                    CssClass = "btn btn-sm btn-outline-danger",
+                    RefreshUrl = "/UserManagement/Grid",
+                    RefreshTargetId = "UserGrid"
                 });
                 grid.Rows.Add(row);
             }
