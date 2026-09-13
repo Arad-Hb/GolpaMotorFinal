@@ -62,7 +62,7 @@
                 ViewData["SearchPlaceholder"] = "جستجوی نام محصول...";
                 ViewData["SearchName"] = "ProductName";
             }
-            @await Html.PartialAsync("_FilterSearchReset")
+            @await Html.PartialAsync("_FilterSearch")
             <select name="IsAvailable" class="form-select">
                 <option value="">وضعیت موجودی</option>
                 <option value="true">موجود</option>
@@ -92,6 +92,7 @@
                 ViewData["NumToPlaceholder"] = "حداکثر امتیاز";
             }
             @await Html.PartialAsync("_NumberRangeFilter")
+            @await Html.PartialAsync("_FilterReset")
         </form>
         <form id="frmAntiForgery">
             @Html.AntiForgeryToken()

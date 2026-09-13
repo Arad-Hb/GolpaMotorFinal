@@ -17,6 +17,7 @@ namespace GolpaMotorFinal.Models.ViewModels.WarrantyManagement
         public string? ValidityPreset { get; set; }
         public int? RemainingDaysFrom { get; set; }
         public int? RemainingDaysTo { get; set; }
+        public int ValidityMonths { get; set; } = 12;
         public string? RegisteredFromJalali { get; set; }
         public string? RegisteredToJalali { get; set; }
         public int GenerateCount { get; set; } = 5;

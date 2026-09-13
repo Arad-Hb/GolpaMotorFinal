@@ -16,6 +16,8 @@ namespace DomainModel.ViewModels.Product
     {
         [Display(Name = "نام")]
         public string Name { get; set; } = string.Empty;
+
+        [Display(Name = "تعداد")]
         public int Count { get; set; }
     }
 }

@@ -1,5 +1,4 @@
 using DomainModel.ViewModels.Product;
-using GolpaMotorFinal.Models.ViewModels;
 
 namespace GolpaMotorFinal.Models.ViewModels.ProductManagement
 {

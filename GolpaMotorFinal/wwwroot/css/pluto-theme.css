@@ -527,12 +527,13 @@ html[dir="rtl"] body.pluto-public {
     gap: 4px;
 }
 
-    .table_filter_bar {
+.table_filter_bar {
     --filter-h: 38px;
     display: flex;
     flex-wrap: wrap;
     align-items: stretch;
-    gap: 8px;
+    justify-content: flex-start;
+    gap: 8px 10px;
     margin-bottom: 14px;
     width: 100%;
 }
@@ -560,7 +561,7 @@ html[dir="rtl"] body.pluto-public {
     -webkit-appearance: none;
     min-width: 0;
     width: max-content;
-    max-width: 220px;
+    max-width: 200px;
     padding-inline: 12px 28px !important;
     border: 1px solid #ddd;
     border-radius: 6px !important;
@@ -606,7 +607,15 @@ html[dir="rtl"] body.pluto-public {
     margin: 0;
     float: none;
     box-shadow: none;
-    padding:5px 10px;
+    padding: 5px 10px;
+}
+
+.pluto-admin .table_filter_bar [data-filter-reset] {
+    flex: 0 0 auto;
+    width: var(--filter-h);
+    min-width: var(--filter-h);
+    padding-inline: 0 !important;
+    margin-inline-start: auto;
 }
 
 .pluto-admin .table_filter_bar .search-component-page {
@@ -659,7 +668,8 @@ html[dir="rtl"] body.pluto-public {
 .pluto-admin .table_filter_bar .filter-search {
     position: relative;
     flex: 1 1 220px;
-    min-width: 200px;
+    min-width: min(100%, 180px);
+    max-width: 100%;
 }
 
 .pluto-admin .table_filter_bar .filter-search__input {
@@ -996,7 +1006,7 @@ html[dir="rtl"] body.pluto-public {
 
 .pluto-admin .table_filter_bar .filter-select__trigger {
     height: var(--filter-h, 38px);
-    max-width: 220px;
+    max-width: 200px;
     width: auto;
 }
 
@@ -1576,6 +1586,36 @@ html[dir="rtl"] body.pluto-public {
 @media (max-width: 576px) {
     .modal-stat-row {
         grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .pluto-admin .table_filter_bar .filter-search {
+        flex: 1 1 100%;
+        min-width: 100%;
+    }
+
+    .pluto-admin .table_filter_bar .form-select,
+    .pluto-admin .table_filter_bar .filter-select {
+        flex: 1 1 calc(50% - 5px);
+        max-width: none;
+        min-width: 0;
+        width: auto;
+    }
+
+    .pluto-admin .table_filter_bar .filter-select__trigger {
+        max-width: none;
+        width: 100%;
+    }
+
+    .pluto-admin .table_filter_bar .date-range,
+    .pluto-admin .table_filter_bar .num-range {
+        flex: 1 1 calc(50% - 5px);
+        min-width: 0;
+    }
+
+    .pluto-admin .table_filter_bar .date-range__trigger,
+    .pluto-admin .table_filter_bar .num-range__trigger {
+        min-width: 0;
+        flex: 1 1 auto;
     }
 }
 

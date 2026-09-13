@@ -463,7 +463,7 @@ namespace GolpaMotorFinal.Controllers
         [HttpPost]
         [Authorize(Roles = "Admin")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> GenerateCodes(long productId, int count)
+        public async Task<IActionResult> GenerateCodes(long productId, int count,int validityMonths=12)
         {
             if (productId <= 0 || count <= 0)
             {
@@ -482,7 +482,8 @@ namespace GolpaMotorFinal.Controllers
                 do
                 {
                     serial = WarrantyCodeGenerator.Serial();
-                } while (await warrantyCards.SerialExistsAsync(serial));
+                } 
+                while (await warrantyCards.SerialExistsAsync(serial));
 
                 await warrantyCards.AddAsync(new WarrantyCard
                 {
@@ -490,7 +491,7 @@ namespace GolpaMotorFinal.Controllers
                     SerialNumber = serial,
                     ScratchedCode = WarrantyCodeGenerator.ScratchedCode(),
                     IsRegistered = false,
-                    ValidityMonths = 12
+                    ValidityMonths = validityMonths
                 });
                 created++;
             }

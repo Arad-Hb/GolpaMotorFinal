@@ -443,6 +443,9 @@
     $(bootDateRanges);
     if (document.readyState !== "loading") bootDateRanges();
 
+
+    // Numeric Range inputs
+
     function numEmptyLabel($wrap) {
         return $wrap.attr("data-empty-label") || "بازه عدد";
     }

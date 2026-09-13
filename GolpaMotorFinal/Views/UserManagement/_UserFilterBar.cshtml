@@ -8,7 +8,7 @@
         ViewData["SearchPlaceholder"] = "نام، فامیلی یا موبایل";
         ViewData["SearchName"] = "SearchTerm";
     }
-    @await Html.PartialAsync("_FilterSearchReset")
+    @await Html.PartialAsync("_FilterSearch")
     <select name="CustomerTypeID" class="form-select">
         <option value="">همه نقش‌ها</option>
         @foreach (var type in types)
@@ -52,4 +52,5 @@
         ViewData["DateToPlaceholder"] = "ثبت کارت تا";
     }
     @await Html.PartialAsync("_DateRangeFilter")
+    @await Html.PartialAsync("_FilterReset")
 </form>

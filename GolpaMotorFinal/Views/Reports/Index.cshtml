@@ -51,7 +51,7 @@
                         ViewData["DateToPlaceholder"] = "تا تاریخ";
                     }
                     @await Html.PartialAsync("_DateRangeFilter")
-                    <button type="button" class="main_bt" data-filter-reset title="بازنشانی"><i class="fa-solid fa-rotate-left"></i></button>
+                    @await Html.PartialAsync("_FilterReset")
                 </form>
                 <div id="WarrantyReportGrid"></div>
             </div>
@@ -83,7 +83,7 @@
                         <option value="11">بهمن</option>
                         <option value="12">اسفند</option>
                     </select>
-                    <button type="button" class="main_bt" data-filter-reset title="بازنشانی"><i class="fa-solid fa-rotate-left"></i></button>
+                    @await Html.PartialAsync("_FilterReset")
                 </form>
                 <div id="ProductReportGrid"></div>
             </div>
@@ -101,7 +101,7 @@
                         ViewData["DateToPlaceholder"] = "تا تاریخ";
                     }
                     @await Html.PartialAsync("_DateRangeFilter")
-                    <button type="button" class="main_bt" data-filter-reset title="بازنشانی"><i class="fa-solid fa-rotate-left"></i></button>
+                    @await Html.PartialAsync("_FilterReset")
                 </form>
                 <div id="RewardReportGrid"></div>
             </div>
