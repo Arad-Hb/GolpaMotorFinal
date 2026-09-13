@@ -34,7 +34,7 @@ $(document).on("input", ".table-filter-input", function () {
 function refreshGrid(targetId, targetUrl, closeOnSuccess = true, afterRefresh) {
     if (!targetUrl) {
         if (closeOnSuccess) {
-            try { generalModal.hide(); } catch (e) { }
+            if (typeof closeModal === "function") closeModal();
         }
         if (typeof afterRefresh === "function") afterRefresh();
         return;
@@ -46,7 +46,7 @@ function refreshGrid(targetId, targetUrl, closeOnSuccess = true, afterRefresh) {
                 $(targetId).html(html);
             }
             if (closeOnSuccess) {
-                try { generalModal.hide(); } catch (e) { }
+                if (typeof closeModal === "function") closeModal();
             }
             if (typeof afterRefresh === "function") afterRefresh();
         })
@@ -110,7 +110,7 @@ $(document).on("submit", ".crud-form", function (e) {
                 });
             } else {
                 if (form.data("close-on-success")) {
-                    try { generalModal.hide(); } catch (err) { }
+                    if (typeof closeModal === "function") closeModal();
                 }
                 toastSuccess(op.message);
             }

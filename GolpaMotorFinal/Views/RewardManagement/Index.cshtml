@@ -29,7 +29,11 @@
         <div class="white_shd full margin_bottom_30">
             <div class="full graph_head d-flex flex-wrap justify-content-between align-items-center gap-2">
                 <div class="heading1 margin_0"><h2>لیست پاداش‌ها</h2></div>
-                <button class="main_bt" id="btnAddCatalog"><i class="fa fa-plus ms-1"></i> افزودن پاداش</button>
+                <button type="button" class="main_bt open-modal"
+                        data-url="@Url.Action("Create", "RewardManagement")"
+                        data-title="افزودن پاداش">
+                    <i class="fa fa-plus ms-1"></i> افزودن پاداش
+                </button>
             </div>
             <div class="padding_infor_info">
                 <form class="table_filter_bar" data-filter-bar data-url="/RewardManagement/CatalogList" data-target="#CatalogGrid">
@@ -108,48 +112,16 @@
     </div>
 </div>
 
-<div class="modal fade" id="rewardModal">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="rewardModalTitle">مدیریت پاداش</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body" id="rewardModalBody"></div>
-        </div>
-    </div>
-</div>
-
 @section Scripts
 {
     <script>
-        let catalogPage = 0;
-        let requestPage = 0;
-
         $(function () {
             LoadCatalogs();
             LoadRequests();
         });
 
-        function rewardModal() {
-            return bootstrap.Modal.getOrCreateInstance(document.getElementById("rewardModal"));
-        }
-
-        function showRewardModal(title) {
-            if (title) $("#rewardModalTitle").text(title);
-            rewardModal().show();
-        }
-
-        function hideRewardModal() {
-            rewardModal().hide();
-        }
-
         function antiForgeryToken() {
             return $('#frmAntiForgery input[name="__RequestVerificationToken"]').val();
-        }
-
-        function catalogListUrl(page) {
-            return "/RewardManagement/CatalogList";
         }
 
         function LoadCatalogs(page) {
@@ -159,13 +131,6 @@
         function LoadRequests(page) {
             applyTableFilter($("#RequestGrid").closest(".padding_infor_info").find("[data-filter-bar]"), page);
         }
-
-        $(document).on("click", "#btnAddCatalog", function () {
-            $.get("/RewardManagement/Create", function (result) {
-                $("#rewardModalBody").html(result);
-                showRewardModal("افزودن پاداش");
-            });
-        });
 
         $(document).on("submit", "#frmCreateCatalog", function (e) {
             e.preventDefault();
@@ -179,20 +144,13 @@
                 headers: { RequestVerificationToken: $('input[name="__RequestVerificationToken"]', this).val() },
                 success: function (res) {
                     if (res.success) {
-                        hideRewardModal();
+                        closeModal();
                         LoadCatalogs();
                         toastSuccess(res.message);
                     } else {
                         toastError(res.message);
                     }
                 }
-            });
-        });
-
-        $(document).on("click", ".btnEditCatalog", function () {
-            $.get("/RewardManagement/Edit", { rewardCatalogID: $(this).data("id") }, function (result) {
-                $("#rewardModalBody").html(result);
-                showRewardModal("ویرایش پاداش");
             });
         });
 
@@ -208,20 +166,13 @@
                 headers: { RequestVerificationToken: $('input[name="__RequestVerificationToken"]', this).val() },
                 success: function (res) {
                     if (res.success) {
-                        hideRewardModal();
+                        closeModal();
                         LoadCatalogs();
                         toastSuccess(res.message);
                     } else {
                         toastError(res.message);
                     }
                 }
-            });
-        });
-
-        $(document).on("click", ".btnDetailsCatalog", function () {
-            $.get("/RewardManagement/Details", { rewardCatalogID: $(this).data("id") }, function (result) {
-                $("#rewardModalBody").html(result);
-                showRewardModal("جزئیات پاداش");
             });
         });
 
@@ -246,13 +197,6 @@
             });
         });
 
-        $(document).on("click", ".btnRequestDetails", function () {
-            $.get("/RewardManagement/RequestDetails", { rewardRequestID: $(this).data("id") }, function (result) {
-                $("#rewardModalBody").html(result);
-                showRewardModal("جزئیات درخواست");
-            });
-        });
-
         $(document).on("click", ".btnApproveRequest", async function () {
             const ok = await confirmDelete("این درخواست تأیید و امتیاز کاربر کسر شود؟");
             if (!ok) return;
@@ -264,7 +208,7 @@
                 headers: { RequestVerificationToken: antiForgeryToken() },
                 success: function (res) {
                     if (res.success) {
-                        hideRewardModal();
+                        closeModal();
                         LoadRequests();
                         toastSuccess(res.message);
                     } else {
@@ -285,7 +229,7 @@
                 headers: { RequestVerificationToken: antiForgeryToken() },
                 success: function (res) {
                     if (res.success) {
-                        hideRewardModal();
+                        closeModal();
                         LoadRequests();
                         toastSuccess(res.message);
                     } else {

@@ -34,15 +34,13 @@
 }
 
 @media (max-width: 768px) {
-    #generalModal .modal-dialog,
-    #productModal .modal-dialog {
+    #generalModal .modal-dialog {
         margin: 0;
         max-width: 100%;
         height: 100%;
     }
 
-    #generalModal .modal-content,
-    #productModal .modal-content {
+    #generalModal .modal-content {
         height: 100%;
         border-radius: 0;
     }

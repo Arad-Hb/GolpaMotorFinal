@@ -46,7 +46,11 @@
                         <td>@(item.RequestDate?.ToLocalTime().ToString("yyyy/MM/dd") ?? "-")</td>
                         <td>@item.StatusTitle</td>
                         <td class="table-actions">
-                            <button type="button" class="btn btn-sm btn-outline-secondary btnRequestDetails" title="جزئیات" data-id="@item.RewardRequestID">
+                            <button type="button" class="btn btn-sm btn-outline-secondary open-modal" title="جزئیات"
+                                    data-url="@Url.Action("RequestDetails", "RewardManagement")"
+                                    data-title="جزئیات درخواست"
+                                    data-id="@item.RewardRequestID"
+                                    data-id-name="rewardRequestID">
                                 <i class="fa fa-eye"></i>
                             </button>
                             @if (!item.IsComplete && item.StatusTitle == RewardStatusTitles.Pending)

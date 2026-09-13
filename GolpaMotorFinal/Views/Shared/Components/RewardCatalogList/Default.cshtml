@@ -42,10 +42,18 @@
                         <td>@(item.IsActive ? "فعال" : "غیرفعال")</td>
                         <td class="table-num">@item.RequestCount</td>
                         <td class="table-actions">
-                            <button type="button" class="btn btn-sm btn-outline-secondary btnDetailsCatalog" title="جزئیات" data-id="@item.RewardCatalogID">
+                            <button type="button" class="btn btn-sm btn-outline-secondary open-modal" title="جزئیات"
+                                    data-url="@Url.Action("Details", "RewardManagement")"
+                                    data-title="جزئیات پاداش"
+                                    data-id="@item.RewardCatalogID"
+                                    data-id-name="rewardCatalogID">
                                 <i class="fa fa-eye"></i>
                             </button>
-                            <button type="button" class="btn btn-sm btn-outline-warning btnEditCatalog" title="ویرایش" data-id="@item.RewardCatalogID">
+                            <button type="button" class="btn btn-sm btn-outline-warning open-modal" title="ویرایش"
+                                    data-url="@Url.Action("Edit", "RewardManagement")"
+                                    data-title="ویرایش پاداش"
+                                    data-id="@item.RewardCatalogID"
+                                    data-id-name="rewardCatalogID">
                                 <i class="fa fa-pen"></i>
                             </button>
                             <button type="button" class="btn btn-sm btn-outline-danger btnDeleteCatalog" title="غیرفعال" data-id="@item.RewardCatalogID">

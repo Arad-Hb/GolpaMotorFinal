@@ -50,15 +50,21 @@
                         <td class="table-num">@prod.UnregisteredCardCount</td>
                         <td class="table-actions">
                             <button type="button"
-                                    class="btn btn-sm btn-outline-secondary btnDetails"
+                                    class="btn btn-sm btn-outline-secondary open-modal"
                                     title="جزئیات"
-                                    data-id="@prod.ProductID">
+                                    data-url="@Url.Action("Details", "ProductManagement")"
+                                    data-title="جزئیات محصول"
+                                    data-id="@prod.ProductID"
+                                    data-id-name="productID">
                                   <i class="fa fa-eye"></i>
                             </button>
                             <button type="button"
-                                    class="btn btn-sm btn-outline-warning btnEdit"
+                                    class="btn btn-sm btn-outline-warning open-modal"
                                     title="ویرایش"
-                                    data-id="@prod.ProductID">
+                                    data-url="@Url.Action("Edit", "ProductManagement")"
+                                    data-title="ویرایش محصول"
+                                    data-id="@prod.ProductID"
+                                    data-id-name="productID">
                                 <i class="fa fa-pen"></i>
                             </button>
                             <button type="button" class="btn btn-sm btn-outline-danger btnDelete" title="حذف"

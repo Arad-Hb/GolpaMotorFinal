@@ -54,7 +54,11 @@
 <div class="white_shd full margin_bottom_30">
     <div class="full graph_head d-flex flex-wrap justify-content-between align-items-center gap-2">
         <div class="heading1 margin_0"><h2>لیست محصولات</h2></div>
-        <button class="main_bt" id="btnAdd"><i class="fa fa-plus ms-1"></i> افزودن محصول</button>
+        <button type="button" class="main_bt open-modal"
+                data-url="@Url.Action("Create", "ProductManagement")"
+                data-title="افزودن محصول">
+            <i class="fa fa-plus ms-1"></i> افزودن محصول
+        </button>
     </div>
     <div class="padding_infor_info">
         <form class="table_filter_bar" data-filter-bar data-url="/ProductManagement/ProductList" data-target="#ProductGrid">
@@ -101,53 +105,16 @@
     </div>
 </div>
 
-<div class="modal fade" id="productModal">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">مدیریت محصول</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body" id="modalBody"></div>
-        </div>
-    </div>
-</div>
-
 @section Scripts
 {
     <script>
-        let currentPage = 0;
-
         $(function () {
             LoadProducts();
         });
 
-        function productModal() {
-            return bootstrap.Modal.getOrCreateInstance(document.getElementById("productModal"));
-        }
-
-        function showProductModal() {
-            productModal().show();
-        }
-
-        function hideProductModal() {
-            productModal().hide();
-        }
-
-        function productListUrl(page) {
-            return "/ProductManagement/ProductList";
-        }
-
         function LoadProducts(page) {
             applyTableFilter($("#ProductGrid").closest(".padding_infor_info").find("[data-filter-bar]"), page);
         }
-
-        $(document).on("click", "#btnAdd", function () {
-            $.get("/ProductManagement/Create", function (result) {
-                $("#modalBody").html(result);
-                showProductModal();
-            });
-        });
 
         $(document).on("submit", "#frmCreate", function (e) {
             e.preventDefault();
@@ -163,20 +130,13 @@
                 },
                 success: function (res) {
                     if (res.success) {
-                        hideProductModal();
+                        closeModal();
                         LoadProducts();
                         toastSuccess(res.message);
                     } else {
                         toastError(res.message);
                     }
                 }
-            });
-        });
-
-        $(document).on("click", ".btnEdit", function () {
-            $.get("/ProductManagement/Edit", { productID: $(this).data("id") }, function (result) {
-                $("#modalBody").html(result);
-                showProductModal();
             });
         });
 
@@ -194,20 +154,13 @@
                 },
                 success: function (res) {
                     if (res.success) {
-                        hideProductModal();
+                        closeModal();
                         LoadProducts();
                         toastSuccess(res.message);
                     } else {
                         toastError(res.message);
                     }
                 }
-            });
-        });
-
-        $(document).on("click", ".btnDetails", function () {
-            $.get("/ProductManagement/Details", { productID: $(this).data("id") }, function (result) {
-                $("#modalBody").html(result);
-                showProductModal();
             });
         });
 

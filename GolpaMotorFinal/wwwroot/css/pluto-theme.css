@@ -1458,29 +1458,24 @@ html[dir="rtl"] body.pluto-public {
 .alert-dark { background: #d6d8d9; color: #1b1e21; border-color: #c6c8ca; }
 
 /* Modal */
-#generalModal .modal-header,
-#productModal .modal-header {
+#generalModal .modal-header {
     background: var(--pluto-navy);
     color: #fff;
 }
 
-#generalModal .modal-title,
-#productModal .modal-title {
+#generalModal .modal-title {
     color: #fff;
 }
 
-#generalModal .btn-close,
-#productModal .btn-close {
+#generalModal .btn-close {
     filter: invert(1);
 }
 
-#generalModal .modal-dialog,
-#productModal .modal-dialog {
+#generalModal .modal-dialog {
     max-width: 560px;
 }
 
-#generalModal .modal-body,
-#productModal .modal-body {
+#generalModal .modal-body {
     padding: 14px 16px 16px;
 }
 
