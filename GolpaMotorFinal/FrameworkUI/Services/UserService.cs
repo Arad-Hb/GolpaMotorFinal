@@ -278,12 +278,12 @@ namespace GolpaMotorFinal.FrameworkUI.Services
         public CrudGridViewModel BuildUserGrid(IEnumerable<UserListItemViewModel> users)
         {
             var grid = new CrudGridViewModel { GridId = "UserGrid" };
-            grid.Headers.AddRange(new[] { "تصویر", "نام", "موبایل", "شغل", "کارت", "امتیاز", "واجد پاداش", "دریافت پاداش", "استان", "شهر" });
+            grid.Headers.AddRange(new[] { "نام", "موبایل", "شغل", "کارت", "امتیاز", "واجد پاداش", "دریافت پاداش", "استان", "شهر" });
 
             foreach (var item in users)
             {
                 var row = new GridRow { Key = item.UserID };
-                row.Columns.Add(Image(item.ProfileImageUrl));
+                
                 row.Columns.Add(Text(item.FullName));
                 row.Columns.Add(Text(item.PhoneNumber));
                 row.Columns.Add(Text(item.RoleName));
@@ -314,14 +314,14 @@ namespace GolpaMotorFinal.FrameworkUI.Services
 
             grid.Headers.AddRange(new[]
             {
-                "تصویر", "نام", "موبایل", "شغل", "کارت", "امتیاز", "تسویه", "مانده", "استان", "شهر"
+                 "نام", "موبایل", "شغل", "کارت", "امتیاز", "تسویه", "مانده", "استان", "شهر"
             });
 
             foreach (var item in users)
             {
                 var row = new GridRow { Key = item.UserID };
 
-                row.Columns.Add(Image(item.ProfileImageUrl));
+              
                 row.Columns.Add(Text(item.FullName));
                 row.Columns.Add(Text(item.PhoneNumber));
                 row.Columns.Add(Text(item.RoleName));
@@ -332,29 +332,29 @@ namespace GolpaMotorFinal.FrameworkUI.Services
                 row.Columns.Add(Text(item.Province));
                 row.Columns.Add(Text(item.City));
 
-                row.Actions.Add(new GridAction
-                {
-                    ActionText = "جزئیات",
-                    OpenModal = true,
-                    EnableRefresh = true,
-                    Ajax = true,
-                    Icon = "fa fa-eye",
-                    Url = "/UserManagement/Details",
-                    Id = item.UserID,
-                    CssClass = "btn btn-sm btn-outline-secondary"
-                });
+                //row.Actions.Add(new GridAction
+                //{
+                //    ActionText = "جزئیات",
+                //    OpenModal = true,
+                //    EnableRefresh = true,
+                //    Ajax = true,
+                //    Icon = "fa fa-eye",
+                //    Url = "/UserManagement/Details",
+                //    Id = item.UserID,
+                //    CssClass = "btn btn-sm btn-outline-secondary"
+                //});
 
-                row.Actions.Add(new GridAction
-                {
-                    ActionText = "ادغام",
-                    OpenModal = true,
-                    EnableRefresh = true,
-                    Ajax = true,
-                    Icon = "fa fa-user-plus",
-                    Url = "/UserManagement/MergeAccounts?gridId=UserReportGrid&refreshUrl=/UserManagement/UserReportGrid",
-                    Id = item.UserID,
-                    CssClass = "btn btn-sm btn-outline-primary"
-                });
+                //row.Actions.Add(new GridAction
+                //{
+                //    ActionText = "ادغام",
+                //    OpenModal = true,
+                //    EnableRefresh = true,
+                //    Ajax = true,
+                //    Icon = "fa fa-user-plus",
+                //    Url = "/UserManagement/MergeAccounts?gridId=UserReportGrid&refreshUrl=/UserManagement/UserReportGrid",
+                //    Id = item.UserID,
+                //    CssClass = "btn btn-sm btn-outline-primary"
+                //});
 
                 grid.Rows.Add(row);
             }
