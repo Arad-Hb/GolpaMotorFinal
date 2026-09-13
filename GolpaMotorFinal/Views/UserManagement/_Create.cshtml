@@ -28,6 +28,27 @@
 
         </div>
         <div class="col-12 col-md-6">
+            <label asp-for="CustomerTypeID"></label>
+            <select asp-for="CustomerTypeID" asp-items="Model.CustomerTypes" class="form-select">
+                <option value="">انتخاب شغل</option>
+            </select>
+            <span asp-validation-for="CustomerTypeID" class="text-danger"></span>
+        </div>
+        <div class="col-12 col-md-6">
+            <label asp-for="ProvinceID"></label>
+            <select asp-for="ProvinceID" asp-items="Model.Provinces" class="form-select js-user-province">
+                <option value="">انتخاب استان</option>
+            </select>
+            <span asp-validation-for="ProvinceID" class="text-danger"></span>
+        </div>
+        <div class="col-12 col-md-6">
+            <label asp-for="CityID"></label>
+            <select asp-for="CityID" asp-items="Model.Cities" class="form-select js-user-city">
+                <option value="">انتخاب شهر</option>
+            </select>
+            <span asp-validation-for="CityID" class="text-danger"></span>
+        </div>
+        <div class="col-12 col-md-6">
 
             <label asp-for="PostalCode">کد پستی</label>
 

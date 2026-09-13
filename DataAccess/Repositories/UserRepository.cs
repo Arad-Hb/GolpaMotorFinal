@@ -115,7 +115,7 @@ namespace DataAccess.Repositories
                 LastName = model.LastName,
                 Email = email,
                 PhoneNumber = model.PhoneNumber,
-
+              
                 ProvinceID = model.ProvinceID,
                 CityID = model.CityID,
                 Address = model.Address,
@@ -128,6 +128,8 @@ namespace DataAccess.Repositories
                 CreditCartNumber = model.CreditCartNumber,
                 IBAN = model.IBAN,
                 AccountNumber = model.AccountNumber,
+
+                CustomerTypeID = model.UserCustomerTypes?.Select(x => (int?)x.CustomerTypeID).FirstOrDefault(),
 
                 TotalEarnedPoints = model.TotalEarnedPoints ?? 0,
                 TotalSettledPoints = model.TotalSettledPoints ?? 0,
@@ -151,6 +153,8 @@ namespace DataAccess.Repositories
                     return result.ToFailed(string.Join(Environment.NewLine,
                         identityResult.Errors.Select(x => x.Description)));
                 }
+
+                await SyncUserCustomerType(user.Id, model.CustomerTypeID);
 
                 return result.ToSuccess("کاربر با موفقیت ثبت شد");
             }
@@ -186,12 +190,43 @@ namespace DataAccess.Repositories
                 if (!result.Succeeded)
                     return op.ToFailed(string.Join(" | ", result.Errors.Select(x => x.Description)));
 
+                await SyncUserCustomerType(model.UserID, model.CustomerTypeID);
+
                 return op.ToSuccess("اطلاعات کاربر با موفقیت ویرایش شد");
             }
             catch (Exception ex)
             {
                 return op.ToFailed($"خطا در ویرایش کاربر: {ex.Message}");
             }
+        }
+
+        private async Task SyncUserCustomerType(string userID, int? customerTypeID)
+        {
+            var existing = await db.UserCustomerTypes
+                .Where(x => x.UserID == userID)
+                .ToListAsync();
+
+            var selectedId = customerTypeID.GetValueOrDefault();
+            if (selectedId > 0
+                && existing.Count == 1
+                && existing[0].CustomerTypeID == selectedId)
+            {
+                return;
+            }
+
+            if (existing.Count > 0)
+                db.UserCustomerTypes.RemoveRange(existing);
+
+            if (selectedId > 0)
+            {
+                await db.UserCustomerTypes.AddAsync(new UserCustomerType
+                {
+                    UserID = userID,
+                    CustomerTypeID = selectedId
+                });
+            }
+
+            await db.SaveChangesAsync();
         }
 
         public async Task<OperationResult> Delete(string userID)
@@ -355,7 +390,9 @@ namespace DataAccess.Repositories
 
         public async Task<UserAddEditModel> Get(string userID)
         {
-            var user = await db.Users.FirstOrDefaultAsync(x => x.Id == userID && !x.IsDeleted);
+            var user = await db.Users
+                .Include(x => x.UserCustomerTypes)
+                .FirstOrDefaultAsync(x => x.Id == userID && !x.IsDeleted);
 
             if (user == null)
                 return new UserAddEditModel();

@@ -3,12 +3,13 @@ using DataAccess.Services;
 using DomainModel.ViewModels.User;
 using Framework.Common;
 using GolpaMotorFinal.FrameworkUI.Services;
-using GolpaMotorFinal.Models.ViewModels.Account;
-using GolpaMotorFinal.Models.ViewModels.UserManagement;
-using GolpaMotorFinal.Models.ViewModels.CRUD;
 using GolpaMotorFinal.Models.ViewModels;
+using GolpaMotorFinal.Models.ViewModels.Account;
+using GolpaMotorFinal.Models.ViewModels.CRUD;
+using GolpaMotorFinal.Models.ViewModels.UserManagement;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace GolpaMotorFinal.Controllers
 {
@@ -158,8 +159,12 @@ namespace GolpaMotorFinal.Controllers
         }
 
         [HttpGet]
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
+            var provinces = await repo.GetProvinces();
+            var customerTypes = await repo.GetCustomerTypes();
+            var cities =new List<DomainModel.Models.City>();
+
             var form = new CrudFormViewModel
             {
                 Title = "افزودن کاربر",
@@ -175,6 +180,9 @@ namespace GolpaMotorFinal.Controllers
             };
             var vm = new UserAddEditViewModel
             {
+                CustomerTypes = new SelectList(customerTypes, "CustomerTypeID", "Title"),
+                Provinces = new SelectList(provinces, "ProvinceID", "Name"),
+                Cities = new SelectList(cities, "CityID", "Name"),
                 CrudFormViewModel = form
             };
 
@@ -224,6 +232,7 @@ namespace GolpaMotorFinal.Controllers
                 LastName = vm.LastName,
                 Email = vm.Email,
                 PhoneNumber = vm.PhoneNumber,
+                CustomerTypeID = vm.CustomerTypeID,
                 ProvinceID = vm.ProvinceID,
                 CityID = vm.CityID,
                 Address = vm.Address,
@@ -326,6 +335,7 @@ namespace GolpaMotorFinal.Controllers
                 LastName = vm.LastName,
                 Email = vm.Email,
                 PhoneNumber = vm.PhoneNumber,
+                CustomerTypeID = vm.CustomerTypeID,
                 ProvinceID = vm.ProvinceID,
                 CityID = vm.CityID,
                 Address = vm.Address,

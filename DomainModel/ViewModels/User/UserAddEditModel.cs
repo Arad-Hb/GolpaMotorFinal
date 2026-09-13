@@ -29,6 +29,9 @@ namespace DomainModel.ViewModels.User
         [Display(Name = "شماره موبایل")]
         public string? PhoneNumber { get; set; }
 
+        [Display(Name = "شغل")]
+        public int? CustomerTypeID { get; set; }
+
         [Display(Name = "استان")]
         public int? ProvinceID { get; set; }
 

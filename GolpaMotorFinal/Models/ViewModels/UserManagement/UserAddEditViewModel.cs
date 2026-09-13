@@ -28,6 +28,9 @@ namespace GolpaMotorFinal.Models.ViewModels.UserManagement
         [Display(Name = "ایمیل")]
         public string? Email { get; set; }
 
+        [Display(Name = "شغل")]
+        public int? CustomerTypeID { get; set; }
+
         [Display(Name = "استان")]
         public int? ProvinceID { get; set; }
 
@@ -65,6 +68,8 @@ namespace GolpaMotorFinal.Models.ViewModels.UserManagement
 
         // عکس جدید
         public IFormFile? ProfileImage { get; set; }
+
+        public IEnumerable<SelectListItem> CustomerTypes { get; set; } = new List<SelectListItem>();
 
         public IEnumerable<SelectListItem> Provinces { get; set; } = new List<SelectListItem>();
 

@@ -107,6 +107,7 @@ namespace GolpaMotorFinal.FrameworkUI.Services
             };
 
             var provinces = await repo.GetProvinces();
+            var customerTypes = await repo.GetCustomerTypes();
             var cities = user.ProvinceID.HasValue
                 ? await repo.GetCitiesByProvinceId(user.ProvinceID.Value)
                 : new List<DomainModel.Models.City>();
@@ -118,6 +119,7 @@ namespace GolpaMotorFinal.FrameworkUI.Services
                 LastName = user.LastName,
                 Email = user.Email,
                 PhoneNumber = user.PhoneNumber,
+                CustomerTypeID = user.CustomerTypeID,
                 ProvinceID = user.ProvinceID,
                 CityID = user.CityID,
                 Address = user.Address,
@@ -128,6 +130,7 @@ namespace GolpaMotorFinal.FrameworkUI.Services
                 IsActive = user.IsActive,
                 IsDeleted = user.IsDeleted,
                 ProfileImageUrl = user.ProfileImageUrl,
+                CustomerTypes = new SelectList(customerTypes, "CustomerTypeID", "Title", user.CustomerTypeID),
                 Provinces = new SelectList(provinces, "ProvinceID", "Name", user.ProvinceID),
                 Cities = new SelectList(cities, "CityID", "Name", user.CityID),
                 CrudFormViewModel = form
