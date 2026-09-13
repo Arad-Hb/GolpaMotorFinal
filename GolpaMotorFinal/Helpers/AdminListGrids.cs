@@ -1,8 +1,10 @@
+using DataAccess.Services;
 using DomainModel.Models;
 using DomainModel.ViewModels.Product;
 using DomainModel.ViewModels.Reports;
 using DomainModel.ViewModels.Reward;
 using GolpaMotorFinal.Models.ViewModels.CRUD;
+using GolpaMotorFinal.Models.ViewModels.UserManagement;
 
 namespace GolpaMotorFinal.Helpers
 {
@@ -194,6 +196,101 @@ namespace GolpaMotorFinal.Helpers
             return grid;
         }
 
+        public static CrudGridViewModel BuildUserGrid(IEnumerable<UserListItemViewModel> users)
+        {
+            var grid = new CrudGridViewModel { GridId = "UserGrid", EmptyMessage = "هیچ کاربری یافت نشد" };
+            grid.Headers.AddRange(new[] { "نام", "موبایل", "شغل", "استان", "شهر", "کارت", "امتیاز", "واجد پاداش", "دریافت پاداش" });
+
+            foreach (var item in users)
+            {
+                var row = new GridRow { Key = item.UserID };
+                row.Columns.Add(Text(item.FullName));
+                row.Columns.Add(Text(item.PhoneNumber));
+                row.Columns.Add(Text(item.RoleName));
+                row.Columns.Add(Text(item.Province));
+                row.Columns.Add(Text(item.City));
+                row.Columns.Add(Number(item.TotalRegisteredCards));
+                row.Columns.Add(Number(item.TotalEarnedPoints));
+                row.Columns.Add(Text(item.IsEligibleForReward ? "بله" : "خیر"));
+                row.Columns.Add(Text(item.HasReceivedReward ? "بله" : "خیر"));
+
+                row.Actions.Add(Modal("ثبت درخواست پاداش", "fa fa-gift", "/UserManagement/EligibleRewards", item.UserID, "userID", "btn btn-sm btn-outline-success"));
+                row.Actions.Add(Modal("جزئیات", "fa fa-eye", "/UserManagement/Details", item.UserID, "userID", "btn btn-sm btn-outline-secondary"));
+                row.Actions.Add(Modal("ویرایش", "fa fa-pen", "/UserManagement/Edit", item.UserID, "userID", "btn btn-sm btn-outline-warning"));
+                row.Actions.Add(new GridAction
+                {
+                    ActionText = "ادغام حساب",
+                    OpenModal = true,
+                    Icon = "fa fa-user-plus",
+                    Url = "/UserManagement/MergeAccounts",
+                    Id = item.UserID,
+                    IdName = "userID",
+                    CssClass = "btn btn-sm btn-outline-primary",
+                    GridId = "UserGrid",
+                    RefreshUrl = "/UserManagement/List"
+                });
+                row.Actions.Add(new GridAction
+                {
+                    ActionText = "حذف",
+                    OpenModal = false,
+                    IsDelete = true,
+                    Icon = "fa fa-trash",
+                    Url = "/UserManagement/Delete",
+                    Id = item.UserID,
+                    IdName = "userID",
+                    CssClass = "btn btn-sm btn-outline-danger",
+                    RefreshUrl = "/UserManagement/List",
+                    RefreshTargetId = "UserGrid"
+                });
+                grid.Rows.Add(row);
+            }
+
+            return grid;
+        }
+
+        public static CrudGridViewModel BuildUserReportGrid(IEnumerable<UserReportViewModel> users)
+        {
+            var grid = new CrudGridViewModel { GridId = "UserReportGrid", EmptyMessage = "داده‌ای یافت نشد" };
+            grid.Headers.AddRange(new[] { "نام", "موبایل", "شغل", "کارت", "امتیاز", "تسویه", "مانده", "استان", "شهر" });
+
+            foreach (var item in users)
+            {
+                var row = new GridRow { Key = item.UserID };
+                row.Columns.Add(Text(item.FullName));
+                row.Columns.Add(Text(item.PhoneNumber));
+                row.Columns.Add(Text(item.RoleName));
+                row.Columns.Add(Number(item.TotalRegisteredCards));
+                row.Columns.Add(Number(item.TotalEarnedPoints));
+                row.Columns.Add(Number(item.TotalSettledPoints));
+                row.Columns.Add(Number(item.RemainedPoints, "fw-bold text-success"));
+                row.Columns.Add(Text(item.Province));
+                row.Columns.Add(Text(item.City));
+                grid.Rows.Add(row);
+            }
+
+            return grid;
+        }
+
+        public static CrudGridViewModel BuildWarrantyCardGrid(IEnumerable<WarrantyCardListItem> items)
+        {
+            var grid = new CrudGridViewModel { GridId = "warrantyCardsGrid", EmptyMessage = "کارتی یافت نشد" };
+            grid.Headers.AddRange(new[] { "سریال", "رمز", "محصول", "وضعیت", "اعتبار (ماه)", "اعتبار باقی‌مانده" });
+
+            foreach (var card in items)
+            {
+                var row = new GridRow { Key = card.WarrantyCardID.ToString() };
+                row.Columns.Add(Text(card.SerialNumber));
+                row.Columns.Add(Text(card.ScratchedCode));
+                row.Columns.Add(Text(card.ProductName));
+                row.Columns.Add(Text(card.IsRegistered ? "ثبت‌شده" : "آزاد"));
+                row.Columns.Add(Number(card.ValidityMonths));
+                row.Columns.Add(Text(card.RemainingText));
+                grid.Rows.Add(row);
+            }
+
+            return grid;
+        }
+
         private static GridAction Modal(string text, string icon, string url, string id, string idName, string css)
         {
             return new GridAction
@@ -214,10 +311,11 @@ namespace GolpaMotorFinal.Helpers
             Value = value ?? "-"
         };
 
-        private static GridColumn Number(object? value) => new()
+        private static GridColumn Number(object? value, string css = "") => new()
         {
             Type = GridColumnType.Number,
-            Value = value ?? 0
+            Value = value ?? 0,
+            CssClass = css
         };
     }
 }

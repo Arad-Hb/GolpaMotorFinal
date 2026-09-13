@@ -39,17 +39,19 @@ namespace GolpaMotorFinal.Controllers
             var stats = await products.GetStatistics();
             var pageSize = PaginationViewModel.DefaultPageSize;
             var page = await products.GetTopRegistrarsPage(pageIndex, pageSize);
-            ViewBag.Stats = stats;
-            ViewBag.TopProducts = await reports.GetTopProducts(5);
-            ViewBag.TopRewards = await reports.GetTopRewards(5);
-            ViewBag.TopRegistrars = new TopRegistrarsPageViewModel
+            return View(new AdminDashboardViewModel
             {
-                Items = page.Items,
-                PageIndex = pageIndex,
-                PageCount = pageSize <= 0 ? 1 : (int)Math.Ceiling(page.Total / (double)pageSize),
-                RecordCount = page.Total
-            };
-            return View();
+                Stats = stats,
+                TopProducts = await reports.GetTopProducts(5),
+                TopRewards = await reports.GetTopRewards(5),
+                TopRegistrars = new TopRegistrarsPageViewModel
+                {
+                    Items = page.Items,
+                    PageIndex = pageIndex,
+                    PageCount = pageSize <= 0 ? 1 : (int)Math.Ceiling(page.Total / (double)pageSize),
+                    RecordCount = page.Total
+                }
+            });
         }
 
         [HttpGet]
@@ -121,23 +123,6 @@ namespace GolpaMotorFinal.Controllers
                 foreach (var error in update.Errors)
                     ModelState.AddModelError(string.Empty, error.Description);
                 return View(ToProfile(user));
-            }
-
-            if (!string.IsNullOrWhiteSpace(model.NewPassword))
-            {
-                if (string.IsNullOrWhiteSpace(model.CurrentPassword))
-                {
-                    ModelState.AddModelError(nameof(model.CurrentPassword), "رمز فعلی را وارد کنید.");
-                    return View(ToProfile(user));
-                }
-
-                var changed = await userManager.ChangePasswordAsync(user, model.CurrentPassword, model.NewPassword);
-                if (!changed.Succeeded)
-                {
-                    foreach (var error in changed.Errors)
-                        ModelState.AddModelError(string.Empty, error.Description);
-                    return View(ToProfile(user));
-                }
             }
 
             await signInManager.RefreshSignInAsync(user);

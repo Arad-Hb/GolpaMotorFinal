@@ -117,10 +117,16 @@ namespace GolpaMotorFinal.FrameworkUI.Services
             }
         }
 
-        public async Task<ProductAddEditModel?> GetForEdit(int productID)
+        public async Task<ProductAddEditModel?> GetForEdit(long productID)
         {
             return await repo.Get(productID);
         }
+
+        public Task<ProductStatistics> GetStatistics() => repo.GetStatistics();
+
+        public Task<ProductListComplexModel> Search(ProductSearchModel sm) => repo.Search(sm);
+
+        public Task<ProductDetailsModel?> GetDetails(long productID) => repo.GetDetails(productID);
 
         public async Task<OperationResult> RemovePicture(long productID)
         {

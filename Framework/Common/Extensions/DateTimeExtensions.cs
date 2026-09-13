@@ -50,19 +50,5 @@ namespace Framework.Common.Extensions
 
             return $"{dayName} {day} {Months[month]} {year}";
         }
-
-        // ⏰ تاریخ + زمان (مثل: دوشنبه 25 خرداد 1405 - 12:45:22)
-        public static string ToPersianDateTime(this DateTime date)
-        {
-            int year = pc.GetYear(date);
-            int month = pc.GetMonth(date);
-            int day = pc.GetDayOfMonth(date);
-
-            string dayName = WeekDays[(int)date.DayOfWeek];
-
-            string time = date.ToString("HH:mm:ss");
-
-            return $"{dayName} {day} {Months[month]} {year} - {time}";
-        }
     }
 }

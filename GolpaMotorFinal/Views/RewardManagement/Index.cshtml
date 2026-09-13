@@ -1,10 +1,11 @@
+@model GolpaMotorFinal.Models.ViewModels.RewardManagement.RewardIndexViewModel
 @using DomainModel.Models
 @using DomainModel.ViewModels.Reward
 @{
     ViewData["Title"] = "مدیریت پاداش";
     Layout = "_AdminLayout";
-    var statuses = ViewBag.Statuses as IEnumerable<RewardDeliveryStatus> ?? Enumerable.Empty<RewardDeliveryStatus>();
-    var catalogs = ViewBag.Catalogs as IEnumerable<RewardCatalogListItem> ?? Enumerable.Empty<RewardCatalogListItem>();
+    var statuses = Model.Statuses;
+    var catalogs = Model.Catalogs;
 }
 
 @await Html.PartialAsync("_AdminPageHeader", new GolpaMotorFinal.Models.ViewModels.AdminPageHeaderViewModel
@@ -131,50 +132,6 @@
         function LoadRequests(page) {
             applyTableFilter($("#RequestGrid").closest(".padding_infor_info").find("[data-filter-bar]"), page);
         }
-
-        $(document).on("submit", "#frmCreateCatalog", function (e) {
-            e.preventDefault();
-            var formData = new FormData(this);
-            $.ajax({
-                url: "/RewardManagement/Create",
-                type: "POST",
-                data: formData,
-                processData: false,
-                contentType: false,
-                headers: { RequestVerificationToken: $('input[name="__RequestVerificationToken"]', this).val() },
-                success: function (res) {
-                    if (res.success) {
-                        closeModal();
-                        LoadCatalogs();
-                        toastSuccess(res.message);
-                    } else {
-                        toastError(res.message);
-                    }
-                }
-            });
-        });
-
-        $(document).on("submit", "#frmEditCatalog", function (e) {
-            e.preventDefault();
-            var formData = new FormData(this);
-            $.ajax({
-                url: "/RewardManagement/Edit",
-                type: "POST",
-                data: formData,
-                processData: false,
-                contentType: false,
-                headers: { RequestVerificationToken: $('input[name="__RequestVerificationToken"]', this).val() },
-                success: function (res) {
-                    if (res.success) {
-                        closeModal();
-                        LoadCatalogs();
-                        toastSuccess(res.message);
-                    } else {
-                        toastError(res.message);
-                    }
-                }
-            });
-        });
 
         $(document).on("click", "#CatalogGrid .btnDeleteCatalog", async function (e) {
             e.stopImmediatePropagation();

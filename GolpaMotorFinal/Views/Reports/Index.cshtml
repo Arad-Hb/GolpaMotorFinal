@@ -1,9 +1,10 @@
+@model GolpaMotorFinal.Models.ViewModels.Reports.ReportsIndexViewModel
 @using DomainModel.ViewModels.Product
 @{
     ViewData["Title"] = "گزارشات";
     Layout = "_AdminLayout";
     var yearNow = Framework.Common.PersianDate.GetYear(DateTime.Today);
-    var products = ViewBag.Products as IEnumerable<ProductListItem> ?? Enumerable.Empty<ProductListItem>();
+    var products = Model.Products;
 }
 
 @await Html.PartialAsync("_AdminPageHeader", new GolpaMotorFinal.Models.ViewModels.AdminPageHeaderViewModel

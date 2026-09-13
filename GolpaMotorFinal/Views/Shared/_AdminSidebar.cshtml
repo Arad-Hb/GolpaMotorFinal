@@ -59,7 +59,7 @@
                     <span>مدیریت پاداش</span>
                 </a>
             </li>
-            <li class="@(IsActive("Reports") || IsActive("UserManagement", "UserReport") ? "active" : null)">
+            <li class="@(IsActive("Reports") ? "active" : null)">
                 <a asp-controller="Reports" asp-action="Index">
                     <i class="fa fa-chart-pie green_color"></i>
                     <span>گزارشات</span>

@@ -1,11 +1,5 @@
 ﻿using DomainModel.ViewModels.Product;
 using Framework.Common;
-using Framework.Services;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DataAccess.Services
 {

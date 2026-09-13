@@ -1,6 +1,6 @@
-﻿using DataAccess.Services;
-using DomainModel.ViewModels.Reward;
+﻿using DomainModel.ViewModels.Reward;
 using Framework.Common;
+using GolpaMotorFinal.FrameworkUI.Services;
 using GolpaMotorFinal.Helpers;
 using GolpaMotorFinal.Models.ViewModels;
 using Microsoft.AspNetCore.Authorization;
@@ -11,22 +11,20 @@ namespace GolpaMotorFinal.Controllers
     [Authorize(Roles = "Admin")]
     public class RewardManagementController : Controller
     {
-        private readonly IRewardCatalogRepository catalogRepo;
-        private readonly IRewardRequestRepository requestRepo;
+        private readonly IRewardService rewards;
 
-        public RewardManagementController(
-            IRewardCatalogRepository catalogRepo,
-            IRewardRequestRepository requestRepo)
+        public RewardManagementController(IRewardService rewards)
         {
-            this.catalogRepo = catalogRepo;
-            this.requestRepo = requestRepo;
+            this.rewards = rewards;
         }
 
         public async Task<IActionResult> Index()
         {
-            ViewBag.Catalogs = await catalogRepo.GetAll();
-            ViewBag.Statuses = await requestRepo.GetStatuses();
-            return View();
+            return View(new GolpaMotorFinal.Models.ViewModels.RewardManagement.RewardIndexViewModel
+            {
+                Catalogs = await rewards.GetCatalogs(),
+                Statuses = await rewards.GetStatuses()
+            });
         }
 
         [HttpGet]
@@ -34,7 +32,7 @@ namespace GolpaMotorFinal.Controllers
         {
             sm ??= new RewardCatalogSearchModel();
             sm.PageSize = PaginationViewModel.DefaultPageSize;
-            var result = await catalogRepo.Search(sm);
+            var result = await rewards.SearchCatalogs(sm);
             var filter = result.sm ?? sm;
             var grid = AdminListGrids.BuildRewardCatalogGrid(result.CatalogList ?? new List<RewardCatalogListItem>());
             CrudGridPager.Attach(
@@ -61,7 +59,7 @@ namespace GolpaMotorFinal.Controllers
             sm.RequestFrom = PersianDate.ParseOrNull(sm.RequestFromJalali);
             sm.RequestTo = PersianDate.ParseOrNull(sm.RequestToJalali);
             sm.PageSize = PaginationViewModel.DefaultPageSize;
-            var result = await requestRepo.Search(sm);
+            var result = await rewards.SearchRequests(sm);
             var filter = result.sm ?? sm;
             var grid = AdminListGrids.BuildRewardRequestGrid(result.RequestList ?? new List<RewardRequestListItem>());
             CrudGridPager.Attach(
@@ -83,9 +81,7 @@ namespace GolpaMotorFinal.Controllers
 
         [HttpGet]
         public IActionResult Create()
-        {
-            return PartialView("_Create", new RewardCatalogAddEditModel { IsActive = true });
-        }
+            => PartialView("_Create", new RewardCatalogAddEditModel { IsActive = true });
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -93,18 +89,16 @@ namespace GolpaMotorFinal.Controllers
         {
             if (!ModelState.IsValid)
                 return Json(new { success = false, message = "اطلاعات معتبر نیست" });
-
-            var result = await catalogRepo.Add(model);
+            var result = await rewards.AddCatalog(model);
             return Json(new { success = result.Success, message = result.Message });
         }
 
         [HttpGet]
         public async Task<IActionResult> Edit(int rewardCatalogID)
         {
-            var catalog = await catalogRepo.Get(rewardCatalogID);
+            var catalog = await rewards.GetCatalog(rewardCatalogID);
             if (catalog == null)
                 return NotFound();
-
             return PartialView("_Edit", catalog);
         }
 
@@ -114,8 +108,7 @@ namespace GolpaMotorFinal.Controllers
         {
             if (!ModelState.IsValid)
                 return Json(new { success = false, message = "اطلاعات معتبر نیست" });
-
-            var result = await catalogRepo.Update(model);
+            var result = await rewards.UpdateCatalog(model);
             return Json(new { success = result.Success, message = result.Message });
         }
 
@@ -123,27 +116,25 @@ namespace GolpaMotorFinal.Controllers
         [ValidateAntiForgeryToken]
         public async Task<JsonResult> Delete(int rewardCatalogID)
         {
-            var result = await catalogRepo.Delete(rewardCatalogID);
+            var result = await rewards.DeleteCatalog(rewardCatalogID);
             return Json(new { success = result.Success, message = result.Message });
         }
 
         [HttpGet]
         public async Task<IActionResult> Details(int rewardCatalogID)
         {
-            var catalog = await catalogRepo.GetDetails(rewardCatalogID);
+            var catalog = await rewards.GetCatalogDetails(rewardCatalogID);
             if (catalog == null)
                 return NotFound();
-
             return PartialView("_Details", catalog);
         }
 
         [HttpGet]
         public async Task<IActionResult> RequestDetails(int rewardRequestID)
         {
-            var request = await requestRepo.GetDetails(rewardRequestID);
+            var request = await rewards.GetRequestDetails(rewardRequestID);
             if (request == null)
                 return NotFound();
-
             return PartialView("_RequestDetails", request);
         }
 
@@ -151,7 +142,7 @@ namespace GolpaMotorFinal.Controllers
         [ValidateAntiForgeryToken]
         public async Task<JsonResult> Approve(int rewardRequestID)
         {
-            var result = await requestRepo.Approve(rewardRequestID);
+            var result = await rewards.Approve(rewardRequestID);
             return Json(new { success = result.Success, message = result.Message });
         }
 
@@ -159,7 +150,7 @@ namespace GolpaMotorFinal.Controllers
         [ValidateAntiForgeryToken]
         public async Task<JsonResult> Reject(int rewardRequestID)
         {
-            var result = await requestRepo.Reject(rewardRequestID);
+            var result = await rewards.Reject(rewardRequestID);
             return Json(new { success = result.Success, message = result.Message });
         }
     }

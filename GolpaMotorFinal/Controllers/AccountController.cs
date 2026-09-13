@@ -1,19 +1,12 @@
 using DataAccess.Services;
 using DomainModel.Models;
-using DomainModel.ViewModels;
-using DomainModel.ViewModels.User;
 using GolpaMotorFinal.FrameworkUI.Services;
-using GolpaMotorFinal.Models;
+using GolpaMotorFinal.Helpers;
 using GolpaMotorFinal.Models.ViewModels.Account;
-using GolpaMotorFinal.Models.ViewModels;
-using GolpaMotorFinal.Models.ViewModels.UserManagement;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
-using System.Security.Claims;
-using System.Threading.Tasks;
 
 namespace GolpaMotorFinal.Controllers
 {
@@ -38,33 +31,32 @@ namespace GolpaMotorFinal.Controllers
             this.cardRepository = cardRepository;
             this.fileManager = fileManager;
         }
+
         private async Task<SelectList> BindProvince()
         {
             var provinces = await userRepository.GetProvinces();
-            //provinces.Insert(0, new Province { ProvinceID = -1, Name = "انتخاب استان" });
-            SelectList lst = new SelectList(provinces, "ProvinceID", "Name");
-            return lst;
+            return new SelectList(provinces, "ProvinceID", "Name");
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public async Task<JsonResult> GetCitiesByProvince(int provinceId)
         {
             var cities = await userRepository.GetCitiesByProvinceId(provinceId);
-
-
             if (cities == null || !cities.Any())
-            {
-                return Json(new { success = false, data = new List<object>(), message = "شهری یافت نشد" });
-            }
+                return Json(new { success = false, data = Array.Empty<object>(), message = "شهری یافت نشد" });
 
-            return Json(new { success = true, data = cities });           
+            return Json(new
+            {
+                success = true,
+                data = cities.Select(c => new { cityID = c.CityID, name = c.Name })
+            });
         }
 
         [HttpGet]
         public IActionResult Login(string returnUrl = null)
         {
-            var vm = new LoginViewModel { ReturnUrl = returnUrl };
-            return View(vm);
+            return View(new LoginViewModel { ReturnUrl = returnUrl });
         }
 
         [HttpPost]
@@ -78,56 +70,42 @@ namespace GolpaMotorFinal.Controllers
                 model.Email,
                 model.Password,
                 model.RememberMe,
-                lockoutOnFailure: false
-            );
+                lockoutOnFailure: false);
 
             if (result.Succeeded)
             {
                 if (!string.IsNullOrEmpty(model.ReturnUrl) && Url.IsLocalUrl(model.ReturnUrl))
                 {
-
                     TempData["SuccessMessage"] = $"خوش آمدید {model.Email}";
                     return Redirect(model.ReturnUrl);
                 }
 
                 var user = await userManager.FindByEmailAsync(model.Email);
-
-                if (user != null)
-                {
-                    if (await userManager.IsInRoleAsync(user, "Admin"))
-                        return RedirectToAction("Index", "Admin");
-                }
+                if (user != null && await userManager.IsInRoleAsync(user, "Admin"))
+                    return RedirectToAction("Index", "Admin");
 
                 return RedirectToAction("Index", "Home");
             }
 
             ModelState.AddModelError(string.Empty, "ایمیل یا رمز عبور اشتباه است.");
-
             return View(model);
         }
-            
+
         [HttpGet]
         public async Task<IActionResult> Register(string returnUrl = null)
         {
-            var vm = new RegisterViewModel {
+            return View(new RegisterViewModel
+            {
                 Provinces = await BindProvince(),
                 Cities = new List<SelectListItem>(),
-                ReturnUrl = returnUrl 
-            };
-            return View(vm);
+                ReturnUrl = returnUrl
+            });
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Register(RegisterViewModel model)
         {
-            if (!ModelState.IsValid)
-            {
-                model.Provinces = await BindProvince();
-                model.Cities = new List<SelectListItem>();
-                return View(model);
-            }
-
             if (!model.ProvinceID.HasValue)
                 ModelState.AddModelError("ProvinceID", "لطفا استان را انتخاب کنید");
             if (!model.CityID.HasValue)
@@ -137,7 +115,6 @@ namespace GolpaMotorFinal.Controllers
             {
                 model.Provinces = await BindProvince();
                 model.Cities = new List<SelectListItem>();
-
                 return View(model);
             }
 
@@ -154,16 +131,16 @@ namespace GolpaMotorFinal.Controllers
             };
 
             var result = await userManager.CreateAsync(user, model.Password);
-                if (result.Succeeded)
-                {
-                    await userManager.AddToRoleAsync(user, "Customer");
-                    await signInManager.SignInAsync(user, false);
-                    TempData["SuccessMessage"] = "ثبت نام شما با موفقیت انجام شد. به گلپا موتور خوش آمدید.";    
-                    return RedirectToAction("Index", "Home");
-                }
+            if (result.Succeeded)
+            {
+                await userManager.AddToRoleAsync(user, "Customer");
+                await signInManager.SignInAsync(user, false);
+                TempData["SuccessMessage"] = "ثبت نام شما با موفقیت انجام شد. به گلپا موتور خوش آمدید.";
+                if (!string.IsNullOrEmpty(model.ReturnUrl) && Url.IsLocalUrl(model.ReturnUrl))
+                    return Redirect(model.ReturnUrl);
+                return RedirectToAction("Index", "Home");
+            }
 
-            //foreach (var error in result.Errors)
-            //ModelState.AddModelError(string.Empty, error.Description);
             foreach (var error in result.Errors)
             {
                 switch (error.Code)
@@ -171,23 +148,18 @@ namespace GolpaMotorFinal.Controllers
                     case "PasswordRequiresLower":
                         ModelState.AddModelError("", "رمز عبور باید حداقل یک حرف کوچک انگلیسی داشته باشد.");
                         break;
-
                     case "PasswordRequiresUpper":
                         ModelState.AddModelError("", "رمز عبور باید حداقل یک حرف بزرگ انگلیسی داشته باشد.");
                         break;
-
                     case "PasswordRequiresDigit":
                         ModelState.AddModelError("", "رمز عبور باید حداقل یک عدد داشته باشد.");
                         break;
-
                     case "DuplicateEmail":
                         ModelState.AddModelError("", "این ایمیل قبلاً ثبت شده است.");
                         break;
-
                     case "DuplicateUserName":
                         ModelState.AddModelError("", "این کاربر قبلاً ثبت شده است.");
                         break;
-
                     default:
                         ModelState.AddModelError("", error.Description);
                         break;
@@ -195,26 +167,8 @@ namespace GolpaMotorFinal.Controllers
             }
 
             model.Provinces = await BindProvince();
-                model.Cities = new List<SelectListItem>();
-
+            model.Cities = new List<SelectListItem>();
             return View(model);
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> ConfirmEmail(string userId, string token)
-        {
-            if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(token))
-                return RedirectToAction("Index", "Home");
-
-            var user = await userManager.FindByIdAsync(userId);
-            if (user == null)
-                return RedirectToAction("Index", "Home");
-
-            var result = await userManager.ConfirmEmailAsync(user, token);
-            if (result.Succeeded)
-                return View("ConfirmEmail");
-
-            return View("~/Views/Shared/Error.cshtml", new ErrorViewModel());
         }
 
         [HttpGet]
@@ -231,17 +185,13 @@ namespace GolpaMotorFinal.Controllers
                 return View(model);
 
             var user = await userManager.FindByEmailAsync(model.Email);
-            if (user == null || !(await userManager.IsEmailConfirmedAsync(user)))
+            if (user != null && await userManager.IsEmailConfirmedAsync(user))
             {
-                // Don't reveal that the user does not exist or is not confirmed
-                return RedirectToAction("ForgotPasswordConfirmation");
+                var token = await userManager.GeneratePasswordResetTokenAsync(user);
+                TempData["ResetUrl"] = Url.Action("ResetPassword", "Account", new { token, email = model.Email }, Request.Scheme);
             }
 
-            var token = await userManager.GeneratePasswordResetTokenAsync(user);
-            //var callbackUrl = Url.Action("ResetPassword", "Account", new { token, email = model.Email }, Request.Scheme);
-            //await _emailSender.SendEmailAsync(model.Email, "Reset Password", $"Please reset your password by <a href=\"{callbackUrl}\">clicking here</a>.");
-
-            return RedirectToAction("ForgotPasswordConfirmation");
+            return RedirectToAction(nameof(ForgotPasswordConfirmation));
         }
 
         [HttpGet]
@@ -255,8 +205,7 @@ namespace GolpaMotorFinal.Controllers
         {
             if (token == null || email == null)
                 return RedirectToAction("Index", "Home");
-            var vm = new ResetPasswordViewModel { Token = token, Email = email };
-            return View(vm);
+            return View(new ResetPasswordViewModel { Token = token, Email = email });
         }
 
         [HttpPost]
@@ -268,20 +217,14 @@ namespace GolpaMotorFinal.Controllers
 
             var user = await userManager.FindByEmailAsync(model.Email);
             if (user == null)
-            {
-                // Don't reveal that the user does not exist
-                return RedirectToAction("ResetPasswordConfirmation");
-            }
+                return RedirectToAction(nameof(ResetPasswordConfirmation));
 
             var result = await userManager.ResetPasswordAsync(user, model.Token, model.Password);
             if (result.Succeeded)
-            {
-                return RedirectToAction("ResetPasswordConfirmation");
-            }
+                return RedirectToAction(nameof(ResetPasswordConfirmation));
+
             foreach (var error in result.Errors)
-            {
                 ModelState.AddModelError(string.Empty, error.Description);
-            }
             return View(model);
         }
 
@@ -302,123 +245,43 @@ namespace GolpaMotorFinal.Controllers
             return RedirectToAction("Index", "Home");
         }
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult ExternalLogin(string provider, string returnUrl = null)
-        {
-            var redirectUrl = Url.Action("ExternalLoginCallback", "Account", new { returnUrl });
-            var properties = signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
-            return Challenge(properties, provider);
-        }
-
         [HttpGet]
-        public async Task<IActionResult> ExternalLoginCallback(string returnUrl = null, string remoteError = null)
+        [Authorize]
+        public async Task<IActionResult> ChangePassword()
         {
-            if (remoteError != null)
-            {
-                ModelState.AddModelError(string.Empty, $"Error from external provider: {remoteError}");
-                return RedirectToAction(nameof(Login));
-            }
-
-            var info = await signInManager.GetExternalLoginInfoAsync();
-            if (info == null)
-                return RedirectToAction(nameof(Login));
-
-            var signInResult = await signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: false, bypassTwoFactor: true);
-            if (signInResult.Succeeded)
-            {
-                return RedirectToLocal(returnUrl);
-            }
-
-            // If the user does not have an account, prompt to create one
-            var email = info.Principal.FindFirstValue(System.Security.Claims.ClaimTypes.Email);
-            return View("ExternalLoginConfirmation", new ExternalLoginViewModel { Email = email, ReturnUrl = returnUrl });
+            return View(new ChangePasswordViewModel());
         }
 
         [HttpPost]
+        [Authorize]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ExternalLoginConfirmation(ExternalLoginViewModel model)
+        public async Task<IActionResult> ChangePassword(ChangePasswordViewModel model)
         {
             if (!ModelState.IsValid)
                 return View(model);
 
-            var info = await signInManager.GetExternalLoginInfoAsync();
-            if (info == null)
+            var user = await userManager.GetUserAsync(User);
+            if (user == null)
                 return RedirectToAction(nameof(Login));
 
-            var user = new ApplicationUser { UserName = model.Email, Email = model.Email };
-            var result = await userManager.CreateAsync(user);
-            if (result.Succeeded)
+            var changed = await userManager.ChangePasswordAsync(user, model.CurrentPassword, model.NewPassword);
+            if (!changed.Succeeded)
             {
-                await userManager.AddToRoleAsync(user, "Customer");
-                result = await userManager.AddLoginAsync(user, info);
-                if (result.Succeeded)
-                {
-                    await signInManager.SignInAsync(user, isPersistent: false);
-                    return RedirectToLocal(model.ReturnUrl);
-                }
+                foreach (var error in changed.Errors)
+                    ModelState.AddModelError(string.Empty, error.Description);
+                return View(model);
             }
-            foreach (var error in result.Errors)
-                ModelState.AddModelError(string.Empty, error.Description);
-            return View(model);
+
+            await signInManager.RefreshSignInAsync(user);
+            TempData["SuccessMessage"] = "رمز عبور با موفقیت تغییر کرد.";
+            if (await userManager.IsInRoleAsync(user, "Admin"))
+                return RedirectToAction("Profile", "Admin");
+            return RedirectToAction(nameof(Profile));
         }
 
-        [HttpGet]
-        public IActionResult LoginWith2fa(string returnUrl = null)
-        {
-            var vm = new LoginWith2faViewModel { ReturnUrl = returnUrl };
-            return View(vm);
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> LoginWith2fa(LoginWith2faViewModel model)
-        {
-            if (!ModelState.IsValid) return View(model);
-
-            var user = await signInManager.GetTwoFactorAuthenticationUserAsync();
-            if (user == null) return RedirectToAction(nameof(Login));
-
-            var result = await signInManager.TwoFactorSignInAsync("Authenticator", model.TwoFactorCode, model.RememberMe, rememberClient: false);
-            if (result.Succeeded) return RedirectToLocal(model.ReturnUrl);
-            if (result.IsLockedOut) return View("Lockout");
-
-            ModelState.AddModelError(string.Empty, "Invalid authenticator code.");
-            return View(model);
-        }
-
-        [HttpGet]
-        public IActionResult LoginWithRecoveryCode(string returnUrl = null)
-        {
-            var vm = new LoginWithRecoveryCodeViewModel { ReturnUrl = returnUrl };
-            return View(vm);
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> LoginWithRecoveryCode(LoginWithRecoveryCodeViewModel model)
-        {
-            if (!ModelState.IsValid) return View(model);
-
-            var result = await signInManager.TwoFactorRecoveryCodeSignInAsync(model.RecoveryCode);
-            if (result.Succeeded) return RedirectToLocal(model.ReturnUrl);
-            if (result.IsLockedOut) return View("Lockout");
-
-            ModelState.AddModelError(string.Empty, "Invalid recovery code.");
-            return View(model);
-        }
-
-        private IActionResult RedirectToLocal(string returnUrl)
-        {
-            if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
-                return Redirect(returnUrl);
-            return RedirectToAction("Index", "Home");
-        }
-
-        //پروفایل کاربر      
         [HttpGet]
         [Authorize]
-        public async Task<IActionResult> Manage()
+        public async Task<IActionResult> Profile()
         {
             var user = await userManager.GetUserAsync(User);
             if (user == null)
@@ -427,13 +290,13 @@ namespace GolpaMotorFinal.Controllers
             if (await userManager.IsInRoleAsync(user, "Admin"))
                 return RedirectToAction("Profile", "Admin");
 
-            return View(await BuildManageModel(user));
+            return View(await BuildProfileModel(user));
         }
 
         [HttpPost]
         [Authorize]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Manage(ManageViewModel model)
+        public async Task<IActionResult> Profile(ManageViewModel model)
         {
             var user = await userManager.GetUserAsync(User);
             if (user == null)
@@ -459,7 +322,7 @@ namespace GolpaMotorFinal.Controllers
                 if (!upload.Success)
                 {
                     ModelState.AddModelError(string.Empty, upload.Message);
-                    return View(await BuildManageModel(user));
+                    return View(await BuildProfileModel(user));
                 }
                 user.ProfileImageUrl = upload.FileUrl;
             }
@@ -469,32 +332,33 @@ namespace GolpaMotorFinal.Controllers
             {
                 foreach (var error in update.Errors)
                     ModelState.AddModelError(string.Empty, error.Description);
-                return View(await BuildManageModel(user));
-            }
-
-            if (!string.IsNullOrWhiteSpace(model.NewPassword))
-            {
-                if (string.IsNullOrWhiteSpace(model.CurrentPassword))
-                {
-                    ModelState.AddModelError(nameof(model.CurrentPassword), "رمز فعلی را وارد کنید.");
-                    return View(await BuildManageModel(user));
-                }
-
-                var changed = await userManager.ChangePasswordAsync(user, model.CurrentPassword, model.NewPassword);
-                if (!changed.Succeeded)
-                {
-                    foreach (var error in changed.Errors)
-                        ModelState.AddModelError(string.Empty, error.Description);
-                    return View(await BuildManageModel(user));
-                }
+                return View(await BuildProfileModel(user));
             }
 
             await signInManager.RefreshSignInAsync(user);
             TempData["SuccessMessage"] = "پروفایل به‌روزرسانی شد.";
-            return RedirectToAction(nameof(Manage));
+            return RedirectToAction(nameof(Profile));
         }
 
-        private async Task<ManageViewModel> BuildManageModel(ApplicationUser user, int cardPage = 0)
+        [HttpGet]
+        [Authorize]
+        public IActionResult Manage()
+        {
+            return RedirectToAction(nameof(Profile));
+        }
+
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> Cards(int pageIndex = 0)
+        {
+            var user = await userManager.GetUserAsync(User);
+            if (user == null)
+                return Unauthorized();
+
+            return PartialView("_ManageCardsTable", await BuildProfileModel(user, pageIndex));
+        }
+
+        private async Task<ManageViewModel> BuildProfileModel(ApplicationUser user, int cardPage = 0)
         {
             var cards = await cardRepository.GetByUserAsync(user.Id);
             var mapped = cards.Select(c => new CustomerCardItem
@@ -505,14 +369,7 @@ namespace GolpaMotorFinal.Controllers
                 Points = c.WarrantyCard?.Product?.ProductPoint ?? c.EarnedPionts
             }).ToList();
 
-            var pageSize = PaginationViewModel.DefaultPageSize;
-            var count = mapped.Count;
-            var pageCount = count == 0 ? 1 : (int)Math.Ceiling(count / (double)pageSize);
-            if (cardPage < 0)
-                cardPage = 0;
-            if (cardPage >= pageCount)
-                cardPage = pageCount - 1;
-
+            var page = CrudGridPager.Slice(mapped, cardPage);
             return new ManageViewModel
             {
                 Email = user.Email ?? string.Empty,
@@ -527,30 +384,11 @@ namespace GolpaMotorFinal.Controllers
                 TotalRegisteredCards = cards.Count,
                 IsEligibleForReward = user.IsEligibleForReward,
                 HasReceivedReward = user.HasReceivedReward,
-                Cards = mapped.Skip(cardPage * pageSize).Take(pageSize).ToList(),
-                CardPage = cardPage,
-                CardPageCount = pageCount,
-                CardRecordCount = count
+                Cards = page.Items,
+                CardPage = page.PageIndex,
+                CardPageCount = page.PageCount,
+                CardRecordCount = page.RecordCount
             };
-        }
-
-        [HttpGet]
-        [Authorize]
-        public async Task<IActionResult> ManageCards(int pageIndex = 0)
-        {
-            var user = await userManager.GetUserAsync(User);
-            if (user == null)
-                return Unauthorized();
-
-            var vm = await BuildManageModel(user, pageIndex);
-            return PartialView("_ManageCardsTable", vm);
-        }
-
-        [HttpGet]
-        [Authorize]
-        public IActionResult Profile()
-        {
-            return RedirectToAction(nameof(Manage));
         }
     }
 }

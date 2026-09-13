@@ -1,17 +1,22 @@
-﻿@using DomainModel.ViewModels.Product
+﻿@model GolpaMotorFinal.Models.ViewModels.Admin.AdminDashboardViewModel
+@using DomainModel.ViewModels.Product
 @{
     ViewData["Title"] = "داشبورد";
     Layout = "_AdminLayout";
-    var stats = ViewBag.Stats as DomainModel.ViewModels.Product.ProductStatistics;
+    var stats = Model.Stats;
 }
 
-<div class="row column_title">
-    <div class="col-md-12">
-        <div class="page_title">
-            <h2>داشبورد</h2>
-        </div>
-    </div>
-</div>
+@await Html.PartialAsync("_AdminPageHeader", new GolpaMotorFinal.Models.ViewModels.AdminPageHeaderViewModel
+{
+    Title = "داشبورد",
+    Breadcrumb = new GolpaMotorFinal.Models.ViewModels.BreadcrumbViewModel
+    {
+        Items =
+        {
+            new GolpaMotorFinal.Models.ViewModels.BreadcrumbItemViewModel { Title = "داشبورد", Active = true }
+        }
+    }
+})
 
 <div class="row column1">
     <div class="col-md-6 col-lg-3">
@@ -77,7 +82,7 @@
             </div>
             <div class="padding_infor_info">
                 <ul class="list-unstyled mb-0">
-                    @foreach (var item in ViewBag.TopProducts as IEnumerable<NamedCountItem> ?? Enumerable.Empty<NamedCountItem>())
+                    @foreach (var item in Model.TopProducts)
                     {
                         <li class="d-flex justify-content-between py-1"><span>@item.Name</span><strong>@item.Count</strong></li>
                     }
@@ -93,7 +98,7 @@
             </div>
             <div class="padding_infor_info">
                 <ul class="list-unstyled mb-0">
-                    @foreach (var item in ViewBag.TopRewards as IEnumerable<NamedCountItem> ?? Enumerable.Empty<NamedCountItem>())
+                    @foreach (var item in Model.TopRewards)
                     {
                         <li class="d-flex justify-content-between py-1"><span>@item.Name</span><strong>@item.Count</strong></li>
                     }
@@ -118,7 +123,7 @@
                    autocomplete="off" />
                         </div>
                         <div id="topRegistrarsGrid">
-                            @await Html.PartialAsync("_TopRegistrarsTable", ViewBag.TopRegistrars as GolpaMotorFinal.Models.ViewModels.Admin.TopRegistrarsPageViewModel)
+                            @await Html.PartialAsync("_TopRegistrarsTable", Model.TopRegistrars)
                         </div>
     </div>
 </div>

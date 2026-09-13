@@ -38,19 +38,12 @@
                 <div class="col-12 col-md-6">
                     <label class="form-label"><i class="fa fa-image ms-1"></i> عکس</label>
                     <input asp-for="ProfileImage" type="file" class="form-control image-preview-input" accept="image/*" />
-                    <img src="@ImageHelper.ToThumbnail(Model.ProfileImageUrl)" class="image-preview mt-2" style="width:80px;height:80px;object-fit:cover;border-radius:50%;" />
-                </div>
-                <div class="col-12 col-md-6">
-                    <label class="form-label">رمز فعلی</label>
-                    <input asp-for="CurrentPassword" type="password" class="form-control" />
-                </div>
-                <div class="col-12 col-md-6">
-                    <label class="form-label">رمز جدید</label>
-                    <input asp-for="NewPassword" type="password" class="form-control" />
+                    <img src="@ImageHelper.ToThumbnail(Model.ProfileImageUrl)" class="image-preview mt-2" style="width:80px;height:80px;object-fit:cover;border-radius:50%;" alt="" />
                 </div>
             </div>
             <div class="form-actions">
                 <button type="submit" class="main_bt">ذخیره</button>
+                <a asp-controller="Account" asp-action="ChangePassword" class="btn btn-outline-primary">تغییر رمز عبور</a>
             </div>
         </form>
     </div>

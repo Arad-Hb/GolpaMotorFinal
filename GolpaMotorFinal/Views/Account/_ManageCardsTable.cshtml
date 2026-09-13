@@ -1,7 +1,7 @@
 @model GolpaMotorFinal.Models.ViewModels.Account.ManageViewModel
 @{
     var rowNumber = Model.CardPage * PaginationViewModel.DefaultPageSize;
-    var listUrl = Url.Action("ManageCards", "Account") ?? "/Account/ManageCards";
+    var listUrl = Url.Action("Cards", "Account") ?? "/Account/Cards";
 }
 
 <div class="table-responsive">

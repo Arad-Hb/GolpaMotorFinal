@@ -7,7 +7,7 @@
       asp-controller="UserManagement"
       asp-action="MergeAccounts"
       method="post"
-      data-refresh-grid-url="@(ViewBag.RefreshUrl ?? "/UserManagement/Grid")"
+      data-refresh-grid-url="@(ViewBag.RefreshUrl ?? "/UserManagement/List")"
       data-grid-id="@(ViewBag.GridId ?? "UserGrid")">
 
     @Html.AntiForgeryToken()

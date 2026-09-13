@@ -13,7 +13,5 @@ namespace GolpaMotorFinal.Models.ViewModels.Admin
         public string? LastName { get; set; }
         public string? ProfileImageUrl { get; set; }
         public IFormFile? ProfileImage { get; set; }
-        public string? CurrentPassword { get; set; }
-        public string? NewPassword { get; set; }
     }
 }

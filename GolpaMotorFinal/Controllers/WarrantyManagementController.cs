@@ -2,6 +2,7 @@
 using DomainModel.Models;
 using Framework.Common;
 using GolpaMotorFinal.FrameworkUI.Services;
+using GolpaMotorFinal.Helpers;
 using GolpaMotorFinal.Models.ViewModels.ProductManagement;
 using GolpaMotorFinal.Models.ViewModels.WarrantyManagement;
 using GolpaMotorFinal.Models.ViewModels;
@@ -21,7 +22,7 @@ namespace GolpaMotorFinal.Controllers
         private readonly RoleManager<IdentityRole> roleManager;
         private readonly ICardRegistrationRepository repo;
         private readonly IWarrantyExcelService excelService;
-        private readonly IWarrantyCardRepository warrantyCards;
+        private readonly IWarrantyService warrantyService;
         private readonly IProductRepository products;
         private readonly IRewardRequestRepository rewardRequests;
         private readonly IMemoryCache cache;
@@ -33,7 +34,7 @@ namespace GolpaMotorFinal.Controllers
                UserManager<ApplicationUser> userManager,
                RoleManager<IdentityRole> roleManager,
                IWarrantyExcelService excelService,
-               IWarrantyCardRepository warrantyCards,
+               IWarrantyService warrantyService,
                IProductRepository products,
                IRewardRequestRepository rewardRequests,
                IMemoryCache cache)
@@ -42,7 +43,7 @@ namespace GolpaMotorFinal.Controllers
             this.userManager = userManager;
             this.roleManager = roleManager;
             this.excelService = excelService;
-            this.warrantyCards = warrantyCards;
+            this.warrantyService = warrantyService;
             this.products = products;
             this.rewardRequests = rewardRequests;
             this.cache = cache;
@@ -148,18 +149,16 @@ namespace GolpaMotorFinal.Controllers
                 PageIndex = pageIndex,
                 PageSize = pageSize
             };
-            var search = await warrantyCards.SearchAsync(filter);
-            var pageCount = pageSize <= 0 ? 1 : (int)Math.Ceiling(search.Total / (double)pageSize);
-
+            var search = await warrantyService.SearchCards(filter);
             var vm = new WarrantyAdminIndexViewModel
             {
                 ProductID = productId,
                 IsRegistered = isRegistered,
                 Products = await products.GetAll(),
                 Cards = search.Items,
-                PageIndex = pageIndex,
-                PageCount = pageCount,
-                RecordCount = search.Total,
+                PageIndex = search.PageIndex,
+                PageCount = search.PageCount,
+                RecordCount = search.RecordCount,
                 Stats = await products.GetStatistics(),
                 RegistrationCard = form
             };
@@ -181,30 +180,31 @@ namespace GolpaMotorFinal.Controllers
 
         [HttpGet]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> CardList(WarrantyCardSearchModel sm)
+        public async Task<IActionResult> List(WarrantyCardSearchModel sm)
         {
             sm ??= new WarrantyCardSearchModel();
             sm.RegisteredFrom = PersianDate.ParseOrNull(sm.RegisteredFromJalali);
             sm.RegisteredTo = PersianDate.ParseOrNull(sm.RegisteredToJalali);
-            sm.PageSize = PaginationViewModel.DefaultPageSize;
-            var search = await warrantyCards.SearchAsync(sm);
-            var pageSize = PaginationViewModel.DefaultPageSize;
-            var vm = new WarrantyAdminIndexViewModel
-            {
-                ProductID = sm.ProductID,
-                IsRegistered = sm.IsRegistered,
-                SearchTerm = sm.SearchTerm,
-                ValidityPreset = sm.ValidityPreset,
-                RemainingDaysFrom = sm.RemainingDaysFrom,
-                RemainingDaysTo = sm.RemainingDaysTo,
-                RegisteredFromJalali = sm.RegisteredFromJalali,
-                RegisteredToJalali = sm.RegisteredToJalali,
-                Cards = search.Items,
-                PageIndex = sm.PageIndex,
-                PageCount = pageSize <= 0 ? 1 : (int)Math.Ceiling(search.Total / (double)pageSize),
-                RecordCount = search.Total
-            };
-            return PartialView("_WarrantyCardTable", vm);
+            var page = await warrantyService.SearchCards(sm);
+            var grid = AdminListGrids.BuildWarrantyCardGrid(page.Items);
+            CrudGridPager.Attach(
+                grid,
+                "warrantyCardsGrid",
+                page.PageIndex,
+                page.PageCount,
+                page.RecordCount,
+                FilterUrl.Combine("/WarrantyManagement/List", new
+                {
+                    sm.SearchTerm,
+                    sm.ProductID,
+                    sm.IsRegistered,
+                    sm.ValidityPreset,
+                    sm.RemainingDaysFrom,
+                    sm.RemainingDaysTo,
+                    sm.RegisteredFromJalali,
+                    sm.RegisteredToJalali
+                }));
+            return ViewComponent("CrudGrid", new { model = grid });
         }
 
         private async Task<IActionResult> FailRegistration(RegisterationCardViewModel request, bool fromAdmin)
@@ -472,33 +472,9 @@ namespace GolpaMotorFinal.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            if (count > 200)
-                count = 200;
-
-            var created = 0;
-            for (var i = 0; i < count; i++)
-            {
-                string serial;
-                do
-                {
-                    serial = WarrantyCodeGenerator.Serial();
-                } 
-                while (await warrantyCards.SerialExistsAsync(serial));
-
-                await warrantyCards.AddAsync(new WarrantyCard
-                {
-                    ProductID = productId,
-                    SerialNumber = serial,
-                    ScratchedCode = WarrantyCodeGenerator.ScratchedCode(),
-                    IsRegistered = false,
-                    ValidityMonths = validityMonths
-                });
-                created++;
-            }
-
-            await warrantyCards.SaveAsync();
-            TempData["ImportSuccess"] = true;
-            TempData["ImportMessage"] = $"{created} کد گارانتی تولید شد.";
+            var result = await warrantyService.GenerateCodes(productId, count, validityMonths);
+            TempData["ImportSuccess"] = result.Success;
+            TempData["ImportMessage"] = result.Message;
             return RedirectToAction(nameof(Index), new { productId });
         }
     }

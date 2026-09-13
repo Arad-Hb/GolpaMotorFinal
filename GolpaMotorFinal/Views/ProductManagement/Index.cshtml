@@ -1,18 +1,21 @@
-﻿@{
+﻿@model DomainModel.ViewModels.Product.ProductStatistics
+@using GolpaMotorFinal.Models.ViewModels
+@using GolpaMotorFinal.Models.ViewModels.CRUD
+@{
     ViewData["Title"] = "محصولات";
     Layout = "_AdminLayout";
-    var stats = ViewBag.Stats as DomainModel.ViewModels.Product.ProductStatistics;
+    ViewData["FilterPartial"] = "_ProductFilterBar";
 }
 
-@await Html.PartialAsync("_AdminPageHeader", new GolpaMotorFinal.Models.ViewModels.AdminPageHeaderViewModel
+@await Html.PartialAsync("_AdminPageHeader", new AdminPageHeaderViewModel
 {
     Title = "مدیریت محصولات",
-    Breadcrumb = new GolpaMotorFinal.Models.ViewModels.BreadcrumbViewModel
+    Breadcrumb = new BreadcrumbViewModel
     {
         Items =
         {
-            new GolpaMotorFinal.Models.ViewModels.BreadcrumbItemViewModel { Title = "داشبورد", Url = Url.Action("Index", "Admin") },
-            new GolpaMotorFinal.Models.ViewModels.BreadcrumbItemViewModel { Title = "محصولات", Active = true }
+            new BreadcrumbItemViewModel { Title = "داشبورد", Url = Url.Action("Index", "Admin") },
+            new BreadcrumbItemViewModel { Title = "محصولات", Active = true }
         }
     }
 })
@@ -22,7 +25,7 @@
         <div class="full counter_section">
             <div class="couter_icon"><div><i class="fa fa-boxes-stacked blue1_color"></i></div></div>
             <div class="counter_no">
-                <p class="total_no">@(stats?.TotalProducts ?? 0)</p>
+                <p class="total_no">@(Model?.TotalProducts ?? 0)</p>
                 <p class="head_couter">کل محصولات</p>
             </div>
         </div>
@@ -31,7 +34,7 @@
         <div class="full counter_section">
             <div class="couter_icon"><div><i class="fa fa-check green_color"></i></div></div>
             <div class="counter_no">
-                <p class="total_no">@(stats?.AvailableProducts ?? 0)</p>
+                <p class="total_no">@(Model?.AvailableProducts ?? 0)</p>
                 <p class="head_couter">موجود</p>
             </div>
         </div>
@@ -40,7 +43,7 @@
         <div class="full counter_section">
             <div class="couter_icon"><div><i class="fa fa-triangle-exclamation red_color"></i></div></div>
             <div class="counter_no">
-                <p class="total_no">@(stats?.ProductsWithoutCards ?? 0)</p>
+                <p class="total_no">@(Model?.ProductsWithoutCards ?? 0)</p>
                 <p class="head_couter">بدون کارت گارانتی</p>
             </div>
         </div>
@@ -49,63 +52,39 @@
         <div class="full counter_section">
             <div class="couter_icon"><div><i class="fa fa-gift purple_color"></i></div></div>
             <div class="counter_no">
-                <p class="total_no">@(stats?.TotalRegisteredPoints ?? 0)</p>
+                <p class="total_no">@(Model?.TotalRegisteredPoints ?? 0)</p>
                 <p class="head_couter">امتیاز ثبت‌شده</p>
             </div>
         </div>
     </div>
 </div>
 
+@{
+    var crudModel = new CrudIndexViewModel
+    {
+        Title = "لیست محصولات",
+        GridId = "ProductGrid",
+        CreateUrl = Url.Action("Create", "ProductManagement") ?? "/ProductManagement/Create",
+        CreateTitle = "افزودن محصول",
+        CreateButtonText = "افزودن محصول",
+        ListHeading = "لیست محصولات",
+        Breadcrumb = null
+    };
+}
+
 <div class="white_shd full margin_bottom_30">
     <div class="full graph_head d-flex flex-wrap justify-content-between align-items-center gap-2">
         <div class="heading1 margin_0"><h2>لیست محصولات</h2></div>
-        <button type="button" class="main_bt open-modal"
-                data-url="@Url.Action("Create", "ProductManagement")"
-                data-title="افزودن محصول">
-            <i class="fa fa-plus ms-1"></i> افزودن محصول
+        <button class="main_bt open-modal"
+                data-url="@crudModel.CreateUrl"
+                data-id="null"
+                data-title="@crudModel.CreateTitle">
+            @crudModel.CreateButtonText
         </button>
     </div>
     <div class="padding_infor_info">
-        <form class="table_filter_bar" data-filter-bar data-url="/ProductManagement/ProductList" data-target="#ProductGrid">
-            @{
-                ViewData["SearchPlaceholder"] = "جستجوی نام محصول...";
-                ViewData["SearchName"] = "ProductName";
-            }
-            @await Html.PartialAsync("_FilterSearch")
-            <select name="IsAvailable" class="form-select">
-                <option value="">وضعیت موجودی</option>
-                <option value="true">موجود</option>
-                <option value="false">ناموجود</option>
-            </select>
-            @{
-                ViewData["NumFromName"] = "RegisteredFrom";
-                ViewData["NumToName"] = "RegisteredTo";
-                ViewData["NumEmptyLabel"] = "ثبت‌شده";
-                ViewData["NumFromPlaceholder"] = "حداقل ثبت‌شده";
-                ViewData["NumToPlaceholder"] = "حداکثر ثبت‌شده";
-            }
-            @await Html.PartialAsync("_NumberRangeFilter")
-            @{
-                ViewData["NumFromName"] = "RemainingFrom";
-                ViewData["NumToName"] = "RemainingTo";
-                ViewData["NumEmptyLabel"] = "باقی‌مانده";
-                ViewData["NumFromPlaceholder"] = "حداقل باقی‌مانده";
-                ViewData["NumToPlaceholder"] = "حداکثر باقی‌مانده";
-            }
-            @await Html.PartialAsync("_NumberRangeFilter")
-            @{
-                ViewData["NumFromName"] = "PointsFrom";
-                ViewData["NumToName"] = "PointsTo";
-                ViewData["NumEmptyLabel"] = "امتیاز";
-                ViewData["NumFromPlaceholder"] = "حداقل امتیاز";
-                ViewData["NumToPlaceholder"] = "حداکثر امتیاز";
-            }
-            @await Html.PartialAsync("_NumberRangeFilter")
-            @await Html.PartialAsync("_FilterReset")
-        </form>
-        <form id="frmAntiForgery">
-            @Html.AntiForgeryToken()
-        </form>
+        @await Html.PartialAsync("_ProductFilterBar")
+        <form id="frmAntiForgery">@Html.AntiForgeryToken()</form>
         <div id="ProductGrid"></div>
     </div>
 </div>
@@ -113,81 +92,6 @@
 @section Scripts
 {
     <script>
-        function LoadProducts(page) {
-            applyTableFilter($("#ProductGrid").closest(".padding_infor_info").find("[data-filter-bar]"), page);
-        }
-
-        $(document).on("submit", "#frmCreate", function (e) {
-            e.preventDefault();
-            var formData = new FormData(this);
-            $.ajax({
-                url: "/ProductManagement/Create",
-                type: "POST",
-                data: formData,
-                processData: false,
-                contentType: false,
-                headers: {
-                    RequestVerificationToken: $('input[name="__RequestVerificationToken"]', this).val()
-                },
-                success: function (res) {
-                    if (res.success) {
-                        closeModal();
-                        LoadProducts();
-                        toastSuccess(res.message);
-                    } else {
-                        toastError(res.message);
-                    }
-                }
-            });
-        });
-
-        $(document).on("submit", "#frmEdit", function (e) {
-            e.preventDefault();
-            var formData = new FormData(this);
-            $.ajax({
-                url: "/ProductManagement/Edit",
-                type: "POST",
-                data: formData,
-                processData: false,
-                contentType: false,
-                headers: {
-                    RequestVerificationToken: $('input[name="__RequestVerificationToken"]', this).val()
-                },
-                success: function (res) {
-                    if (res.success) {
-                        closeModal();
-                        LoadProducts();
-                        toastSuccess(res.message);
-                    } else {
-                        toastError(res.message);
-                    }
-                }
-            });
-        });
-
-        $(document).on("click", "#ProductGrid .btnDelete", async function (e) {
-            e.stopImmediatePropagation();
-            const ok = await confirmDelete("این محصول حذف خواهد شد.");
-            if (!ok) return;
-            const id = $(this).data("id");
-            $.ajax({
-                url: "/ProductManagement/Delete",
-                type: "POST",
-                data: { productID: id },
-                headers: {
-                    RequestVerificationToken: $('#frmAntiForgery input[name="__RequestVerificationToken"]').val()
-                },
-                success: function (res) {
-                    if (res.success) {
-                        LoadProducts();
-                        toastSuccess(res.message);
-                    } else {
-                        toastError(res.message);
-                    }
-                }
-            });
-        });
-
         $(document).on("click", ".btnRemovePicture", async function () {
             const ok = await confirmDelete("عکس محصول حذف شود؟");
             if (!ok) return;
@@ -200,13 +104,10 @@
                 success: function (res) {
                     if (res.success) {
                         toastSuccess(res.message);
-                        LoadProducts();
+                        applyTableFilter($("#ProductGrid").closest(".padding_infor_info").find("[data-filter-bar]"));
                     } else {
                         toastError(res.message);
                     }
-                },
-                error: function () {
-                    toastError("خطا در ارتباط با سرور");
                 }
             });
         });

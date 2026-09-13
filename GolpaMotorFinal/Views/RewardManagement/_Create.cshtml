@@ -1,6 +1,18 @@
 @model DomainModel.ViewModels.Reward.RewardCatalogAddEditModel
+@using GolpaMotorFinal.Models.ViewModels.CRUD
+@{
+    var form = new CrudFormViewModel
+    {
+        Controller = "RewardManagement",
+        Action = "Create",
+        GridId = "CatalogGrid",
+        RefreshGridUrl = "CatalogList",
+        Enctype = "application/x-www-form-urlencoded",
+        SubmitButtonText = "ثبت"
+    };
+}
 
-<form id="frmCreateCatalog" class="admin-form">
+<crud-form model="form">
     @Html.AntiForgeryToken()
     <div asp-validation-summary="ModelOnly" class="text-danger mb-2"></div>
     <div class="row g-3">
@@ -39,4 +51,4 @@
         <button type="submit" class="main_bt">ثبت</button>
         <button type="button" class="btn btn-secondary cancel-modal">انصراف</button>
     </div>
-</form>
+</crud-form>

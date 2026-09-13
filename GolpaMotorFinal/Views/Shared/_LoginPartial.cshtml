@@ -22,7 +22,7 @@
         }
         else
         {
-            <a asp-controller="Account" asp-action="Manage" class="user-info-btn text-decoration-none">
+            <a asp-controller="Account" asp-action="Profile" class="user-info-btn text-decoration-none">
                 <i class="fa-solid fa-user me-2"></i>
                 خوش آمدید
                 @(user?.FirstName ?? "")
@@ -48,9 +48,10 @@
 else
 {
     <a asp-controller="Account" asp-action="Login" class="btn btn-outline-primary">
-
         <i class="fa-solid fa-right-to-bracket"></i>
         ورود
-
+    </a>
+    <a asp-controller="Account" asp-action="Register" class="btn btn-primary">
+        ثبت‌نام
     </a>
 }

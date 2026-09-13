@@ -1,5 +1,4 @@
-﻿using DataAccess.Services;
-using DomainModel.ViewModels.Product;
+﻿using DomainModel.ViewModels.Product;
 using GolpaMotorFinal.FrameworkUI.Services;
 using GolpaMotorFinal.Helpers;
 using GolpaMotorFinal.Models.ViewModels;
@@ -12,25 +11,24 @@ namespace GolpaMotorFinal.Controllers
     [Authorize(Roles = "Admin")]
     public class ProductManagementController : Controller
     {
-        private readonly IProductRepository repo;
         private readonly IProductService service;
-        public ProductManagementController(IProductRepository repo, IProductService service)
+
+        public ProductManagementController(IProductService service)
         {
-            this.repo = repo;
             this.service = service;
         }
+
         public async Task<IActionResult> Index()
         {
-            ViewBag.Stats = await repo.GetStatistics();
-            return View();
+            return View(await service.GetStatistics());
         }
 
         [HttpGet]
-        public async Task<IActionResult> ProductList(ProductSearchModel sm)
+        public async Task<IActionResult> List(ProductSearchModel sm)
         {
             sm ??= new ProductSearchModel();
             sm.PageSize = PaginationViewModel.DefaultPageSize;
-            var result = await repo.Search(sm);
+            var result = await service.Search(sm);
             var filter = result.sm ?? sm;
             var grid = AdminListGrids.BuildProductGrid(result.productList ?? new List<ProductListItem>());
             CrudGridPager.Attach(
@@ -39,7 +37,7 @@ namespace GolpaMotorFinal.Controllers
                 filter.PageIndex,
                 filter.PageCount,
                 filter.RecordCount,
-                FilterUrl.Combine("/ProductManagement/ProductList", new
+                FilterUrl.Combine("/ProductManagement/List", new
                 {
                     filter.ProductName,
                     filter.IsAvailable,
@@ -51,20 +49,6 @@ namespace GolpaMotorFinal.Controllers
                     filter.RemainingTo
                 }));
             return ViewComponent("CrudGrid", new { model = grid });
-        }
-
-        [HttpGet]
-        public async Task<JsonResult> Get(long ProductID)
-        {
-            var product = await repo.Get(ProductID);
-            return Json(product);
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> GetAll()
-        {
-            var products = await repo.GetAll();
-            return Json(products);
         }
 
         [HttpGet]
@@ -80,15 +64,13 @@ namespace GolpaMotorFinal.Controllers
             if (!ModelState.IsValid)
                 return Json(new { success = false, message = "اطلاعات معتبر نیست" });
 
-            var model = new ProductAddEditModel
+            var result = await service.AddProduct(new ProductAddEditModel
             {
                 ProductName = vm.ProductName,
                 Description = vm.Description,
                 ProductPoint = vm.ProductPoint,
                 IsAvailable = vm.IsAvailable
-            };
-
-            var result = await service.AddProduct(model, vm.ImageFile);
+            }, vm.ImageFile);
 
             return Json(new { success = result.Success, message = result.Message });
         }
@@ -96,12 +78,11 @@ namespace GolpaMotorFinal.Controllers
         [HttpGet]
         public async Task<IActionResult> Edit(long productID)
         {
-            var prod = await repo.Get(productID);
-
+            var prod = await service.GetForEdit(productID);
             if (prod == null)
                 return NotFound();
 
-            var vm = new ProductAddEditViewModel
+            return PartialView("_Edit", new ProductAddEditViewModel
             {
                 ProductID = prod.ProductID,
                 ProductName = prod.ProductName,
@@ -109,10 +90,9 @@ namespace GolpaMotorFinal.Controllers
                 ProductPoint = prod.ProductPoint,
                 IsAvailable = prod.IsAvailable,
                 ExistingImageUrl = prod.ImageUrl
-            };
-
-            return PartialView("_Edit", vm);
+            });
         }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(ProductAddEditViewModel vm)
@@ -120,7 +100,7 @@ namespace GolpaMotorFinal.Controllers
             if (!ModelState.IsValid)
                 return Json(new { success = false, message = "اطلاعات معتبر نیست" });
 
-            var model = new ProductAddEditModel
+            var result = await service.UpdateProduct(new ProductAddEditModel
             {
                 ProductID = vm.ProductID,
                 ProductName = vm.ProductName,
@@ -128,9 +108,7 @@ namespace GolpaMotorFinal.Controllers
                 ProductPoint = vm.ProductPoint,
                 IsAvailable = vm.IsAvailable,
                 ImageUrl = vm.ExistingImageUrl
-            };
-
-            var result = await service.UpdateProduct(model, vm.ImageFile);
+            }, vm.ImageFile);
 
             return Json(result);
         }
@@ -138,29 +116,20 @@ namespace GolpaMotorFinal.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<JsonResult> Delete(long productID)
-        {
-            var result = await service.DeleteProduct(productID);
-
-            return Json(result);
-        }
+            => Json(await service.DeleteProduct(productID));
 
         [HttpGet]
         public async Task<IActionResult> Details(long productID)
         {
-            var prod = await repo.GetDetails(productID);
-
+            var prod = await service.GetDetails(productID);
             if (prod == null)
                 return NotFound();
-
             return PartialView("_Details", prod);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<JsonResult> RemovePicture(long productID)
-        {
-            var result = await service.RemovePicture(productID);
-            return Json(result);
-        }
+            => Json(await service.RemovePicture(productID));
     }
 }

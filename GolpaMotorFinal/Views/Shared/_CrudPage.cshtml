@@ -1,18 +1,11 @@
 @using GolpaMotorFinal.Models.ViewModels.CRUD
 @model CrudIndexViewModel
 
-@if (Model.Breadcrumb != null)
+@await Html.PartialAsync("_AdminPageHeader", new GolpaMotorFinal.Models.ViewModels.AdminPageHeaderViewModel
 {
-    @await Component.InvokeAsync("Breadcrumb", Model.Breadcrumb)
-}
-
-<div class="row column_title">
-    <div class="col-md-12">
-        <div class="page_title">
-            <h2>@Model.Title</h2>
-        </div>
-    </div>
-</div>
+    Title = Model.Title,
+    Breadcrumb = Model.Breadcrumb
+})
 
 <div class="white_shd full margin_bottom_30">
     <div class="full graph_head d-flex flex-wrap justify-content-between align-items-center gap-2">

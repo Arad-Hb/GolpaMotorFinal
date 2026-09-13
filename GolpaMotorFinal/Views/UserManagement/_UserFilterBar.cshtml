@@ -3,7 +3,7 @@
     var types = ViewBag.CustomerTypes as IEnumerable<CustomerType> ?? Enumerable.Empty<CustomerType>();
     var provinces = ViewBag.Provinces as IEnumerable<Province> ?? Enumerable.Empty<Province>();
 }
-<form class="table_filter_bar" data-filter-bar data-url="@(ViewData["FilterUrl"] as string ?? "/UserManagement/Grid")" data-target="@(ViewData["FilterTarget"] as string ?? "#UserGrid")">
+<form class="table_filter_bar" data-filter-bar data-url="@(ViewData["FilterUrl"] as string ?? "/UserManagement/List")" data-target="@(ViewData["FilterTarget"] as string ?? "#UserGrid")">
     @{
         ViewData["SearchPlaceholder"] = "نام، فامیلی یا موبایل";
         ViewData["SearchName"] = "SearchTerm";

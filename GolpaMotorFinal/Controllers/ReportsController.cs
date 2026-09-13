@@ -32,8 +32,10 @@ namespace GolpaMotorFinal.Controllers
         {
             ViewBag.CustomerTypes = await userRepo.GetCustomerTypes();
             ViewBag.Provinces = await userRepo.GetProvinces();
-            ViewBag.Products = await products.GetAll();
-            return View();
+            return View(new GolpaMotorFinal.Models.ViewModels.Reports.ReportsIndexViewModel
+            {
+                Products = await products.GetAll()
+            });
         }
 
         [HttpGet]
@@ -42,7 +44,7 @@ namespace GolpaMotorFinal.Controllers
             sm.CardFrom = PersianDate.ParseOrNull(sm.CardFromJalali);
             sm.CardTo = PersianDate.ParseOrNull(sm.CardToJalali);
             var page = await users.GetUserReportPage(sm);
-            var grid = users.BuildUserReportGrid(page.Users);
+            var grid = AdminListGrids.BuildUserReportGrid(page.Users);
             CrudGridPager.Attach(
                 grid,
                 "UserReportGrid",

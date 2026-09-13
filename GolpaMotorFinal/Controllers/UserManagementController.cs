@@ -1,5 +1,4 @@
-﻿using DataAccess.Repositories;
-using DataAccess.Services;
+﻿using DataAccess.Services;
 using DomainModel.ViewModels.User;
 using Framework.Common;
 using GolpaMotorFinal.FrameworkUI.Services;
@@ -19,18 +18,15 @@ namespace GolpaMotorFinal.Controllers
     {
         private readonly IUserRepository repo;
         private readonly IUserService service;
-        private readonly IFileManager fileManager;
         private readonly IRewardRequestRepository rewardRequests;
 
         public UserManagementController(
             IUserRepository repo,
             IUserService service,
-            IFileManager _fileManager,
             IRewardRequestRepository rewardRequests)
         {
             this.repo = repo;
             this.service = service;
-            this.fileManager = _fileManager;
             this.rewardRequests = rewardRequests;
         }
 
@@ -41,59 +37,30 @@ namespace GolpaMotorFinal.Controllers
             return View();
         }
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Search(UserSearchModel sm)
-        {
-            return await UserGrid(sm);
-        }
-
         [HttpGet]
-        public async Task<IActionResult> Grid(UserSearchModel sm)
-        {
-            return await UserGrid(sm);
-        }
-
-        private async Task<IActionResult> UserGrid(UserSearchModel sm)
+        public async Task<IActionResult> List(UserSearchModel sm)
         {
             BindUserFilter(sm);
-            sm.PageSize = PaginationViewModel.DefaultPageSize;
-            var result = await repo.Search(sm);
-            var items = (result.userList ?? new List<UserListItem>()).Select(u => new UserListItemViewModel
-            {
-                UserID = u.UserID,
-                FullName = $"{u.FirstName ?? string.Empty} {u.LastName ?? string.Empty}".Trim(),
-                PhoneNumber = u.PhoneNumber ?? string.Empty,
-                ProfileImageUrl = u.ExistingProfileImageUrl ?? string.Empty,
-                RoleName = u.RoleName ?? string.Empty,
-                TotalRegisteredCards = u.TotalRegisteredCards,
-                TotalEarnedPoints = u.TotalEarnedPoints,
-                IsEligibleForReward = u.IsEligibleForReward,
-                HasReceivedReward = u.HasReceivedReward,
-                Province = u.Province ?? string.Empty,
-                City = u.City ?? string.Empty
-            }).ToList();
-
-            var filter = result.sm ?? sm;
-            var grid = service.BuildUserGrid(items);
+            var page = await service.GetListPage(sm);
+            var grid = AdminListGrids.BuildUserGrid(page.Items);
             CrudGridPager.Attach(
                 grid,
                 "UserGrid",
-                filter.PageIndex,
-                filter.PageCount,
-                filter.RecordCount,
-                FilterUrl.Combine("/UserManagement/Grid", new
+                page.PageIndex,
+                page.PageCount,
+                page.RecordCount,
+                FilterUrl.Combine("/UserManagement/List", new
                 {
-                    filter.SearchTerm,
-                    filter.CustomerTypeID,
-                    filter.ProvinceID,
-                    filter.CityID,
-                    filter.PointsFrom,
-                    filter.PointsTo,
-                    filter.IsEligibleForReward,
-                    filter.HasReceivedReward,
-                    filter.CardFromJalali,
-                    filter.CardToJalali
+                    sm.SearchTerm,
+                    sm.CustomerTypeID,
+                    sm.ProvinceID,
+                    sm.CityID,
+                    sm.PointsFrom,
+                    sm.PointsTo,
+                    sm.IsEligibleForReward,
+                    sm.HasReceivedReward,
+                    sm.CardFromJalali,
+                    sm.CardToJalali
                 }));
             return ViewComponent("CrudGrid", new { model = grid });
         }
@@ -114,7 +81,7 @@ namespace GolpaMotorFinal.Controllers
                 return NotFound();
 
             ViewBag.GridId = string.IsNullOrWhiteSpace(gridId) ? "UserGrid" : gridId;
-            ViewBag.RefreshUrl = string.IsNullOrWhiteSpace(refreshUrl) ? Url.Action("Grid", "UserManagement") : refreshUrl;
+            ViewBag.RefreshUrl = string.IsNullOrWhiteSpace(refreshUrl) ? Url.Action("List", "UserManagement") : refreshUrl;
 
             var vm = new MergeAccountsComplexViewModel
             {
@@ -180,29 +147,6 @@ namespace GolpaMotorFinal.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> UserReportGrid(UserSearchModel sm)
-        {
-            BindUserFilter(sm);
-            var page = await service.GetUserReportPage(sm);
-            var grid = AttachUserReportPager(service.BuildUserReportGrid(page.Users), page.PageIndex, page.PageCount, page.RecordCount);
-            return ViewComponent("CrudGrid", new { model = grid });
-        }
-
-        [HttpGet]
-        public async Task<JsonResult> Get(string UserID)
-        {
-            var user = await repo.Get(UserID);
-            return Json(user);
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> GetAll()
-        {
-            var users = await repo.GetAll();
-            return Json(users);
-        }
-
-        [HttpGet]
         public async Task<IActionResult> Create()
         {
             var provinces = await repo.GetProvinces();
@@ -220,7 +164,7 @@ namespace GolpaMotorFinal.Controllers
                 CloseOnSuccess=true,
                 RefreshGrid=true,
                 GridId = "UserGrid",
-                RefreshGridUrl = "Grid"
+                RefreshGridUrl = "List"
             };
             var vm = new UserAddEditViewModel
             {
@@ -248,28 +192,6 @@ namespace GolpaMotorFinal.Controllers
             }
 
             vm.ProfileImageUrl = "/images/imageUsers/noimage.jpg";
-
-            if (vm.ProfileImage != null)
-            {
-                var upload = await fileManager.UploadAsync(
-                    vm.ProfileImage,
-                    5,
-                    new[] { "jpg", "jpeg", "png" },
-                    "images/imageUsers/uploads",
-                    "images/imageUsers/thumbnails");
-
-                if (!upload.Success)
-                {
-                    return Json(new
-                    {
-                        success = false,
-                        message = upload.Message
-                    });
-                }
-
-                vm.ProfileImageUrl = upload.FileUrl;
-            }
-
             var model = new UserAddEditModel
             {
                 FirstName = vm.FirstName,
@@ -285,23 +207,7 @@ namespace GolpaMotorFinal.Controllers
                 ProfileImageUrl = vm.ProfileImageUrl
             };
 
-            var op = await service.AddUser(model);
-
-            if (!op.Success && vm.ProfileImage != null)
-            {
-                if (!string.IsNullOrWhiteSpace(vm.ProfileImageUrl))
-                {
-                    fileManager.Remove(vm.ProfileImageUrl);
-
-                    var thumbnailPath = vm.ProfileImageUrl.Replace(
-                        "/images/imageUsers/uploads/",
-                        "/images/imageUsers/thumbnails/");
-
-                    fileManager.Remove(thumbnailPath);
-                }
-            }
-
-            return Json(op);
+            return Json(await service.AddUser(model, vm.ProfileImage));
         }
 
         [HttpGet]
@@ -336,42 +242,6 @@ namespace GolpaMotorFinal.Controllers
             if (string.IsNullOrWhiteSpace(vm.UserID))
                 return Json(new { success = false, message = "شناسه کاربر معتبر نیست" });
 
-            var current = await repo.Get(vm.UserID);
-            vm.ProfileImageUrl = string.IsNullOrWhiteSpace(current?.ProfileImageUrl)
-                ? "/images/imageUsers/noimage.jpg"
-                : current.ProfileImageUrl;
-
-            if (vm.ProfileImage != null)
-            {
-                var upload = await fileManager.UploadAsync(
-                    vm.ProfileImage,
-                    5,
-                    new[] { "jpg", "jpeg", "png" },
-                    "images/imageUsers/uploads",
-                    "images/imageUsers/thumbnails");
-
-                if (!upload.Success)
-                {
-                    return Json(new
-                    {
-                        success = false,
-                        message = upload.Message
-                    });
-                }
-
-                if (upload.FileUrl == vm.ProfileImageUrl)
-                {
-                    fileManager.Remove(vm.ProfileImageUrl);
-                    var thumbnailPath = vm.ProfileImageUrl.Replace(
-                        "/images/imageUsers/uploads/",
-                        "/images/imageUsers/thumbnails/");
-
-                    fileManager.Remove(thumbnailPath);
-                }
-
-                vm.ProfileImageUrl = upload.FileUrl;
-            }
-
             var model = new UserAddEditModel
             {
                 UserID = vm.UserID,
@@ -388,13 +258,10 @@ namespace GolpaMotorFinal.Controllers
                 IBAN = vm.IBAN,
                 AccountNumber = vm.AccountNumber,
                 IsActive = vm.IsActive,
-                IsDeleted = vm.IsDeleted,
-                ProfileImageUrl= vm.ProfileImageUrl
+                IsDeleted = vm.IsDeleted
             };
 
-            var result = await service.UpdateUser(model);
-
-            return Json(result);
+            return Json(await service.UpdateUser(model, vm.ProfileImage));
         }
 
 
@@ -402,7 +269,7 @@ namespace GolpaMotorFinal.Controllers
         [ValidateAntiForgeryToken]
         public async Task<JsonResult> Delete(string userID)
         {
-            var result = await repo.Delete(userID);
+            var result = await service.DeleteUser(userID);
             return Json(result);
         }
 
@@ -449,8 +316,8 @@ namespace GolpaMotorFinal.Controllers
             var pageSize = PaginationViewModel.DefaultPageSize;
             var allItems = await rewardRequests.GetEligibleCatalogsForUser(user.UserID);
             var allRequests = await rewardRequests.GetUserRequests(user.UserID);
-            var rewards = SlicePage(allItems, rewardPage, pageSize);
-            var history = SlicePage(allRequests, historyPage, pageSize);
+            var rewards = CrudGridPager.Slice(allItems, rewardPage, pageSize);
+            var history = CrudGridPager.Slice(allRequests, historyPage, pageSize);
 
             var vm = new EligibleRewardsDialogViewModel
             {
@@ -486,34 +353,5 @@ namespace GolpaMotorFinal.Controllers
             var result = await rewardRequests.CreateRequest(userID, rewardCatalogID);
             return Json(new { success = result.Success, message = result.Message });
         }
-
-        [HttpGet]
-        public IActionResult UserReport()
-        {
-            return RedirectToAction("Index", "Reports");
-        }
-
-        private static CrudGridViewModel AttachUserReportPager(CrudGridViewModel grid, int pageIndex, int pageCount, int recordCount)
-        {
-            return CrudGridPager.Attach(grid, "UserReportGrid", pageIndex, pageCount, recordCount, "/UserManagement/UserReportGrid");
-        }
-
-        private static (List<T> Items, int PageIndex, int PageCount, int RecordCount) SlicePage<T>(List<T> source, int pageIndex, int pageSize)
-        {
-            var count = source?.Count ?? 0;
-            if (pageSize <= 0)
-                pageSize = PaginationViewModel.DefaultPageSize;
-            var pageCount = count == 0 ? 1 : (int)Math.Ceiling(count / (double)pageSize);
-            if (pageIndex < 0)
-                pageIndex = 0;
-            if (pageIndex >= pageCount)
-                pageIndex = pageCount - 1;
-            var items = count == 0
-                ? new List<T>()
-                : source!.Skip(pageIndex * pageSize).Take(pageSize).ToList();
-            return (items, pageIndex, pageCount, count);
-        }
-
     }
-
 }

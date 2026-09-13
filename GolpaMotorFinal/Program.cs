@@ -50,8 +50,9 @@ builder.Services.AddScoped<IReportRepository, ReportRepository>();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IFileManager, FileManager>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IRewardService, RewardService>();
+builder.Services.AddScoped<IWarrantyService, WarrantyService>();
 builder.Services.AddScoped<IWarrantyExcelService, WarrantyExcelService>();
-builder.Services.AddScoped<IGridConfigurationFactory, GridConfigurationFactory>();
 
 builder.Services.AddAntiforgery(options =>
 {

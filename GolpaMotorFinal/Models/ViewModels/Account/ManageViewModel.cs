@@ -24,8 +24,6 @@ namespace GolpaMotorFinal.Models.ViewModels.Account
         public string? City { get; set; }
         public string? Province { get; set; }
         public IFormFile? ProfileImage { get; set; }
-        public string? CurrentPassword { get; set; }
-        public string? NewPassword { get; set; }
         public int RemainedPoints { get; set; }
         public bool IsEligibleForReward { get; set; }
         public bool HasReceivedReward { get; set; }
