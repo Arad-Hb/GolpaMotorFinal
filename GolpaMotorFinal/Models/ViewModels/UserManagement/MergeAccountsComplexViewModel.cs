@@ -7,6 +7,7 @@ namespace GolpaMotorFinal.Models.ViewModels.UserManagement
         public MergeAccountsViewModel CurrentUser { get; set; } 
 
         public MergeAccountsViewModel? SearchedUser { get; set; }
+        public bool SearchAttempted { get; set; }
         public SearchBoxViewModel Search { get; set; } = new();
     }
 

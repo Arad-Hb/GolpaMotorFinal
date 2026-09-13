@@ -127,6 +127,7 @@ namespace GolpaMotorFinal.Controllers
         public async Task<IActionResult> SearchUserForMerge(MergeAccountsComplexViewModel model)
         {
             var found = await service.GetMergeSearchResult(model.Search?.SearchTerm ?? string.Empty);
+            model.SearchAttempted = true;
             if (string.IsNullOrWhiteSpace(found.UserID) || found.UserID == model.CurrentUser?.UserID)
                 model.SearchedUser = null;
             else

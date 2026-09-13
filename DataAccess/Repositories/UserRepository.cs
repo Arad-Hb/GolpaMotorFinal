@@ -294,22 +294,22 @@ namespace DataAccess.Repositories
             if (currentUserID == mergeUserID)
                 return op.ToFailed("امکان ادغام یک کاربر با خودش وجود ندارد.");
 
+            var currentUser = await db.Users.FirstOrDefaultAsync(x => x.Id == currentUserID && !x.IsDeleted);
+            var mergeUser = await db.Users.FirstOrDefaultAsync(x => x.Id == mergeUserID && !x.IsDeleted);
+
+            if (currentUser == null)
+                return op.ToFailed("کاربر اصلی یافت نشد.");
+
+            if (mergeUser == null)
+                return op.ToFailed("کاربر انتخاب شده یافت نشد.");
+
+            if (await userManager.IsInRoleAsync(mergeUser, "Admin"))
+                return op.ToFailed("امکان ادغام حساب مدیر وجود ندارد.");
+
             await using var transaction = await db.Database.BeginTransactionAsync();
 
             try
             {
-                var currentUser = await db.Users.FirstOrDefaultAsync(x => x.Id == currentUserID && !x.IsDeleted);
-                var mergeUser = await db.Users.FirstOrDefaultAsync(x => x.Id == mergeUserID && !x.IsDeleted);
-
-                if (currentUser == null)
-                    return op.ToFailed("کاربر اصلی یافت نشد.");
-
-                if (mergeUser == null)
-                    return op.ToFailed("کاربر انتخاب شده یافت نشد.");
-
-                if (await userManager.IsInRoleAsync(mergeUser, "Admin"))
-                    return op.ToFailed("امکان ادغام حساب مدیر وجود ندارد.");
-
                 var sourceCards = await db.CardRegistrations
                     .Where(x => x.UserID == mergeUserID)
                     .ToListAsync();
@@ -322,6 +322,12 @@ namespace DataAccess.Repositories
                 foreach (var tx in sourceTx)
                     tx.UserID = currentUserID;
 
+                var sourceRewards = await db.RewardRequests
+                    .Where(x => x.UserID == mergeUserID)
+                    .ToListAsync();
+                foreach (var reward in sourceRewards)
+                    reward.UserID = currentUserID;
+
                 var sourceTypes = await db.UserCustomerTypes
                     .Where(x => x.UserID == mergeUserID)
                     .ToListAsync();
@@ -329,19 +335,24 @@ namespace DataAccess.Repositories
                     .Where(x => x.UserID == currentUserID)
                     .Select(x => x.CustomerTypeID)
                     .ToListAsync();
-                foreach (var type in sourceTypes)
-                {
-                    if (currentTypeIds.Contains(type.CustomerTypeID))
-                        db.UserCustomerTypes.Remove(type);
-                    else
-                        type.UserID = currentUserID;
-                }
 
-                var sourceRewards = await db.RewardRequests
-                    .Where(x => x.UserID == mergeUserID)
-                    .ToListAsync();
-                foreach (var reward in sourceRewards)
-                    reward.UserID = currentUserID;
+                var typesToAdd = sourceTypes
+                    .Select(x => x.CustomerTypeID)
+                    .Where(id => !currentTypeIds.Contains(id))
+                    .Distinct()
+                    .ToList();
+
+                if (sourceTypes.Count > 0)
+                    db.UserCustomerTypes.RemoveRange(sourceTypes);
+
+                foreach (var typeId in typesToAdd)
+                {
+                    await db.UserCustomerTypes.AddAsync(new UserCustomerType
+                    {
+                        UserID = currentUserID,
+                        CustomerTypeID = typeId
+                    });
+                }
 
                 await db.SaveChangesAsync();
 
@@ -369,16 +380,24 @@ namespace DataAccess.Repositories
                 mergeUser.RemainedPoints = 0;
                 mergeUser.TotalRegisteredCards = 0;
                 mergeUser.IsEligibleForReward = false;
+                mergeUser.PhoneNumber = $"merged_{mergeUser.Id}";
+                mergeUser.UserName = $"merged_{mergeUser.Id}";
+                mergeUser.NormalizedUserName = mergeUser.UserName.ToUpperInvariant();
+                if (!string.IsNullOrWhiteSpace(mergeUser.Email))
+                {
+                    mergeUser.Email = $"merged_{mergeUser.Id}@merged.local";
+                    mergeUser.NormalizedEmail = mergeUser.Email.ToUpperInvariant();
+                }
 
                 await db.SaveChangesAsync();
                 await transaction.CommitAsync();
 
                 return op.ToSuccess("حساب‌های کاربری با موفقیت ادغام شدند.");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 await transaction.RollbackAsync();
-                return op.ToFailed("در هنگام ادغام حساب‌ها خطایی رخ داد.");
+                return op.ToFailed("در هنگام ادغام حساب‌ها خطایی رخ داد: " + ex.Message);
             }
         }
 

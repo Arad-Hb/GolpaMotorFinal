@@ -270,7 +270,7 @@ namespace GolpaMotorFinal.FrameworkUI.Services
                 return op.ToFailed("اطلاعات نامعتبر است.");
 
             if (string.IsNullOrWhiteSpace(model.SelectedMergeUserID))
-                return op.ToFailed("لطفاً حساب مقصد را انتخاب کنید.");
+                return op.ToFailed("لطفاً حساب مبدأ را انتخاب کنید.");
 
             if (model.UserID == model.SelectedMergeUserID)
                 return op.ToFailed("امکان ادغام یک کاربر با خودش وجود ندارد.");

@@ -49,13 +49,18 @@
             var url = searchBox.data("action");
             var target = searchBox.data("target");
             var input = $("#searchInput-" + componentId);
+            var payload = {
+                __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').first().val(),
+                [input.attr("name")]: input.val()
+            };
+            var mergeForm = $(this).closest("#mergeForm");
+            if (mergeForm.length) {
+                payload["CurrentUser.UserID"] = mergeForm.find("input[name='CurrentUser.UserID']").val();
+            }
             $.ajax({
                 url: url,
                 type: "POST",
-                data: {
-                    __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').first().val(),
-                    [input.attr("name")]: input.val()
-                },
+                data: payload,
                 success: function (html) {
                     $("#" + target).html(html);
                 }

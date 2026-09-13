@@ -10,6 +10,7 @@
             <strong>@Model.SearchedUser.FullName</strong>
             <div class="text-muted">@Model.SearchedUser.PhoneNumber</div>
         </div>
+        <span class="badge bg-secondary">مبدأ — حذف نرم</span>
         <div class="form-check m-0">
             <input class="form-check-input select-user"
                    type="checkbox"
@@ -27,7 +28,7 @@
         Model.SearchedUser.RemainedPoints,
         Model.SearchedUser.TotalRegisteredCards))
 }
-else
+else if (Model.SearchAttempted)
 {
     <div class="alert alert-warning py-1 px-2 mb-0 small">هیچ حسابی یافت نشد</div>
 }
