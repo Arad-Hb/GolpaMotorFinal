@@ -100,7 +100,7 @@ namespace GolpaMotorFinal.Controllers
                 if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
                     return Json(new { success = false, message = "اطلاعات نامعتبر است." });
 
-                return RedirectToAction(nameof(UserReport));
+                return RedirectToAction(nameof(Index));
             }
 
             var result = await service.MergeUsers(model.CurrentUser);
@@ -114,10 +114,10 @@ namespace GolpaMotorFinal.Controllers
             if (!result.Success)
             {
                 TempData["MergeMessage"] = result.Message;
-                return RedirectToAction(nameof(UserReport));
+                return RedirectToAction(nameof(Index));
             }
 
-            return RedirectToAction(nameof(UserReport));
+            return RedirectToAction(nameof(Index));
         }
 
 

@@ -264,15 +264,15 @@ namespace DataAccess.Repositories
             try
             {
                 var currentUser = await db.Users.FirstOrDefaultAsync(x => x.Id == currentUserID && !x.IsDeleted);
-                var sourceUser = await db.Users.FirstOrDefaultAsync(x => x.Id == mergeUserID && !x.IsDeleted);
+                var mergeUser = await db.Users.FirstOrDefaultAsync(x => x.Id == mergeUserID && !x.IsDeleted);
 
                 if (currentUser == null)
                     return op.ToFailed("کاربر اصلی یافت نشد.");
 
-                if (sourceUser == null)
+                if (mergeUser == null)
                     return op.ToFailed("کاربر انتخاب شده یافت نشد.");
 
-                if (await userManager.IsInRoleAsync(sourceUser, "Admin"))
+                if (await userManager.IsInRoleAsync(mergeUser, "Admin"))
                     return op.ToFailed("امکان ادغام حساب مدیر وجود ندارد.");
 
                 var sourceCards = await db.CardRegistrations
@@ -322,18 +322,18 @@ namespace DataAccess.Repositories
                 currentUser.RemainedPoints = earned - settled;
                 currentUser.TotalRegisteredCards = await db.CardRegistrations.CountAsync(x => x.UserID == currentUserID);
                 currentUser.IsActive = true;
-                if (sourceUser.HasReceivedReward)
+                if (mergeUser.HasReceivedReward)
                     currentUser.HasReceivedReward = true;
 
                 await RewardEligibilityHelper.ApplyToUserAsync(db, currentUser);
 
-                sourceUser.IsActive = false;
-                sourceUser.IsDeleted = true;
-                sourceUser.TotalEarnedPoints = 0;
-                sourceUser.TotalSettledPoints = 0;
-                sourceUser.RemainedPoints = 0;
-                sourceUser.TotalRegisteredCards = 0;
-                sourceUser.IsEligibleForReward = false;
+                mergeUser.IsActive = false;
+                mergeUser.IsDeleted = true;
+                mergeUser.TotalEarnedPoints = 0;
+                mergeUser.TotalSettledPoints = 0;
+                mergeUser.RemainedPoints = 0;
+                mergeUser.TotalRegisteredCards = 0;
+                mergeUser.IsEligibleForReward = false;
 
                 await db.SaveChangesAsync();
                 await transaction.CommitAsync();

@@ -12,10 +12,11 @@
         </div>
         <div class="form-check m-0">
             <input class="form-check-input select-user"
-                   type="radio"
+                   type="checkbox"
                    name="CurrentUser.SelectedMergeUserID"
                    value="@Model.SearchedUser.UserID"
-                   id="mergeUser_@Model.SearchedUser.UserID" />
+                   id="mergeUser_@Model.SearchedUser.UserID"
+                   checked />
             <label class="form-check-label small" for="mergeUser_@Model.SearchedUser.UserID">انتخاب</label>
         </div>
     </div>
