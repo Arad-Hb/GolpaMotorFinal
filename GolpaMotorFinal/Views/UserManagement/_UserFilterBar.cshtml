@@ -44,13 +44,14 @@
         <option value="true">بله</option>
         <option value="false">خیر</option>
     </select>
-    @{
-        ViewData["DateFromName"] = "CardFromJalali";
-        ViewData["DateToName"] = "CardToJalali";
-        ViewData["DateEmptyLabel"] = "تاریخ ثبت کارت";
-        ViewData["DateFromPlaceholder"] = "ثبت کارت از";
-        ViewData["DateToPlaceholder"] = "ثبت کارت تا";
-    }
-    @await Html.PartialAsync("_DateRangeFilter")
+
+    @await Component.InvokeAsync("DateRangeFilter", new DateRangeFilterViewModel
+    {
+        FromName = "CardFromJalali",
+        ToName = "CardToJalali",
+        EmptyLabel = "بازه تاریخ",
+        FromPlaceholder = "از تاریخ",
+        ToPlaceholder = "تا تاریخ"
+    })
     @await Html.PartialAsync("_FilterReset")
 </form>

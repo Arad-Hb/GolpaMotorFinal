@@ -51,14 +51,15 @@
                             <option value="@p.ProductID">@p.ProductName</option>
                         }
                     </select>
-                    @{
-                        ViewData["DateFromName"] = "fromJalali";
-                        ViewData["DateToName"] = "toJalali";
-                        ViewData["DateEmptyLabel"] = "بازه تاریخ";
-                        ViewData["DateFromPlaceholder"] = "از تاریخ";
-                        ViewData["DateToPlaceholder"] = "تا تاریخ";
-                    }
-                    @await Html.PartialAsync("_DateRangeFilter")
+
+                    @await Component.InvokeAsync("DateRangeFilter", new DateRangeFilterViewModel
+                    {
+                        FromName = "fromJalali",
+                        ToName = "toJalali",
+                        EmptyLabel = "بازه تاریخ",
+                        FromPlaceholder = "از تاریخ",
+                        ToPlaceholder = "تا تاریخ"
+                    })
                     @await Html.PartialAsync("_FilterReset")
                 </form>
                 <div id="WarrantyReportGrid"></div>
@@ -101,14 +102,15 @@
         <div class="white_shd full margin_bottom_30">
             <div class="padding_infor_info">
                 <form class="table_filter_bar" data-filter-bar data-url="/Reports/Rewards" data-target="#RewardReportGrid">
-                    @{
-                        ViewData["DateFromName"] = "fromJalali";
-                        ViewData["DateToName"] = "toJalali";
-                        ViewData["DateEmptyLabel"] = "بازه تاریخ";
-                        ViewData["DateFromPlaceholder"] = "از تاریخ";
-                        ViewData["DateToPlaceholder"] = "تا تاریخ";
-                    }
-                    @await Html.PartialAsync("_DateRangeFilter")
+
+                    @await Component.InvokeAsync("DateRangeFilter", new DateRangeFilterViewModel
+                    {
+                        FromName = "fromJalali",
+                        ToName = "toJalali",
+                        EmptyLabel = "بازه تاریخ",
+                        FromPlaceholder = "از تاریخ",
+                        ToPlaceholder = "تا تاریخ"
+                    })
                     @await Html.PartialAsync("_FilterReset")
                 </form>
                 <div id="RewardReportGrid"></div>

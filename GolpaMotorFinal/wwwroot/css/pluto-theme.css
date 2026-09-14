@@ -821,7 +821,8 @@ html[dir="rtl"] body.pluto-public {
     border-radius: 12px;
     box-shadow: 0 18px 48px rgba(21, 40, 60, 0.18);
     overflow: hidden;
-    min-width: 560px;
+/*    min-width: 560px;*/
+    min-width: 360px;
 }
 
 .num-range-popup {

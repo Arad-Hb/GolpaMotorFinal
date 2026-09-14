@@ -109,14 +109,18 @@
                                 ViewData["NumToPlaceholder"] = "حداکثر روز";
                             }
                             @await Html.PartialAsync("_NumberRangeFilter")
-                            @{
-                                ViewData["DateFromName"] = "RegisteredFromJalali";
-                                ViewData["DateToName"] = "RegisteredToJalali";
-                                ViewData["DateEmptyLabel"] = "تاریخ ثبت";
-                                ViewData["DateFromPlaceholder"] = "ثبت از";
-                                ViewData["DateToPlaceholder"] = "ثبت تا";
-                            }
-                            @await Html.PartialAsync("_DateRangeFilter")
+
+                            @await Component.InvokeAsync("DateRangeFilter", new DateRangeFilterViewModel
+                            {
+                                FromName = "RegisteredFromJalali",
+                                ToName = "RegisteredToJalali",
+                                EmptyLabel = "تاریخ ثبت",
+                                FromPlaceholder = "ثبت از",
+                                ToPlaceholder = "ثبت تا",
+                                FromValue = Model.RegisteredFromJalali,
+                                ToValue = Model.RegisteredToJalali
+                            })
+
                             @await Html.PartialAsync("_FilterReset")
                         </form>
                         <div id="warrantyCardsGrid"></div>

@@ -1,8 +1,8 @@
-using DataAccess.Services;
 using DomainModel.Models;
 using DomainModel.ViewModels.Product;
 using DomainModel.ViewModels.Reports;
 using DomainModel.ViewModels.Reward;
+using DomainModel.ViewModels.Warranty;
 using GolpaMotorFinal.Models.ViewModels.CRUD;
 using GolpaMotorFinal.Models.ViewModels.UserManagement;
 

@@ -309,7 +309,7 @@
             html += "</div>";
             html += '<div class="date-range-popup__cals">';
             html += calendarHtml(left.y, left.m, pickStart, pickEnd);
-            html += calendarHtml(right.y, right.m, pickStart, pickEnd);
+            // html += calendarHtml(right.y, right.m, pickStart, pickEnd);
             html += "</div>";
             popup.html(html);
         }

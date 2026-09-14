@@ -102,14 +102,22 @@
                             <option value="@cat.RewardCatalogID">@cat.Title</option>
                         }
                     </select>
-                    @{
+                    @* @{
                         ViewData["DateFromName"] = "RequestFromJalali";
                         ViewData["DateToName"] = "RequestToJalali";
                         ViewData["DateEmptyLabel"] = "تاریخ درخواست";
                         ViewData["DateFromPlaceholder"] = "از تاریخ";
                         ViewData["DateToPlaceholder"] = "تا تاریخ";
                     }
-                    @await Html.PartialAsync("_DateRangeFilter")
+                    @await Html.PartialAsync("_DateRangeFilter") *@
+                    @await Component.InvokeAsync("DateRangeFilter", new DateRangeFilterViewModel
+                    {
+                        FromName = "fromJalali",
+                        ToName = "toJalali",
+                        EmptyLabel = "بازه تاریخ",
+                        FromPlaceholder = "از تاریخ",
+                        ToPlaceholder = "تا تاریخ"
+                    })
                     @await Html.PartialAsync("_FilterReset")
                 </form>
                 <div id="RequestGrid"></div>
