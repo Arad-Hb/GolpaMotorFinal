@@ -72,7 +72,9 @@
         </button>
     </div>
     <div class="padding_infor_info">
+
         @await Html.PartialAsync("_ProductFilterBar")
+
         <form id="frmAntiForgery">@Html.AntiForgeryToken()</form>
         <div id="ProductGrid"></div>
     </div>

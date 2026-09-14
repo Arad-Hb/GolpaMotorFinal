@@ -44,5 +44,6 @@ namespace Framework.Common
         public static int GetYear(DateTime date) => Calendar.GetYear(date);
 
         public static int GetMonth(DateTime date) => Calendar.GetMonth(date);
+
     }
 }

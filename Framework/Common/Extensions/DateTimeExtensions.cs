@@ -24,7 +24,7 @@ namespace Framework.Common.Extensions
 
         private static readonly string[] Months = new[]
         {
-            "", // index 0 خالی
+            "همه ماه‌ها", // index 0
             "فروردین",
             "اردیبهشت",
             "خرداد",
@@ -50,5 +50,11 @@ namespace Framework.Common.Extensions
 
             return $"{dayName} {day} {Months[month]} {year}";
         }
+
+        public static IReadOnlyList<string> PersianMonths => Months;
+
+        public static string PersianMonthName(int month)
+            => month >= 0 && month < Months.Length ? Months[month] : string.Empty;
+
     }
 }

@@ -33,6 +33,7 @@ namespace GolpaMotorFinal.Controllers
         {
             ViewBag.CustomerTypes = await userRepo.GetCustomerTypes();
             ViewBag.Provinces = await userRepo.GetProvinces();
+
             return View(new ReportsIndexViewModel
             {
                 Products = await products.GetAll()

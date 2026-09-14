@@ -5,5 +5,6 @@ namespace GolpaMotorFinal.Models.ViewModels.Reports
     public class ReportsIndexViewModel
     {
         public IEnumerable<ProductListItem> Products { get; set; } = Enumerable.Empty<ProductListItem>();
+        public IEnumerable<string> Months { get; set; } = new List<string>();
     }
 }

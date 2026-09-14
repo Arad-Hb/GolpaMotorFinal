@@ -1,5 +1,4 @@
 ﻿@model GolpaMotorFinal.Models.ViewModels.Admin.AdminDashboardViewModel
-@using DomainModel.ViewModels.Product
 @{
     ViewData["Title"] = "داشبورد";
     Layout = "_AdminLayout";
@@ -105,15 +104,8 @@
         </div>
     </div>
     <div class="table_section padding_infor_info">
-        <div class="table_filter_bar">
-            <input type="search"
-                   class="form-control table-filter-input"
-                   data-table-target="#topRegistrarsTable"
-                   placeholder="جستجو در جدول..."
-                   autocomplete="off" />
-                        </div>
-                        <div id="topRegistrarsGrid">
-                            @await Html.PartialAsync("_TopRegistrarsTable", Model.TopRegistrars)
-                        </div>
+        <div id="topRegistrarsGrid">
+            @await Html.PartialAsync("_TopRegistrarsTable", Model.TopRegistrars)
+        </div>
     </div>
 </div>
