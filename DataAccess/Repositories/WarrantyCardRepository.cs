@@ -1,5 +1,6 @@
 ﻿using DataAccess.Services;
 using DomainModel.Models;
+using DomainModel.ViewModels.Warranty;
 using Framework.Common;
 using Microsoft.EntityFrameworkCore;
 

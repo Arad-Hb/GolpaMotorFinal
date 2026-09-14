@@ -1,5 +1,6 @@
 ﻿using DomainModel.Models;
 using DomainModel.ViewModels.Product;
+using DomainModel.ViewModels.Warranty;
 
 namespace DataAccess.Services
 {
@@ -14,16 +15,4 @@ namespace DataAccess.Services
         Task<(List<WarrantyCardListItem> Items, int Total)> SearchAsync(WarrantyCardSearchModel search);
     }
 
-    public class WarrantyCardListItem
-    {
-        public long WarrantyCardID { get; set; }
-        public string SerialNumber { get; set; } = string.Empty;
-        public string ScratchedCode { get; set; } = string.Empty;
-        public string ProductName { get; set; } = string.Empty;
-        public bool IsRegistered { get; set; }
-        public int ValidityMonths { get; set; }
-        public DateTime? RegisteredAt { get; set; }
-        public int? RemainingDays { get; set; }
-        public string RemainingText { get; set; } = string.Empty;
-    }
 }

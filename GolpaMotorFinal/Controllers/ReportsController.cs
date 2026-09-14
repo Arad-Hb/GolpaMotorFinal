@@ -3,6 +3,7 @@ using DomainModel.ViewModels.User;
 using Framework.Common;
 using GolpaMotorFinal.FrameworkUI.Services;
 using GolpaMotorFinal.Helpers;
+using GolpaMotorFinal.Models.ViewModels.Reports;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -32,7 +33,7 @@ namespace GolpaMotorFinal.Controllers
         {
             ViewBag.CustomerTypes = await userRepo.GetCustomerTypes();
             ViewBag.Provinces = await userRepo.GetProvinces();
-            return View(new GolpaMotorFinal.Models.ViewModels.Reports.ReportsIndexViewModel
+            return View(new ReportsIndexViewModel
             {
                 Products = await products.GetAll()
             });
