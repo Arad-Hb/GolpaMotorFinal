@@ -7,18 +7,7 @@
     ViewData["FilterPartial"] = "_ProductFilterBar";
 }
 
-@await Html.PartialAsync("_AdminPageHeader", new AdminPageHeaderViewModel
-{
-    Title = "مدیریت محصولات",
-    Breadcrumb = new BreadcrumbViewModel
-    {
-        Items =
-        {
-            new BreadcrumbItemViewModel { Title = "داشبورد", Url = Url.Action("Index", "Admin") },
-            new BreadcrumbItemViewModel { Title = "محصولات", Active = true }
-        }
-    }
-})
+@await Html.PartialAsync("_AdminPageHeader", AdminPageHeaderViewModel.For("مدیریت محصولات", "محصولات"))
 
 <div class="row column1">
     <div class="col-md-6 col-lg-3">

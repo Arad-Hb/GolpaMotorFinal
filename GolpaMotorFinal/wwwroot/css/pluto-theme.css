@@ -410,11 +410,76 @@ html[dir="rtl"] body.pluto-public {
     box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
 }
 
+.pluto-admin .page_title--with-crumb {
+    padding: 10px 18px 12px;
+    margin-bottom: 16px;
+}
+
 .pluto-admin .page_title h2 {
     margin: 0;
     font-size: 22px;
     color: var(--pluto-navy);
     font-weight: 500;
+}
+
+.pluto-admin .page_title--with-crumb h2 {
+    font-size: 18px;
+}
+
+.pluto-admin .breadcrumbs {
+    display: block;
+    margin: 0 0 6px;
+    padding: 0;
+    background: none;
+    box-shadow: none;
+}
+
+.pluto-admin .breadcrumbs ol {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.pluto-admin .breadcrumbs li {
+    display: inline-block;
+}
+
+.pluto-admin .breadcrumbs a,
+.pluto-admin .breadcrumbs span {
+    position: relative;
+    display: inline-block;
+    font-size: 12px;
+    color: var(--pluto-muted);
+    padding-left: 16px;
+    margin-left: 6px;
+    text-decoration: none;
+    text-transform: none;
+}
+
+.pluto-admin .breadcrumbs li:not(:last-of-type) a::after,
+.pluto-admin .breadcrumbs li:not(:last-of-type) span::after {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-top: 1.5px solid var(--pluto-muted);
+    border-left: 1.5px solid var(--pluto-muted);
+    position: absolute;
+    top: 50%;
+    left: 0;
+    transform: translateY(-50%) rotate(-45deg);
+    display: block;
+}
+
+.pluto-admin .breadcrumbs li:last-of-type a,
+.pluto-admin .breadcrumbs li:last-of-type span {
+    color: var(--pluto-navy);
+    font-weight: 700;
+    padding-left: 0;
+    margin-left: 0;
+}
+
+.pluto-admin .breadcrumbs a:hover {
+    color: var(--pluto-green);
 }
 
 .pluto-admin .white_shd {

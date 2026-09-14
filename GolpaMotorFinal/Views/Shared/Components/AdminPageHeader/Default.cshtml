@@ -1,0 +1,10 @@
+@model GolpaMotorFinal.Models.ViewModels.AdminPageHeaderViewModel
+
+<div class="row column_title">
+    <div class="col-md-12">
+        <div class="page_title page_title--with-crumb">
+            @await Component.InvokeAsync("Breadcrumb", new { model = Model.Breadcrumb })
+            <h2>@Model.Title</h2>
+        </div>
+    </div>
+</div>

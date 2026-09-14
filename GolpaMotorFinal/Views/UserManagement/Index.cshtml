@@ -6,18 +6,11 @@
     var crudModel = new CrudIndexViewModel
     {
         Title = "مدیریت کاربران",
+        HeaderCurrent = "کاربران",
         GridId = "UserGrid",
         CreateUrl = Url.Action("Create", "UserManagement") ?? "/UserManagement/Create",
         CreateTitle = "افزودن کاربر",
-        CreateButtonText = "افزودن",
-        Breadcrumb = new BreadcrumbViewModel
-        {
-            Items =
-            {
-                new BreadcrumbItemViewModel { Title = "داشبورد", Url = Url.Action("Index", "Admin") },
-                new BreadcrumbItemViewModel { Title = "کاربران", Active = true }
-            }
-        }
+        CreateButtonText = "افزودن"
     };
     ViewData["FilterPartial"] = "_UserFilterBar";
 }

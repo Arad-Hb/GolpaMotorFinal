@@ -8,18 +8,7 @@
     var catalogs = Model.Catalogs;
 }
 
-@await Html.PartialAsync("_AdminPageHeader", new GolpaMotorFinal.Models.ViewModels.AdminPageHeaderViewModel
-{
-    Title = "مدیریت پاداش",
-    Breadcrumb = new GolpaMotorFinal.Models.ViewModels.BreadcrumbViewModel
-    {
-        Items =
-        {
-            new GolpaMotorFinal.Models.ViewModels.BreadcrumbItemViewModel { Title = "داشبورد", Url = Url.Action("Index", "Admin") },
-            new GolpaMotorFinal.Models.ViewModels.BreadcrumbItemViewModel { Title = "پاداش", Active = true }
-        }
-    }
-})
+@await Html.PartialAsync("_AdminPageHeader", AdminPageHeaderViewModel.For("مدیریت پاداش", "پاداش"))
 
 <ul class="nav nav-tabs mb-3" role="tablist">
     <li class="nav-item">

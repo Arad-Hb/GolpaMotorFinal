@@ -1,21 +1,26 @@
 @model GolpaMotorFinal.Models.ViewModels.BreadcrumbViewModel
 
-<nav aria-label="breadcrumb" class="mb-3">
-    <ol class="breadcrumb bg-light rounded px-3 py-2 mb-0">
+<nav class="breadcrumbs" aria-label="مسیر صفحه">
+    <ol>
         @foreach (var item in Model.Items)
         {
-            if (item.Active)
-            {
-                <li class="breadcrumb-item active" aria-current="page">@item.Title</li>
-            }
-            else if (!string.IsNullOrEmpty(item.Url))
-            {
-                <li class="breadcrumb-item"><a href="@item.Url">@item.Title</a></li>
-            }
-            else
-            {
-                <li class="breadcrumb-item">@item.Title</li>
-            }
+            <li>
+                @if (item.Active || string.IsNullOrEmpty(item.Url))
+                {
+                    if (item.Active)
+                    {
+                        <span aria-current="page">@item.Title</span>
+                    }
+                    else
+                    {
+                        <span>@item.Title</span>
+                    }
+                }
+                else
+                {
+                    <a href="@item.Url">@item.Title</a>
+                }
+            </li>
         }
     </ol>
 </nav>

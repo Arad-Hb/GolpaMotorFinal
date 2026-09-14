@@ -308,8 +308,8 @@
             });
             html += "</div>";
             html += '<div class="date-range-popup__cals">';
-            html += calendarHtml(left.y, left.m, pickStart, pickEnd);
-            // html += calendarHtml(right.y, right.m, pickStart, pickEnd);
+            html += calendarHtml(left.y, left.m, pickStart, pickEnd);  //first callender
+            // html += calendarHtml(right.y, right.m, pickStart, pickEnd); //second callender
             html += "</div>";
             popup.html(html);
         }

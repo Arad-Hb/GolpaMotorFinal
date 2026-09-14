@@ -6,17 +6,7 @@
     var stats = Model.Stats;
 }
 
-@await Html.PartialAsync("_AdminPageHeader", new GolpaMotorFinal.Models.ViewModels.AdminPageHeaderViewModel
-{
-    Title = "داشبورد",
-    Breadcrumb = new GolpaMotorFinal.Models.ViewModels.BreadcrumbViewModel
-    {
-        Items =
-        {
-            new GolpaMotorFinal.Models.ViewModels.BreadcrumbItemViewModel { Title = "داشبورد", Active = true }
-        }
-    }
-})
+@await Html.PartialAsync("_AdminPageHeader", AdminPageHeaderViewModel.For("داشبورد"))
 
 <div class="row column1">
     <div class="col-md-6 col-lg-3">
