@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace GolpaMotorFinal.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class AccountController : Controller
     {
         private readonly UserManager<ApplicationUser> userManager;
@@ -32,6 +33,8 @@ namespace GolpaMotorFinal.Controllers
             this.fileManager = fileManager;
         }
 
+        [HttpGet]
+        [AllowAnonymous]
         private async Task<SelectList> BindProvince()
         {
             var provinces = await userRepository.GetProvinces();
@@ -54,12 +57,14 @@ namespace GolpaMotorFinal.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public IActionResult Login(string returnUrl = null)
         {
             return View(new LoginViewModel { ReturnUrl = returnUrl });
         }
 
         [HttpPost]
+        [AllowAnonymous]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(LoginViewModel model)
         {
@@ -246,14 +251,12 @@ namespace GolpaMotorFinal.Controllers
         }
 
         [HttpGet]
-        [Authorize]
         public async Task<IActionResult> ChangePassword()
         {
             return View(new ChangePasswordViewModel());
         }
 
         [HttpPost]
-        [Authorize]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ChangePassword(ChangePasswordViewModel model)
         {
@@ -280,7 +283,6 @@ namespace GolpaMotorFinal.Controllers
         }
 
         [HttpGet]
-        [Authorize]
         public async Task<IActionResult> Profile()
         {
             var user = await userManager.GetUserAsync(User);
@@ -294,7 +296,6 @@ namespace GolpaMotorFinal.Controllers
         }
 
         [HttpPost]
-        [Authorize]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Profile(ManageViewModel model)
         {
@@ -341,17 +342,15 @@ namespace GolpaMotorFinal.Controllers
         }
 
         [HttpGet]
-        [Authorize]
         public IActionResult Manage()
         {
             return RedirectToAction(nameof(Profile));
         }
 
         [HttpGet]
-        [Authorize]
         public async Task<IActionResult> Cards(int pageIndex = 0)
         {
-            var user = await userManager.GetUserAsync(User);
+            var user = await userManager.GetUserAsync(User);//current loged in user
             if (user == null)
                 return Unauthorized();
 
