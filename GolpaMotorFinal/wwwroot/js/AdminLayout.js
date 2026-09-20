@@ -161,3 +161,23 @@ $(document).on("click", ".btnDelete", async function () {
         toastError("خطا در حذف");
     });
 });
+
+ // $(document).on("click", ".btnRemovePicture", async function () {
+        //     const ok = await confirmDelete("عکس محصول حذف شود؟");
+        //     if (!ok) return;
+        //     const id = $(this).data("id");
+        //     const token = $('#antiforgery-form input[name="__RequestVerificationToken"]').val();
+        //     $.ajax({
+        //         url: '/ProductManagement/RemovePicture',
+        //         type: 'POST',
+        //         data: { productID: id, __RequestVerificationToken: token },
+        //         success: function (res) {
+        //             if (res.success) {
+        //                 toastSuccess(res.message);
+        //                 applyTableFilter($("#ProductGrid").closest(".padding_infor_info").find("[data-filter-bar]"));
+        //             } else {
+        //                 toastError(res.message);
+        //             }
+        //         }
+        //     });
+        // });

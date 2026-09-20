@@ -127,9 +127,9 @@ namespace GolpaMotorFinal.Controllers
             return PartialView("_Details", prod);
         }
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<JsonResult> RemovePicture(long productID)
-            => Json(await service.RemovePicture(productID));
+        //[HttpPost]
+        //[ValidateAntiForgeryToken]
+        //public async Task<JsonResult> RemovePicture(long productID)
+        //    => Json(await service.RemovePicture(productID));
     }
 }

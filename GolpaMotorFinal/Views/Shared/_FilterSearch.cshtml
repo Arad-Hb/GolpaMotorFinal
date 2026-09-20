@@ -1,14 +1,10 @@
-@{
-    var placeholder = ViewData["SearchPlaceholder"] as string ?? "جستجو...";
-    var name = ViewData["SearchName"] as string ?? "SearchTerm";
-    var value = ViewData["SearchValue"] as string ?? "";
-}
+@model FilterSearchViewModel
 <div class="filter-search">
     <input type="search"
-           name="@name"
-           value="@value"
+           name="@Model.Name"
+           value="@Model.Value"
            class="form-control filter-search__input"
-           placeholder="@placeholder"
+           placeholder="@Model.Placeholder"
            autocomplete="off" />
     <button type="button" class="filter-search__btn" data-filter-search aria-label="جستجو">
         <i class="fa-solid fa-magnifying-glass"></i>

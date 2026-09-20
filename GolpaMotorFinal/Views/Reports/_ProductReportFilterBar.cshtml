@@ -1,10 +1,8 @@
-@{
-    var yearNow = (int)(ViewBag.YearNow ?? Framework.Common.PersianDate.GetYear(DateTime.Today));
-}
+@model ProductReportFilterBarViewModel
 <form class="table_filter_bar" data-filter-bar data-url="/Reports/Products" data-target="#ProductReportGrid">
     <select name="year" class="form-select">
         <option value="">همه سال‌ها</option>
-        @for (var y = yearNow; y >= yearNow - 7; y--)
+        @for (var y = Model.YearNow; y >= Model.YearNow - 7; y--)
         {
             <option value="@y">@y</option>
         }

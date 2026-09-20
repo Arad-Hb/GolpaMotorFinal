@@ -1,8 +1,8 @@
 @model GolpaMotorFinal.Models.ViewModels.Reports.ReportsIndexViewModel
+@using DomainModel.Models
 @using GolpaMotorFinal.Models.ViewModels.CRUD
 @{
     Layout = "_AdminLayout";
-    ViewBag.YearNow = Framework.Common.PersianDate.GetYear(DateTime.Today);
 }
 
 <ul class="nav nav-tabs mb-3" role="tablist">
@@ -14,37 +14,39 @@
 
 <div class="tab-content">
     <div class="tab-pane fade show active" id="reportUsers">
-        @{
-            ViewData["FilterUrl"] = "/Reports/Users";
-            ViewData["FilterTarget"] = "#UserReportGrid";
-        }
         @await Html.PartialAsync("_CrudPage", new CrudIndexViewModel
         {
             GridId = "UserReportGrid",
             ListHeading = "گزارش کاربران",
-            FilterPartial = "~/Views/UserManagement/_UserFilterBar.cshtml"
+            FilterPartial = "~/Views/UserManagement/_UserFilterBar.cshtml",
+            FilterModel = new UserFilterBarViewModel
+            {
+                Url = "/Reports/Users",
+                Target = "#UserReportGrid",
+                CustomerTypes = ViewBag.CustomerTypes as IEnumerable<CustomerType> ?? Enumerable.Empty<CustomerType>(),
+                Provinces = ViewBag.Provinces as IEnumerable<Province> ?? Enumerable.Empty<Province>()
+            }
         })
     </div>
     <div class="tab-pane fade" id="reportWarranty">
-        @{
-            ViewData["FilterModel"] = Model.Products;
-        }
         @await Html.PartialAsync("_CrudPage", new CrudIndexViewModel
         {
             GridId = "WarrantyReportGrid",
             ListHeading = "گزارش کارت گارانتی",
-            FilterPartial = "_WarrantyReportFilterBar"
+            FilterPartial = "_WarrantyReportFilterBar",
+            FilterModel = Model.Products
         })
     </div>
     <div class="tab-pane fade" id="reportProducts">
-        @{
-            ViewData["FilterModel"] = null;
-        }
         @await Html.PartialAsync("_CrudPage", new CrudIndexViewModel
         {
             GridId = "ProductReportGrid",
             ListHeading = "گزارش محصول",
-            FilterPartial = "_ProductReportFilterBar"
+            FilterPartial = "_ProductReportFilterBar",
+            FilterModel = new ProductReportFilterBarViewModel
+            {
+                YearNow = Framework.Common.PersianDate.GetYear(DateTime.Today)
+            }
         })
     </div>
     <div class="tab-pane fade" id="reportRewards">

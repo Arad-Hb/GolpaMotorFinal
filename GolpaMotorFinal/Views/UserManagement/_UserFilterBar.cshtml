@@ -1,24 +1,16 @@
-@using DomainModel.Models
-@{
-    var types = ViewBag.CustomerTypes as IEnumerable<CustomerType> ?? Enumerable.Empty<CustomerType>();
-    var provinces = ViewBag.Provinces as IEnumerable<Province> ?? Enumerable.Empty<Province>();
-}
-<form class="table_filter_bar" data-filter-bar data-url="@(ViewData["FilterUrl"] as string ?? "/UserManagement/List")" data-target="@(ViewData["FilterTarget"] as string ?? "#UserGrid")">
-    @{
-        ViewData["SearchPlaceholder"] = "نام، فامیلی یا موبایل";
-        ViewData["SearchName"] = "SearchTerm";
-    }
-    @await Html.PartialAsync("_FilterSearch")
+@model UserFilterBarViewModel
+<form class="table_filter_bar" data-filter-bar data-url="@Model.Url" data-target="@Model.Target">
+    @await Html.PartialAsync("_FilterSearch", FilterSearchViewModel.For("SearchTerm", "نام، فامیلی یا موبایل"))
     <select name="CustomerTypeID" class="form-select">
         <option value="">همه نقش‌ها</option>
-        @foreach (var type in types)
+        @foreach (var type in Model.CustomerTypes)
         {
             <option value="@type.CustomerTypeID">@type.Title</option>
         }
     </select>
     <select name="ProvinceID" class="form-select">
         <option value="">همه استان‌ها</option>
-        @foreach (var p in provinces)
+        @foreach (var p in Model.Provinces)
         {
             <option value="@p.ProvinceID">@p.Name</option>
         }
@@ -26,14 +18,8 @@
     <select name="CityID" class="form-select">
         <option value="">همه شهرها</option>
     </select>
-    @{
-        ViewData["NumFromName"] = "PointsFrom";
-        ViewData["NumToName"] = "PointsTo";
-        ViewData["NumEmptyLabel"] = "امتیاز";
-        ViewData["NumFromPlaceholder"] = "حداقل امتیاز";
-        ViewData["NumToPlaceholder"] = "حداکثر امتیاز";
-    }
-    @await Html.PartialAsync("_NumberRangeFilter")
+    @await Html.PartialAsync("_NumberRangeFilter", NumberRangeFilterViewModel.For(
+        "PointsFrom", "PointsTo", "امتیاز", "حداقل امتیاز", "حداکثر امتیاز"))
     <select name="IsEligibleForReward" class="form-select">
         <option value="">واجد پاداش</option>
         <option value="true">بله</option>

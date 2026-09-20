@@ -18,17 +18,15 @@
     </div>
     <div class="padding_infor_info">
         @{
-            var filterPartial = Model.FilterPartial ?? ViewData["FilterPartial"] as string;
-            if (!string.IsNullOrWhiteSpace(filterPartial))
+            if (!string.IsNullOrWhiteSpace(Model.FilterPartial))
             {
-                var filterModel = ViewData["FilterModel"];
-                if (filterModel != null)
+                if (Model.FilterModel != null)
                 {
-                    @await Html.PartialAsync(filterPartial, filterModel)
+                    @await Html.PartialAsync(Model.FilterPartial, Model.FilterModel)
                 }
                 else
                 {
-                    @await Html.PartialAsync(filterPartial)
+                    @await Html.PartialAsync(Model.FilterPartial)
                 }
             }
         }

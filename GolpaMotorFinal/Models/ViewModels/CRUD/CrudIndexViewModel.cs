@@ -8,6 +8,7 @@ namespace GolpaMotorFinal.Models.ViewModels.CRUD
         public string CreateButtonText { get; set; } = "افزودن";
         public string ListHeading { get; set; } = "لیست";
         public string? FilterPartial { get; set; }
+        public object? FilterModel { get; set; }
         public bool ShowCreate => !string.IsNullOrWhiteSpace(CreateUrl);
     }
 }

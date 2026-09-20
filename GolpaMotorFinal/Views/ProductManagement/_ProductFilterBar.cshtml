@@ -1,38 +1,15 @@
 <form class="table_filter_bar" data-filter-bar data-url="/ProductManagement/List" data-target="#ProductGrid">
-    @{
-        ViewData["SearchPlaceholder"] = "جستجوی نام محصول...";
-        ViewData["SearchName"] = "ProductName";
-    }
-    @await Html.PartialAsync("_FilterSearch")
+    @await Html.PartialAsync("_FilterSearch", FilterSearchViewModel.For("ProductName", "جستجوی نام محصول..."))
     <select name="IsAvailable" class="form-select">
         <option value="">وضعیت موجودی</option>
         <option value="true">موجود</option>
         <option value="false">ناموجود</option>
     </select>
-    @{
-        ViewData["NumFromName"] = "RegisteredFrom";
-        ViewData["NumToName"] = "RegisteredTo";
-        ViewData["NumEmptyLabel"] = "ثبت‌شده";
-        ViewData["NumFromPlaceholder"] = "حداقل ثبت‌شده";
-        ViewData["NumToPlaceholder"] = "حداکثر ثبت‌شده";
-    }
-    @await Html.PartialAsync("_NumberRangeFilter")
-    @{
-        ViewData["NumFromName"] = "RemainingFrom";
-        ViewData["NumToName"] = "RemainingTo";
-        ViewData["NumEmptyLabel"] = "باقی‌مانده";
-        ViewData["NumFromPlaceholder"] = "حداقل باقی‌مانده";
-        ViewData["NumToPlaceholder"] = "حداکثر باقی‌مانده";
-    }
-    @await Html.PartialAsync("_NumberRangeFilter")
-    @{
-        ViewData["NumFromName"] = "PointsFrom";
-        ViewData["NumToName"] = "PointsTo";
-        ViewData["NumEmptyLabel"] = "امتیاز";
-        ViewData["NumFromPlaceholder"] = "حداقل امتیاز";
-        ViewData["NumToPlaceholder"] = "حداکثر امتیاز";
-    }
-    @await Html.PartialAsync("_NumberRangeFilter")
-
+    @await Html.PartialAsync("_NumberRangeFilter", NumberRangeFilterViewModel.For(
+        "RegisteredFrom", "RegisteredTo", "ثبت‌شده", "حداقل ثبت‌شده", "حداکثر ثبت‌شده"))
+    @await Html.PartialAsync("_NumberRangeFilter", NumberRangeFilterViewModel.For(
+        "RemainingFrom", "RemainingTo", "باقی‌مانده", "حداقل باقی‌مانده", "حداکثر باقی‌مانده"))
+    @await Html.PartialAsync("_NumberRangeFilter", NumberRangeFilterViewModel.For(
+        "PointsFrom", "PointsTo", "امتیاز", "حداقل امتیاز", "حداکثر امتیاز"))
     @await Html.PartialAsync("_FilterReset")
 </form>

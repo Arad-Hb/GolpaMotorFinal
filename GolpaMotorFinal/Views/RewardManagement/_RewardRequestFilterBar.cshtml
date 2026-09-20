@@ -1,25 +1,16 @@
-@using DomainModel.Models
-@using DomainModel.ViewModels.Reward
-@{
-    var statuses = ViewBag.Statuses as IEnumerable<RewardDeliveryStatus> ?? Enumerable.Empty<RewardDeliveryStatus>();
-    var catalogs = ViewBag.Catalogs as IEnumerable<RewardCatalogListItem> ?? Enumerable.Empty<RewardCatalogListItem>();
-}
+@model GolpaMotorFinal.Models.ViewModels.RewardManagement.RewardIndexViewModel
 <form class="table_filter_bar" data-filter-bar data-url="/RewardManagement/RequestList" data-target="#RequestGrid">
-    @{
-        ViewData["SearchPlaceholder"] = "جستجوی کاربر یا پاداش...";
-        ViewData["SearchName"] = "SearchTerm";
-    }
-    @await Html.PartialAsync("_FilterSearch")
+    @await Html.PartialAsync("_FilterSearch", FilterSearchViewModel.For("SearchTerm", "جستجوی کاربر یا پاداش..."))
     <select name="RewardDeliveryStatusID" class="form-select">
         <option value="">همه وضعیت‌ها</option>
-        @foreach (var status in statuses)
+        @foreach (var status in Model.Statuses)
         {
             <option value="@status.RewardDeliveryStatusID">@status.Title</option>
         }
     </select>
     <select name="RewardCatalogID" class="form-select">
         <option value="">همه پاداش‌ها</option>
-        @foreach (var cat in catalogs)
+        @foreach (var cat in Model.Catalogs)
         {
             <option value="@cat.RewardCatalogID">@cat.Title</option>
         }

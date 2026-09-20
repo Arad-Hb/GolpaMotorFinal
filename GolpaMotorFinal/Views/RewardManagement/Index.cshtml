@@ -2,8 +2,6 @@
 @using GolpaMotorFinal.Models.ViewModels.CRUD
 @{
     Layout = "_AdminLayout";
-    ViewBag.Statuses = Model.Statuses;
-    ViewBag.Catalogs = Model.Catalogs;
 }
 
 <ul class="nav nav-tabs mb-3" role="tablist">
@@ -33,7 +31,8 @@
         {
             GridId = "RequestGrid",
             ListHeading = "درخواست‌های پاداش",
-            FilterPartial = "_RewardRequestFilterBar"
+            FilterPartial = "_RewardRequestFilterBar",
+            FilterModel = Model
         })
     </div>
 </div>

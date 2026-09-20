@@ -1,11 +1,6 @@
 @model GolpaMotorFinal.Models.ViewModels.WarrantyManagement.WarrantyAdminIndexViewModel
 <form class="table_filter_bar" data-filter-bar data-url="/WarrantyManagement/List" data-target="#warrantyCardsGrid">
-    @{
-        ViewData["SearchPlaceholder"] = "سریال، رمز یا موبایل";
-        ViewData["SearchName"] = "SearchTerm";
-        ViewData["SearchValue"] = Model.SearchTerm;
-    }
-    @await Html.PartialAsync("_FilterSearch")
+    @await Html.PartialAsync("_FilterSearch", FilterSearchViewModel.For("SearchTerm", "سریال، رمز یا موبایل", Model.SearchTerm))
     <select name="ProductID" class="form-select">
         <option value="">همه محصولات</option>
         @foreach (var item in Model.Products)
@@ -24,14 +19,14 @@
         <option value="d10">تا ۱۰ روز مانده</option>
         <option value="d30">تا ۳۰ روز مانده</option>
     </select>
-    @{
-        ViewData["NumFromName"] = "RemainingDaysFrom";
-        ViewData["NumToName"] = "RemainingDaysTo";
-        ViewData["NumEmptyLabel"] = "روز باقی‌مانده";
-        ViewData["NumFromPlaceholder"] = "حداقل روز";
-        ViewData["NumToPlaceholder"] = "حداکثر روز";
-    }
-    @await Html.PartialAsync("_NumberRangeFilter")
+    @await Html.PartialAsync("_NumberRangeFilter", NumberRangeFilterViewModel.For(
+        "RemainingDaysFrom",
+        "RemainingDaysTo",
+        "روز باقی‌مانده",
+        "حداقل روز",
+        "حداکثر روز",
+        Model.RemainingDaysFrom?.ToString(),
+        Model.RemainingDaysTo?.ToString()))
 
     @await Component.InvokeAsync("DateRangeFilter", new DateRangeFilterViewModel
     {

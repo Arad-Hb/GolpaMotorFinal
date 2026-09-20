@@ -1,9 +1,5 @@
 <form class="table_filter_bar" data-filter-bar data-url="/RewardManagement/CatalogList" data-target="#CatalogGrid">
-    @{
-        ViewData["SearchPlaceholder"] = "جستجوی عنوان پاداش...";
-        ViewData["SearchName"] = "Title";
-    }
-    @await Html.PartialAsync("_FilterSearch")
+    @await Html.PartialAsync("_FilterSearch", FilterSearchViewModel.For("Title", "جستجوی عنوان پاداش..."))
     <select name="IsCashReward" class="form-select">
         <option value="">نوع پاداش</option>
         <option value="true">نقدی</option>
@@ -14,13 +10,7 @@
         <option value="true">فعال</option>
         <option value="false">غیرفعال</option>
     </select>
-    @{
-        ViewData["NumFromName"] = "RequiredFrom";
-        ViewData["NumToName"] = "RequiredTo";
-        ViewData["NumEmptyLabel"] = "بازه امتیاز";
-        ViewData["NumFromPlaceholder"] = "حداقل امتیاز";
-        ViewData["NumToPlaceholder"] = "حداکثر امتیاز";
-    }
-    @await Html.PartialAsync("_NumberRangeFilter")
+    @await Html.PartialAsync("_NumberRangeFilter", NumberRangeFilterViewModel.For(
+        "RequiredFrom", "RequiredTo", "بازه امتیاز", "حداقل امتیاز", "حداکثر امتیاز"))
     @await Html.PartialAsync("_FilterReset")
 </form>

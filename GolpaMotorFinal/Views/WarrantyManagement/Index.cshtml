@@ -3,7 +3,6 @@
 @{
     Layout = "_AdminLayout";
     var openTab = string.IsNullOrWhiteSpace(Model.OpenTab) ? "cards" : Model.OpenTab;
-    ViewData["FilterModel"] = Model;
 }
 
 <div class="row column1">
@@ -66,7 +65,8 @@
         {
             GridId = "warrantyCardsGrid",
             ListHeading = "لیست کارت‌ها",
-            FilterPartial = "_WarrantyCardFilterBar"
+            FilterPartial = "_WarrantyCardFilterBar",
+            FilterModel = Model
         })
     </div>
 
