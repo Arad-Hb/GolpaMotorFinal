@@ -1,0 +1,11 @@
+<form class="table_filter_bar" data-filter-bar data-url="/Reports/Rewards" data-target="#RewardReportGrid">
+    @await Component.InvokeAsync("DateRangeFilter", new DateRangeFilterViewModel
+    {
+        FromName = "fromJalali",
+        ToName = "toJalali",
+        EmptyLabel = "بازه تاریخ",
+        FromPlaceholder = "از تاریخ",
+        ToPlaceholder = "تا تاریخ"
+    })
+    @await Html.PartialAsync("_FilterReset")
+</form>

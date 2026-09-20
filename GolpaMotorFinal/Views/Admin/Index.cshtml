@@ -1,11 +1,8 @@
 ﻿@model GolpaMotorFinal.Models.ViewModels.Admin.AdminDashboardViewModel
 @{
-    ViewData["Title"] = "داشبورد";
     Layout = "_AdminLayout";
     var stats = Model.Stats;
 }
-
-@await Html.PartialAsync("_AdminPageHeader", AdminPageHeaderViewModel.For("داشبورد"))
 
 <div class="row column1">
     <div class="col-md-6 col-lg-3">

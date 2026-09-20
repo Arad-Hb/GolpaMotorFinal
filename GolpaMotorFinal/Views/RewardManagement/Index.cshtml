@@ -1,14 +1,10 @@
 @model GolpaMotorFinal.Models.ViewModels.RewardManagement.RewardIndexViewModel
-@using DomainModel.Models
-@using DomainModel.ViewModels.Reward
+@using GolpaMotorFinal.Models.ViewModels.CRUD
 @{
-    ViewData["Title"] = "مدیریت پاداش";
     Layout = "_AdminLayout";
-    var statuses = Model.Statuses;
-    var catalogs = Model.Catalogs;
+    ViewBag.Statuses = Model.Statuses;
+    ViewBag.Catalogs = Model.Catalogs;
 }
-
-@await Html.PartialAsync("_AdminPageHeader", AdminPageHeaderViewModel.For("مدیریت پاداش", "پاداش"))
 
 <ul class="nav nav-tabs mb-3" role="tablist">
     <li class="nav-item">
@@ -21,89 +17,24 @@
 
 <div class="tab-content">
     <div class="tab-pane fade show active" id="catalogTab">
-        <div class="white_shd full margin_bottom_30">
-            <div class="full graph_head d-flex flex-wrap justify-content-between align-items-center gap-2">
-                <div class="heading1 margin_0"><h2>لیست پاداش‌ها</h2></div>
-                <button type="button" class="main_bt open-modal"
-                        data-url="@Url.Action("Create", "RewardManagement")"
-                        data-title="افزودن پاداش">
-                    <i class="fa fa-plus ms-1"></i> افزودن پاداش
-                </button>
-            </div>
-            <div class="padding_infor_info">
-                <form class="table_filter_bar" data-filter-bar data-url="/RewardManagement/CatalogList" data-target="#CatalogGrid">
-                    @{
-                        ViewData["SearchPlaceholder"] = "جستجوی عنوان پاداش...";
-                        ViewData["SearchName"] = "Title";
-                    }
-                    @await Html.PartialAsync("_FilterSearch")
-                    <select name="IsCashReward" class="form-select">
-                        <option value="">نوع پاداش</option>
-                        <option value="true">نقدی</option>
-                        <option value="false">غیرنقدی</option>
-                    </select>
-                    <select name="IsActive" class="form-select">
-                        <option value="">وضعیت</option>
-                        <option value="true">فعال</option>
-                        <option value="false">غیرفعال</option>
-                    </select>
-                    @{
-                        ViewData["NumFromName"] = "RequiredFrom";
-                        ViewData["NumToName"] = "RequiredTo";
-                        ViewData["NumEmptyLabel"] = "بازه امتیاز";
-                        ViewData["NumFromPlaceholder"] = "حداقل امتیاز";
-                        ViewData["NumToPlaceholder"] = "حداکثر امتیاز";
-                    }
-                    @await Html.PartialAsync("_NumberRangeFilter")
-                    @await Html.PartialAsync("_FilterReset")
-                </form>
-                <form id="frmAntiForgery">
-                    @Html.AntiForgeryToken()
-                </form>
-                <div id="CatalogGrid"></div>
-            </div>
-        </div>
+        @await Html.PartialAsync("_CrudPage", new CrudIndexViewModel
+        {
+            GridId = "CatalogGrid",
+            CreateUrl = Url.Action("Create", "RewardManagement") ?? "/RewardManagement/Create",
+            CreateTitle = "افزودن پاداش",
+            CreateButtonText = "افزودن پاداش",
+            ListHeading = "لیست پاداش‌ها",
+            FilterPartial = "_RewardCatalogFilterBar"
+        })
     </div>
 
     <div class="tab-pane fade" id="requestTab">
-        <div class="white_shd full margin_bottom_30">
-            <div class="full graph_head">
-                <div class="heading1 margin_0"><h2>درخواست‌های پاداش</h2></div>
-            </div>
-            <div class="padding_infor_info">
-                <form class="table_filter_bar" data-filter-bar data-url="/RewardManagement/RequestList" data-target="#RequestGrid">
-                    @{
-                        ViewData["SearchPlaceholder"] = "جستجوی کاربر یا پاداش...";
-                        ViewData["SearchName"] = "SearchTerm";
-                    }
-                    @await Html.PartialAsync("_FilterSearch")
-                    <select name="RewardDeliveryStatusID" class="form-select">
-                        <option value="">همه وضعیت‌ها</option>
-                        @foreach (var status in statuses)
-                        {
-                            <option value="@status.RewardDeliveryStatusID">@status.Title</option>
-                        }
-                    </select>
-                    <select name="RewardCatalogID" class="form-select">
-                        <option value="">همه پاداش‌ها</option>
-                        @foreach (var cat in catalogs)
-                        {
-                            <option value="@cat.RewardCatalogID">@cat.Title</option>
-                        }
-                    </select>
-                    @await Component.InvokeAsync("DateRangeFilter", new DateRangeFilterViewModel
-                    {
-                        FromName = "fromJalali",
-                        ToName = "toJalali",
-                        EmptyLabel = "بازه تاریخ",
-                        FromPlaceholder = "از تاریخ",
-                        ToPlaceholder = "تا تاریخ"
-                    })
-                    @await Html.PartialAsync("_FilterReset")
-                </form>
-                <div id="RequestGrid"></div>
-            </div>
-        </div>
+        @await Html.PartialAsync("_CrudPage", new CrudIndexViewModel
+        {
+            GridId = "RequestGrid",
+            ListHeading = "درخواست‌های پاداش",
+            FilterPartial = "_RewardRequestFilterBar"
+        })
     </div>
 </div>
 
@@ -111,7 +42,7 @@
 {
     <script>
         function antiForgeryToken() {
-            return $('#frmAntiForgery input[name="__RequestVerificationToken"]').val();
+            return $('#antiforgery-form input[name="__RequestVerificationToken"]').val();
         }
 
         function LoadCatalogs(page) {

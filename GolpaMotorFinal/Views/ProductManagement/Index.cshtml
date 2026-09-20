@@ -1,13 +1,8 @@
 ﻿@model DomainModel.ViewModels.Product.ProductStatistics
-@using GolpaMotorFinal.Models.ViewModels
 @using GolpaMotorFinal.Models.ViewModels.CRUD
 @{
-    ViewData["Title"] = "محصولات";
     Layout = "_AdminLayout";
-    ViewData["FilterPartial"] = "_ProductFilterBar";
 }
-
-@await Html.PartialAsync("_AdminPageHeader", AdminPageHeaderViewModel.For("مدیریت محصولات", "محصولات"))
 
 <div class="row column1">
     <div class="col-md-6 col-lg-3">
@@ -51,34 +46,15 @@
 @{
     var crudModel = new CrudIndexViewModel
     {
-        Title = "لیست محصولات",
         GridId = "ProductGrid",
         CreateUrl = Url.Action("Create", "ProductManagement") ?? "/ProductManagement/Create",
         CreateTitle = "افزودن محصول",
         CreateButtonText = "افزودن محصول",
         ListHeading = "لیست محصولات",
-        Breadcrumb = null
+        FilterPartial = "_ProductFilterBar"
     };
 }
-
-<div class="white_shd full margin_bottom_30">
-    <div class="full graph_head d-flex flex-wrap justify-content-between align-items-center gap-2">
-        <div class="heading1 margin_0"><h2>لیست محصولات</h2></div>
-        <button class="main_bt open-modal"
-                data-url="@crudModel.CreateUrl"
-                data-id="null"
-                data-title="@crudModel.CreateTitle">
-            @crudModel.CreateButtonText
-        </button>
-    </div>
-    <div class="padding_infor_info">
-
-        @await Html.PartialAsync("_ProductFilterBar")
-
-        <form id="frmAntiForgery">@Html.AntiForgeryToken()</form>
-        <div id="ProductGrid"></div>
-    </div>
-</div>
+@await Html.PartialAsync("_CrudPage", crudModel)
 
 @section Scripts
 {
@@ -87,7 +63,7 @@
             const ok = await confirmDelete("عکس محصول حذف شود؟");
             if (!ok) return;
             const id = $(this).data("id");
-            const token = $('#frmAntiForgery input[name="__RequestVerificationToken"]').val();
+            const token = $('#antiforgery-form input[name="__RequestVerificationToken"]').val();
             $.ajax({
                 url: '/ProductManagement/RemovePicture',
                 type: 'POST',

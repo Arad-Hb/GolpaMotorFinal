@@ -1,11 +1,10 @@
 ﻿@model GolpaMotorFinal.Models.ViewModels.WarrantyManagement.WarrantyAdminIndexViewModel
+@using GolpaMotorFinal.Models.ViewModels.CRUD
 @{
-    ViewData["Title"] = "گارانتی‌ها";
     Layout = "_AdminLayout";
     var openTab = string.IsNullOrWhiteSpace(Model.OpenTab) ? "cards" : Model.OpenTab;
+    ViewData["FilterModel"] = Model;
 }
-
-@await Html.PartialAsync("_AdminPageHeader", AdminPageHeaderViewModel.For("مدیریت کارت‌های گارانتی", "گارانتی"))
 
 <div class="row column1">
     <div class="col-md-6 col-lg-3">
@@ -46,142 +45,107 @@
     </div>
 </div>
 
-<div class="white_shd full margin_bottom_30">
-    <div class="full graph_head">
-        <div class="heading1 margin_0">
-            <h2>عملیات گارانتی</h2>
+<ul class="nav nav-tabs mb-3" id="warrantyTab" role="tablist">
+    <li class="nav-item">
+        <button class="nav-link @(openTab == "cards" ? "active" : null)" id="tab-cards" data-bs-toggle="tab" data-bs-target="#warranty-cards" type="button" role="tab">لیست کارت‌ها</button>
+    </li>
+    <li class="nav-item">
+        <button class="nav-link @(openTab == "register" ? "active" : null)" id="tab-register" data-bs-toggle="tab" data-bs-target="#warranty-form" type="button" role="tab">فرم ثبت کارت گارانتی</button>
+    </li>
+    <li class="nav-item">
+        <button class="nav-link @(openTab == "excel" ? "active" : null)" id="tab-excel" data-bs-toggle="tab" data-bs-target="#warranty-excel" type="button" role="tab">ورود اکسل</button>
+    </li>
+    <li class="nav-item">
+        <button class="nav-link @(openTab == "generate" ? "active" : null)" id="tab-generate" data-bs-toggle="tab" data-bs-target="#warranty-generate" type="button" role="tab">تولید سریال</button>
+    </li>
+</ul>
+
+<div class="tab-content" id="warrantyTabContent">
+    <div class="tab-pane fade @(openTab == "cards" ? "show active" : null)" id="warranty-cards" role="tabpanel">
+        @await Html.PartialAsync("_CrudPage", new CrudIndexViewModel
+        {
+            GridId = "warrantyCardsGrid",
+            ListHeading = "لیست کارت‌ها",
+            FilterPartial = "_WarrantyCardFilterBar"
+        })
+    </div>
+
+    <div class="tab-pane fade @(openTab == "register" ? "show active" : null)" id="warranty-form" role="tabpanel">
+        <div class="white_shd full margin_bottom_30">
+            <div class="padding_infor_info">
+                @{
+                    ViewData["RegisterAction"] = "RegisterForCustomer";
+                    ViewData["CustomerTypeLabel"] = "نقش مشتری";
+                }
+                @await Html.PartialAsync("_RegisterCardForm", Model.RegistrationCard)
+            </div>
         </div>
     </div>
-    <div class="full inner_elements">
-        <div class="tab_style2">
-            <div class="tabbar padding_infor_info">
-                <nav>
-                    <div class="nav nav-tabs" id="warrantyTab" role="tablist">
-                        <button class="nav-link @(openTab == "cards" ? "active" : null)" id="tab-cards" data-bs-toggle="tab" data-bs-target="#warranty-cards" type="button" role="tab">لیست کارت‌ها</button>
-                        <button class="nav-link @(openTab == "register" ? "active" : null)" id="tab-register" data-bs-toggle="tab" data-bs-target="#warranty-form" type="button" role="tab">فرم ثبت کارت گارانتی</button>
-                        <button class="nav-link @(openTab == "excel" ? "active" : null)" id="tab-excel" data-bs-toggle="tab" data-bs-target="#warranty-excel" type="button" role="tab">ورود اکسل</button>
-                        <button class="nav-link @(openTab == "generate" ? "active" : null)" id="tab-generate" data-bs-toggle="tab" data-bs-target="#warranty-generate" type="button" role="tab">تولید سریال</button>
+
+    <div class="tab-pane fade @(openTab == "excel" ? "show active" : null)" id="warranty-excel" role="tabpanel">
+        <div class="white_shd full margin_bottom_30">
+            <div class="padding_infor_info">
+                @if (Model.LastImport != null)
+                {
+                    <div class="alert @(Model.LastImport.Success ? "alert-info" : "alert-danger")">
+                        @Model.LastImport.Message
                     </div>
-                </nav>
-                <div class="tab-content pt-3" id="warrantyTabContent">
-                    <div class="tab-pane fade @(openTab == "cards" ? "show active" : null)" id="warranty-cards" role="tabpanel">
-                        <form class="table_filter_bar" data-filter-bar data-url="/WarrantyManagement/List" data-target="#warrantyCardsGrid">
-                            @{
-                                ViewData["SearchPlaceholder"] = "سریال، رمز یا موبایل";
-                                ViewData["SearchName"] = "SearchTerm";
-                                ViewData["SearchValue"] = Model.SearchTerm;
-                            }
-                            @await Html.PartialAsync("_FilterSearch")
-                            <select name="ProductID" class="form-select">
-                                <option value="">همه محصولات</option>
+                }
+                <form asp-action="UploadExcel" method="post" enctype="multipart/form-data" class="admin-form">
+                    @Html.AntiForgeryToken()
+                    <div class="row g-2 align-items-end">
+                        <div class="col-12 col-md-4">
+                            <label class="form-label">محصول</label>
+                            <select name="ProductID" class="form-select" required>
+                                <option value="">انتخاب محصول</option>
                                 @foreach (var item in Model.Products)
                                 {
-                                    <option value="@item.ProductID" selected="@(Model.ProductID == item.ProductID)">@item.ProductName</option>
+                                    <option value="@item.ProductID">@item.ProductName</option>
                                 }
                             </select>
-                            <select name="IsRegistered" class="form-select">
-                                <option value="">همه وضعیت‌ها</option>
-                                <option value="true" selected="@(Model.IsRegistered == true)">ثبت‌شده</option>
-                                <option value="false" selected="@(Model.IsRegistered == false)">آزاد</option>
+                        </div>
+                        <div class="col-12 col-md-5">
+                            <label class="form-label">فایل اکسل</label>
+                            <input type="file" name="ExcelFile" accept=".xlsx,.xls" class="form-control" required />
+                        </div>
+                        <div class="col-12 col-md-3">
+                            <button type="submit" class="main_bt w-100">آپلود اکسل</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="tab-pane fade @(openTab == "generate" ? "show active" : null)" id="warranty-generate" role="tabpanel">
+        <div class="white_shd full margin_bottom_30">
+            <div class="padding_infor_info">
+                <form asp-action="GenerateCodes" method="post" class="admin-form">
+                    @Html.AntiForgeryToken()
+                    <div class="row g-2 align-items-end">
+                        <div class="col-4 col-md-4">
+                            <label class="form-label">محصول</label>
+                            <select name="productId" class="form-select" required>
+                                <option value="">انتخاب محصول</option>
+                                @foreach (var item in Model.Products)
+                                {
+                                    <option value="@item.ProductID">@item.ProductName</option>
+                                }
                             </select>
-                            <select name="ValidityPreset" class="form-select">
-                                <option value="">وضعیت اعتبار</option>
-                                <option value="expired">منقضی‌شده</option>
-                                <option value="d10">تا ۱۰ روز مانده</option>
-                                <option value="d30">تا ۳۰ روز مانده</option>
-                            </select>
-                            @{
-                                ViewData["NumFromName"] = "RemainingDaysFrom";
-                                ViewData["NumToName"] = "RemainingDaysTo";
-                                ViewData["NumEmptyLabel"] = "روز باقی‌مانده";
-                                ViewData["NumFromPlaceholder"] = "حداقل روز";
-                                ViewData["NumToPlaceholder"] = "حداکثر روز";
-                            }
-                            @await Html.PartialAsync("_NumberRangeFilter")
-
-                            @await Component.InvokeAsync("DateRangeFilter", new DateRangeFilterViewModel
-                            {
-                                FromName = "RegisteredFromJalali",
-                                ToName = "RegisteredToJalali",
-                                EmptyLabel = "تاریخ ثبت",
-                                FromPlaceholder = "ثبت از",
-                                ToPlaceholder = "ثبت تا",
-                                FromValue = Model.RegisteredFromJalali,
-                                ToValue = Model.RegisteredToJalali
-                            })
-
-                            @await Html.PartialAsync("_FilterReset")
-                        </form>
-                        <div id="warrantyCardsGrid"></div>
+                        </div>
+                        <div class="col-2 col-md-2">
+                            <label class="form-label">تعداد</label>
+                            <input type="number" name="count" class="form-control" value="@Model.GenerateCount" min="1" max="200" />
+                        </div>
+                        <div class="col-2 col-md-2">
+                            <label class="form-label">مدت اعتبار</label>
+                            <input type="number" name="validityMonths" class="form-control" value="@Model.ValidityMonths" min="1" max="60" />
+                        </div>
+                        <div class="col-2 col-md-2">
+                            <button type="submit" class="main_bt w-100">تولید سریال</button>
+                        </div>
                     </div>
-
-                    <div class="tab-pane fade @(openTab == "register" ? "show active" : null)" id="warranty-form" role="tabpanel">
-                        @{
-                            ViewData["RegisterAction"] = "RegisterForCustomer";
-                            ViewData["CustomerTypeLabel"] = "نقش مشتری";
-                        }
-                        @await Html.PartialAsync("_RegisterCardForm", Model.RegistrationCard)
-                    </div>
-
-                    <div class="tab-pane fade @(openTab == "excel" ? "show active" : null)" id="warranty-excel" role="tabpanel">
-                        @if (Model.LastImport != null)
-                        {
-                            <div class="alert @(Model.LastImport.Success ? "alert-info" : "alert-danger")">
-                                @Model.LastImport.Message
-                            </div>
-                        }
-                        <form asp-action="UploadExcel" method="post" enctype="multipart/form-data" class="admin-form">
-                            @Html.AntiForgeryToken()
-                            <div class="row g-2 align-items-end">
-                                <div class="col-12 col-md-4">
-                                    <label class="form-label">محصول</label>
-                                    <select name="ProductID" class="form-select" required>
-                                        <option value="">انتخاب محصول</option>
-                                        @foreach (var item in Model.Products)
-                                        {
-                                            <option value="@item.ProductID">@item.ProductName</option>
-                                        }
-                                    </select>
-                                </div>
-                                <div class="col-12 col-md-5">
-                                    <label class="form-label">فایل اکسل</label>
-                                    <input type="file" name="ExcelFile" accept=".xlsx,.xls" class="form-control" required />
-                                </div>
-                                <div class="col-12 col-md-3">
-                                    <button type="submit" class="main_bt w-100">آپلود اکسل</button>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
-                    <div class="tab-pane fade @(openTab == "generate" ? "show active" : null)" id="warranty-generate" role="tabpanel">
-                        <form asp-action="GenerateCodes" method="post" class="admin-form">
-                            @Html.AntiForgeryToken()
-                            <div class="row g-2 align-items-end">
-                                <div class="col-4 col-md-4">
-                                    <label class="form-label">محصول</label>
-                                    <select name="productId" class="form-select" required>
-                                        <option value="">انتخاب محصول</option>
-                                        @foreach (var item in Model.Products)
-                                        {
-                                            <option value="@item.ProductID">@item.ProductName</option>
-                                        }
-                                    </select>
-                                </div>
-                                <div class="col-2 col-md-2">
-                                    <label class="form-label">تعداد</label>
-                                    <input type="number" name="count" class="form-control" value="@Model.GenerateCount" min="1" max="200" />
-                                </div>
-                                <div class="col-2 col-md-2">
-                                    <label class="form-label">مدت اعتبار</label>
-                                    <input type="number" name="validityMonths" class="form-control" value="@Model.ValidityMonths" min="1" max="60" />
-                                </div>
-                                <div class="col-2 col-md-2">
-                                    <button type="submit" class="main_bt w-100">تولید سریال</button>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
-                </div>
+                </form>
             </div>
         </div>
     </div>

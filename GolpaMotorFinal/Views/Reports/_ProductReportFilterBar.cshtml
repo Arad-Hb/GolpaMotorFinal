@@ -1,0 +1,19 @@
+@{
+    var yearNow = (int)(ViewBag.YearNow ?? Framework.Common.PersianDate.GetYear(DateTime.Today));
+}
+<form class="table_filter_bar" data-filter-bar data-url="/Reports/Products" data-target="#ProductReportGrid">
+    <select name="year" class="form-select">
+        <option value="">همه سال‌ها</option>
+        @for (var y = yearNow; y >= yearNow - 7; y--)
+        {
+            <option value="@y">@y</option>
+        }
+    </select>
+    <select name="month" class="form-select">
+        @for (var m = 0; m <= 12; m++)
+        {
+            <option value="@(m == 0 ? "" : m.ToString())">@DateTimeExtensions.PersianMonthName(m)</option>
+        }
+    </select>
+    @await Html.PartialAsync("_FilterReset")
+</form>

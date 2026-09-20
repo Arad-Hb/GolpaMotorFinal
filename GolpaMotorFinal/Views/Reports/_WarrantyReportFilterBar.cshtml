@@ -1,0 +1,21 @@
+@model IEnumerable<DomainModel.ViewModels.Product.ProductListItem>
+<form class="table_filter_bar" data-filter-bar data-url="/Reports/Warranty" data-target="#WarrantyReportGrid">
+    <select name="productId" class="form-select">
+        <option value="">همه محصولات</option>
+        @foreach (var p in Model)
+        {
+            <option value="@p.ProductID">@p.ProductName</option>
+        }
+    </select>
+
+    @await Component.InvokeAsync("DateRangeFilter", new DateRangeFilterViewModel
+    {
+        FromName = "fromJalali",
+        ToName = "toJalali",
+        EmptyLabel = "بازه تاریخ",
+        FromPlaceholder = "از تاریخ",
+        ToPlaceholder = "تا تاریخ"
+    })
+
+    @await Html.PartialAsync("_FilterReset")
+</form>

@@ -1,5 +1,8 @@
 @{
     Layout = null;
+    var pageHeader = AdminPageContext.For(ViewContext);
+    if (ViewData["Title"] == null)
+        ViewData["Title"] = pageHeader.Title;
 }
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
@@ -23,6 +26,7 @@
                 <partial name="_AdminHeader" />
                 <div class="midde_cont">
                     <div class="container-fluid">
+                        @await Component.InvokeAsync("AdminPageHeader", new { model = pageHeader })
                         @RenderBody()
                     </div>
                     <partial name="_AdminFooter" />

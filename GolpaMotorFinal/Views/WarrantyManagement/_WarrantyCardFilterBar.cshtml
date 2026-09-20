@@ -1,0 +1,48 @@
+@model GolpaMotorFinal.Models.ViewModels.WarrantyManagement.WarrantyAdminIndexViewModel
+<form class="table_filter_bar" data-filter-bar data-url="/WarrantyManagement/List" data-target="#warrantyCardsGrid">
+    @{
+        ViewData["SearchPlaceholder"] = "سریال، رمز یا موبایل";
+        ViewData["SearchName"] = "SearchTerm";
+        ViewData["SearchValue"] = Model.SearchTerm;
+    }
+    @await Html.PartialAsync("_FilterSearch")
+    <select name="ProductID" class="form-select">
+        <option value="">همه محصولات</option>
+        @foreach (var item in Model.Products)
+        {
+            <option value="@item.ProductID" selected="@(Model.ProductID == item.ProductID)">@item.ProductName</option>
+        }
+    </select>
+    <select name="IsRegistered" class="form-select">
+        <option value="">همه وضعیت‌ها</option>
+        <option value="true" selected="@(Model.IsRegistered == true)">ثبت‌شده</option>
+        <option value="false" selected="@(Model.IsRegistered == false)">آزاد</option>
+    </select>
+    <select name="ValidityPreset" class="form-select">
+        <option value="">وضعیت اعتبار</option>
+        <option value="expired">منقضی‌شده</option>
+        <option value="d10">تا ۱۰ روز مانده</option>
+        <option value="d30">تا ۳۰ روز مانده</option>
+    </select>
+    @{
+        ViewData["NumFromName"] = "RemainingDaysFrom";
+        ViewData["NumToName"] = "RemainingDaysTo";
+        ViewData["NumEmptyLabel"] = "روز باقی‌مانده";
+        ViewData["NumFromPlaceholder"] = "حداقل روز";
+        ViewData["NumToPlaceholder"] = "حداکثر روز";
+    }
+    @await Html.PartialAsync("_NumberRangeFilter")
+
+    @await Component.InvokeAsync("DateRangeFilter", new DateRangeFilterViewModel
+    {
+        FromName = "RegisteredFromJalali",
+        ToName = "RegisteredToJalali",
+        EmptyLabel = "تاریخ ثبت",
+        FromPlaceholder = "ثبت از",
+        ToPlaceholder = "ثبت تا",
+        FromValue = Model.RegisteredFromJalali,
+        ToValue = Model.RegisteredToJalali
+    })
+
+    @await Html.PartialAsync("_FilterReset")
+</form>

@@ -1,15 +1,8 @@
 @model GolpaMotorFinal.Models.ViewModels.Admin.AdminProfileViewModel
 @using GolpaMotorFinal.Helpers
 @{
-    ViewData["Title"] = "پروفایل مدیر";
     Layout = "_AdminLayout";
 }
-
-<div class="row column_title">
-    <div class="col-md-12">
-        <div class="page_title"><h2>پروفایل مدیر</h2></div>
-    </div>
-</div>
 
 @if (TempData["SuccessMessage"] != null)
 {

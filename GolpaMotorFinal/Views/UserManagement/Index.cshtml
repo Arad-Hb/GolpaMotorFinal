@@ -4,14 +4,13 @@
 
     var crudModel = new CrudIndexViewModel
     {
-        Title = "مدیریت کاربران",
-        HeaderCurrent = "کاربران",
         GridId = "UserGrid",
         CreateUrl = Url.Action("Create", "UserManagement") ?? "/UserManagement/Create",
         CreateTitle = "افزودن کاربر",
-        CreateButtonText = "افزودن"
+        CreateButtonText = "افزودن",
+        ListHeading = "لیست کاربران",
+        FilterPartial = "_UserFilterBar"
     };
-    ViewData["FilterPartial"] = "_UserFilterBar";
 }
 
 @await Html.PartialAsync("_CrudPage", crudModel)

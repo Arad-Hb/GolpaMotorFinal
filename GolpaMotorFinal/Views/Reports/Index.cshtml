@@ -1,12 +1,9 @@
 @model GolpaMotorFinal.Models.ViewModels.Reports.ReportsIndexViewModel
+@using GolpaMotorFinal.Models.ViewModels.CRUD
 @{
-    ViewData["Title"] = "گزارشات";
     Layout = "_AdminLayout";
-    var yearNow = Framework.Common.PersianDate.GetYear(DateTime.Today);
-    var products = Model.Products;
+    ViewBag.YearNow = Framework.Common.PersianDate.GetYear(DateTime.Today);
 }
-
-@await Html.PartialAsync("_AdminPageHeader", AdminPageHeaderViewModel.For("گزارشات"))
 
 <ul class="nav nav-tabs mb-3" role="tablist">
     <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#reportUsers" type="button">گزارش کاربران</button></li>
@@ -17,87 +14,45 @@
 
 <div class="tab-content">
     <div class="tab-pane fade show active" id="reportUsers">
-        <div class="white_shd full margin_bottom_30">
-            <div class="padding_infor_info">
-                @{
-                    ViewData["FilterUrl"] = "/Reports/Users";
-                    ViewData["FilterTarget"] = "#UserReportGrid";
-                }
-                @await Html.PartialAsync("~/Views/UserManagement/_UserFilterBar.cshtml")
-                <div id="UserReportGrid"></div>
-            </div>
-        </div>
+        @{
+            ViewData["FilterUrl"] = "/Reports/Users";
+            ViewData["FilterTarget"] = "#UserReportGrid";
+        }
+        @await Html.PartialAsync("_CrudPage", new CrudIndexViewModel
+        {
+            GridId = "UserReportGrid",
+            ListHeading = "گزارش کاربران",
+            FilterPartial = "~/Views/UserManagement/_UserFilterBar.cshtml"
+        })
     </div>
     <div class="tab-pane fade" id="reportWarranty">
-        <div class="white_shd full margin_bottom_30">
-            <div class="padding_infor_info">
-                <form class="table_filter_bar" data-filter-bar data-url="/Reports/Warranty" data-target="#WarrantyReportGrid">
-                    <select name="productId" class="form-select">
-                        <option value="">همه محصولات</option>
-                        @foreach (var p in products)
-                        {
-                            <option value="@p.ProductID">@p.ProductName</option>
-                        }
-                    </select>
-
-                    @await Component.InvokeAsync("DateRangeFilter", new DateRangeFilterViewModel
-                    {
-                        FromName = "fromJalali",
-                        ToName = "toJalali",
-                        EmptyLabel = "بازه تاریخ",
-                        FromPlaceholder = "از تاریخ",
-                        ToPlaceholder = "تا تاریخ"
-                    })
-
-                    @await Html.PartialAsync("_FilterReset")
-                </form>
-                <div id="WarrantyReportGrid"></div>
-            </div>
-        </div>
+        @{
+            ViewData["FilterModel"] = Model.Products;
+        }
+        @await Html.PartialAsync("_CrudPage", new CrudIndexViewModel
+        {
+            GridId = "WarrantyReportGrid",
+            ListHeading = "گزارش کارت گارانتی",
+            FilterPartial = "_WarrantyReportFilterBar"
+        })
     </div>
     <div class="tab-pane fade" id="reportProducts">
-        <div class="white_shd full margin_bottom_30">
-            <div class="padding_infor_info">
-                <form class="table_filter_bar" data-filter-bar data-url="/Reports/Products" data-target="#ProductReportGrid">
-                    <select name="year" class="form-select">
-                        <option value="">همه سال‌ها</option>
-                        @for (var y = yearNow; y >= yearNow - 7; y--)
-                        {
-                          <option value="@y">@y</option>
-                        }
-                    </select>
-                    <select name="month" class="form-select">
-                        @for (var m = 0; m <= 12; m++)
-                        {
-                          <option value="@(m == 0 ? "" : m.ToString())">@DateTimeExtensions.PersianMonthName(m)</option>
-                        }
-                    </select>
-
-                    @await Html.PartialAsync("_FilterReset")
-
-                </form>
-                <div id="ProductReportGrid"></div>
-            </div>
-        </div>
+        @{
+            ViewData["FilterModel"] = null;
+        }
+        @await Html.PartialAsync("_CrudPage", new CrudIndexViewModel
+        {
+            GridId = "ProductReportGrid",
+            ListHeading = "گزارش محصول",
+            FilterPartial = "_ProductReportFilterBar"
+        })
     </div>
     <div class="tab-pane fade" id="reportRewards">
-        <div class="white_shd full margin_bottom_30">
-            <div class="padding_infor_info">
-                <form class="table_filter_bar" data-filter-bar data-url="/Reports/Rewards" data-target="#RewardReportGrid">
-
-                    @await Component.InvokeAsync("DateRangeFilter", new DateRangeFilterViewModel
-                    {
-                        FromName = "fromJalali",
-                        ToName = "toJalali",
-                        EmptyLabel = "بازه تاریخ",
-                        FromPlaceholder = "از تاریخ",
-                        ToPlaceholder = "تا تاریخ"
-                    })
-
-                    @await Html.PartialAsync("_FilterReset")
-                </form>
-                <div id="RewardReportGrid"></div>
-            </div>
-        </div>
+        @await Html.PartialAsync("_CrudPage", new CrudIndexViewModel
+        {
+            GridId = "RewardReportGrid",
+            ListHeading = "گزارش پاداش",
+            FilterPartial = "_RewardReportFilterBar"
+        })
     </div>
 </div>
