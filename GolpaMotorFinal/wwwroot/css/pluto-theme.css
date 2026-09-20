@@ -584,7 +584,7 @@ html[dir="rtl"] body.pluto-public {
     vertical-align: middle;
 }
 
-.pluto-admin table.table td.table-actions {
+.pluto-admin table.table .table-actions__btns {
     display: flex;
     flex-wrap: nowrap;
     align-items: center;

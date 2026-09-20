@@ -65,6 +65,7 @@
                         @if (hasActions)
                         {
                             <td class="table-actions">
+                                <div class="table-actions__btns">
                                 @foreach (var action in row.Actions.Where(a => a.Visible))
                                 {
                                     var css = action.CssClass ?? "";
@@ -87,6 +88,7 @@
                                         <i class="@action.Icon"></i>
                                     </button>
                                 }
+                                </div>
                             </td>
                         }
                     </tr>

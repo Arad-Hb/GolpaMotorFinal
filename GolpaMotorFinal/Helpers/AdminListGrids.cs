@@ -17,7 +17,9 @@ namespace GolpaMotorFinal.Helpers
 
             foreach (var prod in items)
             {
+                var id = prod.ProductID.ToString();
                 var row = new GridRow { Key = prod.ProductID.ToString() };
+
                 row.Columns.Add(new GridColumn
                 {
                     Type = GridColumnType.Image,
@@ -28,8 +30,6 @@ namespace GolpaMotorFinal.Helpers
                 row.Columns.Add(Text(prod.IsAvailable ? "موجود" : "ناموجود"));
                 row.Columns.Add(Number(prod.RegisteredCardCount));
                 row.Columns.Add(Number(prod.UnregisteredCardCount));
-
-                var id = prod.ProductID.ToString();
                 row.Actions.Add(Modal("جزئیات", "fa fa-eye", "/ProductManagement/Details", id, "productID", "btn btn-sm btn-outline-secondary"));
                 row.Actions.Add(Modal("ویرایش", "fa fa-pen", "/ProductManagement/Edit", id, "productID", "btn btn-sm btn-outline-warning"));
                 row.Actions.Add(new GridAction
@@ -43,15 +43,15 @@ namespace GolpaMotorFinal.Helpers
                     IdName = "productID",
                     CssClass = "btn btn-sm btn-outline-danger"
                 });
-                row.Actions.Add(new GridAction
-                {
-                    ActionText = "حذف عکس",
-                    OpenModal = false,
-                    Icon = "fa fa-image",
-                    Id = id,
-                    IdName = "productID",
-                    CssClass = "btn btn-sm btn-outline-danger btnRemovePicture"
-                });
+                //row.Actions.Add(new GridAction
+                //{
+                //    ActionText = "حذف عکس",
+                //    OpenModal = false,
+                //    Icon = "fa fa-image",
+                //    Id = id,
+                //    IdName = "productID",
+                //    CssClass = "btn btn-sm btn-outline-danger btnRemovePicture"
+                //});
                 grid.Rows.Add(row);
             }
 
@@ -65,15 +65,15 @@ namespace GolpaMotorFinal.Helpers
 
             foreach (var item in items)
             {
+                var id = item.RewardCatalogID.ToString();
                 var row = new GridRow { Key = item.RewardCatalogID.ToString() };
+
                 row.Columns.Add(Text(item.Title));
                 row.Columns.Add(Number(item.RequiredPoints));
                 row.Columns.Add(Text(item.IsCashReward ? "نقدی" : "غیرنقدی"));
                 row.Columns.Add(Text(item.IsCashReward ? item.CashValue?.ToString("N0") ?? "-" : "-"));
                 row.Columns.Add(Text(item.IsActive ? "فعال" : "غیرفعال"));
                 row.Columns.Add(Number(item.RequestCount));
-
-                var id = item.RewardCatalogID.ToString();
                 row.Actions.Add(Modal("جزئیات", "fa fa-eye", "/RewardManagement/Details", id, "rewardCatalogID", "btn btn-sm btn-outline-secondary"));
                 row.Actions.Add(Modal("ویرایش", "fa fa-pen", "/RewardManagement/Edit", id, "rewardCatalogID", "btn btn-sm btn-outline-warning"));
                 row.Actions.Add(new GridAction
@@ -98,20 +98,19 @@ namespace GolpaMotorFinal.Helpers
 
             foreach (var item in items)
             {
+                var id = item.RewardRequestID.ToString();
+                var pending = !item.IsComplete && item.StatusTitle == RewardStatusTitles.Pending;
                 var row = new GridRow { Key = item.RewardRequestID.ToString() };
                 var name = string.IsNullOrWhiteSpace(item.UserFullName) ? "نامشخص" : item.UserFullName;
+                
                 row.Columns.Add(Text(name));
                 row.Columns.Add(Text(item.PhoneNumber ?? "-"));
                 row.Columns.Add(Text(item.CatalogTitle));
                 row.Columns.Add(Number(item.RequiredPoints));
                 row.Columns.Add(Number(item.RemainedPoints));
                 row.Columns.Add(Text(item.RequestDate.HasValue
-                    ? item.RequestDate.Value.ToLocalTime().ToString("yyyy/MM/dd")
-                    : "-"));
+                    ? item.RequestDate.Value.ToLocalTime().ToString("yyyy/MM/dd"): "-"));
                 row.Columns.Add(Text(item.StatusTitle));
-
-                var id = item.RewardRequestID.ToString();
-                var pending = !item.IsComplete && item.StatusTitle == RewardStatusTitles.Pending;
                 row.Actions.Add(Modal("جزئیات", "fa fa-eye", "/RewardManagement/RequestDetails", id, "rewardRequestID", "btn btn-sm btn-outline-secondary"));
                 row.Actions.Add(new GridAction
                 {
@@ -147,6 +146,7 @@ namespace GolpaMotorFinal.Helpers
             foreach (var row in items)
             {
                 var gridRow = new GridRow { Key = row.ProductName };
+
                 gridRow.Columns.Add(Text(row.ProductName));
                 gridRow.Columns.Add(Number(row.TotalCards));
                 gridRow.Columns.Add(Number(row.Registered));
@@ -167,6 +167,7 @@ namespace GolpaMotorFinal.Helpers
             foreach (var row in items)
             {
                 var gridRow = new GridRow { Key = $"{row.ProductName}-{row.JalaliYear}-{row.JalaliMonth}" };
+
                 gridRow.Columns.Add(Text(row.ProductName));
                 gridRow.Columns.Add(Number(row.JalaliYear));
                 gridRow.Columns.Add(Number(row.JalaliMonth));
@@ -279,6 +280,7 @@ namespace GolpaMotorFinal.Helpers
             foreach (var card in items)
             {
                 var row = new GridRow { Key = card.WarrantyCardID.ToString() };
+
                 row.Columns.Add(Text(card.SerialNumber));
                 row.Columns.Add(Text(card.ScratchedCode));
                 row.Columns.Add(Text(card.ProductName));
