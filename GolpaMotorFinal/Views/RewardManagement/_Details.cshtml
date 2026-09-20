@@ -4,7 +4,7 @@
     <div class="fw-semibold mb-2">@Model.Title</div>
     <p class="text-muted">@(string.IsNullOrWhiteSpace(Model.Description) ? "توضیحی ثبت نشده است" : Model.Description)</p>
     <ul class="list-unstyled mb-0">
-        <li>حد نصاب: <strong>@Model.RequiredPoints</strong></li>
+        <li>حداقل امتیاز: <strong>@Model.RequiredPoints</strong></li>
         <li>نوع: @(Model.IsCashReward ? "نقدی" : "غیرنقدی")</li>
         @if (Model.IsCashReward)
         {

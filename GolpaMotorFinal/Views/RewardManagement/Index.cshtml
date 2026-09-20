@@ -50,9 +50,9 @@
                     @{
                         ViewData["NumFromName"] = "RequiredFrom";
                         ViewData["NumToName"] = "RequiredTo";
-                        ViewData["NumEmptyLabel"] = "حد نصاب";
-                        ViewData["NumFromPlaceholder"] = "حداقل حد نصاب";
-                        ViewData["NumToPlaceholder"] = "حداکثر حد نصاب";
+                        ViewData["NumEmptyLabel"] = "بازه امتیاز";
+                        ViewData["NumFromPlaceholder"] = "حداقل امتیاز";
+                        ViewData["NumToPlaceholder"] = "حداکثر امتیاز";
                     }
                     @await Html.PartialAsync("_NumberRangeFilter")
                     @await Html.PartialAsync("_FilterReset")
@@ -91,14 +91,6 @@
                             <option value="@cat.RewardCatalogID">@cat.Title</option>
                         }
                     </select>
-                    @* @{
-                        ViewData["DateFromName"] = "RequestFromJalali";
-                        ViewData["DateToName"] = "RequestToJalali";
-                        ViewData["DateEmptyLabel"] = "تاریخ درخواست";
-                        ViewData["DateFromPlaceholder"] = "از تاریخ";
-                        ViewData["DateToPlaceholder"] = "تا تاریخ";
-                    }
-                    @await Html.PartialAsync("_DateRangeFilter") *@
                     @await Component.InvokeAsync("DateRangeFilter", new DateRangeFilterViewModel
                     {
                         FromName = "fromJalali",
