@@ -4,6 +4,7 @@ namespace DomainModel.ViewModels.Warranty
     {
         public string SerialNumber { get; set; } = string.Empty;
         public string ScratchedCode { get; set; } = string.Empty;
+        public int? ValidityMonths { get; set; }
     }
 
     public class WarrantyImportResult
@@ -13,5 +14,6 @@ namespace DomainModel.ViewModels.Warranty
         public int Inserted { get; set; }
         public int Duplicate { get; set; }
         public int Empty { get; set; }
+        public int Invalid { get; set; }
     }
 }

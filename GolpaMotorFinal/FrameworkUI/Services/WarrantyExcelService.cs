@@ -23,6 +23,13 @@ namespace GolpaMotorFinal.FrameworkUI.Services
                 return result;
             }
 
+            var ext = Path.GetExtension(file.FileName)?.ToLowerInvariant();
+            if (ext != ".xlsx")
+            {
+                result.Message = "فقط فایل اکسل با پسوند xlsx پذیرفته می‌شود.";
+                return result;
+            }
+
             var items = new List<WarrantyCardImportItem>();
 
             using (var package = new ExcelPackage(file.OpenReadStream()))
@@ -38,10 +45,24 @@ namespace GolpaMotorFinal.FrameworkUI.Services
 
                 for (int row = 2; row <= rowCount; row++)
                 {
+                    var serial = ToEnglishDigits(worksheet.Cells[row, 1].Text);
+                    var code = ToEnglishDigits(worksheet.Cells[row, 2].Text);
+                    var monthsText = ToEnglishDigits(worksheet.Cells[row, 3].Text);
+
+                    int? months = null;
+                    if (!string.IsNullOrWhiteSpace(monthsText))
+                    {
+                        if (int.TryParse(monthsText, out var parsed))
+                            months = parsed;
+                        else
+                            months = 0;
+                    }
+
                     items.Add(new WarrantyCardImportItem
                     {
-                        SerialNumber = worksheet.Cells[row, 1].Text?.Trim() ?? string.Empty,
-                        ScratchedCode = worksheet.Cells[row, 2].Text?.Trim() ?? string.Empty
+                        SerialNumber = serial,
+                        ScratchedCode = code,
+                        ValidityMonths = months
                     });
                 }
             }
@@ -52,7 +73,25 @@ namespace GolpaMotorFinal.FrameworkUI.Services
             result.Inserted = imported.Inserted;
             result.Duplicate = imported.Duplicate;
             result.Empty = imported.Empty;
+            result.Invalid = imported.Invalid;
             return result;
+        }
+
+        private static string ToEnglishDigits(string? value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+                return string.Empty;
+
+            var chars = value.Trim().ToCharArray();
+            for (var i = 0; i < chars.Length; i++)
+            {
+                if (chars[i] >= '۰' && chars[i] <= '۹')
+                    chars[i] = (char)('0' + (chars[i] - '۰'));
+                else if (chars[i] >= '٠' && chars[i] <= '٩')
+                    chars[i] = (char)('0' + (chars[i] - '٠'));
+            }
+
+            return new string(chars);
         }
     }
 }

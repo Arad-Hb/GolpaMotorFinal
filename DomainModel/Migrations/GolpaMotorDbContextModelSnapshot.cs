@@ -618,6 +618,9 @@ namespace DomainModel.Migrations
 
                     b.HasIndex("ProductID");
 
+                    b.HasIndex("SerialNumber")
+                        .IsUnique();
+
                     b.ToTable("WarrantyCards");
                 });
 

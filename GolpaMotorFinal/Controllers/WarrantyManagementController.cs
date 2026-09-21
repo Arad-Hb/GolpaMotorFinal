@@ -169,11 +169,12 @@ namespace GolpaMotorFinal.Controllers
             {
                 vm.LastImport = new WarrantyExcelImportResult
                 {
-                    Success = TempData["ImportSuccess"] as bool? ?? false,
+                    Success = TempData["ImportSuccess"]?.ToString() == "1",
                     Message = importMsg,
-                    Inserted = TempData["ImportInserted"] as int? ?? 0,
-                    Duplicate = TempData["ImportDuplicate"] as int? ?? 0,
-                    Empty = TempData["ImportEmpty"] as int? ?? 0
+                    Inserted = int.TryParse(TempData["ImportInserted"]?.ToString(), out var inserted) ? inserted : 0,
+                    Duplicate = int.TryParse(TempData["ImportDuplicate"]?.ToString(), out var duplicate) ? duplicate : 0,
+                    Empty = int.TryParse(TempData["ImportEmpty"]?.ToString(), out var empty) ? empty : 0,
+                    Invalid = int.TryParse(TempData["ImportInvalid"]?.ToString(), out var invalid) ? invalid : 0
                 };
             }
 
@@ -440,27 +441,35 @@ namespace GolpaMotorFinal.Controllers
         {
             if (model.ProductID <= 0 || model.ExcelFile == null)
             {
-                TempData["ImportSuccess"] = false;
-                TempData["ImportMessage"] = "محصول و فایل اکسل الزامی است.";
-                return RedirectToAction(nameof(Index));
+                SetImportTempData(false, "محصول و فایل اکسل الزامی است.");
+                return RedirectToAction(nameof(Index), new { tab = "excel" });
             }
 
             try
             {
                 var result = await excelService.ImportExcel(model.ProductID, model.ExcelFile);
-                TempData["ImportSuccess"] = result.Success;
-                TempData["ImportMessage"] = result.Message;
-                TempData["ImportInserted"] = result.Inserted;
-                TempData["ImportDuplicate"] = result.Duplicate;
-                TempData["ImportEmpty"] = result.Empty;
+                SetImportTempData(result.Success, result.Message, result.Inserted, result.Duplicate, result.Empty, result.Invalid);
+                return RedirectToAction(nameof(Index), new
+                {
+                    tab = result.Success ? "cards" : "excel",
+                    productId = model.ProductID
+                });
             }
             catch (Exception ex)
             {
-                TempData["ImportSuccess"] = false;
-                TempData["ImportMessage"] = ex.Message;
+                SetImportTempData(false, ex.Message);
+                return RedirectToAction(nameof(Index), new { tab = "excel", productId = model.ProductID });
             }
+        }
 
-            return RedirectToAction(nameof(Index));
+        private void SetImportTempData(bool success, string message, int inserted = 0, int duplicate = 0, int empty = 0, int invalid = 0)
+        {
+            TempData["ImportSuccess"] = success ? "1" : "0";
+            TempData["ImportMessage"] = message;
+            TempData["ImportInserted"] = inserted.ToString();
+            TempData["ImportDuplicate"] = duplicate.ToString();
+            TempData["ImportEmpty"] = empty.ToString();
+            TempData["ImportInvalid"] = invalid.ToString();
         }
 
         [HttpPost]
@@ -470,15 +479,13 @@ namespace GolpaMotorFinal.Controllers
         {
             if (productId <= 0 || count <= 0)
             {
-                TempData["ImportSuccess"] = false;
-                TempData["ImportMessage"] = "محصول و تعداد معتبر نیست.";
-                return RedirectToAction(nameof(Index));
+                SetImportTempData(false, "محصول و تعداد معتبر نیست.");
+                return RedirectToAction(nameof(Index), new { tab = "generate" });
             }
 
             var result = await warrantyService.GenerateCodes(productId, count, validityMonths);
-            TempData["ImportSuccess"] = result.Success;
-            TempData["ImportMessage"] = result.Message;
-            return RedirectToAction(nameof(Index), new { productId });
+            SetImportTempData(result.Success, result.Message);
+            return RedirectToAction(nameof(Index), new { productId, tab = "cards" });
         }
     }
 }

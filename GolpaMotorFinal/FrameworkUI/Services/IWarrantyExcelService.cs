@@ -7,6 +7,7 @@
         public int Inserted { get; set; }
         public int Duplicate { get; set; }
         public int Empty { get; set; }
+        public int Invalid { get; set; }
     }
 
     public interface IWarrantyExcelService

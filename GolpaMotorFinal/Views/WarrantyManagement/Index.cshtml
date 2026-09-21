@@ -44,6 +44,13 @@
     </div>
 </div>
 
+@if (Model.LastImport != null)
+{
+    <div class="alert @(Model.LastImport.Success ? "alert-info" : "alert-danger")">
+        @Model.LastImport.Message
+    </div>
+}
+
 <ul class="nav nav-tabs mb-3" id="warrantyTab" role="tablist">
     <li class="nav-item">
         <button class="nav-link @(openTab == "cards" ? "active" : null)" id="tab-cards" data-bs-toggle="tab" data-bs-target="#warranty-cards" type="button" role="tab">لیست کارت‌ها</button>
@@ -93,6 +100,7 @@
                 }
                 <form asp-action="UploadExcel" method="post" enctype="multipart/form-data" class="admin-form">
                     @Html.AntiForgeryToken()
+                    <p class="text-muted mb-3">ردیف اول عنوان ستون‌ها است. ستون A سریال، ستون B رمز، ستون C مدت اعتبار به ماه (مثلاً ۲۴). اگر ستون C خالی باشد ۱۲ ماه ذخیره می‌شود. اعتبار بعد از ثبت کارت شروع می‌شود.</p>
                     <div class="row g-2 align-items-end">
                         <div class="col-12 col-md-4">
                             <label class="form-label">محصول</label>
@@ -106,7 +114,7 @@
                         </div>
                         <div class="col-12 col-md-5">
                             <label class="form-label">فایل اکسل</label>
-                            <input type="file" name="ExcelFile" accept=".xlsx,.xls" class="form-control" required />
+                            <input type="file" name="ExcelFile" accept=".xlsx" class="form-control" required />
                         </div>
                         <div class="col-12 col-md-3">
                             <button type="submit" class="main_bt w-100">آپلود اکسل</button>

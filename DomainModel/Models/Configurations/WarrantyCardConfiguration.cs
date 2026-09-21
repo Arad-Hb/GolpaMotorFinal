@@ -28,6 +28,9 @@ namespace DomainModel.Models.Configurations
             builder.HasOne(x => x.Product)
                 .WithMany(x => x.WarrantyCards)
                 .HasForeignKey(x => x.ProductID);
+
+            builder.HasIndex(x => x.SerialNumber)
+                .IsUnique();
         }
     }
 }

@@ -17,7 +17,7 @@ namespace DataAccess.Mappers
             };
         }
 
-        public static WarrantyCard ToEntity(WarrantyCardImportItem item, long productId, int validityMonths = 12)
-            => ToEntity(productId, item.SerialNumber, item.ScratchedCode, validityMonths);
+        public static WarrantyCard ToEntity(WarrantyCardImportItem item, long productId, int defaultValidityMonths = 12)
+            => ToEntity(productId, item.SerialNumber, item.ScratchedCode, item.ValidityMonths ?? defaultValidityMonths);
     }
 }

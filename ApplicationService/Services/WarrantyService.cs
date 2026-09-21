@@ -9,10 +9,12 @@ namespace ApplicationService.Services
     public class WarrantyService : IWarrantyService
     {
         private readonly IWarrantyCardRepository cards;
+        private readonly IProductRepository products;
 
-        public WarrantyService(IWarrantyCardRepository cards)
+        public WarrantyService(IWarrantyCardRepository cards, IProductRepository products)
         {
             this.cards = cards;
+            this.products = products;
         }
 
         public async Task<(List<WarrantyCardListItem> Items, int PageIndex, int PageCount, int RecordCount)> SearchCards(WarrantyCardSearchModel sm)
@@ -51,10 +53,10 @@ namespace ApplicationService.Services
             return op.ToSuccess($"{created} کد گارانتی تولید شد.");
         }
 
-        public async Task<WarrantyImportResult> ImportCards(long productId, IReadOnlyList<WarrantyCardImportItem> items, int validityMonths = 12)
+        public async Task<WarrantyImportResult> ImportCards(long productId, IReadOnlyList<WarrantyCardImportItem> items)
         {
             var result = new WarrantyImportResult();
-            if (productId <= 0)
+            if (productId <= 0 || !await products.Exists(productId))
             {
                 result.Message = "محصول معتبر نیست.";
                 return result;
@@ -70,7 +72,7 @@ namespace ApplicationService.Services
                 var serial = item.SerialNumber?.Trim();
                 var code = item.ScratchedCode?.Trim();
 
-                if (string.IsNullOrWhiteSpace(serial) && string.IsNullOrWhiteSpace(code))
+                if (string.IsNullOrWhiteSpace(serial) && string.IsNullOrWhiteSpace(code) && !item.ValidityMonths.HasValue)
                 {
                     result.Empty++;
                     continue;
@@ -82,6 +84,13 @@ namespace ApplicationService.Services
                     continue;
                 }
 
+                var months = item.ValidityMonths ?? 12;
+                if (months <= 0 || months > 60)
+                {
+                    result.Invalid++;
+                    continue;
+                }
+
                 if (existing.Contains(serial) || batchSerials.Contains(serial))
                 {
                     result.Duplicate++;
@@ -89,7 +98,7 @@ namespace ApplicationService.Services
                 }
 
                 batchSerials.Add(serial);
-                list.Add(WarrantyCardMapper.ToEntity(productId, serial, code, validityMonths));
+                list.Add(WarrantyCardMapper.ToEntity(productId, serial, code, months));
             }
 
             if (list.Count > 0)
@@ -101,7 +110,7 @@ namespace ApplicationService.Services
             result.Inserted = list.Count;
             result.Success = true;
             result.Message =
-                $"{result.Inserted} کارت درج شد، {result.Duplicate} تکراری و {result.Empty} ردیف خالی نادیده گرفته شد.";
+                $"{result.Inserted} کارت درج شد، {result.Duplicate} تکراری، {result.Empty} خالی و {result.Invalid} نامعتبر نادیده گرفته شد.";
             return result;
         }
     }
