@@ -1,8 +1,10 @@
+using Application.Services;
 using DataAccess.Services;
 using DomainModel.ViewModels.User;
 using Framework.Common;
-using GolpaMotorFinal.FrameworkUI.Services;
 using GolpaMotorFinal.Helpers;
+using GolpaMotorFinal.Mappers;
+using GolpaMotorFinal.Models.ViewModels;
 using GolpaMotorFinal.Models.ViewModels.Reports;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -13,26 +15,23 @@ namespace GolpaMotorFinal.Controllers
     public class ReportsController : Controller
     {
         private readonly IUserService users;
-        private readonly IUserRepository userRepo;
         private readonly IProductRepository products;
         private readonly IReportRepository reports;
 
         public ReportsController(
             IUserService users,
-            IUserRepository userRepo,
             IProductRepository products,
             IReportRepository reports)
         {
             this.users = users;
-            this.userRepo = userRepo;
             this.products = products;
             this.reports = reports;
         }
 
         public async Task<IActionResult> Index()
         {
-            ViewBag.CustomerTypes = await userRepo.GetCustomerTypes();
-            ViewBag.Provinces = await userRepo.GetProvinces();
+            ViewBag.CustomerTypes = await users.GetCustomerTypes();
+            ViewBag.Provinces = await users.GetProvinces();
 
             return View(new ReportsIndexViewModel
             {
@@ -45,8 +44,11 @@ namespace GolpaMotorFinal.Controllers
         {
             sm.CardFrom = PersianDate.ParseOrNull(sm.CardFromJalali);
             sm.CardTo = PersianDate.ParseOrNull(sm.CardToJalali);
-            var page = await users.GetUserReportPage(sm);
-            var grid = AdminListGrids.BuildUserReportGrid(page.Users);
+            sm.PageSize = PaginationViewModel.DefaultPageSize;
+            var result = await users.Search(sm);
+            var page = result.sm ?? sm;
+            var reportUsers = (result.userList ?? new List<UserListItem>()).Select(UserViewMapper.ToReport).ToList();
+            var grid = AdminListGrids.BuildUserReportGrid(reportUsers);
             CrudGridPager.Attach(
                 grid,
                 "UserReportGrid",

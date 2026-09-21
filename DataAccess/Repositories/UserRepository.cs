@@ -1,10 +1,10 @@
 ﻿using DataAccess.Helpers;
+using DataAccess.Mappers;
 using DataAccess.Services;
 using DomainModel.Models;
 using DomainModel.ViewModels.User;
 using Framework.Common;
 using Microsoft.AspNetCore.Identity;
-using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
 
 
@@ -21,130 +21,13 @@ namespace DataAccess.Repositories
             this.userManager = userManager;            
         }
 
-        private ApplicationUser ToDbModel(UserAddEditModel model)
-        {
-            var user = new ApplicationUser
-            {
-                UserName = string.IsNullOrWhiteSpace(model.Email)
-                            ? $"noemail_{Guid.NewGuid():N}@noemail.local"
-                            : model.Email.Trim(),
-
-                Email = string.IsNullOrWhiteSpace(model.Email)
-                            ? $"noemail_{Guid.NewGuid():N}@noemail.local"
-                            : model.Email.Trim(),
-
-                PhoneNumber = model.PhoneNumber,
-
-                FirstName = model.FirstName?.Trim(),
-                LastName = model.LastName?.Trim(),
-
-                ProvinceID = model.ProvinceID,
-                CityID = model.CityID,
-
-                Address = string.IsNullOrWhiteSpace(model.Address) ? null : model.Address.Trim(),
-                PostalCode = string.IsNullOrWhiteSpace(model.PostalCode) ? null : model.PostalCode.Trim(),
-
-                ProfileImageUrl = string.IsNullOrWhiteSpace(model.ProfileImageUrl)
-                    ? null
-                    : model.ProfileImageUrl,
-
-                CreditCartNumber = string.IsNullOrWhiteSpace(model.CreditCartNumber)
-                    ? null
-                    : model.CreditCartNumber,
-
-                IBAN = string.IsNullOrWhiteSpace(model.IBAN)
-                    ? null
-                    : model.IBAN,
-
-                AccountNumber = string.IsNullOrWhiteSpace(model.AccountNumber)
-                    ? null
-                    : model.AccountNumber,
-
-                IsActive = model.IsActive,
-                IsDeleted = false,
-                IsConfirmedCode = false,
-
-                RegisterDate = model.RegisterDate ?? DateTime.Now,
-
-                TotalEarnedPoints = model.TotalEarnedPoints ?? 0,
-                TotalSettledPoints = model.TotalSettledPoints ?? 0,
-                TotalRegisteredCards = model.TotalRegisteredCards ?? 0
-            };
-
-            user.RemainedPoints =
-                (user.TotalEarnedPoints ?? 0) -
-                (user.TotalSettledPoints ?? 0);
-
-            return user;
-        }
-
-        private void UpdateDbModel(ApplicationUser user, UserAddEditModel model)
-        {
-            user.FirstName = model.FirstName?.Trim();
-            user.LastName = model.LastName?.Trim();
-            user.PhoneNumber = model.PhoneNumber?.Trim();
-
-            user.ProvinceID = model.ProvinceID;
-            user.CityID = model.CityID;
-
-            user.Address = model.Address?.Trim();
-            user.PostalCode = model.PostalCode?.Trim();
-
-            user.ProfileImageUrl = model.ProfileImageUrl?.Trim();
-
-            user.CreditCartNumber = model.CreditCartNumber?.Trim();
-            user.IBAN = model.IBAN?.Trim();
-            user.AccountNumber = model.AccountNumber?.Trim();
-
-            user.IsActive = model.IsActive;
-        }
-
-        private UserAddEditModel ToViewModel(ApplicationUser model)
-        {
-            var email = model.Email;
-            var emailAttr = new EmailAddressAttribute();
-            if (!string.IsNullOrWhiteSpace(email) && !emailAttr.IsValid(email))
-            {
-                email = null;
-            }
-
-            return new UserAddEditModel
-            {
-                UserID = model.Id,
-                FirstName = model.FirstName,
-                LastName = model.LastName,
-                Email = email,
-                PhoneNumber = model.PhoneNumber,
-              
-                ProvinceID = model.ProvinceID,
-                CityID = model.CityID,
-                Address = model.Address,
-                PostalCode = model.PostalCode,
-                ProfileImageUrl = model.ProfileImageUrl,
-
-                IsActive = model.IsActive,
-                IsDeleted = model.IsDeleted,
-
-                CreditCartNumber = model.CreditCartNumber,
-                IBAN = model.IBAN,
-                AccountNumber = model.AccountNumber,
-
-                CustomerTypeID = model.UserCustomerTypes?.Select(x => (int?)x.CustomerTypeID).FirstOrDefault(),
-
-                TotalEarnedPoints = model.TotalEarnedPoints ?? 0,
-                TotalSettledPoints = model.TotalSettledPoints ?? 0,
-                RemainedPoints = model.RemainedPoints ?? 0,
-                TotalRegisteredCards = model.TotalRegisteredCards ?? 0
-            };
-        }
-
         public async Task<OperationResult> Add(UserAddEditModel model)
         {
             var result = new OperationResult("Add User");
 
             try
             {
-                var user = ToDbModel(model);
+                var user = UserMapper.ToEntity(model);
                 var password = $"P@ss{Guid.NewGuid():N}1!";
                 var identityResult = await userManager.CreateAsync(user, password);
 
@@ -178,7 +61,7 @@ namespace DataAccess.Repositories
                 if (user == null)
                     return op.ToFailed("کاربر یافت نشد");
 
-                UpdateDbModel(user, model);
+                UserMapper.Apply(user, model);
 
                 if (!string.IsNullOrWhiteSpace(model.Email))
                 {
@@ -407,58 +290,25 @@ namespace DataAccess.Repositories
                 .AnyAsync(x => x.Id == userID && !x.IsDeleted);
         }
 
-        public async Task<UserAddEditModel> Get(string userID)
+        public async Task<UserAddEditModel?> Get(string userID)
         {
             var user = await db.Users
                 .Include(x => x.UserCustomerTypes)
                 .FirstOrDefaultAsync(x => x.Id == userID && !x.IsDeleted);
 
             if (user == null)
-                return new UserAddEditModel();
+                return null;
 
-            return ToViewModel(user);
+            return UserMapper.ToAddEditModel(user);
         }
 
         public async Task<UserDetailsModel> GetUserDetail(string sm)
         {
             var result = new UserDetailsModel();
-          
-            var searchResult=await db.Users
-               .Where(x => !x.IsDeleted && (x.PhoneNumber == sm || x.FirstName==sm || x.LastName==sm))
-               .Select(x => new UserDetailsModel
-               {
-                   UserID = x.Id,
 
-                   FirstName = x.FirstName ?? string.Empty,
-                   LastName = x.LastName ?? string.Empty,
-                   Email = x.Email ?? string.Empty,
-                   PhoneNumber = x.PhoneNumber ?? string.Empty,
-
-                   Province = x.Province != null ? x.Province.Name : string.Empty,
-                   City = x.City != null ? x.City.Name : string.Empty,
-                   Address = x.Address ?? string.Empty,
-                   PostalCode = x.PostalCode ?? string.Empty,
-
-                   ProfileImageUrl = x.ProfileImageUrl ?? string.Empty,
-
-                   RoleName = x.UserCustomerTypes
-                       .Select(uct => uct.CustomerType.Title)
-                       .FirstOrDefault() ?? string.Empty,
-
-                   IsActive = x.IsActive,
-                   RegisterDate = x.RegisterDate,
-
-                   CreditCartNumber = x.CreditCartNumber ?? string.Empty,
-                   IBAN = x.IBAN ?? string.Empty,
-                   AccountNumber = x.AccountNumber ?? string.Empty,
-
-                   TotalEarnedPoints = x.TotalEarnedPoints ?? 0,
-                   TotalSettledPoints = x.TotalSettledPoints ?? 0,
-                   RemainedPoints = x.RemainedPoints ?? 0,
-                   TotalRegisteredCards = x.TotalRegisteredCards ?? 0,
-                   IsEligibleForReward = x.IsEligibleForReward,
-                   HasReceivedReward = x.HasReceivedReward
-               })
+            var searchResult = await db.Users
+               .Where(x => !x.IsDeleted && (x.PhoneNumber == sm || x.FirstName == sm || x.LastName == sm))
+               .Select(UserMapper.ToDetails)
                .FirstOrDefaultAsync();
 
             if (searchResult != null) result = searchResult;
@@ -469,39 +319,7 @@ namespace DataAccess.Repositories
         {
             return await db.Users
                 .Where(x => !x.IsDeleted)
-                .Select(x => new UserDetailsModel
-                {
-                    UserID = x.Id,
-
-                    FirstName = x.FirstName ?? string.Empty,
-                    LastName = x.LastName ?? string.Empty,
-                    Email = x.Email ?? string.Empty,
-                    PhoneNumber = x.PhoneNumber ?? string.Empty,
-                    ProfileImageUrl = x.ProfileImageUrl ?? string.Empty,
-
-                    Province = x.Province != null ? x.Province.Name : string.Empty,
-                    City = x.City != null ? x.City.Name : string.Empty,
-                    Address = x.Address ?? string.Empty,
-                    PostalCode = x.PostalCode ?? string.Empty,
-
-                    RoleName =x.UserCustomerTypes
-                        .Select(c => c.CustomerType.Title)
-                        .FirstOrDefault() ?? string.Empty,
-
-                    IsActive = x.IsActive,
-                    RegisterDate = x.RegisterDate,
-
-                    CreditCartNumber = x.CreditCartNumber ?? string.Empty,
-                    IBAN = x.IBAN ?? string.Empty,
-                    AccountNumber = x.AccountNumber ?? string.Empty,
-
-                    TotalEarnedPoints = x.TotalEarnedPoints ?? 0,
-                    TotalSettledPoints = x.TotalSettledPoints ?? 0,
-                    RemainedPoints = x.RemainedPoints ?? 0,
-                    TotalRegisteredCards = x.TotalRegisteredCards ?? 0,
-                    IsEligibleForReward = x.IsEligibleForReward,
-                    HasReceivedReward = x.HasReceivedReward
-                })
+                .Select(UserMapper.ToDetails)
                 .ToListAsync();
         }
 
@@ -521,40 +339,7 @@ namespace DataAccess.Repositories
         {
             return await db.Users
                 .Where(x => x.Id == userID)
-                .Select(x => new UserDetailsModel
-                {
-                    UserID = x.Id,
-
-                    FirstName = x.FirstName ?? string.Empty,
-                    LastName = x.LastName ?? string.Empty,
-                    Email = x.Email ?? string.Empty,
-                    PhoneNumber = x.PhoneNumber ?? string.Empty,
-
-                    Province = x.Province != null ? x.Province.Name : string.Empty,
-                    City = x.City != null ? x.City.Name : string.Empty,
-                    Address = x.Address ?? string.Empty,
-                    PostalCode = x.PostalCode ?? string.Empty,
-
-                    ProfileImageUrl = x.ProfileImageUrl ?? string.Empty,
-
-                    RoleName = x.UserCustomerTypes
-                        .Select(uct => uct.CustomerType.Title)
-                        .FirstOrDefault() ?? string.Empty,
-
-                    IsActive = x.IsActive,
-                    RegisterDate = x.RegisterDate,
-
-                    CreditCartNumber = x.CreditCartNumber ?? string.Empty,
-                    IBAN = x.IBAN ?? string.Empty,
-                    AccountNumber = x.AccountNumber ?? string.Empty,
-
-                    TotalEarnedPoints = x.TotalEarnedPoints ?? 0,
-                    TotalSettledPoints = x.TotalSettledPoints ?? 0,
-                    RemainedPoints = x.RemainedPoints ?? 0,
-                    TotalRegisteredCards = x.TotalRegisteredCards ?? 0,
-                    IsEligibleForReward = x.IsEligibleForReward,
-                    HasReceivedReward = x.HasReceivedReward
-                })
+                .Select(UserMapper.ToDetails)
                 .FirstOrDefaultAsync();
         }
 
@@ -661,26 +446,7 @@ namespace DataAccess.Repositories
                 .OrderByDescending(u => u.RegisterDate)
                 .Skip(pageIndex * sm.PageSize)
                 .Take(sm.PageSize)
-                .Select(u => new UserListItem
-                {
-                    UserID = u.Id,
-                    FirstName = u.FirstName,
-                    LastName = u.LastName,
-                    Email = u.Email,
-                    PhoneNumber = u.PhoneNumber ?? string.Empty,
-                    ExistingProfileImageUrl = u.ProfileImageUrl,
-                    RemainedPoints = u.RemainedPoints ?? 0,
-                    TotalRegisteredCards = u.TotalRegisteredCards ?? 0,
-                    TotalEarnedPoints = u.TotalEarnedPoints ?? 0,
-                    TotalSettledPoints = u.TotalSettledPoints ?? 0,
-                    Province = u.Province != null ? u.Province.Name : string.Empty,
-                    City = u.City != null ? u.City.Name : string.Empty,
-                    RoleName = u.UserCustomerTypes
-                        .Select(c => c.CustomerType.Title)
-                        .FirstOrDefault() ?? string.Empty,
-                    IsEligibleForReward = u.IsEligibleForReward,
-                    HasReceivedReward = u.HasReceivedReward,
-                })
+                .Select(UserMapper.ToListItem)
                 .ToListAsync();
 
             return new UserListComplexModel { userList = users, sm = sm };

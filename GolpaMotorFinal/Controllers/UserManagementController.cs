@@ -1,39 +1,41 @@
-﻿using DataAccess.Services;
+﻿using Application.Services;
+using DataAccess.Services;
 using DomainModel.ViewModels.User;
 using Framework.Common;
 using GolpaMotorFinal.FrameworkUI.Services;
 using GolpaMotorFinal.Helpers;
+using GolpaMotorFinal.Mappers;
+using GolpaMotorFinal.Models;
 using GolpaMotorFinal.Models.ViewModels;
 using GolpaMotorFinal.Models.ViewModels.Account;
 using GolpaMotorFinal.Models.ViewModels.CRUD;
 using GolpaMotorFinal.Models.ViewModels.UserManagement;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace GolpaMotorFinal.Controllers
 {
     [Authorize(Roles = "Admin")]
     public class UserManagementController : Controller
     {
-        private readonly IUserRepository repo;
         private readonly IUserService service;
+        private readonly IFileManager fileManager;
         private readonly IRewardRequestRepository rewardRequests;
 
         public UserManagementController(
-            IUserRepository repo,
             IUserService service,
+            IFileManager fileManager,
             IRewardRequestRepository rewardRequests)
         {
-            this.repo = repo;
             this.service = service;
+            this.fileManager = fileManager;
             this.rewardRequests = rewardRequests;
         }
 
         public async Task<IActionResult> Index()
         {
-            ViewBag.CustomerTypes = await repo.GetCustomerTypes();
-            ViewBag.Provinces = await repo.GetProvinces();
+            ViewBag.CustomerTypes = await service.GetCustomerTypes();
+            ViewBag.Provinces = await service.GetProvinces();
             return View();
         }
 
@@ -41,8 +43,11 @@ namespace GolpaMotorFinal.Controllers
         public async Task<IActionResult> List(UserSearchModel sm)
         {
             BindUserFilter(sm);
-            var page = await service.GetListPage(sm);
-            var grid = AdminListGrids.BuildUserGrid(page.Items);
+            sm.PageSize = PaginationViewModel.DefaultPageSize;
+            var result = await service.Search(sm);
+            var page = result.sm ?? sm;
+            var items = (result.userList ?? new List<UserListItem>()).Select(UserViewMapper.ToListItem).ToList();
+            var grid = AdminListGrids.BuildUserGrid(items);
             CrudGridPager.Attach(
                 grid,
                 "UserGrid",
@@ -75,9 +80,8 @@ namespace GolpaMotorFinal.Controllers
         [HttpGet]
         public async Task<IActionResult> MergeAccounts(string userID, string? gridId = null, string? refreshUrl = null)
         {
-            var currentUser =await service.GetUserMergeAccounts(userID);
-
-            if (string.IsNullOrWhiteSpace(currentUser.UserID))
+            var user = await service.GetDetails(userID);
+            if (user == null || string.IsNullOrWhiteSpace(user.UserID))
                 return NotFound();
 
             ViewBag.GridId = string.IsNullOrWhiteSpace(gridId) ? "UserGrid" : gridId;
@@ -85,8 +89,7 @@ namespace GolpaMotorFinal.Controllers
 
             var vm = new MergeAccountsComplexViewModel
             {
-                CurrentUser = currentUser,
-               
+                CurrentUser = UserViewMapper.ToMerge(user),
                 Search = new SearchBoxViewModel
                 {
                     Action = "SearchUserForMerge",
@@ -99,7 +102,7 @@ namespace GolpaMotorFinal.Controllers
                 }
             };
 
-            return PartialView("_MergeAccounts",vm);
+            return PartialView("_MergeAccounts", vm);
         }
 
         [HttpPost]
@@ -114,9 +117,8 @@ namespace GolpaMotorFinal.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            var result = await service.MergeUsers(model.CurrentUser);
+            var result = await service.MergeUsers(model.CurrentUser.UserID, model.CurrentUser.SelectedMergeUserID ?? string.Empty);
 
-            // If AJAX call, return JSON so client can refresh grid and close modal
             if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
             {
                 return Json(result);
@@ -131,17 +133,16 @@ namespace GolpaMotorFinal.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> SearchUserForMerge(MergeAccountsComplexViewModel model)
         {
-            var found = await service.GetMergeSearchResult(model.Search?.SearchTerm ?? string.Empty);
+            var found = await service.GetUserDetail(model.Search?.SearchTerm ?? string.Empty);
             model.SearchAttempted = true;
             if (string.IsNullOrWhiteSpace(found.UserID) || found.UserID == model.CurrentUser?.UserID)
                 model.SearchedUser = null;
             else
-                model.SearchedUser = found;
+                model.SearchedUser = UserViewMapper.ToMerge(found);
 
             return PartialView("_MergeResult", model);
         }
@@ -149,39 +150,32 @@ namespace GolpaMotorFinal.Controllers
         [HttpGet]
         public async Task<IActionResult> Create()
         {
-            var provinces = await repo.GetProvinces();
-            var customerTypes = await repo.GetCustomerTypes();
-            var cities =new List<DomainModel.Models.City>();
+            var provinces = await service.GetProvinces();
+            var customerTypes = await service.GetCustomerTypes();
+            var cities = new List<DomainModel.Models.City>();
 
             var form = new CrudFormViewModel
             {
                 Title = "افزودن کاربر",
                 Controller = "UserManagement",
                 Action = "Create",
-                Method="POST",
-                Enctype= "multipart/form-data",
+                Method = "POST",
+                Enctype = "multipart/form-data",
                 SubmitButtonText = "افزودن",
-                CloseOnSuccess=true,
-                RefreshGrid=true,
+                CloseOnSuccess = true,
+                RefreshGrid = true,
                 GridId = "UserGrid",
                 RefreshGridUrl = "List"
             };
-            var vm = new UserAddEditViewModel
-            {
-                CustomerTypes = new SelectList(customerTypes, "CustomerTypeID", "Title"),
-                Provinces = new SelectList(provinces, "ProvinceID", "Name"),
-                Cities = new SelectList(cities, "CityID", "Name"),
-                CrudFormViewModel = form
-            };
 
-            return PartialView("_Create",vm);
+            var vm = UserViewMapper.ToAddEditViewModel(new UserAddEditModel(), customerTypes, provinces, cities, form);
+            return PartialView("_Create", vm);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(UserAddEditViewModel vm)
         {
-
             if (!ModelState.IsValid)
             {
                 return Json(new
@@ -191,32 +185,50 @@ namespace GolpaMotorFinal.Controllers
                 });
             }
 
-            vm.ProfileImageUrl = "/images/imageUsers/noimage.jpg";
-            var model = new UserAddEditModel
-            {
-                FirstName = vm.FirstName,
-                LastName = vm.LastName,
-                Email = vm.Email,
-                PhoneNumber = vm.PhoneNumber,
-                CustomerTypeID = vm.CustomerTypeID,
-                ProvinceID = vm.ProvinceID,
-                CityID = vm.CityID,
-                Address = vm.Address,
-                PostalCode = vm.PostalCode,
-                IsActive = vm.IsActive,
-                ProfileImageUrl = vm.ProfileImageUrl
-            };
+            var model = UserViewMapper.ToAddEditModel(vm);
+            model.ProfileImageUrl = "/images/imageUsers/noimage.jpg";
 
-            return Json(await service.AddUser(model, vm.ProfileImage));
+            var uploaded = await TryUpload(vm.ProfileImage);
+            if (uploaded is { Success: false })
+                return Json(new OperationResult("AddUser").ToFailed(uploaded.Message));
+            if (uploaded is { Success: true })
+                model.ProfileImageUrl = uploaded.FileUrl;
+
+            var result = await service.AddUser(model);
+            if (!result.Success && uploaded is { Success: true })
+                RemoveUserImage(uploaded.FileUrl);
+
+            return Json(result);
         }
 
         [HttpGet]
         public async Task<IActionResult> Edit(string userID)
         {
-            var vm = await service.GetForEdit(userID);
+            var user = await service.Get(userID);
+            if (user == null)
+                return NotFound();
 
-            if (vm == null) return NotFound();
+            var provinces = await service.GetProvinces();
+            var customerTypes = await service.GetCustomerTypes();
+            var cities = user.ProvinceID.HasValue
+                ? await service.GetCitiesByProvinceId(user.ProvinceID.Value)
+                : new List<DomainModel.Models.City>();
 
+            var form = new CrudFormViewModel
+            {
+                Title = "ویرایش کاربر",
+                Controller = "UserManagement",
+                Action = "Edit",
+                Method = "POST",
+                Enctype = "multipart/form-data",
+                SubmitButtonText = "ثبت نهایی",
+                CloseOnSuccess = true,
+                RefreshGrid = true,
+                GridId = "UserGrid",
+                RefreshGridUrl = "List"
+            };
+
+            var vm = UserViewMapper.ToAddEditViewModel(user, customerTypes, provinces, cities, form);
             return PartialView("_Edit", vm);
         }
 
@@ -242,41 +254,39 @@ namespace GolpaMotorFinal.Controllers
             if (string.IsNullOrWhiteSpace(vm.UserID))
                 return Json(new { success = false, message = "شناسه کاربر معتبر نیست" });
 
-            var model = new UserAddEditModel
-            {
-                UserID = vm.UserID,
-                FirstName = vm.FirstName,
-                LastName = vm.LastName,
-                Email = vm.Email,
-                PhoneNumber = vm.PhoneNumber,
-                CustomerTypeID = vm.CustomerTypeID,
-                ProvinceID = vm.ProvinceID,
-                CityID = vm.CityID,
-                Address = vm.Address,
-                PostalCode = vm.PostalCode,
-                CreditCartNumber = vm.CreditCartNumber,
-                IBAN = vm.IBAN,
-                AccountNumber = vm.AccountNumber,
-                IsActive = vm.IsActive,
-                IsDeleted = vm.IsDeleted
-            };
+            var currentUser = await service.Get(vm.UserID);
+            if (currentUser == null)
+                return Json(new { success = false, message = "کاربر یافت نشد." });
 
-            return Json(await service.UpdateUser(model, vm.ProfileImage));
+            var model = UserViewMapper.ToAddEditModel(vm);
+            model.ProfileImageUrl = string.IsNullOrWhiteSpace(currentUser.ProfileImageUrl)
+                ? "/images/imageUsers/noimage.jpg"
+                : currentUser.ProfileImageUrl;
+
+            var uploaded = await TryUpload(vm.ProfileImage);
+            if (uploaded is { Success: false })
+                return Json(new OperationResult("UpdateUser").ToFailed(uploaded.Message));
+            if (uploaded is { Success: true })
+                model.ProfileImageUrl = uploaded.FileUrl;
+
+            return Json(await service.UpdateUser(model));
         }
-
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<JsonResult> Delete(string userID)
         {
+            var user = await service.Get(userID);
             var result = await service.DeleteUser(userID);
+            if (result.Success)
+                RemoveUserImage(user?.ProfileImageUrl);
             return Json(result);
         }
 
         [HttpGet]
         public async Task<JsonResult> GetCitiesByProvince(int provinceId)
         {
-            var cities = await repo.GetCitiesByProvinceId(provinceId);
+            var cities = await service.GetCitiesByProvinceId(provinceId);
             if (cities == null || !cities.Any())
             {
                 return Json(new { success = false, data = Array.Empty<object>(), message = "شهری یافت نشد" });
@@ -292,11 +302,9 @@ namespace GolpaMotorFinal.Controllers
         [HttpGet]
         public async Task<IActionResult> Details(string userID)
         {
-            var user = await repo.GetDetails(userID);
-
+            var user = await service.GetDetails(userID);
             if (user == null)
                 return NotFound();
-
 
             return PartialView("_Details", user);
         }
@@ -309,7 +317,7 @@ namespace GolpaMotorFinal.Controllers
 
             await rewardRequests.RefreshEligibility(userID);
 
-            var user = await repo.GetDetails(userID);
+            var user = await service.GetDetails(userID);
             if (user == null)
                 return NotFound();
 
@@ -352,6 +360,23 @@ namespace GolpaMotorFinal.Controllers
 
             var result = await rewardRequests.CreateRequest(userID, rewardCatalogID);
             return Json(new { success = result.Success, message = result.Message });
+        }
+
+        private async Task<FileUploadResult?> TryUpload(IFormFile? image)
+        {
+            if (image == null)
+                return null;
+            return await fileManager.UploadAsync(
+                image, 5, new[] { "jpg", "jpeg", "png" },
+                "images/imageUsers/uploads", "images/imageUsers/thumbnails");
+        }
+
+        private void RemoveUserImage(string? url)
+        {
+            if (string.IsNullOrWhiteSpace(url) || url == "/images/imageUsers/noimage.jpg")
+                return;
+            fileManager.Remove(url);
+            fileManager.Remove(url.Replace("/images/imageUsers/uploads/", "/images/imageUsers/thumbnails/"));
         }
     }
 }
