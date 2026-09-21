@@ -1,4 +1,5 @@
 using DataAccess.Helpers;
+using DataAccess.Mappers;
 using DataAccess.Services;
 using DomainModel.Models;
 using DomainModel.ViewModels.Reward;
@@ -52,14 +53,14 @@ namespace DataAccess.Repositories
 
         public async Task<List<RewardRequestListItem>> GetUserRequests(string userId)
         {
-            return await ProjectRequests(db.RewardRequests.Where(x => x.UserID == userId))
+            return await RewardRequestMapper.ToListItems(db.RewardRequests.Where(x => x.UserID == userId))
                 .OrderByDescending(x => x.RequestDate)
                 .ToListAsync();
         }
 
         public async Task<RewardRequestListItem?> GetDetails(int rewardRequestId)
         {
-            return await ProjectRequests(db.RewardRequests.Where(x => x.RewardRequestID == rewardRequestId))
+            return await RewardRequestMapper.ToListItems(db.RewardRequests.Where(x => x.RewardRequestID == rewardRequestId))
                 .FirstOrDefaultAsync();
         }
 
@@ -100,7 +101,7 @@ namespace DataAccess.Repositories
             var pageIndex = searchModel.PageIndex < 0 ? 0 : searchModel.PageIndex;
             var pageSize = searchModel.PageSize <= 0 ? 10 : searchModel.PageSize;
 
-            var list = await ProjectRequests(query)
+            var list = await RewardRequestMapper.ToListItems(query)
                 .OrderByDescending(x => x.RequestDate)
                 .Skip(pageIndex * pageSize)
                 .Take(pageSize)
@@ -287,26 +288,6 @@ namespace DataAccess.Repositories
             {
                 return op.ToFailed("خطا در رد درخواست: " + ex.Message);
             }
-        }
-
-        private static IQueryable<RewardRequestListItem> ProjectRequests(IQueryable<RewardRequest> query)
-        {
-            return query.Select(x => new RewardRequestListItem
-            {
-                RewardRequestID = x.RewardRequestID,
-                UserID = x.UserID,
-                UserFullName = ((x.User.FirstName ?? "") + " " + (x.User.LastName ?? "")),
-                PhoneNumber = x.User.PhoneNumber,
-                RewardCatalogID = x.RewardCatalogID,
-                CatalogTitle = x.RewardCatalog.Title,
-                RequiredPoints = x.RewardCatalog.RequiredPoints,
-                RemainedPoints = x.User.RemainedPoints ?? 0,
-                RequestDate = x.RequestDate,
-                ReviewedDate = x.ReviewedDate,
-                IsComplete = x.IsComplete,
-                RewardDeliveryStatusID = x.RewardDeliveryStatusID,
-                StatusTitle = x.RewardDeliveryStatus.Title
-            });
         }
 
         private async Task<int> ComputeAvailablePointsAsync(string userId, int remained, int pendingStatusId)

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using DomainModel.Models;
+using Application.Services;
 using GolpaMotorFinal.FrameworkUI.Services;
 using GolpaMotorFinal.Models.ViewModels.Admin;
 using GolpaMotorFinal.Models.ViewModels;
@@ -13,7 +14,7 @@ namespace GolpaMotorFinal.Controllers
     [Authorize(Roles = "Admin")]
     public class AdminController : Controller
     {
-        private readonly IProductRepository products;
+        private readonly IProductService products;
         private readonly UserManager<ApplicationUser> userManager;
         private readonly SignInManager<ApplicationUser> signInManager;
         private readonly IFileManager fileManager;
@@ -21,7 +22,7 @@ namespace GolpaMotorFinal.Controllers
         private readonly IReportRepository reports;
 
         public AdminController(
-            IProductRepository products,
+            IProductService products,
             IReportRepository reports,
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,

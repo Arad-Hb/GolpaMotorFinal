@@ -1,5 +1,4 @@
 ﻿using Application.Services;
-using DataAccess.Services;
 using DomainModel.ViewModels.User;
 using Framework.Common;
 using GolpaMotorFinal.FrameworkUI.Services;
@@ -20,16 +19,16 @@ namespace GolpaMotorFinal.Controllers
     {
         private readonly IUserService service;
         private readonly IFileManager fileManager;
-        private readonly IRewardRequestRepository rewardRequests;
+        private readonly IRewardService rewards;
 
         public UserManagementController(
             IUserService service,
             IFileManager fileManager,
-            IRewardRequestRepository rewardRequests)
+            IRewardService rewards)
         {
             this.service = service;
             this.fileManager = fileManager;
-            this.rewardRequests = rewardRequests;
+            this.rewards = rewards;
         }
 
         public async Task<IActionResult> Index()
@@ -315,16 +314,16 @@ namespace GolpaMotorFinal.Controllers
             if (string.IsNullOrWhiteSpace(userID))
                 return NotFound();
 
-            await rewardRequests.RefreshEligibility(userID);
+            await rewards.RefreshEligibility(userID);
 
             var user = await service.GetDetails(userID);
             if (user == null)
                 return NotFound();
 
             var pageSize = PaginationViewModel.DefaultPageSize;
-            var allItems = await rewardRequests.GetEligibleCatalogsForUser(user.UserID);
-            var allRequests = await rewardRequests.GetUserRequests(user.UserID);
-            var rewards = CrudGridPager.Slice(allItems, rewardPage, pageSize);
+            var allItems = await rewards.GetEligibleCatalogsForUser(user.UserID);
+            var allRequests = await rewards.GetUserRequests(user.UserID);
+            var rewardSlice = CrudGridPager.Slice(allItems, rewardPage, pageSize);
             var history = CrudGridPager.Slice(allRequests, historyPage, pageSize);
 
             var vm = new EligibleRewardsDialogViewModel
@@ -334,15 +333,15 @@ namespace GolpaMotorFinal.Controllers
                 PhoneNumber = user.PhoneNumber,
                 TotalEarnedPoints = user.TotalEarnedPoints,
                 TotalSettledPoints = user.TotalSettledPoints,
-                RemainedPoints = await rewardRequests.GetAvailablePoints(user.UserID),
+                RemainedPoints = await rewards.GetAvailablePoints(user.UserID),
                 TotalRegisteredCards = user.TotalRegisteredCards,
                 IsEligibleForReward = user.IsEligibleForReward,
                 HasReceivedReward = user.HasReceivedReward,
-                Items = rewards.Items,
+                Items = rewardSlice.Items,
                 RecentRequests = history.Items,
-                RewardPage = rewards.PageIndex,
-                RewardPageCount = rewards.PageCount,
-                RewardRecordCount = rewards.RecordCount,
+                RewardPage = rewardSlice.PageIndex,
+                RewardPageCount = rewardSlice.PageCount,
+                RewardRecordCount = rewardSlice.RecordCount,
                 HistoryPage = history.PageIndex,
                 HistoryPageCount = history.PageCount,
                 HistoryRecordCount = history.RecordCount
@@ -358,7 +357,7 @@ namespace GolpaMotorFinal.Controllers
             if (string.IsNullOrWhiteSpace(userID))
                 return Json(new { success = false, message = "کاربر نامعتبر است." });
 
-            var result = await rewardRequests.CreateRequest(userID, rewardCatalogID);
+            var result = await rewards.CreateRequest(userID, rewardCatalogID);
             return Json(new { success = result.Success, message = result.Message });
         }
 

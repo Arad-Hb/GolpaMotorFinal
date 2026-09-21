@@ -1,4 +1,5 @@
 using DataAccess.Helpers;
+using DataAccess.Mappers;
 using DataAccess.Services;
 using DomainModel.Models;
 using DomainModel.ViewModels.Reward;
@@ -16,39 +17,12 @@ namespace DataAccess.Repositories
             this.db = db;
         }
 
-        private static RewardCatalog ToDbModel(RewardCatalogAddEditModel model)
-        {
-            return new RewardCatalog
-            {
-                Title = model.Title,
-                Description = model.Description,
-                RequiredPoints = model.RequiredPoints,
-                IsCashReward = model.IsCashReward,
-                CashValue = model.IsCashReward ? model.CashValue : null,
-                IsActive = model.IsActive
-            };
-        }
-
-        private static RewardCatalogAddEditModel ToViewModel(RewardCatalog catalog)
-        {
-            return new RewardCatalogAddEditModel
-            {
-                RewardCatalogID = catalog.RewardCatalogID,
-                Title = catalog.Title,
-                Description = catalog.Description,
-                RequiredPoints = catalog.RequiredPoints,
-                IsCashReward = catalog.IsCashReward,
-                CashValue = catalog.CashValue,
-                IsActive = catalog.IsActive
-            };
-        }
-
         public async Task<OperationResult> Add(RewardCatalogAddEditModel catalog)
         {
             var op = new OperationResult("Add Reward Catalog");
             try
             {
-                var entity = ToDbModel(catalog);
+                var entity = RewardCatalogMapper.ToEntity(catalog);
                 db.RewardCatalogs.Add(entity);
                 await db.SaveChangesAsync();
                 await RewardEligibilityHelper.RefreshAllUsersAsync(db);
@@ -74,12 +48,7 @@ namespace DataAccess.Repositories
                 if (entity == null)
                     return op.ToFailed("پاداش پیدا نشد");
 
-                entity.Title = catalog.Title;
-                entity.Description = catalog.Description;
-                entity.RequiredPoints = catalog.RequiredPoints;
-                entity.IsCashReward = catalog.IsCashReward;
-                entity.CashValue = catalog.IsCashReward ? catalog.CashValue : null;
-                entity.IsActive = catalog.IsActive;
+                RewardCatalogMapper.Apply(entity, catalog);
 
                 await db.SaveChangesAsync();
                 await RewardEligibilityHelper.RefreshAllUsersAsync(db);
@@ -118,24 +87,14 @@ namespace DataAccess.Repositories
             var entity = await db.RewardCatalogs
                 .FirstOrDefaultAsync(x => x.RewardCatalogID == rewardCatalogID);
 
-            return entity == null ? null : ToViewModel(entity);
+            return entity == null ? null : RewardCatalogMapper.ToAddEditModel(entity);
         }
 
         public async Task<List<RewardCatalogListItem>> GetAll()
         {
             return await db.RewardCatalogs
                 .OrderBy(x => x.RequiredPoints)
-                .Select(x => new RewardCatalogListItem
-                {
-                    RewardCatalogID = x.RewardCatalogID,
-                    Title = x.Title,
-                    Description = x.Description,
-                    RequiredPoints = x.RequiredPoints,
-                    IsCashReward = x.IsCashReward,
-                    CashValue = x.CashValue,
-                    IsActive = x.IsActive,
-                    RequestCount = x.RewardRequests.Count
-                })
+                .Select(RewardCatalogMapper.ToListItem)
                 .ToListAsync();
         }
 
@@ -144,17 +103,7 @@ namespace DataAccess.Repositories
             return await db.RewardCatalogs
                 .Where(x => x.IsActive)
                 .OrderBy(x => x.RequiredPoints)
-                .Select(x => new RewardCatalogListItem
-                {
-                    RewardCatalogID = x.RewardCatalogID,
-                    Title = x.Title,
-                    Description = x.Description,
-                    RequiredPoints = x.RequiredPoints,
-                    IsCashReward = x.IsCashReward,
-                    CashValue = x.CashValue,
-                    IsActive = x.IsActive,
-                    RequestCount = x.RewardRequests.Count
-                })
+                .Select(RewardCatalogMapper.ToListItem)
                 .ToListAsync();
         }
 
@@ -162,17 +111,7 @@ namespace DataAccess.Repositories
         {
             return await db.RewardCatalogs
                 .Where(x => x.RewardCatalogID == rewardCatalogID)
-                .Select(x => new RewardCatalogDetailsModel
-                {
-                    RewardCatalogID = x.RewardCatalogID,
-                    Title = x.Title,
-                    Description = x.Description,
-                    RequiredPoints = x.RequiredPoints,
-                    IsCashReward = x.IsCashReward,
-                    CashValue = x.CashValue,
-                    IsActive = x.IsActive,
-                    RequestCount = x.RewardRequests.Count
-                })
+                .Select(RewardCatalogMapper.ToDetails)
                 .FirstOrDefaultAsync();
         }
 
@@ -209,17 +148,7 @@ namespace DataAccess.Repositories
                 .OrderBy(x => x.RequiredPoints)
                 .Skip(pageIndex * pageSize)
                 .Take(pageSize)
-                .Select(x => new RewardCatalogListItem
-                {
-                    RewardCatalogID = x.RewardCatalogID,
-                    Title = x.Title,
-                    Description = x.Description,
-                    RequiredPoints = x.RequiredPoints,
-                    IsCashReward = x.IsCashReward,
-                    CashValue = x.CashValue,
-                    IsActive = x.IsActive,
-                    RequestCount = x.RewardRequests.Count
-                })
+                .Select(RewardCatalogMapper.ToListItem)
                 .ToListAsync();
 
             result.sm = searchModel;

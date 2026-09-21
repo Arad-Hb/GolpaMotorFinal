@@ -1,6 +1,10 @@
-﻿using DomainModel.ViewModels.Product;
+﻿using Application.Services;
+using DomainModel.ViewModels.Product;
+using Framework.Common;
 using GolpaMotorFinal.FrameworkUI.Services;
 using GolpaMotorFinal.Helpers;
+using GolpaMotorFinal.Mappers;
+using GolpaMotorFinal.Models;
 using GolpaMotorFinal.Models.ViewModels;
 using GolpaMotorFinal.Models.ViewModels.ProductManagement;
 using Microsoft.AspNetCore.Authorization;
@@ -11,11 +15,17 @@ namespace GolpaMotorFinal.Controllers
     [Authorize(Roles = "Admin")]
     public class ProductManagementController : Controller
     {
-        private readonly IProductService service;
+        private static readonly string[] ImageExtensions = { "jpg", "jpeg", "png" };
+        private const string ProductUploadFolder = "images/imageProducts/uploads";
+        private const string ProductThumbFolder = "images/imageProducts/thumbnails";
 
-        public ProductManagementController(IProductService service)
+        private readonly IProductService service;
+        private readonly IFileManager fileManager;
+
+        public ProductManagementController(IProductService service, IFileManager fileManager)
         {
             this.service = service;
+            this.fileManager = fileManager;
         }
 
         public async Task<IActionResult> Index()
@@ -64,13 +74,19 @@ namespace GolpaMotorFinal.Controllers
             if (!ModelState.IsValid)
                 return Json(new { success = false, message = "اطلاعات معتبر نیست" });
 
-            var result = await service.AddProduct(new ProductAddEditModel
-            {
-                ProductName = vm.ProductName,
-                Description = vm.Description,
-                ProductPoint = vm.ProductPoint,
-                IsAvailable = vm.IsAvailable
-            }, vm.ImageFile);
+            if (vm.ImageFile == null)
+                return Json(new { success = false, message = "تصویر محصول الزامی است" });
+
+            var upload = await fileManager.UploadAsync(
+                vm.ImageFile, 5, ImageExtensions, ProductUploadFolder, ProductThumbFolder);
+            if (!upload.Success)
+                return Json(new { success = false, message = upload.Message });
+
+            var model = ProductViewMapper.ToAddEditModel(vm);
+            model.ImageUrl = upload.FileUrl;
+            var result = await service.AddProduct(model);
+            if (!result.Success)
+                fileManager.Remove(upload.FileUrl);
 
             return Json(new { success = result.Success, message = result.Message });
         }
@@ -78,19 +94,11 @@ namespace GolpaMotorFinal.Controllers
         [HttpGet]
         public async Task<IActionResult> Edit(long productID)
         {
-            var prod = await service.GetForEdit(productID);
+            var prod = await service.Get(productID);
             if (prod == null)
                 return NotFound();
 
-            return PartialView("_Edit", new ProductAddEditViewModel
-            {
-                ProductID = prod.ProductID,
-                ProductName = prod.ProductName,
-                Description = prod.Description,
-                ProductPoint = prod.ProductPoint,
-                IsAvailable = prod.IsAvailable,
-                ExistingImageUrl = prod.ImageUrl
-            });
+            return PartialView("_Edit", ProductViewMapper.ToAddEditViewModel(prod));
         }
 
         [HttpPost]
@@ -100,23 +108,39 @@ namespace GolpaMotorFinal.Controllers
             if (!ModelState.IsValid)
                 return Json(new { success = false, message = "اطلاعات معتبر نیست" });
 
-            var result = await service.UpdateProduct(new ProductAddEditModel
-            {
-                ProductID = vm.ProductID,
-                ProductName = vm.ProductName,
-                Description = vm.Description,
-                ProductPoint = vm.ProductPoint,
-                IsAvailable = vm.IsAvailable,
-                ImageUrl = vm.ExistingImageUrl
-            }, vm.ImageFile);
+            var current = await service.Get(vm.ProductID);
+            if (current == null)
+                return Json(new { success = false, message = "محصول یافت نشد" });
 
-            return Json(result);
+            var model = ProductViewMapper.ToAddEditModel(vm);
+            model.ImageUrl = current.ImageUrl;
+
+            if (vm.ImageFile != null)
+            {
+                var upload = await fileManager.UploadAsync(
+                    vm.ImageFile, 5, ImageExtensions, ProductUploadFolder, ProductThumbFolder);
+                if (!upload.Success)
+                    return Json(new OperationResult("UpdateProduct").ToFailed(upload.Message));
+
+                if (!string.IsNullOrWhiteSpace(current.ImageUrl))
+                    fileManager.Remove(current.ImageUrl);
+
+                model.ImageUrl = upload.FileUrl;
+            }
+
+            return Json(await service.UpdateProduct(model));
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<JsonResult> Delete(long productID)
-            => Json(await service.DeleteProduct(productID));
+        {
+            var product = await service.Get(productID);
+            var result = await service.DeleteProduct(productID);
+            if (result.Success && !string.IsNullOrEmpty(product?.ImageUrl))
+                fileManager.Remove(product.ImageUrl);
+            return Json(result);
+        }
 
         [HttpGet]
         public async Task<IActionResult> Details(long productID)
@@ -126,10 +150,5 @@ namespace GolpaMotorFinal.Controllers
                 return NotFound();
             return PartialView("_Details", prod);
         }
-
-        //[HttpPost]
-        //[ValidateAntiForgeryToken]
-        //public async Task<JsonResult> RemovePicture(long productID)
-        //    => Json(await service.RemovePicture(productID));
     }
 }

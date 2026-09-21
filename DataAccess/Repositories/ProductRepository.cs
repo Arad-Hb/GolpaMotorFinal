@@ -1,14 +1,9 @@
-﻿using DataAccess.Services;
+﻿using DataAccess.Mappers;
+using DataAccess.Services;
 using DomainModel.Models;
 using DomainModel.ViewModels.Product;
 using Framework.Common;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace DataAccess.Repositories
 {
@@ -21,39 +16,13 @@ namespace DataAccess.Repositories
         {
             this.db = db;
         }
-        private Product ToDbModel(ProductAddEditModel product)
-        {
-            return new Product
-            {
-                ProductName = product.ProductName,
-                Description = product.Description,
-                ImageUrl = product.ImageUrl,
-                ProductPoint = product.ProductPoint,
-                IsAvailable = product.IsAvailable,
-                IsDeleted = false,
-                //CreatedDate = DateTime.Now
-            };
-        }
-        private ProductAddEditModel ToViewModel(Product product)
-        {
-            return new ProductAddEditModel
-            {
-                ProductID = product.ProductID,
-                ProductName = product.ProductName,
-                Description = product.Description,
-                ImageUrl = product.ImageUrl,
-                ProductPoint = product.ProductPoint,
-                IsAvailable = product.IsAvailable
-            };
-        }
-
         public async Task<OperationResult> Add(ProductAddEditModel product)
         {
             var op = new OperationResult("Add Product");
 
             try
             {
-                var p = ToDbModel(product);
+                var p = ProductMapper.ToEntity(product);
 
                 db.Products.Add(p);
                 await db.SaveChangesAsync();
@@ -80,11 +49,7 @@ namespace DataAccess.Repositories
                 if (prod == null)
                     return op.ToFailed("محصول پیدا نشد");
 
-                prod.ProductName = product.ProductName;
-                prod.Description = product.Description;
-                prod.ImageUrl = product.ImageUrl; //فقط FileName ذخیره می‌شود (نه path کامل)               
-                prod.ProductPoint = product.ProductPoint;
-                prod.IsAvailable = product.IsAvailable;
+                ProductMapper.Apply(prod, product);
 
                 await db.SaveChangesAsync();
 
@@ -127,44 +92,22 @@ namespace DataAccess.Repositories
             if (product == null)
                 return null;
 
-            return ToViewModel(product);
+            return ProductMapper.ToAddEditModel(product);
         }
 
         public async Task<List<ProductListItem>> GetAll()
         {
             return await db.Products.Where(x => !x.IsDeleted)
-                .Select(x => new ProductListItem
-                {
-                    ProductID = x.ProductID,
-                    ProductName = x.ProductName,
-                    ImageUrl = x.ImageUrl ?? string.Empty,
-                    ProductPoint = x.ProductPoint,
-                    IsAvailable = x.IsAvailable,
-                    RegisteredCardCount = x.WarrantyCards.Count(w => w.IsRegistered),
-                    UnregisteredCardCount = x.WarrantyCards.Count(w => !w.IsRegistered)
-                })
+                .Select(ProductMapper.ToListItem)
                 .ToListAsync();
         }
 
         public async Task<ProductDetailsModel?> GetDetails(long productID)
         {
-            var product = await db.Products
-                .Include(x => x.WarrantyCards)
-                .FirstOrDefaultAsync(x => x.ProductID == productID && !x.IsDeleted);
-
-            if (product == null)
-                return null;
-
-            return new ProductDetailsModel
-            {
-                ProductID = product.ProductID,
-                ProductName = product.ProductName,
-                Description = product.Description,
-                ImageUrl = product.ImageUrl,
-                ProductPoint = product.ProductPoint,
-                IsAvailable = product.IsAvailable,
-                WarrantyCount = product.WarrantyCards.Count
-            };
+            return await db.Products
+                .Where(x => x.ProductID == productID && !x.IsDeleted)
+                .Select(ProductMapper.ToDetails)
+                .FirstOrDefaultAsync();
         }
 
         public async Task<bool> Exists(long id)
@@ -236,16 +179,7 @@ namespace DataAccess.Repositories
                 .OrderByDescending(p => p.ProductID)
                 .Skip(pageIndex * pageSize)
                 .Take(pageSize)
-                .Select(product => new ProductListItem
-                {
-                    ProductID = product.ProductID,
-                    ProductName = product.ProductName,
-                    ProductPoint = product.ProductPoint,
-                    IsAvailable = product.IsAvailable,
-                    ImageUrl = product.ImageUrl,
-                    RegisteredCardCount = product.WarrantyCards.Count(w => w.IsRegistered),
-                    UnregisteredCardCount = product.WarrantyCards.Count(w => !w.IsRegistered)
-                })
+                .Select(ProductMapper.ToListItem)
                 .ToListAsync();
 
             // 9. خروجی نهایی

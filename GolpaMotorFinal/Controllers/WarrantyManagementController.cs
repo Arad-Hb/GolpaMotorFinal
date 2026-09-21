@@ -1,4 +1,5 @@
-﻿using DataAccess.Services;
+﻿using Application.Services;
+using DataAccess.Services;
 using DomainModel.Models;
 using DomainModel.ViewModels.Warranty;
 using Framework.Common;
@@ -24,8 +25,8 @@ namespace GolpaMotorFinal.Controllers
         private readonly ICardRegistrationRepository repo;
         private readonly IWarrantyExcelService excelService;
         private readonly IWarrantyService warrantyService;
-        private readonly IProductRepository products;
-        private readonly IRewardRequestRepository rewardRequests;
+        private readonly IProductService products;
+        private readonly IRewardService rewards;
         private readonly IMemoryCache cache;
         private const int MaxCardsPerRequest = 10;
         private const int RegisterAttemptWindowSeconds = 60;
@@ -36,8 +37,8 @@ namespace GolpaMotorFinal.Controllers
                RoleManager<IdentityRole> roleManager,
                IWarrantyExcelService excelService,
                IWarrantyService warrantyService,
-               IProductRepository products,
-               IRewardRequestRepository rewardRequests,
+               IProductService products,
+               IRewardService rewards,
                IMemoryCache cache)
         {
             this.repo = repo;
@@ -46,7 +47,7 @@ namespace GolpaMotorFinal.Controllers
             this.excelService = excelService;
             this.warrantyService = warrantyService;
             this.products = products;
-            this.rewardRequests = rewardRequests;
+            this.rewards = rewards;
             this.cache = cache;
         }
 
@@ -184,6 +185,7 @@ namespace GolpaMotorFinal.Controllers
         public async Task<IActionResult> List(WarrantyCardSearchModel sm)
         {
             sm ??= new WarrantyCardSearchModel();
+            sm.PageSize = PaginationViewModel.DefaultPageSize;
             sm.RegisteredFrom = PersianDate.ParseOrNull(sm.RegisteredFromJalali);
             sm.RegisteredTo = PersianDate.ParseOrNull(sm.RegisteredToJalali);
             var page = await warrantyService.SearchCards(sm);
@@ -410,7 +412,7 @@ namespace GolpaMotorFinal.Controllers
             }
 
             await repo.SaveChangesAsync();
-            await rewardRequests.RefreshEligibility(user.Id);
+            await rewards.RefreshEligibility(user.Id);
 
             var successCount = validCards.Count;
             var failCount = invalidCards.Count;

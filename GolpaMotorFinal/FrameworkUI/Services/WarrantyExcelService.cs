@@ -1,16 +1,16 @@
-﻿using DataAccess.Services;
-using DomainModel.Models;
+﻿using Application.Services;
+using DomainModel.ViewModels.Warranty;
 using OfficeOpenXml;
 
 namespace GolpaMotorFinal.FrameworkUI.Services
 {
     public class WarrantyExcelService : IWarrantyExcelService
     {
-        private readonly IWarrantyCardRepository repo;
+        private readonly IWarrantyService warrantyService;
 
-        public WarrantyExcelService(IWarrantyCardRepository repo)
+        public WarrantyExcelService(IWarrantyService warrantyService)
         {
-            this.repo = repo;
+            this.warrantyService = warrantyService;
         }
 
         public async Task<WarrantyExcelImportResult> ImportExcel(long productId, IFormFile file)
@@ -23,9 +23,7 @@ namespace GolpaMotorFinal.FrameworkUI.Services
                 return result;
             }
 
-            var existing = await repo.GetSerialsAsync();
-            var batchSerials = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            var list = new List<WarrantyCard>();
+            var items = new List<WarrantyCardImportItem>();
 
             using (var package = new ExcelPackage(file.OpenReadStream()))
             {
@@ -40,49 +38,20 @@ namespace GolpaMotorFinal.FrameworkUI.Services
 
                 for (int row = 2; row <= rowCount; row++)
                 {
-                    var serial = worksheet.Cells[row, 1].Text?.Trim();
-                    var code = worksheet.Cells[row, 2].Text?.Trim();
-
-                    if (string.IsNullOrWhiteSpace(serial) && string.IsNullOrWhiteSpace(code))
+                    items.Add(new WarrantyCardImportItem
                     {
-                        result.Empty++;
-                        continue;
-                    }
-
-                    if (string.IsNullOrWhiteSpace(serial) || string.IsNullOrWhiteSpace(code))
-                    {
-                        result.Empty++;
-                        continue;
-                    }
-
-                    if (existing.Contains(serial) || batchSerials.Contains(serial))
-                    {
-                        result.Duplicate++;
-                        continue;
-                    }
-
-                    batchSerials.Add(serial);
-                    list.Add(new WarrantyCard
-                    {
-                        ProductID = productId,
-                        SerialNumber = serial,
-                        ScratchedCode = code,
-                        IsRegistered = false,
-                        ValidityMonths = 12
+                        SerialNumber = worksheet.Cells[row, 1].Text?.Trim() ?? string.Empty,
+                        ScratchedCode = worksheet.Cells[row, 2].Text?.Trim() ?? string.Empty
                     });
                 }
             }
 
-            if (list.Count > 0)
-            {
-                repo.AddRange(list);
-                await repo.SaveAsync();
-            }
-
-            result.Inserted = list.Count;
-            result.Success = true;
-            result.Message =
-                $"{result.Inserted} کارت درج شد، {result.Duplicate} تکراری و {result.Empty} ردیف خالی نادیده گرفته شد.";
+            var imported = await warrantyService.ImportCards(productId, items);
+            result.Success = imported.Success;
+            result.Message = imported.Message;
+            result.Inserted = imported.Inserted;
+            result.Duplicate = imported.Duplicate;
+            result.Empty = imported.Empty;
             return result;
         }
     }

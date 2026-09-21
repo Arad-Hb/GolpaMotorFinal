@@ -1,6 +1,6 @@
-﻿using DomainModel.ViewModels.Reward;
+﻿using Application.Services;
+using DomainModel.ViewModels.Reward;
 using Framework.Common;
-using GolpaMotorFinal.FrameworkUI.Services;
 using GolpaMotorFinal.Helpers;
 using GolpaMotorFinal.Models.ViewModels;
 using Microsoft.AspNetCore.Authorization;

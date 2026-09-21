@@ -15,12 +15,12 @@ namespace GolpaMotorFinal.Controllers
     public class ReportsController : Controller
     {
         private readonly IUserService users;
-        private readonly IProductRepository products;
+        private readonly IProductService products;
         private readonly IReportRepository reports;
 
         public ReportsController(
             IUserService users,
-            IProductRepository products,
+            IProductService products,
             IReportRepository reports)
         {
             this.users = users;
