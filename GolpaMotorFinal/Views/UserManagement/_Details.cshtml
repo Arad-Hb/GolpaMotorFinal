@@ -1,40 +1,91 @@
 ﻿@model DomainModel.ViewModels.User.UserDetailsModel
 @using GolpaMotorFinal.Helpers
 @using GolpaMotorFinal.Models.ViewModels.UserManagement
+@{
+    string Dash(string? value) => string.IsNullOrWhiteSpace(value) ? "—" : value;
+    var hasPhoto = !string.IsNullOrWhiteSpace(Model.ProfileImageUrl)
+        && Model.ProfileImageUrl.IndexOf("noimage", StringComparison.OrdinalIgnoreCase) < 0;
+}
 
 <div class="modal-compact user-details-compact">
-    <div class="modal-identity">
-        <img src="@ImageHelper.ToThumbnail(@Model.ProfileImageUrl)" alt="" class="modal-avatar" />
-        <div class="modal-identity-text">
-            <div class="fw-semibold">@Model.FirstName @Model.LastName</div>
-            <div class="text-muted small">@Model.RoleName</div>
+    <div class="modal-details-hero">
+        <div class="modal-details-hero-main">
+            @if (hasPhoto)
+            {
+                <img src="@ImageHelper.ToThumbnail(Model.ProfileImageUrl)" alt="" class="modal-details-photo" />
+            }
+            else
+            {
+                <div class="modal-details-photo is-empty">
+                    <i class="fa fa-image"></i>
+                    <span>فاقد تصویر</span>
+                </div>
+            }
+            <div>
+                <div class="modal-details-name">@Dash($"{Model.FirstName} {Model.LastName}".Trim())</div>
+                <div class="modal-details-sub">@Dash(Model.RoleName)</div>
+            </div>
         </div>
         @if (Model.IsActive)
         {
-            <span class="badge bg-success">فعال</span>
+            <span class="modal-status-pill is-on">فعال</span>
         }
         else
         {
-            <span class="badge bg-danger">غیرفعال</span>
+            <span class="modal-status-pill is-off">غیرفعال</span>
         }
     </div>
 
-    <dl class="modal-kv">
-        <dt>موبایل</dt><dd>@Model.PhoneNumber</dd>
-        <dt>ایمیل</dt><dd>@Model.Email</dd>
-        <dt>استان</dt><dd>@Model.Province</dd>
-        <dt>شهر</dt><dd>@Model.City</dd>
-        <dt>آدرس</dt><dd>@Model.Address</dd>
-        <dt>کد پستی</dt><dd>@Model.PostalCode</dd>
-        <dt>ثبت‌نام</dt><dd>@Model.RegisterDate.ToString("yyyy/MM/dd")</dd>
-        <dt>کارت بانکی</dt><dd>@Model.CreditCartNumber</dd>
-        <dt>شبا</dt><dd>@Model.IBAN</dd>
-        <dt>حساب</dt><dd>@Model.AccountNumber</dd>
-    </dl>
+    <div class="modal-details-grid">
+        <div class="modal-details-cell">
+            <span class="modal-details-label">موبایل</span>
+            <span class="modal-details-value">@Dash(Model.PhoneNumber)</span>
+        </div>
+        <div class="modal-details-cell">
+            <span class="modal-details-label">ایمیل</span>
+            <span class="modal-details-value">@Dash(Model.Email)</span>
+        </div>
+        <div class="modal-details-cell">
+            <span class="modal-details-label">استان</span>
+            <span class="modal-details-value">@Dash(Model.Province)</span>
+        </div>
+        <div class="modal-details-cell">
+            <span class="modal-details-label">تاریخ ثبت‌نام</span>
+            <span class="modal-details-value">@Model.RegisterDate.ToString("yyyy/MM/dd")</span>
+        </div>
+        <div class="modal-details-cell">
+            <span class="modal-details-label">شهر</span>
+            <span class="modal-details-value">@Dash(Model.City)</span>
+        </div>
+        <div class="modal-details-cell">
+            <span class="modal-details-label">کارت بانکی</span>
+            <span class="modal-details-value">@Dash(Model.CreditCartNumber)</span>
+        </div>
+        <div class="modal-details-cell">
+            <span class="modal-details-label">آدرس</span>
+            <span class="modal-details-value">@Dash(Model.Address)</span>
+        </div>
+        <div class="modal-details-cell">
+            <span class="modal-details-label">شماره شبا</span>
+            <span class="modal-details-value">@Dash(Model.IBAN)</span>
+        </div>
+        <div class="modal-details-cell">
+            <span class="modal-details-label">کد پستی</span>
+            <span class="modal-details-value">@Dash(Model.PostalCode)</span>
+        </div>
+        <div class="modal-details-cell">
+            <span class="modal-details-label">حساب</span>
+            <span class="modal-details-value">@Dash(Model.AccountNumber)</span>
+        </div>
+    </div>
 
     @await Html.PartialAsync("_UserStatBoxes", UserStatBoxesViewModel.From(
         Model.TotalEarnedPoints,
         Model.TotalSettledPoints,
         Model.RemainedPoints,
         Model.TotalRegisteredCards))
+
+    <div class="form-actions">
+        <button type="button" class="btn btn-secondary cancel-modal">بستن</button>
+    </div>
 </div>

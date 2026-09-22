@@ -15,6 +15,17 @@
 <crud-form model="form">
     @Html.AntiForgeryToken()
     <div asp-validation-summary="ModelOnly" class="text-danger mb-2"></div>
+    <div class="modal-photo-row" data-fallback="/images/imageProducts/noimage.jpg">
+        <img class="modal-thumb image-preview" src="/images/imageProducts/noimage.jpg" alt="پیش‌نمایش" />
+        <div>
+            <div class="modal-photo-actions">
+                <button type="button" class="btn js-pick-photo">بارگذاری عکس</button>
+                <button type="button" class="js-remove-photo">حذف عکس</button>
+            </div>
+            <span class="modal-photo-hint">حداقل فایل JPG یا PNG</span>
+            <input asp-for="ImageFile" type="file" class="d-none image-preview-input" accept="image/*" />
+        </div>
+    </div>
     <div class="row">
         <div class="col-12 col-md-6">
             <label asp-for="ProductName" class="form-label"><i class="fa fa-box ms-1"></i> نام محصول</label>
@@ -31,17 +42,12 @@
         <label asp-for="Description" class="form-label">توضیحات</label>
         <textarea asp-for="Description" class="form-control"></textarea>
     </div>
-    <div class="mt-3">
-        <label asp-for="ImageFile" class="form-label"><i class="fa fa-image ms-1"></i> تصویر محصول</label>
-        <input asp-for="ImageFile" type="file" class="form-control image-preview-input" accept="image/*" />
-        <img class="image-preview mt-2 d-none" alt="پیش‌نمایش" />
-    </div>
     <div class="form-check mt-3">
         <input asp-for="IsAvailable" class="form-check-input" />
         <label asp-for="IsAvailable" class="form-check-label">موجود</label>
     </div>
     <div class="form-actions">
-        <button type="submit" class="main_bt">ثبت</button>
         <button type="button" class="btn btn-secondary cancel-modal">انصراف</button>
+        <button type="submit" class="main_bt">ثبت</button>
     </div>
 </crud-form>

@@ -9,107 +9,99 @@
     <input asp-for="Password" type="hidden" />
     <input asp-for="IsDeleted" type="hidden" />
 
-    <ul class="nav nav-tabs mb-3" role="tablist">
-        <li class="nav-item" role="presentation">
-            <button class="nav-link active" id="user-general-tab" data-bs-toggle="tab" data-bs-target="#user-general-pane" type="button" role="tab">اطلاعات کلی</button>
-        </li>
-        <li class="nav-item" role="presentation">
-            <button class="nav-link" id="user-financial-tab" data-bs-toggle="tab" data-bs-target="#user-financial-pane" type="button" role="tab">اطلاعات مالی</button>
-        </li>
-    </ul>
-
-    <div class="tab-content">
-        <div class="tab-pane fade show active" id="user-general-pane" role="tabpanel">
-            <div class="row">
-                <div class="col-12 col-md-6">
-                    <img src="@ImageHelper.ToThumbnail(Model.ProfileImageUrl)"
-                         alt=""
-                         class="modal-avatar" />
-                </div>
-
-                <div class="col-12 col-md-6">
-                    <label asp-for="FirstName"></label>
-                    <input asp-for="FirstName" class="form-control" />
-                    <span asp-validation-for="FirstName" class="text-danger"></span>
-                </div>
-                <div class="col-12 col-md-6">
-                    <label asp-for="LastName"></label>
-                    <input asp-for="LastName" class="form-control" />
-                    <span asp-validation-for="LastName" class="text-danger"></span>
-                </div>
-                <div class="col-12 col-md-6">
-                    <label asp-for="PhoneNumber"></label>
-                    <input asp-for="PhoneNumber" class="form-control" />
-                    <span asp-validation-for="PhoneNumber" class="text-danger"></span>
-                </div>
-                <div class="col-12 col-md-6">
-                    <label asp-for="CustomerTypeID"></label>
-                    <select asp-for="CustomerTypeID" asp-items="Model.CustomerTypes" class="form-select">
-                        <option value="">انتخاب شغل</option>
-                    </select>
-                    <span asp-validation-for="CustomerTypeID" class="text-danger"></span>
-                </div>
-                <div class="col-12 col-md-6">
-                    <label asp-for="ProvinceID"></label>
-                    <select asp-for="ProvinceID" asp-items="Model.Provinces" class="form-select js-user-province">
-                        <option value="">انتخاب استان</option>
-                    </select>
-                    <span asp-validation-for="ProvinceID" class="text-danger"></span>
-                </div>
-                <div class="col-12 col-md-6">
-                    <label asp-for="CityID"></label>
-                    <select asp-for="CityID" asp-items="Model.Cities" class="form-select js-user-city">
-                        <option value="">انتخاب شهر</option>
-                    </select>
-                    <span asp-validation-for="CityID" class="text-danger"></span>
-                </div>
-                <div class="col-12 col-md-6">
-                    <label asp-for="PostalCode"></label>
-                    <input asp-for="PostalCode" class="form-control" />
-                    <span asp-validation-for="PostalCode" class="text-danger"></span>
-                </div>
+    <div class="modal-photo-row" data-fallback="/images/imageUsers/noimage.jpg">
+        <img src="@ImageHelper.ToThumbnail(Model.ProfileImageUrl)"
+             alt=""
+             class="modal-avatar image-preview" />
+        <div>
+            <div class="modal-photo-actions">
+                <button type="button" class="btn js-pick-photo">بارگذاری عکس</button>
+                <button type="button" class="js-remove-photo">حذف عکس</button>
             </div>
+            <span class="modal-photo-hint">حداقل فایل JPG یا PNG</span>
+            <input asp-for="ProfileImage" type="file" class="d-none image-preview-input" accept="image/*" />
+            <input type="hidden" asp-for="RemoveProfileImage" class="js-remove-photo-flag" />
+        </div>
+    </div>
 
-            <div class="mt-3">
-                <label asp-for="Address"></label>
-                <textarea asp-for="Address" class="form-control"></textarea>
-                <span asp-validation-for="Address" class="text-danger"></span>
-            </div>
-
-            <div class="mt-3">
-                <input asp-for="ProfileImage" type="file" class="form-control" />
-            </div>
-
-            <div class="mt-3">
-                <input asp-for="IsActive" />
-                <label asp-for="IsActive">فعال </label>
+    <div class="row">
+        <div class="col-12 col-md-6">
+            <label asp-for="FirstName"></label>
+            <input asp-for="FirstName" class="form-control" />
+            <span asp-validation-for="FirstName" class="text-danger"></span>
+        </div>
+        <div class="col-12 col-md-6">
+            <label asp-for="LastName"></label>
+            <input asp-for="LastName" class="form-control" />
+            <span asp-validation-for="LastName" class="text-danger"></span>
+        </div>
+        <div class="col-12 col-md-6">
+            <label asp-for="PhoneNumber"></label>
+            <input asp-for="PhoneNumber" class="form-control" />
+            <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+        </div>
+        <div class="col-12 col-md-6">
+            <label asp-for="CustomerTypeID"></label>
+            <select asp-for="CustomerTypeID" asp-items="Model.CustomerTypes" class="form-select">
+                <option value="">انتخاب شغل</option>
+            </select>
+            <span asp-validation-for="CustomerTypeID" class="text-danger"></span>
+        </div>
+        <div class="col-12 col-md-6">
+            <label asp-for="ProvinceID"></label>
+            <select asp-for="ProvinceID" asp-items="Model.Provinces" class="form-select js-user-province">
+                <option value="">انتخاب استان</option>
+            </select>
+            <span asp-validation-for="ProvinceID" class="text-danger"></span>
+        </div>
+        <div class="col-12 col-md-6">
+            <label asp-for="CityID"></label>
+            <select asp-for="CityID" asp-items="Model.Cities" class="form-select js-user-city">
+                <option value="">انتخاب شهر</option>
+            </select>
+            <span asp-validation-for="CityID" class="text-danger"></span>
+        </div>
+        <div class="col-12 col-md-6">
+            <label asp-for="PostalCode"></label>
+            <input asp-for="PostalCode" class="form-control" />
+            <span asp-validation-for="PostalCode" class="text-danger"></span>
+        </div>
+        <div class="col-12 col-md-6 d-flex align-items-end">
+            <div class="form-check mb-2">
+                <input asp-for="IsActive" class="form-check-input" />
+                <label asp-for="IsActive" class="form-check-label">فعال</label>
             </div>
         </div>
+    </div>
 
-        <div class="tab-pane fade" id="user-financial-pane" role="tabpanel">
-            <div class="row">
-                <div class="col-12">
-                    <label asp-for="CreditCartNumber"></label>
-                    <input asp-for="CreditCartNumber" class="form-control" autocomplete="off" />
-                    <span asp-validation-for="CreditCartNumber" class="text-danger"></span>
-                </div>
-                <div class="col-12 mt-3">
-                    <label asp-for="IBAN"></label>
-                    <input asp-for="IBAN" class="form-control" autocomplete="off" />
-                    <span asp-validation-for="IBAN" class="text-danger"></span>
-                </div>
-                <div class="col-12 mt-3">
-                    <label asp-for="AccountNumber"></label>
-                    <input asp-for="AccountNumber" class="form-control" autocomplete="off" />
-                    <span asp-validation-for="AccountNumber" class="text-danger"></span>
-                </div>
-            </div>
-            <p class="text-muted small mt-3 mb-0">برای درخواست پاداش نقدی حداقل یکی از این سه مورد باید تکمیل شود.</p>
+    <div class="mt-3">
+        <label asp-for="Address"></label>
+        <textarea asp-for="Address" class="form-control"></textarea>
+        <span asp-validation-for="Address" class="text-danger"></span>
+    </div>
+
+    <h6 class="modal-section-title">اطلاعات مالی</h6>
+    <div class="row">
+        <div class="col-12 col-md-6">
+            <label asp-for="CreditCartNumber"></label>
+            <input asp-for="CreditCartNumber" class="form-control" autocomplete="off" />
+            <span asp-validation-for="CreditCartNumber" class="text-danger"></span>
+        </div>
+        <div class="col-12 col-md-6">
+            <label asp-for="IBAN"></label>
+            <input asp-for="IBAN" class="form-control" autocomplete="off" />
+            <span asp-validation-for="IBAN" class="text-danger"></span>
+        </div>
+        <div class="col-12">
+            <label asp-for="AccountNumber"></label>
+            <input asp-for="AccountNumber" class="form-control" autocomplete="off" />
+            <span asp-validation-for="AccountNumber" class="text-danger"></span>
+            <p class="form-text mb-0">برای درخواست پاداش نقدی حداقل یکی از این سه مورد باید تکمیل شود.</p>
         </div>
     </div>
 
     <div class="form-actions">
-        <button type="submit" class="main_bt">ویرایش</button>
         <button type="button" class="btn btn-secondary cancel-modal">انصراف</button>
+        <button type="submit" class="main_bt">ویرایش</button>
     </div>
 </crud-form>

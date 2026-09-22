@@ -123,13 +123,28 @@ $(document).on("submit", ".crud-form", function (e) {
 
 $(document).on("change", ".image-preview-input", function () {
     const file = this.files && this.files[0];
-    const img = $(this).closest("form").find(".image-preview");
+    const row = $(this).closest(".modal-photo-row");
+    const img = row.length ? row.find(".image-preview") : $(this).closest("form").find(".image-preview");
     if (!file || !img.length) return;
     const reader = new FileReader();
     reader.onload = function (e) {
         img.attr("src", e.target.result).removeClass("d-none");
     };
     reader.readAsDataURL(file);
+    row.find(".js-remove-photo-flag").val("false");
+});
+
+$(document).on("click", ".js-pick-photo", function () {
+    $(this).closest(".modal-photo-row").find(".image-preview-input").trigger("click");
+});
+
+$(document).on("click", ".js-remove-photo", function () {
+    const row = $(this).closest(".modal-photo-row");
+    const input = row.find(".image-preview-input");
+    input.val("");
+    const fallback = row.data("fallback") || "/images/imageUsers/noimage.jpg";
+    row.find(".image-preview").attr("src", fallback).removeClass("d-none");
+    row.find(".js-remove-photo-flag").val("true");
 });
 
 $(document).on("click", ".btnDelete", async function () {

@@ -69,6 +69,8 @@ namespace GolpaMotorFinal.Models.ViewModels.UserManagement
         // عکس جدید
         public IFormFile? ProfileImage { get; set; }
 
+        public bool RemoveProfileImage { get; set; }
+
         public IEnumerable<SelectListItem> CustomerTypes { get; set; } = new List<SelectListItem>();
 
         public IEnumerable<SelectListItem> Provinces { get; set; } = new List<SelectListItem>();

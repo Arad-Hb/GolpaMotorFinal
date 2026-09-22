@@ -1,16 +1,53 @@
 @model DomainModel.ViewModels.Reward.RewardCatalogDetailsModel
+@{
+    string Dash(string? value) => string.IsNullOrWhiteSpace(value) ? "—" : value;
+}
 
 <div class="modal-compact">
-    <div class="fw-semibold mb-2">@Model.Title</div>
-    <p class="text-muted">@(string.IsNullOrWhiteSpace(Model.Description) ? "توضیحی ثبت نشده است" : Model.Description)</p>
-    <ul class="list-unstyled mb-0">
-        <li>حداقل امتیاز: <strong>@Model.RequiredPoints</strong></li>
-        <li>نوع: @(Model.IsCashReward ? "نقدی" : "غیرنقدی")</li>
-        @if (Model.IsCashReward)
+    <div class="modal-details-hero">
+        <div class="modal-details-hero-main">
+            <div class="modal-details-photo is-empty">
+                <i class="fa fa-gift"></i>
+            </div>
+            <div>
+                <div class="modal-details-name">@Dash(Model.Title)</div>
+                <div class="modal-details-sub">@(Model.IsCashReward ? "پاداش نقدی" : "پاداش غیرنقدی")</div>
+            </div>
+        </div>
+        @if (Model.IsActive)
         {
-            <li>مبلغ: <strong>@(Model.CashValue?.ToString("N0"))</strong></li>
+            <span class="modal-status-pill is-on">فعال</span>
         }
-        <li>وضعیت: @(Model.IsActive ? "فعال" : "غیرفعال")</li>
-        <li>تعداد درخواست: @Model.RequestCount</li>
-    </ul>
+        else
+        {
+            <span class="modal-status-pill is-off">غیرفعال</span>
+        }
+    </div>
+
+    <div class="modal-details-grid">
+        <div class="modal-details-cell">
+            <span class="modal-details-label">حد نصاب امتیاز</span>
+            <span class="modal-details-value">@Model.RequiredPoints</span>
+        </div>
+        <div class="modal-details-cell">
+            <span class="modal-details-label">نوع</span>
+            <span class="modal-details-value">@(Model.IsCashReward ? "نقدی" : "غیرنقدی")</span>
+        </div>
+        <div class="modal-details-cell">
+            <span class="modal-details-label">مبلغ نقدی</span>
+            <span class="modal-details-value">@(Model.IsCashReward ? (Model.CashValue?.ToString("N0") ?? "—") : "—")</span>
+        </div>
+        <div class="modal-details-cell">
+            <span class="modal-details-label">تعداد درخواست</span>
+            <span class="modal-details-value">@Model.RequestCount</span>
+        </div>
+        <div class="modal-details-cell">
+            <span class="modal-details-label">توضیحات</span>
+            <span class="modal-details-value">@Dash(Model.Description)</span>
+        </div>
+    </div>
+
+    <div class="form-actions">
+        <button type="button" class="btn btn-secondary cancel-modal">بستن</button>
+    </div>
 </div>

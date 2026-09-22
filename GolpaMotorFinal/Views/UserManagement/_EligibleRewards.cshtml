@@ -1,142 +1,166 @@
 @model GolpaMotorFinal.Models.ViewModels.Account.EligibleRewardsDialogViewModel
+@using GolpaMotorFinal.Helpers
+@using GolpaMotorFinal.Models.ViewModels.UserManagement
 @{
+    string Dash(string? value) => string.IsNullOrWhiteSpace(value) ? "—" : value;
+    var hasPhoto = !string.IsNullOrWhiteSpace(Model.ProfileImageUrl)
+        && Model.ProfileImageUrl.IndexOf("noimage", StringComparison.OrdinalIgnoreCase) < 0;
     var rewardRow = Model.RewardPage * PaginationViewModel.DefaultPageSize;
     var historyRow = Model.HistoryPage * PaginationViewModel.DefaultPageSize;
     var rewardUrl = Url.Action("EligibleRewards", "UserManagement", new { userID = Model.UserID, historyPage = Model.HistoryPage }) ?? "/UserManagement/EligibleRewards";
     var historyUrl = Url.Action("EligibleRewards", "UserManagement", new { userID = Model.UserID, rewardPage = Model.RewardPage }) ?? "/UserManagement/EligibleRewards";
 }
 
-<div id="rewardRequestAlert" class="alert d-none"></div>
+<div class="modal-compact">
+    <div id="rewardRequestAlert" class="alert d-none"></div>
 
-<div class="mb-3">
-    <div class="fw-semibold">@(string.IsNullOrWhiteSpace(Model.CustomerName) ? "مشتری" : Model.CustomerName)</div>
-    <div class="text-muted small">@Model.PhoneNumber</div>
-</div>
-
-<div class="d-flex flex-wrap gap-3 mb-3">
-    <div>
-        <span class="text-muted small d-block">امتیاز کسب‌شده</span>
-        <strong>@Model.TotalEarnedPoints</strong>
-    </div>
-    <div>
-        <span class="text-muted small d-block">امتیاز تسویه‌شده</span>
-        <strong>@Model.TotalSettledPoints</strong>
-    </div>
-    <div>
-        <span class="text-muted small d-block">مانده قابل استفاده</span>
-        <strong>@Model.RemainedPoints</strong>
-    </div>
-    <div>
-        <span class="text-muted small d-block">کارت‌های ثبت‌شده</span>
-        <strong>@Model.TotalRegisteredCards</strong>
-    </div>
-    <div>
-        <span class="text-muted small d-block">واجد شرایط</span>
-        <strong>@(Model.IsEligibleForReward ? "بله" : "خیر")</strong>
-    </div>
-    <div>
-        <span class="text-muted small d-block">دریافت قبلی</span>
-        <strong>@(Model.HasReceivedReward ? "بله" : "خیر")</strong>
-    </div>
-</div>
-
-<h6 class="mt-3">پاداش‌های قابل درخواست</h6>
-<div class="table-responsive">
-    <table class="table table-sm align-middle">
-        <thead>
-            <tr>
-                <th class="table-num">#</th>
-                <th>عنوان</th>
-                <th>حد نصاب</th>
-                <th>نوع</th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-            @if (Model.Items.Any())
+    <div class="modal-details-hero">
+        <div class="modal-details-hero-main">
+            @if (hasPhoto)
             {
-                foreach (var item in Model.Items)
-                {
-                    rewardRow++;
-                    <tr>
-                        <td class="table-num">@rewardRow</td>
-                        <td>
-                            <div>@item.Title</div>
-                            <div class="small text-muted">@item.Description</div>
-                        </td>
-                        <td>@item.RequiredPoints</td>
-                        <td>@(item.IsCashReward ? "نقدی" : "غیرنقدی")</td>
-                        <td>
-                            @if (item.HasPendingRequest)
-                            {
-                                <span class="badge bg-warning text-dark">در انتظار بررسی</span>
-                            }
-                            else
-                            {
-                                <button type="button"
-                                        class="btn btn-sm btn-primary btnSubmitRewardRequest"
-                                        data-id="@item.RewardCatalogID"
-                                        data-user-id="@Model.UserID">
-                                    ثبت درخواست
-                                </button>
-                            }
-                        </td>
-                    </tr>
-                }
+                <img src="@ImageHelper.ToThumbnail(Model.ProfileImageUrl)" alt="" class="modal-details-photo" />
             }
             else
             {
-                <tr>
-                    <td colspan="5" class="text-muted">در حال حاضر پاداش واجد شرایطی برای این مشتری وجود ندارد.</td>
-                </tr>
+                <div class="modal-details-photo is-empty">
+                    <i class="fa fa-image"></i>
+                    <span>فاقد تصویر</span>
+                </div>
             }
-        </tbody>
-    </table>
-</div>
-@await Component.InvokeAsync("Pagination", PaginationViewModel.For(
-    "generalModalBody",
-    Model.RewardPage,
-    Model.RewardPageCount,
-    Model.RewardRecordCount,
-    rewardUrl,
-    pageParameter: "rewardPage"))
+            <div>
+                <div class="modal-details-name">@Dash(string.IsNullOrWhiteSpace(Model.CustomerName) ? "مشتری" : Model.CustomerName)</div>
+                <div class="modal-details-sub">@Dash(Model.PhoneNumber)</div>
+            </div>
+        </div>
+        @if (Model.IsEligibleForReward)
+        {
+            <span class="modal-status-pill is-on">واجد شرایط</span>
+        }
+        else
+        {
+            <span class="modal-status-pill is-off">غیرواجد</span>
+        }
+    </div>
 
-<h6 class="mt-4">درخواست‌های قبلی</h6>
-<div class="table-responsive">
-    <table class="table table-sm align-middle">
-        <thead>
-            <tr>
-                <th class="table-num">#</th>
-                <th>عنوان</th>
-                <th>وضعیت</th>
-            </tr>
-        </thead>
-        <tbody>
-            @if (Model.RecentRequests.Any())
-            {
-                foreach (var req in Model.RecentRequests)
+    <div class="modal-details-grid">
+        <div class="modal-details-cell">
+            <span class="modal-details-label">واجد شرایط</span>
+            <span class="modal-details-value">@(Model.IsEligibleForReward ? "بله" : "خیر")</span>
+        </div>
+        <div class="modal-details-cell">
+            <span class="modal-details-label">دریافت قبلی</span>
+            <span class="modal-details-value">@(Model.HasReceivedReward ? "بله" : "خیر")</span>
+        </div>
+    </div>
+
+    @await Html.PartialAsync("_UserStatBoxes", UserStatBoxesViewModel.From(
+        Model.TotalEarnedPoints,
+        Model.TotalSettledPoints,
+        Model.RemainedPoints,
+        Model.TotalRegisteredCards))
+
+    <h6 class="modal-section-title">پاداش‌های قابل درخواست</h6>
+    <div class="table-responsive">
+        <table class="table table-sm align-middle">
+            <thead>
+                <tr>
+                    <th class="table-num">#</th>
+                    <th>عنوان</th>
+                    <th>حد نصاب</th>
+                    <th>نوع</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Items.Any())
                 {
-                    historyRow++;
+                    foreach (var item in Model.Items)
+                    {
+                        rewardRow++;
+                        <tr>
+                            <td class="table-num">@rewardRow</td>
+                            <td>
+                                <div>@item.Title</div>
+                                <div class="small text-muted">@item.Description</div>
+                            </td>
+                            <td>@item.RequiredPoints</td>
+                            <td>@(item.IsCashReward ? "نقدی" : "غیرنقدی")</td>
+                            <td>
+                                @if (item.HasPendingRequest)
+                                {
+                                    <span class="badge bg-warning text-dark">در انتظار بررسی</span>
+                                }
+                                else
+                                {
+                                    <button type="button"
+                                            class="btn btn-sm btn-primary btnSubmitRewardRequest"
+                                            data-id="@item.RewardCatalogID"
+                                            data-user-id="@Model.UserID">
+                                        ثبت درخواست
+                                    </button>
+                                }
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
                     <tr>
-                        <td class="table-num">@historyRow</td>
-                        <td>@req.CatalogTitle</td>
-                        <td>@req.StatusTitle</td>
+                        <td colspan="5" class="text-muted">در حال حاضر پاداش واجد شرایطی برای این مشتری وجود ندارد.</td>
                     </tr>
                 }
-            }
-            else
-            {
+            </tbody>
+        </table>
+    </div>
+    @await Component.InvokeAsync("Pagination", PaginationViewModel.For(
+        "generalModalBody",
+        Model.RewardPage,
+        Model.RewardPageCount,
+        Model.RewardRecordCount,
+        rewardUrl,
+        pageParameter: "rewardPage"))
+
+    <h6 class="modal-section-title">درخواست‌های قبلی</h6>
+    <div class="table-responsive">
+        <table class="table table-sm align-middle">
+            <thead>
                 <tr>
-                    <td colspan="3" class="text-muted">درخواستی ثبت نشده است.</td>
+                    <th class="table-num">#</th>
+                    <th>عنوان</th>
+                    <th>وضعیت</th>
                 </tr>
-            }
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                @if (Model.RecentRequests.Any())
+                {
+                    foreach (var req in Model.RecentRequests)
+                    {
+                        historyRow++;
+                        <tr>
+                            <td class="table-num">@historyRow</td>
+                            <td>@req.CatalogTitle</td>
+                            <td>@req.StatusTitle</td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="3" class="text-muted">درخواستی ثبت نشده است.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    @await Component.InvokeAsync("Pagination", PaginationViewModel.For(
+        "generalModalBody",
+        Model.HistoryPage,
+        Model.HistoryPageCount,
+        Model.HistoryRecordCount,
+        historyUrl,
+        pageParameter: "historyPage"))
+
+    <div class="form-actions">
+        <button type="button" class="btn btn-secondary cancel-modal">بستن</button>
+    </div>
 </div>
-@await Component.InvokeAsync("Pagination", PaginationViewModel.For(
-    "generalModalBody",
-    Model.HistoryPage,
-    Model.HistoryPageCount,
-    Model.HistoryRecordCount,
-    historyUrl,
-    pageParameter: "historyPage"))

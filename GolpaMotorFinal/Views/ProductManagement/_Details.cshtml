@@ -1,23 +1,56 @@
 ﻿@model DomainModel.ViewModels.Product.ProductDetailsModel
 @using GolpaMotorFinal.Helpers
+@{
+    string Dash(string? value) => string.IsNullOrWhiteSpace(value) ? "—" : value;
+    var hasPhoto = !string.IsNullOrWhiteSpace(Model.ImageUrl)
+        && Model.ImageUrl.IndexOf("noimage", StringComparison.OrdinalIgnoreCase) < 0;
+}
 
 <div class="modal-compact product-details-compact">
-    <div class="modal-identity">
-        <img src="@ImageHelper.Fix(Model.ImageUrl)" alt="" class="modal-thumb" />
-        <div class="modal-identity-text">
-            <div class="fw-semibold">@Model.ProductName</div>
-            <div class="text-muted small">امتیاز @Model.ProductPoint · گارانتی @Model.WarrantyCount</div>
+    <div class="modal-details-hero">
+        <div class="modal-details-hero-main">
+            @if (hasPhoto)
+            {
+                <img src="@ImageHelper.Fix(Model.ImageUrl)" alt="" class="modal-details-photo" />
+            }
+            else
+            {
+                <div class="modal-details-photo is-empty">
+                    <i class="fa fa-image"></i>
+                    <span>فاقد تصویر</span>
+                </div>
+            }
+            <div>
+                <div class="modal-details-name">@Dash(Model.ProductName)</div>
+                <div class="modal-details-sub">امتیاز @Model.ProductPoint</div>
+            </div>
         </div>
         @if (Model.IsAvailable)
         {
-            <span class="badge bg-success">موجود</span>
+            <span class="modal-status-pill is-on">موجود</span>
         }
         else
         {
-            <span class="badge bg-danger">ناموجود</span>
+            <span class="modal-status-pill is-off">ناموجود</span>
         }
     </div>
-    <p class="modal-desc">
-        @(string.IsNullOrWhiteSpace(Model.Description) ? "توضیحی ثبت نشده است" : Model.Description)
-    </p>
+
+    <div class="modal-details-grid">
+        <div class="modal-details-cell">
+            <span class="modal-details-label">امتیاز محصول</span>
+            <span class="modal-details-value">@Model.ProductPoint</span>
+        </div>
+        <div class="modal-details-cell">
+            <span class="modal-details-label">تعداد گارانتی</span>
+            <span class="modal-details-value">@Model.WarrantyCount</span>
+        </div>
+        <div class="modal-details-cell">
+            <span class="modal-details-label">توضیحات</span>
+            <span class="modal-details-value">@Dash(Model.Description)</span>
+        </div>
+    </div>
+
+    <div class="form-actions">
+        <button type="button" class="btn btn-secondary cancel-modal">بستن</button>
+    </div>
 </div>

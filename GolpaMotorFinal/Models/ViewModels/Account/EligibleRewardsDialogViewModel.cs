@@ -7,6 +7,7 @@ namespace GolpaMotorFinal.Models.ViewModels.Account
         public string UserID { get; set; } = string.Empty;
         public string CustomerName { get; set; } = string.Empty;
         public string? PhoneNumber { get; set; }
+        public string? ProfileImageUrl { get; set; }
         public int TotalEarnedPoints { get; set; }
         public int TotalSettledPoints { get; set; }
         public int RemainedPoints { get; set; }

@@ -266,7 +266,15 @@ namespace GolpaMotorFinal.Controllers
             if (uploaded is { Success: false })
                 return Json(new OperationResult("UpdateUser").ToFailed(uploaded.Message));
             if (uploaded is { Success: true })
+            {
+                RemoveUserImage(currentUser.ProfileImageUrl);
                 model.ProfileImageUrl = uploaded.FileUrl;
+            }
+            else if (vm.RemoveProfileImage)
+            {
+                RemoveUserImage(currentUser.ProfileImageUrl);
+                model.ProfileImageUrl = "/images/imageUsers/noimage.jpg";
+            }
 
             return Json(await service.UpdateUser(model));
         }
@@ -331,6 +339,7 @@ namespace GolpaMotorFinal.Controllers
                 UserID = user.UserID,
                 CustomerName = $"{user.FirstName} {user.LastName}".Trim(),
                 PhoneNumber = user.PhoneNumber,
+                ProfileImageUrl = user.ProfileImageUrl,
                 TotalEarnedPoints = user.TotalEarnedPoints,
                 TotalSettledPoints = user.TotalSettledPoints,
                 RemainedPoints = await rewards.GetAvailablePoints(user.UserID),
