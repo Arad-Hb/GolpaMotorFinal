@@ -24,6 +24,6 @@ namespace GolpaMotorFinal.Models.ViewModels.WarrantyManagement
         public ProductStatistics? Stats { get; set; }
         public WarrantyExcelImportResult? LastImport { get; set; }
         public RegisterationCardViewModel RegistrationCard { get; set; } = new();
-        public string OpenTab { get; set; } = "cards";
+        public string OpenTab { get; set; } = "register";
     }
 }
