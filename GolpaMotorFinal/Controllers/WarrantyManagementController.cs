@@ -14,7 +14,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Win32;
 using System.Security.Cryptography;
 
 namespace GolpaMotorFinal.Controllers
@@ -62,17 +61,54 @@ namespace GolpaMotorFinal.Controllers
             });
         }
 
+        private async Task<RegisterationCardViewModel> EmptyRegisterForm()
+        {
+            var vm = new RegisterationCardViewModel
+            {
+                CustomerTypes = await BindCustomerTypes(),
+                op = new OperationResult("WarrantyRegistration")
+            };
+            if (TempData["SuccessMessage"] is string ok)
+                vm.op.ToSuccess(ok);
+            else if (TempData["ErrorMessage"] is string err)
+                vm.op.ToFailed(err);
+            return vm;
+        }
+
+        private static string ResolveTab(string? tab)
+        {
+            return tab switch
+            {
+                "cards" or "excel" or "generate" or "register" => tab,
+                _ => "register"
+            };
+        }
+
+        private async Task<WarrantyCardsPageViewModel> BuildIndex(string tab, RegisterationCardViewModel? form = null)
+        {
+            form ??= new RegisterationCardViewModel
+            {
+                CustomerTypes = await BindCustomerTypes(),
+                op = new OperationResult("WarrantyRegistration")
+            };
+            if (form.CustomerTypes == null || !form.CustomerTypes.Any())
+                form.CustomerTypes = await BindCustomerTypes();
+            EnsureOperation(form);
+
+            var productList = await products.GetAll();
+            return new WarrantyCardsPageViewModel
+            {
+                Stats = await products.GetStatistics(),
+                Filter = new WarrantyCardFilterBarViewModel { Products = productList },
+                RegistrationCard = form,
+                OpenTab = ResolveTab(tab)
+            };
+        }
+
         private static OperationResult EnsureOperation(RegisterationCardViewModel request)
         {
             request.op ??= new OperationResult("WarrantyRegistration");
             return request.op;
-        }
-
-        private async Task<IActionResult> WarrantyForm(RegisterationCardViewModel request)
-        {
-            EnsureOperation(request);
-            request.CustomerTypes = await BindCustomerTypes();
-            return View("Register", request);
         }
 
         private async Task EnsureRoleAsync(string roleName)
@@ -81,32 +117,17 @@ namespace GolpaMotorFinal.Controllers
                 await roleManager.CreateAsync(new IdentityRole(roleName));
         }
 
-        public async Task<IActionResult> Index(long? productId, bool? isRegistered, string tab="register", int pageIndex = 0)
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Index(string tab = "register")
         {
-            if (!User.IsInRole("Admin"))
-                return RedirectToAction(nameof(Register));
-
-            var vm = await BuildAdminIndex(productId, isRegistered, pageIndex: pageIndex);
-            vm.OpenTab = ResolveOpenTab(tab, vm.LastImport != null);
-            return View(vm);
+            return View(await BuildIndex(tab));
         }
 
         [HttpGet]
         [AllowAnonymous]
         public async Task<IActionResult> Register()
         {
-            var vm = new RegisterationCardViewModel
-            {
-                CustomerTypes = await BindCustomerTypes(),
-                op = new OperationResult("WarrantyRegistration")
-            };
-
-            if (TempData["SuccessMessage"] is string success)
-                vm.op.ToSuccess(success);
-            else if (TempData["ErrorMessage"] is string error)
-                vm.op.ToFailed(error);
-
-            return View(vm);
+            return View(await EmptyRegisterForm());
         }
 
         [HttpPost]
@@ -120,68 +141,6 @@ namespace GolpaMotorFinal.Controllers
         [ValidateAntiForgeryToken]
         public Task<IActionResult> RegisterForCustomer(RegisterationCardViewModel request)
             => CompleteRegistration(request, fromAdmin: true);
-
-        private static string ResolveOpenTab(string? tab, bool hasImport)
-        {
-            return tab switch
-            {
-                "register" => "register",
-                "excel" => "excel",
-                "generate" => "generate",
-                "cards" => "cards",
-                _ => hasImport ? "excel" : "cards"
-            };
-        }
-
-        private async Task<WarrantyAdminIndexViewModel> BuildAdminIndex(long? productId, bool? isRegistered, RegisterationCardViewModel? form = null, int pageIndex = 0)
-        {
-            form ??= new RegisterationCardViewModel();
-            EnsureOperation(form);
-            form.CustomerTypes = await BindCustomerTypes();
-
-            if (TempData["SuccessMessage"] is string success)
-                form.op!.ToSuccess(success);
-            else if (TempData["ErrorMessage"] is string error)
-                form.op!.ToFailed(error);
-
-            var pageSize = PaginationViewModel.DefaultPageSize;
-            var filter = new WarrantyCardSearchModel
-            {
-                ProductID = productId,
-                IsRegistered = isRegistered,
-                PageIndex = pageIndex,
-                PageSize = pageSize
-            };
-            var search = await warrantyService.SearchCards(filter);
-            var vm = new WarrantyAdminIndexViewModel
-            {
-                ProductID = productId,
-                IsRegistered = isRegistered,
-                Products = await products.GetAll(),
-                Cards = search.Items,
-                PageIndex = search.PageIndex,
-                PageCount = search.PageCount,
-                RecordCount = search.RecordCount,
-                Stats = await products.GetStatistics(),
-                RegistrationCard = form,
-                OpenTab= "register"
-            };
-
-            if (TempData["ImportMessage"] is string importMsg)
-            {
-                vm.LastImport = new WarrantyExcelImportResult
-                {
-                    Success = TempData["ImportSuccess"]?.ToString() == "1",
-                    Message = importMsg,
-                    Inserted = int.TryParse(TempData["ImportInserted"]?.ToString(), out var inserted) ? inserted : 0,
-                    Duplicate = int.TryParse(TempData["ImportDuplicate"]?.ToString(), out var duplicate) ? duplicate : 0,
-                    Empty = int.TryParse(TempData["ImportEmpty"]?.ToString(), out var empty) ? empty : 0,
-                    Invalid = int.TryParse(TempData["ImportInvalid"]?.ToString(), out var invalid) ? invalid : 0
-                };
-            }
-
-            return vm;
-        }
 
         [HttpGet]
         [Authorize(Roles = "Admin")]
@@ -215,12 +174,9 @@ namespace GolpaMotorFinal.Controllers
 
         private async Task<IActionResult> FailRegistration(RegisterationCardViewModel request, bool fromAdmin)
         {
-            if (!fromAdmin)
-                return await WarrantyForm(request);
-
-            var vm = await BuildAdminIndex(null, null, request);
-            vm.OpenTab = "register";
-            return View("Index", vm);
+            EnsureOperation(request);
+            request.CustomerTypes = await BindCustomerTypes();
+            return View(fromAdmin ? "Index" : nameof(Register), fromAdmin ? await BuildIndex("register", request) : request);
         }
 
         private string GetRegistrationRateLimitKey()
@@ -432,62 +388,60 @@ namespace GolpaMotorFinal.Controllers
             }
 
             return fromAdmin
-                ? RedirectToAction(nameof(Index), new { tab = "register" })
+                ? RedirectToAction(nameof(Index), new { tab = "cards" })
                 : RedirectToAction(nameof(Register));
         }
 
         [HttpPost]
         [Authorize(Roles = "Admin")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> UploadExcel(UploadWarrantyExcelViewModel model)
+        public async Task<IActionResult> Excel(UploadWarrantyExcelViewModel model)
         {
             if (model.ProductID <= 0 || model.ExcelFile == null)
             {
-                SetImportTempData(false, "محصول و فایل اکسل الزامی است.");
+                TempData["ErrorMessage"] = "محصول و فایل اکسل الزامی است.";
                 return RedirectToAction(nameof(Index), new { tab = "excel" });
             }
 
             try
             {
                 var result = await excelService.ImportExcel(model.ProductID, model.ExcelFile);
-                SetImportTempData(result.Success, result.Message, result.Inserted, result.Duplicate, result.Empty, result.Invalid);
-                return RedirectToAction(nameof(Index), new
+                if (result.Success)
                 {
-                    tab = result.Success ? "cards" : "excel",
-                    productId = model.ProductID
-                });
+                    TempData["SuccessMessage"] = result.Message;
+                    return RedirectToAction(nameof(Index), new { tab = "cards" });
+                }
+
+                TempData["ErrorMessage"] = result.Message;
+                return RedirectToAction(nameof(Index), new { tab = "excel" });
             }
             catch (Exception ex)
             {
-                SetImportTempData(false, ex.Message);
-                return RedirectToAction(nameof(Index), new { tab = "excel", productId = model.ProductID });
+                TempData["ErrorMessage"] = ex.Message;
+                return RedirectToAction(nameof(Index), new { tab = "excel" });
             }
-        }
-
-        private void SetImportTempData(bool success, string message, int inserted = 0, int duplicate = 0, int empty = 0, int invalid = 0)
-        {
-            TempData["ImportSuccess"] = success ? "1" : "0";
-            TempData["ImportMessage"] = message;
-            TempData["ImportInserted"] = inserted.ToString();
-            TempData["ImportDuplicate"] = duplicate.ToString();
-            TempData["ImportEmpty"] = empty.ToString();
-            TempData["ImportInvalid"] = invalid.ToString();
         }
 
         [HttpPost]
         [Authorize(Roles = "Admin")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> GenerateCodes(long productId, int count,int validityMonths=12)
+        public async Task<IActionResult> Generate(long productId, int count, int validityMonths = 12)
         {
             if (productId <= 0 || count <= 0)
             {
-                SetImportTempData(false, "محصول و تعداد معتبر نیست.");
+                TempData["ErrorMessage"] = "محصول و تعداد معتبر نیست.";
                 return RedirectToAction(nameof(Index), new { tab = "generate" });
             }
 
             var result = await warrantyService.GenerateCodes(productId, count, validityMonths);
-            SetImportTempData(result.Success, result.Message);
-            return RedirectToAction(nameof(Index), new { productId, tab = "cards" });
+            if (result.Success)
+            {
+                TempData["SuccessMessage"] = result.Message;
+                return RedirectToAction(nameof(Index), new { tab = "cards" });
+            }
+
+            TempData["ErrorMessage"] = result.Message;
+            return RedirectToAction(nameof(Index), new { tab = "generate" });
         }
     }
 }

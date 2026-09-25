@@ -1,0 +1,39 @@
+@model DomainModel.ViewModels.Product.ProductStatistics?
+<div class="row column1">
+    <div class="col-md-6 col-lg-3">
+        <div class="full counter_section">
+            <div class="couter_icon"><div><i class="fa fa-check green_color"></i></div></div>
+            <div class="counter_no">
+                <p class="total_no">@(Model?.RegisteredCards ?? 0)</p>
+                <p class="head_couter">ثبت‌شده</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+        <div class="full counter_section">
+            <div class="couter_icon"><div><i class="fa fa-clock yellow_color"></i></div></div>
+            <div class="counter_no">
+                <p class="total_no">@(Model?.UnregisteredCards ?? 0)</p>
+                <p class="head_couter">باقی‌مانده</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+        <div class="full counter_section">
+            <div class="couter_icon"><div><i class="fa fa-box red_color"></i></div></div>
+            <div class="counter_no">
+                <p class="total_no">@(Model?.ProductsWithoutCards ?? 0)</p>
+                <p class="head_couter">محصول بدون کارت</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+        <div class="full counter_section">
+            <div class="couter_icon"><div><i class="fa fa-gift purple_color"></i></div></div>
+            <div class="counter_no">
+                <p class="total_no">@(Model?.TotalRegisteredPoints ?? 0)</p>
+                <p class="head_couter">امتیاز ثبت‌شده</p>
+            </div>
+        </div>
+    </div>
+</div>

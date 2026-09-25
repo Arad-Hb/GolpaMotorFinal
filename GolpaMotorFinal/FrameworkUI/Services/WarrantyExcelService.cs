@@ -1,5 +1,6 @@
 ﻿using Application.Services;
 using DomainModel.ViewModels.Warranty;
+using Framework.Common;
 using OfficeOpenXml;
 
 namespace GolpaMotorFinal.FrameworkUI.Services
@@ -13,22 +14,16 @@ namespace GolpaMotorFinal.FrameworkUI.Services
             this.warrantyService = warrantyService;
         }
 
-        public async Task<WarrantyExcelImportResult> ImportExcel(long productId, IFormFile file)
+        public async Task<OperationResult> ImportExcel(long productId, IFormFile file)
         {
-            var result = new WarrantyExcelImportResult();
+            var op = new OperationResult("WarrantyExcel");
 
             if (file == null || file.Length == 0)
-            {
-                result.Message = "فایل انتخاب نشده است";
-                return result;
-            }
+                return op.ToFailed("فایل انتخاب نشده است");
 
             var ext = Path.GetExtension(file.FileName)?.ToLowerInvariant();
             if (ext != ".xlsx")
-            {
-                result.Message = "فقط فایل اکسل با پسوند xlsx پذیرفته می‌شود.";
-                return result;
-            }
+                return op.ToFailed("فقط فایل اکسل با پسوند xlsx پذیرفته می‌شود.");
 
             var items = new List<WarrantyCardImportItem>();
 
@@ -36,10 +31,7 @@ namespace GolpaMotorFinal.FrameworkUI.Services
             {
                 var worksheet = package.Workbook.Worksheets[0];
                 if (worksheet?.Dimension == null)
-                {
-                    result.Message = "فایل اکسل خالی است.";
-                    return result;
-                }
+                    return op.ToFailed("فایل اکسل خالی است.");
 
                 int rowCount = worksheet.Dimension.Rows;
 
@@ -68,13 +60,9 @@ namespace GolpaMotorFinal.FrameworkUI.Services
             }
 
             var imported = await warrantyService.ImportCards(productId, items);
-            result.Success = imported.Success;
-            result.Message = imported.Message;
-            result.Inserted = imported.Inserted;
-            result.Duplicate = imported.Duplicate;
-            result.Empty = imported.Empty;
-            result.Invalid = imported.Invalid;
-            return result;
+            return imported.Success
+                ? op.ToSuccess(imported.Message)
+                : op.ToFailed(imported.Message);
         }
 
         private static string ToEnglishDigits(string? value)

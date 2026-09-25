@@ -1,5 +1,5 @@
-@model GolpaMotorFinal.Models.ViewModels.WarrantyManagement.WarrantyAdminIndexViewModel
-<form class="table_filter_bar" data-filter-bar data-url="/WarrantyManagement/List" data-target="#warrantyCardsGrid">
+@model GolpaMotorFinal.Models.ViewModels.WarrantyManagement.WarrantyCardFilterBarViewModel
+<form class="table_filter_bar" data-filter-bar data-autoload="false" data-url="/WarrantyManagement/List" data-target="#warrantyCardsGrid">
     @await Html.PartialAsync("_FilterSearch", FilterSearchViewModel.For("SearchTerm", "سریال یا رمز", Model.SearchTerm))
     <select name="ProductID" class="form-select">
         <option value="">همه محصولات</option>

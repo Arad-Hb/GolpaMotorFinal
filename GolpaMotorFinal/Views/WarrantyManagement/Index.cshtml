@@ -1,54 +1,19 @@
-﻿@model GolpaMotorFinal.Models.ViewModels.WarrantyManagement.WarrantyAdminIndexViewModel
+﻿@model GolpaMotorFinal.Models.ViewModels.WarrantyManagement.WarrantyCardsPageViewModel
 @using GolpaMotorFinal.Models.ViewModels.CRUD
 @{
     Layout = "_AdminLayout";
     var openTab = string.IsNullOrWhiteSpace(Model.OpenTab) ? "register" : Model.OpenTab;
 }
 
-<div class="row column1">
-    <div class="col-md-6 col-lg-3">
-        <div class="full counter_section">
-            <div class="couter_icon"><div><i class="fa fa-check green_color"></i></div></div>
-            <div class="counter_no">
-                <p class="total_no">@(Model.Stats?.RegisteredCards ?? 0)</p>
-                <p class="head_couter">ثبت‌شده</p>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-6 col-lg-3">
-        <div class="full counter_section">
-            <div class="couter_icon"><div><i class="fa fa-clock yellow_color"></i></div></div>
-            <div class="counter_no">
-                <p class="total_no">@(Model.Stats?.UnregisteredCards ?? 0)</p>
-                <p class="head_couter">باقی‌مانده</p>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-6 col-lg-3">
-        <div class="full counter_section">
-            <div class="couter_icon"><div><i class="fa fa-box red_color"></i></div></div>
-            <div class="counter_no">
-                <p class="total_no">@(Model.Stats?.ProductsWithoutCards ?? 0)</p>
-                <p class="head_couter">محصول بدون کارت</p>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-6 col-lg-3">
-        <div class="full counter_section">
-            <div class="couter_icon"><div><i class="fa fa-gift purple_color"></i></div></div>
-            <div class="counter_no">
-                <p class="total_no">@(Model.Stats?.TotalRegisteredPoints ?? 0)</p>
-                <p class="head_couter">امتیاز ثبت‌شده</p>
-            </div>
-        </div>
-    </div>
-</div>
+@await Html.PartialAsync("_WarrantyStats", Model.Stats)
 
-@if (Model.LastImport != null)
+@if (TempData["SuccessMessage"] is string successMsg)
 {
-    <div class="alert @(Model.LastImport.Success ? "alert-info" : "alert-danger")">
-        @Model.LastImport.Message
-    </div>
+    <div class="alert alert-info">@successMsg</div>
+}
+@if (TempData["ErrorMessage"] is string errorMsg)
+{
+    <div class="alert alert-danger">@errorMsg</div>
 }
 
 <ul class="nav nav-tabs mb-3" id="warrantyTab" role="tablist">
@@ -58,7 +23,6 @@
     <li class="nav-item">
         <button class="nav-link @(openTab == "cards" ? "active" : null)" id="tab-cards" data-bs-toggle="tab" data-bs-target="#warranty-cards" type="button" role="tab">لیست کارت‌ها</button>
     </li>
-    
     <li class="nav-item">
         <button class="nav-link @(openTab == "excel" ? "active" : null)" id="tab-excel" data-bs-toggle="tab" data-bs-target="#warranty-excel" type="button" role="tab">ورود اکسل</button>
     </li>
@@ -68,7 +32,6 @@
 </ul>
 
 <div class="tab-content" id="warrantyTabContent">
-
     <div class="tab-pane fade @(openTab == "register" ? "show active" : null)" id="warranty-form" role="tabpanel">
         <div class="white_shd full margin_bottom_30">
             <div class="padding_infor_info">
@@ -87,20 +50,14 @@
             GridId = "warrantyCardsGrid",
             ListHeading = "لیست کارت‌ها",
             FilterPartial = "_WarrantyCardFilterBar",
-            FilterModel = Model
+            FilterModel = Model.Filter
         })
     </div>
 
     <div class="tab-pane fade @(openTab == "excel" ? "show active" : null)" id="warranty-excel" role="tabpanel">
         <div class="white_shd full margin_bottom_30">
             <div class="padding_infor_info">
-                @if (Model.LastImport != null)
-                {
-                    <div class="alert @(Model.LastImport.Success ? "alert-info" : "alert-danger")">
-                        @Model.LastImport.Message
-                    </div>
-                }
-                <form asp-action="UploadExcel" method="post" enctype="multipart/form-data" class="admin-form">
+                <form asp-action="Excel" method="post" enctype="multipart/form-data" class="admin-form">
                     @Html.AntiForgeryToken()
                     <p class="text-muted mb-3">ردیف اول عنوان ستون‌ها است. ستون A سریال، ستون B رمز، ستون C مدت اعتبار به ماه (مثلاً ۲۴). اگر ستون C خالی باشد ۱۲ ماه ذخیره می‌شود. اعتبار بعد از ثبت کارت شروع می‌شود.</p>
                     <div class="row g-2 align-items-end">
@@ -108,7 +65,7 @@
                             <label class="form-label">محصول</label>
                             <select name="ProductID" class="form-select" required>
                                 <option value="">انتخاب محصول</option>
-                                @foreach (var item in Model.Products)
+                                @foreach (var item in Model.Filter.Products)
                                 {
                                     <option value="@item.ProductID">@item.ProductName</option>
                                 }
@@ -130,14 +87,14 @@
     <div class="tab-pane fade @(openTab == "generate" ? "show active" : null)" id="warranty-generate" role="tabpanel">
         <div class="white_shd full margin_bottom_30">
             <div class="padding_infor_info">
-                <form asp-action="GenerateCodes" method="post" class="admin-form">
+                <form asp-action="Generate" method="post" class="admin-form">
                     @Html.AntiForgeryToken()
                     <div class="row g-2 align-items-end">
                         <div class="col-4 col-md-4">
                             <label class="form-label">محصول</label>
                             <select name="productId" class="form-select" required>
                                 <option value="">انتخاب محصول</option>
-                                @foreach (var item in Model.Products)
+                                @foreach (var item in Model.Filter.Products)
                                 {
                                     <option value="@item.ProductID">@item.ProductName</option>
                                 }
@@ -160,3 +117,23 @@
         </div>
     </div>
 </div>
+
+@section Scripts
+{
+    <script>
+        function loadWarrantyGrid() {
+            var $bar = $("#warranty-cards [data-filter-bar]");
+            var $grid = $("#warrantyCardsGrid");
+            if (!$bar.length || !$grid.length) return;
+            if ($.trim($grid.html()) !== "") return;
+            applyTableFilter($bar, 0);
+        }
+
+        $(function () {
+            if ($("#warranty-cards").hasClass("active"))
+                loadWarrantyGrid();
+        });
+
+        $("#tab-cards").on("shown.bs.tab", loadWarrantyGrid);
+    </script>
+}

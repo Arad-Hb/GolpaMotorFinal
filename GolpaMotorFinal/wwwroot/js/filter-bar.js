@@ -829,6 +829,7 @@
 
     $(function () {
         $("[data-filter-bar]").each(function () {
+            if ($(this).attr("data-autoload") === "false") return;
             var target = $(this).attr("data-target");
             if (!target) return;
             var $t = $(target);
