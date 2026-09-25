@@ -2,7 +2,6 @@
 @using System.Collections.Generic
 @{
     var actionName = ViewData["RegisterAction"] as string ?? "Register";
-    var typeLabel = ViewData["CustomerTypeLabel"] as string ?? "نقش شما";
     var codes = Model.ScratchedCode is { Count: > 0 } ? Model.ScratchedCode : new List<string> { "" };
     var cardCount = codes.Count > 10 ? 10 : codes.Count;
 }
@@ -68,7 +67,7 @@
         <span asp-validation-for="CustomerPhoneNumber" class="text-danger small"></span>
     </div>
     <div class="mb-4">
-        <label class="form-label fw-bold">@typeLabel</label>
+        <label class="form-label fw-bold">نقش مشتری</label>
         <div class="d-flex flex-wrap gap-2">
             @foreach (var item in Model.CustomerTypes)
             {

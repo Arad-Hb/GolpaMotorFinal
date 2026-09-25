@@ -37,7 +37,6 @@
             <div class="padding_infor_info">
                 @{
                     ViewData["RegisterAction"] = "RegisterForCustomer";
-                    ViewData["CustomerTypeLabel"] = "نقش مشتری";
                 }
                 @await Html.PartialAsync("_RegisterCardForm", Model.RegistrationCard)
             </div>
