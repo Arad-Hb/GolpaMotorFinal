@@ -6,6 +6,7 @@ using DomainModel.ViewModels.User;
 using Framework.Common;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Cryptography;
 
 
 namespace DataAccess.Repositories
@@ -13,12 +14,17 @@ namespace DataAccess.Repositories
     public class UserRepository : IUserRepository
     {
         private readonly GolpaMotorDbContext db;
-        private readonly UserManager<ApplicationUser> userManager;        
+        private readonly UserManager<ApplicationUser> userManager;
+        private readonly RoleManager<IdentityRole> roleManager;
 
-        public UserRepository(GolpaMotorDbContext db,UserManager<ApplicationUser> userManager)
+        public UserRepository(
+            GolpaMotorDbContext db,
+            UserManager<ApplicationUser> userManager,
+            RoleManager<IdentityRole> roleManager)
         {
             this.db = db;
-            this.userManager = userManager;            
+            this.userManager = userManager;
+            this.roleManager = roleManager;
         }
 
         public async Task<OperationResult> Add(UserAddEditModel model)
@@ -450,6 +456,57 @@ namespace DataAccess.Repositories
                 .ToListAsync();
 
             return new UserListComplexModel { userList = users, sm = sm };
+        }
+
+        public Task<ApplicationUser?> GetByPhone(string phone)
+        {
+            if (string.IsNullOrWhiteSpace(phone))
+                return Task.FromResult<ApplicationUser?>(null);
+
+            return userManager.Users.FirstOrDefaultAsync(x => x.PhoneNumber == phone);
+        }
+
+        public async Task<OperationResult> CreateCustomer(string phone, string? firstName, string? lastName)
+        {
+            var op = new OperationResult("CreateCustomer");
+            if (string.IsNullOrWhiteSpace(phone))
+                return op.ToFailed("شماره موبایل اجباری است");
+
+            var user = new ApplicationUser
+            {
+                UserName = phone,
+                PhoneNumber = phone,
+                FirstName = firstName,
+                LastName = lastName,
+                EmailConfirmed = true,
+                IsActive = true,
+                IsConfirmedCode = true
+            };
+
+            var tempPassword = Convert.ToBase64String(RandomNumberGenerator.GetBytes(12)) + "Aa1";
+            var createResult = await userManager.CreateAsync(user, tempPassword);
+            if (!createResult.Succeeded)
+            {
+                return op.ToFailed(string.Join(" | ", createResult.Errors.Select(x => x.Description)));
+            }
+
+            return op.ToSuccess("کاربر ایجاد شد");
+        }
+
+        public async Task EnsureCustomerRole(string userId)
+        {
+            if (string.IsNullOrWhiteSpace(userId))
+                return;
+
+            if (!await roleManager.RoleExistsAsync("Customer"))
+                await roleManager.CreateAsync(new IdentityRole("Customer"));
+
+            var user = await userManager.FindByIdAsync(userId);
+            if (user == null)
+                return;
+
+            if (!await userManager.IsInRoleAsync(user, "Customer"))
+                await userManager.AddToRoleAsync(user, "Customer");
         }
 
     }
