@@ -45,34 +45,8 @@
     <script src="~/pager/pager.js" asp-append-version="true"></script>
     <script src="~/js/pagination.js" asp-append-version="true"></script>
     <script src="~/js/filter-bar.js" asp-append-version="true"></script>
-    <script src="~/js/AdminLayout.js"></script>
+    <script src="~/js/AdminLayout.js" asp-append-version="true"></script>
     <form id="antiforgery-form" class="d-none">@Html.AntiForgeryToken()</form>
-    <script>
-        $(document).on("click", ".search__button", function (e) {
-            e.preventDefault();
-            var searchBox = $(this).closest(".search");
-            var componentId = searchBox.data("component-id");
-            var url = searchBox.data("action");
-            var target = searchBox.data("target");
-            var input = $("#searchInput-" + componentId);
-            var payload = {
-                __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').first().val(),
-                [input.attr("name")]: input.val()
-            };
-            var mergeForm = $(this).closest("#mergeForm");
-            if (mergeForm.length) {
-                payload["CurrentUser.UserID"] = mergeForm.find("input[name='CurrentUser.UserID']").val();
-            }
-            $.ajax({
-                url: url,
-                type: "POST",
-                data: payload,
-                success: function (html) {
-                    $("#" + target).html(html);
-                }
-            });
-        });
-    </script>
     @RenderSection("Scripts", false)
 </body>
 </html>

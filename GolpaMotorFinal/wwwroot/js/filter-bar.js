@@ -170,9 +170,9 @@
         $(".date-range.is-open, .num-range.is-open, .filter-select.is-open").removeClass("is-open");
     }
 
-    function renderSinglePicker($input) {
+    function renderSinglePicker(input) {
         closePickers();
-        var current = parseJalali($input.val());
+        var current = parseJalali(input.val());
         var today = todayJ();
         var y = current ? current.jy : today.jy;
         var m = current ? current.jm : today.jm;
@@ -194,8 +194,8 @@
             popup.html(html);
         }
         draw();
-        var offset = $input.offset();
-        popup.css({ top: offset.top + $input.outerHeight() + 4, left: offset.left });
+        var offset = input.offset();
+        popup.css({ top: offset.top + input.outerHeight() + 4, left: offset.left });
         $("body").append(popup);
         popup.on("click", ".jdp-nav", function (e) {
             e.stopPropagation();
@@ -205,36 +205,34 @@
             draw();
         });
         popup.on("click", ".jdp-day", function () {
-            $input.val(formatJ({ jy: y, jm: m, jd: parseInt($(this).data("d"), 10) })).trigger("change");
+            input.val(formatJ({ jy: y, jm: m, jd: parseInt($(this).data("d"), 10) })).trigger("change");
             closePickers();
         });
     }
 
-    function emptyLabel($wrap) {
-        return $wrap.attr("data-empty-label") || "انتخاب تاریخ";
+    function emptyLabel(wrap) {
+        return wrap.attr("data-empty-label") || "انتخاب تاریخ";
     }
 
-    function updateTrigger($wrap) {
-        var $from = $wrap.find(".js-date-from");
-        var $to = $wrap.find(".js-date-to");
-        var from = parseJalali($from.val());
-        var to = parseJalali($to.val());
-        var text = (!from || !to) ? emptyLabel($wrap) : presetLabelFor(from, to);
-        $wrap.find(".date-range__label").text(text);
-        $wrap.toggleClass("has-value", !!(from && to));
+    function updateTrigger(wrap) {
+        var from = parseJalali(wrap.find(".js-date-from").val());
+        var to = parseJalali(wrap.find(".js-date-to").val());
+        var text = (!from || !to) ? emptyLabel(wrap) : presetLabelFor(from, to);
+        wrap.find(".date-range__label").text(text);
+        wrap.toggleClass("has-value", !!(from && to));
     }
 
-    function applyRange($wrap, from, to, triggerChange) {
+    function applyRange(wrap, from, to, triggerChange) {
         if (from && to && cmpJ(from, to) > 0) {
             var tmp = from;
             from = to;
             to = tmp;
         }
-        $wrap.find(".js-date-from").val(from ? formatJ(from) : "");
-        $wrap.find(".js-date-to").val(to ? formatJ(to) : "");
-        updateTrigger($wrap);
+        wrap.find(".js-date-from").val(from ? formatJ(from) : "");
+        wrap.find(".js-date-to").val(to ? formatJ(to) : "");
+        updateTrigger(wrap);
         if (triggerChange) {
-            $wrap.find(".js-date-to").trigger("change");
+            wrap.find(".js-date-to").trigger("change");
         }
     }
 
@@ -283,11 +281,11 @@
         return { y: y, m: m };
     }
 
-    function openRangePopup($wrap) {
+    function openRangePopup(wrap) {
         closePickers();
-        $wrap.addClass("is-open");
-        var from = parseJalali($wrap.find(".js-date-from").val());
-        var to = parseJalali($wrap.find(".js-date-to").val());
+        wrap.addClass("is-open");
+        var from = parseJalali(wrap.find(".js-date-from").val());
+        var to = parseJalali(wrap.find(".js-date-to").val());
         var pickStart = from;
         var pickEnd = to;
         var view = from || todayJ();
@@ -315,7 +313,7 @@
         }
 
         function position() {
-            var rect = $wrap.find(".date-range__trigger")[0].getBoundingClientRect();
+            var rect = wrap.find(".date-range__trigger")[0].getBoundingClientRect();
             var pw = popup.outerWidth();
             var ph = popup.outerHeight();
             var top = rect.bottom + 8;
@@ -339,14 +337,14 @@
             left = { y: pickStart.jy, m: pickStart.jm };
             right = { y: pickEnd.jy, m: pickEnd.jm };
             if (right.y === left.y && right.m === left.m) right = nextMonth(left.y, left.m);
-            applyRange($wrap, pickStart, pickEnd, true);
+            applyRange(wrap, pickStart, pickEnd, true);
             closePickers();
         });
 
         popup.on("click", ".date-range-cal__nav", function (e) {
             e.stopPropagation();
-            var $cal = $(this).closest(".date-range-cal");
-            var isLeft = $cal.index() === 0;
+            var cal = $(this).closest(".date-range-cal");
+            var isLeft = cal.index() === 0;
             var dir = parseInt($(this).data("dir"), 10);
             if (isLeft) {
                 left = dir < 0 ? prevMonth(left.y, left.m) : nextMonth(left.y, left.m);
@@ -364,8 +362,8 @@
 
         popup.on("click", ".date-range-cal__day", function (e) {
             e.stopPropagation();
-            var $cal = $(this).closest(".date-range-cal");
-            var day = { jy: parseInt($cal.data("y"), 10), jm: parseInt($cal.data("m"), 10), jd: parseInt($(this).data("d"), 10) };
+            var cal = $(this).closest(".date-range-cal");
+            var day = { jy: parseInt(cal.data("y"), 10), jm: parseInt(cal.data("m"), 10), jd: parseInt($(this).data("d"), 10) };
             if (!pickStart || pickEnd) {
                 pickStart = day;
                 pickEnd = null;
@@ -373,35 +371,35 @@
                 return;
             }
             pickEnd = day;
-            applyRange($wrap, pickStart, pickEnd, true);
+            applyRange(wrap, pickStart, pickEnd, true);
             closePickers();
         });
 
         $(window).off("resize.dateRange").on("resize.dateRange", position);
     }
 
-    function shiftRange($wrap, dir) {
-        var from = parseJalali($wrap.find(".js-date-from").val());
-        var to = parseJalali($wrap.find(".js-date-to").val());
+    function shiftRange(wrap, dir) {
+        var from = parseJalali(wrap.find(".js-date-from").val());
+        var to = parseJalali(wrap.find(".js-date-to").val());
         if (!from || !to) {
             var t = todayJ();
-            applyRange($wrap, t, t, true);
+            applyRange(wrap, t, t, true);
             return;
         }
         var span = Math.round((jToDate(to) - jToDate(from)) / 86400000) || 1;
-        applyRange($wrap, addDays(from, dir * span), addDays(to, dir * span), true);
+        applyRange(wrap, addDays(from, dir * span), addDays(to, dir * span), true);
     }
 
-    function initDateRange($wrap) {
-        if ($wrap.data("rangeReady")) return;
-        $wrap.data("rangeReady", true);
-        $wrap.addClass("date-range");
-        var $inputs = $wrap.find("input.js-jalali");
-        if ($inputs.length < 2) return;
-        $inputs.eq(0).addClass("js-date-from js-date-range-input").attr({ tabindex: "-1", "aria-hidden": "true" });
-        $inputs.eq(1).addClass("js-date-to js-date-range-input").attr({ tabindex: "-1", "aria-hidden": "true" });
-        if (!$wrap.find(".date-range__trigger").length) {
-            $wrap.prepend(
+    function initDateRange(wrap) {
+        if (wrap.data("rangeReady")) return;
+        wrap.data("rangeReady", true);
+        wrap.addClass("date-range");
+        var inputs = wrap.find("input.js-jalali");
+        if (inputs.length < 2) return;
+        inputs.eq(0).addClass("js-date-from js-date-range-input").attr({ tabindex: "-1", "aria-hidden": "true" });
+        inputs.eq(1).addClass("js-date-to js-date-range-input").attr({ tabindex: "-1", "aria-hidden": "true" });
+        if (!wrap.find(".date-range__trigger").length) {
+            wrap.prepend(
                 '<div class="date-range__control">' +
                 '<button type="button" class="date-range__nav" data-dir="-1" aria-label="بازه قبلی"><i class="fa-solid fa-chevron-right"></i></button>' +
                 '<button type="button" class="date-range__trigger" aria-haspopup="dialog">' +
@@ -412,25 +410,25 @@
                 "</div>"
             );
         }
-        updateTrigger($wrap);
+        updateTrigger(wrap);
     }
 
-    function wrapDatePairs(root) {
-        var $root = $(root || document);
-        $root.find(".js-date-range").each(function () {
+    function wrapDatePairs(scope) {
+        var root = $(scope || document);
+        root.find(".js-date-range").each(function () {
             initDateRange($(this));
         });
-        var leftover = $root.find("input.js-jalali").not(".js-date-range-input").get();
+        var leftover = root.find("input.js-jalali").not(".js-date-range-input").get();
         for (var i = 0; i < leftover.length - 1; i++) {
-            var $a = $(leftover[i]);
-            var $b = $(leftover[i + 1]);
-            if (!$a.length || !$b.length) continue;
-            if ($a.parent()[0] !== $b.parent()[0]) continue;
-            if ($a.closest(".date-range, .js-date-range").length) continue;
-            var $w = $('<div class="date-range js-date-range" data-empty-label="انتخاب تاریخ"></div>');
-            $a.before($w);
-            $w.append($a).append($b);
-            initDateRange($w);
+            var a = $(leftover[i]);
+            var b = $(leftover[i + 1]);
+            if (!a.length || !b.length) continue;
+            if (a.parent()[0] !== b.parent()[0]) continue;
+            if (a.closest(".date-range, .js-date-range").length) continue;
+            var w = $('<div class="date-range js-date-range" data-empty-label="انتخاب تاریخ"></div>');
+            a.before(w);
+            w.append(a).append(b);
+            initDateRange(w);
             i++;
         }
     }
@@ -446,8 +444,8 @@
 
     // Numeric Range inputs
 
-    function numEmptyLabel($wrap) {
-        return $wrap.attr("data-empty-label") || "بازه عدد";
+    function numEmptyLabel(wrap) {
+        return wrap.attr("data-empty-label") || "بازه عدد";
     }
 
     function parseNum(val) {
@@ -463,42 +461,42 @@
         return "تا " + to;
     }
 
-    function updateNumTrigger($wrap) {
-        var from = parseNum($wrap.find(".js-num-from").val());
-        var to = parseNum($wrap.find(".js-num-to").val());
-        $wrap.find(".num-range__label").text(numLabel(from, to, numEmptyLabel($wrap)));
-        $wrap.toggleClass("has-value", from !== null || to !== null);
+    function updateNumTrigger(wrap) {
+        var from = parseNum(wrap.find(".js-num-from").val());
+        var to = parseNum(wrap.find(".js-num-to").val());
+        wrap.find(".num-range__label").text(numLabel(from, to, numEmptyLabel(wrap)));
+        wrap.toggleClass("has-value", from !== null || to !== null);
     }
 
-    function applyNumRange($wrap, from, to, triggerChange) {
+    function applyNumRange(wrap, from, to, triggerChange) {
         if (from !== null && to !== null && from > to) {
             var tmp = from;
             from = to;
             to = tmp;
         }
-        $wrap.find(".js-num-from").val(from === null ? "" : from);
-        $wrap.find(".js-num-to").val(to === null ? "" : to);
-        updateNumTrigger($wrap);
+        wrap.find(".js-num-from").val(from === null ? "" : from);
+        wrap.find(".js-num-to").val(to === null ? "" : to);
+        updateNumTrigger(wrap);
         if (triggerChange) {
-            $wrap.find(".js-num-to").trigger("change");
+            wrap.find(".js-num-to").trigger("change");
         }
     }
 
-    function numStep($wrap) {
-        var step = parseNum($wrap.find(".js-num-from").attr("step"));
+    function numStep(wrap) {
+        var step = parseNum(wrap.find(".js-num-from").attr("step"));
         return step && step > 0 ? step : 1;
     }
 
-    function initNumRange($wrap) {
-        if ($wrap.data("numReady")) return;
-        $wrap.data("numReady", true);
-        $wrap.addClass("num-range");
-        var $inputs = $wrap.find("input[type=number]");
-        if ($inputs.length < 2) return;
-        $inputs.eq(0).addClass("js-num-from js-num-range-input").attr({ tabindex: "-1", "aria-hidden": "true" });
-        $inputs.eq(1).addClass("js-num-to js-num-range-input").attr({ tabindex: "-1", "aria-hidden": "true" });
-        if (!$wrap.find(".num-range__trigger").length) {
-            $wrap.prepend(
+    function initNumRange(wrap) {
+        if (wrap.data("numReady")) return;
+        wrap.data("numReady", true);
+        wrap.addClass("num-range");
+        var inputs = wrap.find("input[type=number]");
+        if (inputs.length < 2) return;
+        inputs.eq(0).addClass("js-num-from js-num-range-input").attr({ tabindex: "-1", "aria-hidden": "true" });
+        inputs.eq(1).addClass("js-num-to js-num-range-input").attr({ tabindex: "-1", "aria-hidden": "true" });
+        if (!wrap.find(".num-range__trigger").length) {
+            wrap.prepend(
                 '<div class="num-range__control">' +
                 '<button type="button" class="num-range__nav" data-dir="-1" aria-label="بازه قبلی"><i class="fa-solid fa-chevron-right"></i></button>' +
                 '<button type="button" class="num-range__trigger" aria-haspopup="dialog">' +
@@ -509,19 +507,19 @@
                 "</div>"
             );
         }
-        updateNumTrigger($wrap);
+        updateNumTrigger(wrap);
     }
 
-    function wrapNumPairs(root) {
-        var $root = $(root || document);
-        $root.find(".js-num-range, .filter-range").each(function () {
-            var $box = $(this);
-            if ($box.find("input[type=number]").length >= 2) initNumRange($box);
+    function wrapNumPairs(scope) {
+        var root = $(scope || document);
+        root.find(".js-num-range, .filter-range").each(function () {
+            var box = $(this);
+            if (box.find("input[type=number]").length >= 2) initNumRange(box);
         });
     }
 
-    function positionFixedPopup($anchor, popup) {
-        var rect = $anchor[0].getBoundingClientRect();
+    function positionFixedPopup(anchor, popup) {
+        var rect = anchor[0].getBoundingClientRect();
         var pw = popup.outerWidth();
         var ph = popup.outerHeight();
         var top = rect.bottom + 8;
@@ -531,12 +529,12 @@
         popup.css({ top: top + "px", right: rightPos + "px", left: "auto" });
     }
 
-    function openNumPopup($wrap) {
+    function openNumPopup(wrap) {
         closePickers();
-        $wrap.addClass("is-open");
-        var from = $wrap.find(".js-num-from").val();
-        var to = $wrap.find(".js-num-to").val();
-        var step = numStep($wrap);
+        wrap.addClass("is-open");
+        var from = wrap.find(".js-num-from").val();
+        var to = wrap.find(".js-num-to").val();
+        var step = numStep(wrap);
         var popup = $(
             '<div class="num-range-popup" dir="rtl">' +
             '<div class="num-range-popup__fields">' +
@@ -552,13 +550,13 @@
         popup.find(".num-range-popup__from").val(from);
         popup.find(".num-range-popup__to").val(to);
         $("body").append(popup);
-        positionFixedPopup($wrap.find(".num-range__trigger"), popup);
+        positionFixedPopup(wrap.find(".num-range__trigger"), popup);
         popup.find(".num-range-popup__from").trigger("focus").trigger("select");
 
         function commit(apply) {
             var nextFrom = parseNum(popup.find(".num-range-popup__from").val());
             var nextTo = parseNum(popup.find(".num-range-popup__to").val());
-            applyNumRange($wrap, nextFrom, nextTo, apply);
+            applyNumRange(wrap, nextFrom, nextTo, apply);
             closePickers();
         }
 
@@ -568,7 +566,7 @@
         });
         popup.on("click", ".num-range-popup__clear", function (e) {
             e.stopPropagation();
-            applyNumRange($wrap, null, null, true);
+            applyNumRange(wrap, null, null, true);
             closePickers();
         });
         popup.on("keydown", "input", function (e) {
@@ -578,66 +576,66 @@
             }
         });
         $(window).off("resize.numRange").on("resize.numRange", function () {
-            positionFixedPopup($wrap.find(".num-range__trigger"), popup);
+            positionFixedPopup(wrap.find(".num-range__trigger"), popup);
         });
     }
 
-    function shiftNumRange($wrap, dir) {
-        var from = parseNum($wrap.find(".js-num-from").val());
-        var to = parseNum($wrap.find(".js-num-to").val());
-        var step = numStep($wrap) * dir;
+    function shiftNumRange(wrap, dir) {
+        var from = parseNum(wrap.find(".js-num-from").val());
+        var to = parseNum(wrap.find(".js-num-to").val());
+        var step = numStep(wrap) * dir;
         if (from === null && to === null) return;
         if (from !== null && to !== null) {
             var span = Math.abs(to - from) || Math.abs(step);
-            applyNumRange($wrap, from + dir * span, to + dir * span, true);
+            applyNumRange(wrap, from + dir * span, to + dir * span, true);
             return;
         }
-        if (from !== null) applyNumRange($wrap, from + step, null, true);
-        else applyNumRange($wrap, null, to + step, true);
+        if (from !== null) applyNumRange(wrap, from + step, null, true);
+        else applyNumRange(wrap, null, to + step, true);
     }
 
-    function updateFilterSelect($wrap) {
-        var $sel = $wrap.find("select");
-        var $opt = $sel.find("option:selected");
-        if (!$opt.length) $opt = $sel.find("option").first();
-        $wrap.find(".filter-select__label").text($.trim($opt.text() || ""));
-        $wrap.toggleClass("has-value", !!$sel.val());
+    function updateFilterSelect(wrap) {
+        var sel = wrap.find("select");
+        var opt = sel.find("option:selected");
+        if (!opt.length) opt = sel.find("option").first();
+        wrap.find(".filter-select__label").text($.trim(opt.text() || ""));
+        wrap.toggleClass("has-value", !!sel.val());
     }
 
-    function initFilterSelect($select) {
-        if ($select.data("selectReady") || $select.closest(".filter-select").length) return;
-        $select.data("selectReady", true);
-        var $wrap = $('<div class="filter-select"></div>');
-        $select.before($wrap);
-        $wrap.append($select);
-        $wrap.append(
+    function initFilterSelect(select) {
+        if (select.data("selectReady") || select.closest(".filter-select").length) return;
+        select.data("selectReady", true);
+        var wrap = $('<div class="filter-select"></div>');
+        select.before(wrap);
+        wrap.append(select);
+        wrap.append(
             '<button type="button" class="filter-select__trigger" aria-haspopup="listbox">' +
             '<span class="filter-select__label"></span>' +
             '<i class="fa-solid fa-chevron-down"></i>' +
             "</button>"
         );
-        if ($select.prop("disabled")) {
-            $wrap.addClass("is-disabled").find(".filter-select__trigger").prop("disabled", true);
+        if (select.prop("disabled")) {
+            wrap.addClass("is-disabled").find(".filter-select__trigger").prop("disabled", true);
         }
-        if ($select.hasClass("form-select-sm") || $select.hasClass("crud-page-size")) {
-            $wrap.addClass("filter-select--sm");
+        if (select.hasClass("form-select-sm") || select.hasClass("crud-page-size")) {
+            wrap.addClass("filter-select--sm");
         }
-        updateFilterSelect($wrap);
+        updateFilterSelect(wrap);
     }
 
     function wrapFilterSelects(root) {
         $(root || document).find("select.form-select, select.form-control").each(function () {
-            var $select = $(this);
-            if (this.multiple || ($select.attr("size") && $select.attr("size") !== "1")) return;
-            if ($select.closest(".swal2-container, .filter-select-popup, .gm-pager").length) return;
-            initFilterSelect($select);
+            var select = $(this);
+            if (this.multiple || (select.attr("size") && select.attr("size") !== "1")) return;
+            if (select.closest(".swal2-container, .filter-select-popup, .gm-pager").length) return;
+            initFilterSelect(select);
         });
     }
 
     window.initAdminSelects = wrapFilterSelects;
     window.refreshFilterSelect = function (el) {
-        var $wrap = $(el).closest(".filter-select");
-        if ($wrap.length) updateFilterSelect($wrap);
+        var wrap = $(el).closest(".filter-select");
+        if (wrap.length) updateFilterSelect(wrap);
     };
 
     if (window.MutationObserver) {
@@ -657,44 +655,44 @@
         });
     }
 
-    function openFilterSelect($wrap) {
+    function openFilterSelect(wrap) {
         closePickers();
-        $wrap.addClass("is-open");
-        var $sel = $wrap.find("select");
+        wrap.addClass("is-open");
+        var sel = wrap.find("select");
         var popup = $('<div class="filter-select-popup" dir="rtl" role="listbox"></div>');
-        $sel.find("option").each(function () {
-            var $opt = $(this);
+        sel.find("option").each(function () {
+            var opt = $(this);
             var active = this.selected ? " is-active" : "";
             popup.append(
                 $('<button type="button" class="filter-select-popup__opt' + active + '"></button>')
-                    .attr("data-value", $opt.attr("value") || "")
-                    .text($.trim($opt.text() || ""))
+                    .attr("data-value", opt.attr("value") || "")
+                    .text($.trim(opt.text() || ""))
             );
         });
         $("body").append(popup);
-        var minW = Math.max($wrap.outerWidth(), 160);
+        var minW = Math.max(wrap.outerWidth(), 160);
         popup.css("min-width", minW + "px");
-        positionFixedPopup($wrap.find(".filter-select__trigger"), popup);
+        positionFixedPopup(wrap.find(".filter-select__trigger"), popup);
 
         popup.on("click", ".filter-select-popup__opt", function (e) {
             e.stopPropagation();
             var val = $(this).attr("data-value");
-            $sel.val(val).trigger("change");
-            $wrap.removeClass("is-invalid");
-            updateFilterSelect($wrap);
+            sel.val(val).trigger("change");
+            wrap.removeClass("is-invalid");
+            updateFilterSelect(wrap);
             closePickers();
         });
         $(window).off("resize.filterSelect").on("resize.filterSelect", function () {
-            positionFixedPopup($wrap.find(".filter-select__trigger"), popup);
+            positionFixedPopup(wrap.find(".filter-select__trigger"), popup);
         });
     }
 
     $(document).on("click", ".filter-select__trigger", function (e) {
         e.preventDefault();
         e.stopPropagation();
-        var $wrap = $(this).closest(".filter-select");
-        if ($wrap.hasClass("is-open")) closePickers();
-        else openFilterSelect($wrap);
+        var wrap = $(this).closest(".filter-select");
+        if (wrap.hasClass("is-open")) closePickers();
+        else openFilterSelect(wrap);
     });
 
     $(document).on("invalid", "select", function () {
@@ -704,9 +702,9 @@
     $(document).on("click", ".num-range__trigger", function (e) {
         e.preventDefault();
         e.stopPropagation();
-        var $wrap = $(this).closest(".num-range");
-        if ($wrap.hasClass("is-open")) closePickers();
-        else openNumPopup($wrap);
+        var wrap = $(this).closest(".num-range");
+        if (wrap.hasClass("is-open")) closePickers();
+        else openNumPopup(wrap);
     });
 
     $(document).on("click", ".num-range__nav", function (e) {
@@ -723,9 +721,9 @@
     $(document).on("click", ".date-range__trigger", function (e) {
         e.preventDefault();
         e.stopPropagation();
-        var $wrap = $(this).closest(".date-range");
-        if ($wrap.hasClass("is-open")) closePickers();
-        else openRangePopup($wrap);
+        var wrap = $(this).closest(".date-range");
+        if (wrap.hasClass("is-open")) closePickers();
+        else openRangePopup(wrap);
     });
 
     $(document).on("click", ".date-range__nav", function (e) {
@@ -737,9 +735,9 @@
     $(document).on("click", function () { closePickers(); });
     $(document).on("click", ".jdp-popup, .js-jalali, .date-range-popup, .date-range, .num-range-popup, .num-range, .filter-select-popup, .filter-select", function (e) { e.stopPropagation(); });
 
-    function serializeBar($bar) {
+    function serializeBar(bar) {
         var data = {};
-        $bar.find("input, select").each(function () {
+        bar.find("input, select").each(function () {
             var name = this.name;
             if (!name || this.disabled) return;
             var val = $(this).val();
@@ -748,11 +746,11 @@
         return data;
     }
 
-    function applyFilter($bar, page) {
-        var url = $bar.attr("data-url");
-        var target = $bar.attr("data-target");
+    function applyFilter(bar, page) {
+        var url = bar.attr("data-url");
+        var target = bar.attr("data-target");
         if (!url || !target) return;
-        var data = serializeBar($bar);
+        var data = serializeBar(bar);
         data.pageIndex = page || 0;
         var qs = $.param(data);
         $(target).load(url + (url.indexOf("?") >= 0 ? "&" : "?") + qs, function () {
@@ -783,47 +781,47 @@
     });
 
     $(document).on("change", "[data-filter-bar] select, [data-filter-bar] input[type=number], [data-filter-bar] .js-jalali", function () {
-        var $bar = $(this).closest("[data-filter-bar]");
+        var bar = $(this).closest("[data-filter-bar]");
         if (this.name === "ProvinceID") return;
         if ($(this).closest(".num-range-popup").length) return;
-        applyFilter($bar, 0);
+        applyFilter(bar, 0);
     });
 
     $(document).on("click", "[data-filter-reset]", function (e) {
         e.preventDefault();
-        var $bar = $(this).closest("[data-filter-bar]");
-        $bar.find("input, select").each(function () {
+        var bar = $(this).closest("[data-filter-bar]");
+        bar.find("input, select").each(function () {
             if (this.tagName === "SELECT") this.selectedIndex = 0;
             else $(this).val("");
         });
-        var $city = $bar.find("[name=CityID]");
-        if ($city.length) {
-            $city.html('<option value="">همه شهرها</option>');
+        var city = bar.find("[name=CityID]");
+        if (city.length) {
+            city.html('<option value="">همه شهرها</option>');
         }
-        $bar.find(".date-range").each(function () { updateTrigger($(this)); });
-        $bar.find(".num-range").each(function () { updateNumTrigger($(this)); });
-        $bar.find(".filter-select").each(function () { updateFilterSelect($(this)); });
-        applyFilter($bar, 0);
+        bar.find(".date-range").each(function () { updateTrigger($(this)); });
+        bar.find(".num-range").each(function () { updateNumTrigger($(this)); });
+        bar.find(".filter-select").each(function () { updateFilterSelect($(this)); });
+        applyFilter(bar, 0);
     });
 
     $(document).on("change", "[data-filter-bar] [name=ProvinceID]", function () {
-        var $bar = $(this).closest("[data-filter-bar]");
-        var $city = $bar.find("[name=CityID]");
+        var bar = $(this).closest("[data-filter-bar]");
+        var city = bar.find("[name=CityID]");
         var id = $(this).val();
-        $city.html('<option value="">همه شهرها</option>');
-        updateFilterSelect($city.closest(".filter-select"));
+        city.html('<option value="">همه شهرها</option>');
+        updateFilterSelect(city.closest(".filter-select"));
         if (id) {
             $.get("/UserManagement/GetCitiesByProvince", { provinceId: id }, function (res) {
                 var list = res && res.data ? res.data : (Array.isArray(res) ? res : []);
                 list.forEach(function (c) {
-                    $city.append($("<option>").val(c.cityID || c.CityID).text(c.name || c.Name));
+                    city.append($("<option>").val(c.cityID || c.CityID).text(c.name || c.Name));
                 });
-                updateFilterSelect($city.closest(".filter-select"));
-                applyFilter($bar, 0);
+                updateFilterSelect(city.closest(".filter-select"));
+                applyFilter(bar, 0);
             });
         } else {
-            updateFilterSelect($city.closest(".filter-select"));
-            applyFilter($bar, 0);
+            updateFilterSelect(city.closest(".filter-select"));
+            applyFilter(bar, 0);
         }
     });
 
@@ -832,8 +830,8 @@
             if ($(this).attr("data-autoload") === "false") return;
             var target = $(this).attr("data-target");
             if (!target) return;
-            var $t = $(target);
-            if ($t.length && $.trim($t.html()) === "") applyFilter($(this), 0);
+            var t = $(target);
+            if (t.length && $.trim(t.html()) === "") applyFilter($(this), 0);
         });
     });
 })();

@@ -80,10 +80,12 @@ namespace GolpaMotorFinal.Helpers
                 {
                     ActionText = "غیرفعال",
                     OpenModal = false,
+                    IsDelete = true,
                     Icon = "fa fa-trash",
+                    Url = "/RewardManagement/Delete",
                     Id = id,
                     IdName = "rewardCatalogID",
-                    CssClass = "btn btn-sm btn-outline-danger btnDeleteCatalog"
+                    CssClass = "btn btn-sm btn-outline-danger"
                 });
                 grid.Rows.Add(row);
             }

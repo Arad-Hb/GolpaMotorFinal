@@ -54,13 +54,13 @@ function applyModalSize(size) {
 function destroyModalWidgets(root) {
     if (!root) return;
     $(".filter-select-popup, .date-range-popup, .num-range-popup").remove();
-    const $root = $(root);
-    $root.find(".filter-select").each(function () {
-        const $wrap = $(this);
-        const $select = $wrap.find("select").first();
-        if ($select.length) {
-            $wrap.replaceWith($select);
-            $select.removeData("selectReady");
+    const el = $(root);
+    el.find(".filter-select").each(function () {
+        const wrap = $(this);
+        const select = wrap.find("select").first();
+        if (select.length) {
+            wrap.replaceWith(select);
+            select.removeData("selectReady");
         }
     });
 }
@@ -140,19 +140,19 @@ $(document).on("click", ".cancel-modal", function () {
 
 $(document).on("change", ".js-user-province", function () {
     const provinceId = $(this).val();
-    const $city = $(this).closest("form").find(".js-user-city");
-    $city.empty().append($("<option>").val("").text("انتخاب شهر"));
-    if (window.refreshFilterSelect) window.refreshFilterSelect($city);
+    const city = $(this).closest("form").find(".js-user-city");
+    city.empty().append($("<option>").val("").text("انتخاب شهر"));
+    if (window.refreshFilterSelect) window.refreshFilterSelect(city);
     if (!provinceId) return;
 
     $.get("/UserManagement/GetCitiesByProvince", { provinceId: provinceId }, function (res) {
         if (!res || !res.success || !res.data) return;
-        res.data.forEach(function (city) {
-            const id = city.cityID ?? city.cityId ?? city.CityID;
-            const name = city.name ?? city.Name;
-            $city.append($("<option>").val(id).text(name));
+        res.data.forEach(function (item) {
+            const id = item.cityID ?? item.cityId ?? item.CityID;
+            const name = item.name ?? item.Name;
+            city.append($("<option>").val(id).text(name));
         });
-        if (window.refreshFilterSelect) window.refreshFilterSelect($city);
+        if (window.refreshFilterSelect) window.refreshFilterSelect(city);
     });
 });
 

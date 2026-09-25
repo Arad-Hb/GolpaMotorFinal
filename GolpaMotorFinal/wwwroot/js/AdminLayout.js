@@ -19,24 +19,64 @@ $(document).on("click", "#sidebarCollapse, .sidebar_toggle", function (e) {
     }
 });
 
+$(document).on("click", ".search__button", function (e) {
+    e.preventDefault();
+    var searchBox = $(this).closest(".search");
+    var componentId = searchBox.data("component-id");
+    var url = searchBox.data("action");
+    var target = searchBox.data("target");
+    var input = $("#searchInput-" + componentId);
+    var payload = {
+        __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').first().val(),
+        [input.attr("name")]: input.val()
+    };
+    var mergeForm = $(this).closest("#mergeForm");
+    if (mergeForm.length) {
+        payload["CurrentUser.UserID"] = mergeForm.find("input[name='CurrentUser.UserID']").val();
+    }
+    $.ajax({
+        url: url,
+        type: "POST",
+        data: payload,
+        success: function (html) {
+            $("#" + target).html(html);
+        }
+    });
+});
+
 $(document).on("input", ".table-filter-input", function () {
     const query = ($(this).val() || "").toString().trim().toLowerCase();
     const target = $(this).data("table-target");
-    const $root = target ? $(target) : $(this).closest(".white_shd, .card, .table_section, .tab-pane").find("table").first();
-    const $table = $root.is("table") ? $root : $root.find("table").first();
-    $table.find("tbody tr").each(function () {
+    const root = target ? $(target) : $(this).closest(".white_shd, .card, .table_section, .tab-pane").find("table").first();
+    const table = root.is("table") ? root : root.find("table").first();
+    table.find("tbody tr").each(function () {
         const rowText = ($(this).text() || "").toLowerCase();
         const emptyRow = $(this).find("td").length <= 1 && rowText.indexOf("یافت") !== -1;
         $(this).toggle(!query || emptyRow || rowText.indexOf(query) !== -1);
     });
 });
 
+function filterBarForGrid(targetId) {
+    if (!targetId) return $();
+    var selector = String(targetId).charAt(0) === "#" ? targetId : ("#" + targetId);
+    return $('[data-filter-bar][data-target="' + selector + '"]');
+}
+
 function refreshGrid(targetId, targetUrl, closeOnSuccess = true, afterRefresh) {
-    if (!targetUrl) {
-        if (closeOnSuccess) {
-            if (typeof closeModal === "function") closeModal();
-        }
+    function finish() {
+        if (closeOnSuccess && typeof closeModal === "function") closeModal();
         if (typeof afterRefresh === "function") afterRefresh();
+    }
+
+    var bar = filterBarForGrid(targetId);
+    if (bar.length && typeof window.applyTableFilter === "function") {
+        applyTableFilter(bar);
+        finish();
+        return;
+    }
+
+    if (!targetUrl) {
+        finish();
         return;
     }
 
@@ -45,10 +85,7 @@ function refreshGrid(targetId, targetUrl, closeOnSuccess = true, afterRefresh) {
             if (targetId) {
                 $(targetId).html(html);
             }
-            if (closeOnSuccess) {
-                if (typeof closeModal === "function") closeModal();
-            }
-            if (typeof afterRefresh === "function") afterRefresh();
+            finish();
         })
         .fail(function () {
             toastError("بارگذاری مجدد لیست ناموفق بود.");
@@ -165,7 +202,8 @@ $(document).on("click", ".btnDelete", async function () {
         }
     }).done(function (op) {
         if (op.success) {
-            const targetID = btn.data("refresh-target-id") ? ("#" + btn.data("refresh-target-id")) : null;
+            const gridId = btn.data("refresh-target-id") || btn.closest("[data-grid]").attr("data-grid");
+            const targetID = gridId ? ("#" + gridId) : null;
             refreshGrid(targetID, btn.data("refresh-target-url"), true, function () {
                 toastSuccess(op.message);
             });

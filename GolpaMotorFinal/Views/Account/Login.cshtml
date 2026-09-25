@@ -66,21 +66,6 @@
     </div>
 </div>
 
-<script>
-    document.getElementById('toggle-password').addEventListener('click', function () {
-    var passwordInput = document.getElementById('Password');
-    var passwordIcon = document.getElementById('toggle-password-icon');
-    if (passwordInput.type === 'password') {
-            passwordInput.type = 'text';
-            passwordIcon.classList.remove('fa-eye');
-            passwordIcon.classList.add('fa-eye-slash');
-            this.setAttribute('aria-pressed', 'true');
-        }
-    else {
-            passwordInput.type = 'password';
-            passwordIcon.classList.remove('fa-eye-slash');
-            passwordIcon.classList.add('fa-eye');
-            this.setAttribute('aria-pressed', 'false');
-        }
-    });
-</script>
+@section Scripts {
+    <script src="~/js/accountPages.js" asp-append-version="true"></script>
+}

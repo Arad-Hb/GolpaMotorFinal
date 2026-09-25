@@ -67,18 +67,5 @@
 </div>
 
 @section Scripts {
-    <script>
-        $(document).on("change", ".js-user-province", function () {
-            var provinceId = $(this).val();
-            var $city = $(this).closest("form").find(".js-user-city");
-            $city.empty().append($("<option>").val("").text("انتخاب شهر"));
-            if (!provinceId) return;
-            $.get("/Account/GetCitiesByProvince", { provinceId: provinceId }, function (res) {
-                if (!res || !res.success || !res.data) return;
-                res.data.forEach(function (city) {
-                    $city.append($("<option>").val(city.cityID).text(city.name));
-                });
-            });
-        });
-    </script>
+    <script src="~/js/accountPages.js" asp-append-version="true"></script>
 }

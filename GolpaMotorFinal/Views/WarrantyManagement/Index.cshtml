@@ -120,20 +120,5 @@
 
 @section Scripts
 {
-    <script>
-        function loadWarrantyGrid() {
-            var $bar = $("#warranty-cards [data-filter-bar]");
-            var $grid = $("#warrantyCardsGrid");
-            if (!$bar.length || !$grid.length) return;
-            if ($.trim($grid.html()) !== "") return;
-            applyTableFilter($bar, 0);
-        }
-
-        $(function () {
-            if ($("#warranty-cards").hasClass("active"))
-                loadWarrantyGrid();
-        });
-
-        $("#tab-cards").on("shown.bs.tab", loadWarrantyGrid);
-    </script>
+    <script src="~/js/warrantyPages.js" asp-append-version="true"></script>
 }
