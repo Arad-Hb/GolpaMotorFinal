@@ -5,15 +5,16 @@ using DomainModel.ViewModels.Warranty;
 using Framework.Common;
 using GolpaMotorFinal.FrameworkUI.Services;
 using GolpaMotorFinal.Helpers;
+using GolpaMotorFinal.Models.ViewModels;
 using GolpaMotorFinal.Models.ViewModels.ProductManagement;
 using GolpaMotorFinal.Models.ViewModels.WarrantyManagement;
-using GolpaMotorFinal.Models.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Win32;
 using System.Security.Cryptography;
 
 namespace GolpaMotorFinal.Controllers
@@ -80,7 +81,7 @@ namespace GolpaMotorFinal.Controllers
                 await roleManager.CreateAsync(new IdentityRole(roleName));
         }
 
-        public async Task<IActionResult> Index(long? productId, bool? isRegistered, string? tab, int pageIndex = 0)
+        public async Task<IActionResult> Index(long? productId, bool? isRegistered, string tab="register", int pageIndex = 0)
         {
             if (!User.IsInRole("Admin"))
                 return RedirectToAction(nameof(Register));
@@ -162,7 +163,8 @@ namespace GolpaMotorFinal.Controllers
                 PageCount = search.PageCount,
                 RecordCount = search.RecordCount,
                 Stats = await products.GetStatistics(),
-                RegistrationCard = form
+                RegistrationCard = form,
+                OpenTab= "register"
             };
 
             if (TempData["ImportMessage"] is string importMsg)

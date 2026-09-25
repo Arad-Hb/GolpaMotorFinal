@@ -2,7 +2,7 @@ namespace GolpaMotorFinal.Models.ViewModels
 {
     public class PaginationViewModel
     {
-        public const int DefaultPageSize = 10;
+        public const int DefaultPageSize = 50;
 
         public int PageIndex { get; set; }
         public int PageSize { get; set; } = DefaultPageSize;
@@ -13,7 +13,7 @@ namespace GolpaMotorFinal.Models.ViewModels
         public string ListUrl { get; set; } = string.Empty;
         public string PageParameter { get; set; } = "pageIndex";
         public bool ShowPageSizeSelector { get; set; }
-        public List<int> PageSizeOptions { get; set; } = new() { 10, 25, 50 };
+        public List<int> PageSizeOptions { get; set; } = new() { 50, 100, 150 };
 
         public static PaginationViewModel For(
             string gridId,

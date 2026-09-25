@@ -629,7 +629,7 @@
         $(root || document).find("select.form-select, select.form-control").each(function () {
             var $select = $(this);
             if (this.multiple || ($select.attr("size") && $select.attr("size") !== "1")) return;
-            if ($select.closest(".swal2-container, .filter-select-popup").length) return;
+            if ($select.closest(".swal2-container, .filter-select-popup, .gm-pager").length) return;
             initFilterSelect($select);
         });
     }
@@ -757,6 +757,9 @@
         var qs = $.param(data);
         $(target).load(url + (url.indexOf("?") >= 0 ? "&" : "?") + qs, function () {
             wrapFilterSelects(target);
+            if (window.Pager && typeof window.Pager.scan === "function") {
+                window.Pager.scan(this);
+            }
         });
     }
 

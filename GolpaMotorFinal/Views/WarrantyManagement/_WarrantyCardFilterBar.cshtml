@@ -1,6 +1,6 @@
 @model GolpaMotorFinal.Models.ViewModels.WarrantyManagement.WarrantyAdminIndexViewModel
 <form class="table_filter_bar" data-filter-bar data-url="/WarrantyManagement/List" data-target="#warrantyCardsGrid">
-    @await Html.PartialAsync("_FilterSearch", FilterSearchViewModel.For("SearchTerm", "سریال، رمز یا موبایل", Model.SearchTerm))
+    @await Html.PartialAsync("_FilterSearch", FilterSearchViewModel.For("SearchTerm", "سریال یا رمز", Model.SearchTerm))
     <select name="ProductID" class="form-select">
         <option value="">همه محصولات</option>
         @foreach (var item in Model.Products)
@@ -11,7 +11,7 @@
     <select name="IsRegistered" class="form-select">
         <option value="">همه وضعیت‌ها</option>
         <option value="true" selected="@(Model.IsRegistered == true)">ثبت‌شده</option>
-        <option value="false" selected="@(Model.IsRegistered == false)">آزاد</option>
+        <option value="false" selected="@(Model.IsRegistered == false)">ثبت‌نشده</option>
     </select>
     <select name="ValidityPreset" class="form-select">
         <option value="">وضعیت اعتبار</option>

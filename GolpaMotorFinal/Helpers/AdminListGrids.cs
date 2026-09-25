@@ -284,7 +284,7 @@ namespace GolpaMotorFinal.Helpers
                 row.Columns.Add(Text(card.SerialNumber));
                 row.Columns.Add(Text(card.ScratchedCode));
                 row.Columns.Add(Text(card.ProductName));
-                row.Columns.Add(Text(card.IsRegistered ? "ثبت‌شده" : "آزاد"));
+                row.Columns.Add(Text(card.IsRegistered ? "ثبت‌شده" : "ثبت‌‌نشده"));
                 row.Columns.Add(Number(card.ValidityMonths));
                 row.Columns.Add(Text(card.RemainingText));
                 grid.Rows.Add(row);

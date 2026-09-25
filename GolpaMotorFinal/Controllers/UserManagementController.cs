@@ -357,6 +357,7 @@ namespace GolpaMotorFinal.Controllers
             };
 
             return PartialView("_EligibleRewards", vm);
+            //return view(vm);
         }
 
         [HttpPost]
