@@ -11,5 +11,8 @@ namespace DataAccess.Services
         Task<List<RewardPopularityRow>> GetRewardPopularity(DateTime? from, DateTime? to);
         Task<List<NamedCountItem>> GetTopProducts(int take = 5);
         Task<List<NamedCountItem>> GetTopRewards(int take = 5);
+        Task<ReportPage<ProductWarrantyReportRow>> SearchProductWarranty(ProductWarrantyReportSearchModel search);
+        Task<ReportPage<ReportActivityItem>> SearchActivities(ReportActivitySearchModel search);
+        Task<ReportPage<ProductCardDetailItem>> SearchProductCards(ReportActivitySearchModel search);
     }
 }

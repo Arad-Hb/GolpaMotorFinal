@@ -11,10 +11,14 @@ namespace DataAccess.Repositories
     public class RewardRequestRepository : IRewardRequestRepository
     {
         private readonly GolpaMotorDbContext db;
+        private readonly IReportActivityWriter reportActivities;
 
-        public RewardRequestRepository(GolpaMotorDbContext db)
+        public RewardRequestRepository(
+            GolpaMotorDbContext db,
+            IReportActivityWriter reportActivities)
         {
             this.db = db;
+            this.reportActivities = reportActivities;
         }
 
         public async Task RefreshEligibility(string userId)
@@ -185,12 +189,16 @@ namespace DataAccess.Repositories
                 {
                     UserID = userId,
                     RewardCatalogID = rewardCatalogId,
-                    RequestDate = DateTime.Now,
+                    RequestDate = DateTime.UtcNow,
                     IsComplete = false,
-                    RewardDeliveryStatusID = pendingStatusId
+                    RewardDeliveryStatusID = pendingStatusId,
+                    User = user,
+                    RewardCatalog = catalog
                 };
 
                 db.RewardRequests.Add(request);
+                await reportActivities.AddRewardActivityAsync(
+                    request, ReportActivityTypes.RewardRequested);
                 await db.SaveChangesAsync();
                 return op.ToSuccess("درخواست پاداش ثبت شد", request.RewardRequestID);
             }
@@ -230,7 +238,7 @@ namespace DataAccess.Repositories
                 var before = remained;
                 var after = remained - required;
 
-                db.PointTransactions.Add(new PointTransaction
+                var pointTransaction = new PointTransaction
                 {
                     UserID = user.Id,
                     RewardRequestID = request.RewardRequestID,
@@ -238,12 +246,13 @@ namespace DataAccess.Repositories
                     PointsAmount = -required,
                     PointsBeforeTransaction = before,
                     PointsAfterTransaction = after,
-                    PointTransactionDate = DateTime.Now,
+                    PointTransactionDate = DateTime.UtcNow,
                     Description = $"کسر بابت دریافت جایزه: {request.RewardCatalog.Title}"
-                });
+                };
+                db.PointTransactions.Add(pointTransaction);
 
                 request.IsComplete = true;
-                request.ReviewedDate = DateTime.Now;
+                request.ReviewedDate = DateTime.UtcNow;
                 request.RewardDeliveryStatusID = approvedStatusId;
 
                 user.TotalSettledPoints = (user.TotalSettledPoints ?? 0) + required;
@@ -251,6 +260,8 @@ namespace DataAccess.Repositories
                 user.HasReceivedReward = true;
 
                 await RewardEligibilityHelper.ApplyToUserAsync(db, user);
+                await reportActivities.AddRewardActivityAsync(
+                    request, ReportActivityTypes.RewardApproved, pointTransaction);
                 await db.SaveChangesAsync();
                 return op.ToSuccess("درخواست تأیید شد و پاداش برای کاربر ثبت شد");
             }
@@ -267,6 +278,7 @@ namespace DataAccess.Repositories
             {
                 var request = await db.RewardRequests
                     .Include(x => x.RewardDeliveryStatus)
+                    .Include(x => x.RewardCatalog)
                     .FirstOrDefaultAsync(x => x.RewardRequestID == rewardRequestId);
 
                 if (request == null)
@@ -279,8 +291,10 @@ namespace DataAccess.Repositories
                 if (rejectedStatusId == 0)
                     return op.ToFailed("وضعیت رد در سیستم تعریف نشده است");
 
-                request.ReviewedDate = DateTime.Now;
+                request.ReviewedDate = DateTime.UtcNow;
                 request.RewardDeliveryStatusID = rejectedStatusId;
+                await reportActivities.AddRewardActivityAsync(
+                    request, ReportActivityTypes.RewardRejected);
                 await db.SaveChangesAsync();
                 return op.ToSuccess("درخواست رد شد");
             }

@@ -35,5 +35,8 @@ namespace DomainModel.Models
         public virtual ApplicationUser User { get; set; } = null!;
 
         public virtual WarrantyCard WarrantyCard { get; set; } = null!;
+
+        public virtual ICollection<ReportActivityLog> ReportActivityLogs { get; set; }
+            = new HashSet<ReportActivityLog>();
     }
 }

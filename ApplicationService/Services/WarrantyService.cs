@@ -18,6 +18,7 @@ namespace ApplicationService.Services
         private readonly ICardRegistrationRepository registrations;
         private readonly IUserRepository users;
         private readonly IRewardService rewards;
+        private readonly IReportActivityWriter reportActivities;
         private readonly IMemoryCache cache;
 
         public WarrantyService(
@@ -26,6 +27,7 @@ namespace ApplicationService.Services
             ICardRegistrationRepository registrations,
             IUserRepository users,
             IRewardService rewards,
+            IReportActivityWriter reportActivities,
             IMemoryCache cache)
         {
             this.cards = cards;
@@ -33,6 +35,7 @@ namespace ApplicationService.Services
             this.registrations = registrations;
             this.users = users;
             this.rewards = rewards;
+            this.reportActivities = reportActivities;
             this.cache = cache;
         }
 
@@ -232,25 +235,32 @@ namespace ApplicationService.Services
 
             foreach (var card in validCards)
             {
-                await registrations.AddRegistration(new CardRegistration
+                var occurredAtUtc = DateTime.UtcNow;
+                var registration = new CardRegistration
                 {
                     WarrantyCardID = card.WarrantyCardID,
                     UserID = user.Id,
                     SerialNumber = card.SerialNumber,
                     ScratchedCode = card.ScratchedCode,
                     CustomerPhoneNumber = request.CustomerPhoneNumber,
-                    CreatedAt = DateTime.UtcNow
-                });
+                    CreatedAt = occurredAtUtc,
+                    EarnedPionts = card.Product.ProductPoint,
+                    IsApproved = true
+                };
+                await registrations.AddRegistration(registration);
 
                 card.IsRegistered = true;
 
-                await registrations.AddTransaction(new PointTransaction
+                var pointTransaction = new PointTransaction
                 {
                     UserID = user.Id,
                     PointsAmount = card.Product.ProductPoint,
-                    PointTransactionDate = DateTime.UtcNow,
+                    PointTransactionDate = occurredAtUtc,
                     Description = $"ثبت کارت گارانتی {card.SerialNumber}"
-                });
+                };
+                await registrations.AddTransaction(pointTransaction);
+                await reportActivities.AddCardRegisteredAsync(
+                    user.Id, card, registration, pointTransaction);
             }
 
             await registrations.SaveChangesAsync();

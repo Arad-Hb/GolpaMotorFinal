@@ -22,6 +22,7 @@ namespace DomainModel.Models
         public DbSet<PointTransaction> PointTransactions { get; set; }
         public DbSet<Product> Products { get; set; }
         public DbSet<Province> Provinces { get; set; }
+        public DbSet<ReportActivityLog> ReportActivityLogs { get; set; }
         public DbSet<RewardCatalog> RewardCatalogs { get; set; }
         public DbSet<RewardDeliveryStatus> RewardDeliveryStatuses { get; set; }
         public DbSet<RewardRequest> RewardRequests { get; set; }
@@ -48,6 +49,8 @@ namespace DomainModel.Models
             modelBuilder.ApplyConfiguration(new ProductConfiguration());
 
             modelBuilder.ApplyConfiguration(new ProvinceConfiguration());
+
+            modelBuilder.ApplyConfiguration(new ReportActivityLogConfiguration());
 
             modelBuilder.ApplyConfiguration(new RewardCatalogConfiguration());
 

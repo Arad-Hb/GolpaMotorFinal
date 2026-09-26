@@ -20,11 +20,18 @@ namespace DomainModel.Models
 
         public bool IsRegistered { get; set; }
 
+        public DateTime IssuedAtUtc { get; set; } = DateTime.UtcNow;
+
+        public DateTime ProductAssignedAtUtc { get; set; } = DateTime.UtcNow;
+
         public string? Description { get; set; }
 
         public virtual Product Product { get; set; } = null!;
 
         public virtual ICollection<CardRegistration> CardRegistrations { get; set; }
             = new HashSet<CardRegistration>();
+
+        public virtual ICollection<ReportActivityLog> ReportActivityLogs { get; set; }
+            = new HashSet<ReportActivityLog>();
     }
 }

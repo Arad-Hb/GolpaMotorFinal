@@ -7,13 +7,16 @@ namespace DataAccess.Mappers
     {
         public static WarrantyCard ToEntity(long productId, string serialNumber, string scratchedCode, int validityMonths = 12)
         {
+            var now = DateTime.UtcNow;
             return new WarrantyCard
             {
                 ProductID = productId,
                 SerialNumber = serialNumber,
                 ScratchedCode = scratchedCode,
                 IsRegistered = false,
-                ValidityMonths = validityMonths
+                ValidityMonths = validityMonths,
+                IssuedAtUtc = now,
+                ProductAssignedAtUtc = now
             };
         }
 

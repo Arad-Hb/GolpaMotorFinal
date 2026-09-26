@@ -791,6 +791,7 @@
         e.preventDefault();
         var bar = $(this).closest("[data-filter-bar]");
         bar.find("input, select").each(function () {
+            if ($(this).is("[data-fixed-filter]")) return;
             if (this.tagName === "SELECT") this.selectedIndex = 0;
             else $(this).val("");
         });

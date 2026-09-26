@@ -5,6 +5,7 @@ namespace Framework.Common.Extensions
     public static class DateTimeExtensions
     {
         private static readonly PersianCalendar Calendar = new();
+        private static readonly TimeZoneInfo IranTimeZone = ResolveIranTimeZone();
 
         private static readonly string[] WeekDays =
         {
@@ -91,5 +92,46 @@ namespace Framework.Common.Extensions
         public static int GetPersianYear(this DateTime date) => Calendar.GetYear(date);
 
         public static int GetPersianMonth(this DateTime date) => Calendar.GetMonth(date);
+
+        public static DateTime? JalaliStartOfDayUtc(this string? jalali)
+        {
+            var local = jalali.ToGregorianDate();
+            return local.HasValue
+                ? TimeZoneInfo.ConvertTimeToUtc(
+                    DateTime.SpecifyKind(local.Value.Date, DateTimeKind.Unspecified),
+                    IranTimeZone)
+                : null;
+        }
+
+        public static DateTime? JalaliEndExclusiveUtc(this string? jalali)
+        {
+            var local = jalali.ToGregorianDate();
+            return local.HasValue
+                ? TimeZoneInfo.ConvertTimeToUtc(
+                    DateTime.SpecifyKind(local.Value.Date.AddDays(1), DateTimeKind.Unspecified),
+                    IranTimeZone)
+                : null;
+        }
+
+        public static DateTime ToIranTime(this DateTime utc)
+            => TimeZoneInfo.ConvertTimeFromUtc(
+                DateTime.SpecifyKind(utc, DateTimeKind.Utc),
+                IranTimeZone);
+
+        private static TimeZoneInfo ResolveIranTimeZone()
+        {
+            foreach (var id in new[] { "Iran Standard Time", "Asia/Tehran" })
+            {
+                try
+                {
+                    return TimeZoneInfo.FindSystemTimeZoneById(id);
+                }
+                catch (TimeZoneNotFoundException)
+                {
+                }
+            }
+
+            return TimeZoneInfo.Utc;
+        }
     }
 }

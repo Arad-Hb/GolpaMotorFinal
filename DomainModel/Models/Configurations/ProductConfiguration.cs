@@ -23,6 +23,11 @@ namespace DomainModel.Models.Configurations
 
             builder.Property(x => x.ImageUrl)
                 .HasMaxLength(200);
+
+            builder.Property(x => x.CreatedAtUtc)
+                .HasDefaultValueSql("SYSUTCDATETIME()");
+
+            builder.HasIndex(x => x.CreatedAtUtc);
         }
     }
 }

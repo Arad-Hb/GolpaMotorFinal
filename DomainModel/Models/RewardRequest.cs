@@ -30,5 +30,8 @@ namespace DomainModel.Models
 
         public virtual ICollection<PointTransaction> PointTransactions { get; set; }
             = new HashSet<PointTransaction>();
+
+        public virtual ICollection<ReportActivityLog> ReportActivityLogs { get; set; }
+            = new HashSet<ReportActivityLog>();
     }
 }

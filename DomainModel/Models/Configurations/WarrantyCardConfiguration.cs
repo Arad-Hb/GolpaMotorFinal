@@ -25,12 +25,21 @@ namespace DomainModel.Models.Configurations
             builder.Property(x => x.Description)
                 .HasMaxLength(500);
 
+            builder.Property(x => x.IssuedAtUtc)
+                .HasDefaultValueSql("SYSUTCDATETIME()");
+
+            builder.Property(x => x.ProductAssignedAtUtc)
+                .HasDefaultValueSql("SYSUTCDATETIME()");
+
             builder.HasOne(x => x.Product)
                 .WithMany(x => x.WarrantyCards)
                 .HasForeignKey(x => x.ProductID);
 
             builder.HasIndex(x => x.SerialNumber)
                 .IsUnique();
+
+            builder.HasIndex(x => new { x.ProductID, x.IssuedAtUtc });
+            builder.HasIndex(x => new { x.ProductID, x.ProductAssignedAtUtc });
         }
     }
 }

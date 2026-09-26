@@ -7,8 +7,7 @@
 
 <ul class="nav nav-tabs mb-3" role="tablist">
     <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#reportUsers" type="button">گزارش کاربران</button></li>
-    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#reportWarranty" type="button">گزارش کارت گارانتی</button></li>
-    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#reportProducts" type="button">گزارش محصول</button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#reportProductWarranty" type="button">گزارش کارت‌های گارانتی بر اساس محصول</button></li>
     <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#reportRewards" type="button">گزارش پاداش</button></li>
 </ul>
 
@@ -28,24 +27,15 @@
             }
         })
     </div>
-    <div class="tab-pane fade" id="reportWarranty">
+    <div class="tab-pane fade" id="reportProductWarranty">
         @await Html.PartialAsync("_CrudPage", new CrudIndexViewModel
         {
-            GridId = "WarrantyReportGrid",
-            ListHeading = "گزارش کارت گارانتی",
-            FilterPartial = "_WarrantyReportFilterBar",
-            FilterModel = Model.Products
-        })
-    </div>
-    <div class="tab-pane fade" id="reportProducts">
-        @await Html.PartialAsync("_CrudPage", new CrudIndexViewModel
-        {
-            GridId = "ProductReportGrid",
-            ListHeading = "گزارش محصول",
-            FilterPartial = "_ProductReportFilterBar",
-            FilterModel = new ProductReportFilterBarViewModel
+            GridId = "ProductWarrantyReportGrid",
+            ListHeading = "گزارش یکپارچه محصول و کارت گارانتی",
+            FilterPartial = "_ProductWarrantyReportFilterBar",
+            FilterModel = new ProductWarrantyReportFilterBarViewModel
             {
-                YearNow = DateTime.Today.GetPersianYear()
+                Products = Model.Products
             }
         })
     </div>

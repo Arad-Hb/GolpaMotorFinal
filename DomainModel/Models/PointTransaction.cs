@@ -35,5 +35,8 @@ namespace DomainModel.Models
         public virtual RewardRequest RewardRequest { get; set; } = null!;
 
         public virtual PaymentTransaction? PaymentTransaction { get; set; }
+
+        public virtual ICollection<ReportActivityLog> ReportActivityLogs { get; set; }
+            = new HashSet<ReportActivityLog>();
     }
 }

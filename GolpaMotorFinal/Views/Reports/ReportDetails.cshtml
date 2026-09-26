@@ -1,0 +1,20 @@
+@model GolpaMotorFinal.Models.ViewModels.Reports.ReportDetailsPageViewModel
+@using GolpaMotorFinal.Models.ViewModels.CRUD
+@{
+    Layout = "_AdminLayout";
+}
+
+<div class="mb-3">
+    <a href="/Reports/Index" class="btn btn-sm btn-outline-secondary">
+        <i class="fa fa-arrow-right"></i>
+        بازگشت به گزارش‌ها
+    </a>
+</div>
+
+@await Html.PartialAsync("_CrudPage", new CrudIndexViewModel
+{
+    GridId = Model.GridId,
+    ListHeading = Model.Title,
+    FilterPartial = Model.FilterPartial,
+    FilterModel = Model.Filter
+})

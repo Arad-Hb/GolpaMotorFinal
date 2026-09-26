@@ -1,6 +1,7 @@
 using Application.Services;
 using DataAccess.Services;
 using DomainModel.ViewModels.User;
+using DomainModel.ViewModels.Reports;
 using Framework.Common.Extensions;
 using GolpaMotorFinal.Helpers;
 using GolpaMotorFinal.Mappers;
@@ -124,5 +125,153 @@ namespace GolpaMotorFinal.Controllers
                 FilterUrl.Combine("/Reports/Rewards", new { fromJalali, toJalali }));
             return ViewComponent("CrudGrid", new { model = grid });
         }
+
+        [HttpGet]
+        public async Task<IActionResult> ProductWarranty(ProductWarrantyReportSearchModel sm)
+        {
+            sm.FromUtc = sm.FromJalali.JalaliStartOfDayUtc();
+            sm.ToUtcExclusive = sm.ToJalali.JalaliEndExclusiveUtc();
+            sm.PageSize = PaginationViewModel.DefaultPageSize;
+            var page = await reports.SearchProductWarranty(sm);
+            var grid = AdminListGrids.BuildProductWarrantyReportGrid(page.Items);
+            CrudGridPager.Attach(
+                grid,
+                "ProductWarrantyReportGrid",
+                page.PageIndex,
+                page.PageCount,
+                page.RecordCount,
+                FilterUrl.Combine("/Reports/ProductWarranty", new
+                {
+                    sm.ProductID,
+                    sm.SearchTerm,
+                    sm.IsRegistered,
+                    sm.CountFrom,
+                    sm.CountTo,
+                    sm.PointsFrom,
+                    sm.PointsTo,
+                    sm.FromJalali,
+                    sm.ToJalali
+                }),
+                page.PageSize);
+            return ViewComponent("CrudGrid", new { model = grid });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Activities(ReportActivitySearchModel sm)
+        {
+            sm.FromUtc = sm.FromJalali.JalaliStartOfDayUtc();
+            sm.ToUtcExclusive = sm.ToJalali.JalaliEndExclusiveUtc();
+            sm.PageSize = PaginationViewModel.DefaultPageSize;
+            var page = await reports.SearchActivities(sm);
+            var grid = AdminListGrids.BuildReportActivityGrid(page.Items);
+            CrudGridPager.Attach(
+                grid,
+                "ReportActivityGrid",
+                page.PageIndex,
+                page.PageCount,
+                page.RecordCount,
+                ActivityUrl("/Reports/Activities", sm),
+                page.PageSize);
+            return ViewComponent("CrudGrid", new { model = grid });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> ProductCards(ReportActivitySearchModel sm)
+        {
+            sm.FromUtc = sm.FromJalali.JalaliStartOfDayUtc();
+            sm.ToUtcExclusive = sm.ToJalali.JalaliEndExclusiveUtc();
+            sm.PageSize = PaginationViewModel.DefaultPageSize;
+            var page = await reports.SearchProductCards(sm);
+            var grid = AdminListGrids.BuildProductCardDetailsGrid(page.Items);
+            CrudGridPager.Attach(
+                grid,
+                "ProductCardDetailGrid",
+                page.PageIndex,
+                page.PageCount,
+                page.RecordCount,
+                ActivityUrl("/Reports/ProductCards", sm),
+                page.PageSize);
+            return ViewComponent("CrudGrid", new { model = grid });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> ProductDetails(long id)
+        {
+            var product = await products.GetDetails(id);
+            if (product == null)
+                return NotFound();
+
+            return View("ReportDetails", new ReportDetailsPageViewModel
+            {
+                Title = $"جزئیات کارت‌های محصول «{product.ProductName}»",
+                GridId = "ProductCardDetailGrid",
+                FilterPartial = "_ProductCardDetailFilterBar",
+                Filter = new ReportActivityFilterBarViewModel
+                {
+                    Url = "/Reports/ProductCards",
+                    Target = "#ProductCardDetailGrid",
+                    ProductID = id,
+                    Products = await products.GetAll()
+                }
+            });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> UserDetails(string id)
+            => View("ReportDetails", await DetailPage(
+                $"گردش کامل کاربر", userId: id));
+
+        [HttpGet]
+        public async Task<IActionResult> CardDetails(long id)
+            => View("ReportDetails", await DetailPage(
+                $"تاریخچه کارت گارانتی شماره {id}", warrantyCardId: id));
+
+        [HttpGet]
+        public async Task<IActionResult> RewardDetails(int id)
+            => View("ReportDetails", await DetailPage(
+                $"جزئیات درخواست پاداش شماره {id}", rewardRequestId: id));
+
+        [HttpGet]
+        public async Task<IActionResult> RewardCatalogDetails(int id)
+            => View("ReportDetails", await DetailPage(
+                "جزئیات درخواست‌های پاداش", rewardCatalogId: id));
+
+        private async Task<ReportDetailsPageViewModel> DetailPage(
+            string title,
+            string? userId = null,
+            long? warrantyCardId = null,
+            int? rewardRequestId = null,
+            int? rewardCatalogId = null)
+        {
+            return new ReportDetailsPageViewModel
+            {
+                Title = title,
+                Filter = new ReportActivityFilterBarViewModel
+                {
+                    Products = await products.GetAll(),
+                    UserID = userId,
+                    WarrantyCardID = warrantyCardId,
+                    RewardRequestID = rewardRequestId,
+                    RewardCatalogID = rewardCatalogId
+                }
+            };
+        }
+
+        private static string ActivityUrl(string path, ReportActivitySearchModel sm)
+            => FilterUrl.Combine(path, new
+            {
+                sm.SearchTerm,
+                sm.ProductID,
+                sm.UserID,
+                sm.WarrantyCardID,
+                sm.RewardRequestID,
+                sm.RewardCatalogID,
+                sm.ActivityType,
+                sm.RewardStatus,
+                sm.PointsFrom,
+                sm.PointsTo,
+                sm.FromJalali,
+                sm.ToJalali
+            });
     }
 }

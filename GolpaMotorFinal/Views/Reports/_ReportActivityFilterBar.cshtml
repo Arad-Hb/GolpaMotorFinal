@@ -1,0 +1,64 @@
+@model ReportActivityFilterBarViewModel
+<form class="table_filter_bar" data-filter-bar data-url="@Model.Url" data-target="@Model.Target">
+    @if (Model.ProductID.HasValue)
+    {
+        <input type="hidden" name="ProductID" value="@Model.ProductID" />
+    }
+    else
+    {
+        <select name="ProductID" class="form-select">
+            <option value="">همه محصولات</option>
+            @foreach (var product in Model.Products)
+            {
+                <option value="@product.ProductID">@product.ProductName</option>
+            }
+        </select>
+    }
+    @if (!string.IsNullOrWhiteSpace(Model.UserID))
+    {
+        <input type="hidden" name="UserID" value="@Model.UserID" />
+    }
+    @if (Model.WarrantyCardID.HasValue)
+    {
+        <input type="hidden" name="WarrantyCardID" value="@Model.WarrantyCardID" />
+    }
+    @if (Model.RewardRequestID.HasValue)
+    {
+        <input type="hidden" name="RewardRequestID" value="@Model.RewardRequestID" />
+    }
+    @if (Model.RewardCatalogID.HasValue)
+    {
+        <input type="hidden" name="RewardCatalogID" value="@Model.RewardCatalogID" />
+    }
+
+    <input type="search" name="SearchTerm" class="form-control" placeholder="کاربر، موبایل، محصول یا کارت..." />
+
+    <select name="ActivityType" class="form-select">
+        <option value="">همه رویدادها</option>
+        <option value="CardRegistered">فعال‌سازی کارت</option>
+        <option value="RewardRequested">درخواست پاداش</option>
+        <option value="RewardApproved">تأیید پاداش</option>
+        <option value="RewardRejected">رد پاداش</option>
+    </select>
+
+    <select name="RewardStatus" class="form-select">
+        <option value="">همه وضعیت‌ها</option>
+        <option value="در انتظار بررسی">در انتظار بررسی</option>
+        <option value="تایید شده">تأیید شده</option>
+        <option value="رد شده">رد شده</option>
+    </select>
+
+    @await Component.InvokeAsync("DateRangeFilter", new DateRangeFilterViewModel
+    {
+        FromName = "FromJalali",
+        ToName = "ToJalali",
+        EmptyLabel = "بازه رخداد",
+        FromPlaceholder = "از تاریخ",
+        ToPlaceholder = "تا تاریخ"
+    })
+
+    @await Html.PartialAsync("_NumberRangeFilter", NumberRangeFilterViewModel.For(
+        "PointsFrom", "PointsTo", "تغییر امتیاز", "حداقل", "حداکثر"))
+
+    @await Html.PartialAsync("_FilterReset")
+</form>

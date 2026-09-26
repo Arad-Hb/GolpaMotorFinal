@@ -1,0 +1,16 @@
+@model ReportActivityFilterBarViewModel
+<form class="table_filter_bar" data-filter-bar data-url="@Model.Url" data-target="@Model.Target">
+    <input type="hidden" name="ProductID" value="@Model.ProductID" data-fixed-filter />
+    <input type="search" name="SearchTerm" class="form-control" placeholder="سریال، رمز یا مشتری..." />
+
+    @await Component.InvokeAsync("DateRangeFilter", new DateRangeFilterViewModel
+    {
+        FromName = "FromJalali",
+        ToName = "ToJalali",
+        EmptyLabel = "بازه صدور کارت",
+        FromPlaceholder = "از تاریخ",
+        ToPlaceholder = "تا تاریخ"
+    })
+
+    @await Html.PartialAsync("_FilterReset")
+</form>

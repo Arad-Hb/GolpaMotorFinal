@@ -49,6 +49,7 @@ builder.Services.AddScoped<IWarrantyCardRepository, WarrantyCardRepository>();
 builder.Services.AddScoped<IRewardCatalogRepository, RewardCatalogRepository>();
 builder.Services.AddScoped<IRewardRequestRepository, RewardRequestRepository>();
 builder.Services.AddScoped<IReportRepository, ReportRepository>();
+builder.Services.AddScoped<IReportActivityWriter, ReportActivityWriter>();
 builder.Services.AddScoped<ILookupRepository, LookupRepository>();
 
 builder.Services.AddScoped<IProductService, ProductService>();

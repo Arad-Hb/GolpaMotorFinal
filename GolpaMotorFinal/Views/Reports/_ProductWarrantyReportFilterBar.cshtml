@@ -1,0 +1,40 @@
+@model ProductWarrantyReportFilterBarViewModel
+<form class="table_filter_bar" data-filter-bar data-url="/Reports/ProductWarranty" data-target="#ProductWarrantyReportGrid">
+    <input type="search" name="SearchTerm" class="form-control" placeholder="نام محصول..." />
+
+    <select name="ProductID" class="form-select">
+        <option value="">همه محصولات</option>
+        @foreach (var product in Model.Products)
+        {
+            <option value="@product.ProductID">@product.ProductName</option>
+        }
+    </select>
+
+    <select name="IsRegistered" class="form-select">
+        <option value="">همه کارت‌ها</option>
+        <option value="true">فعال‌شده</option>
+        <option value="false">آزاد</option>
+    </select>
+
+    @await Component.InvokeAsync("DateRangeFilter", new DateRangeFilterViewModel
+    {
+        FromName = "FromJalali",
+        ToName = "ToJalali",
+        EmptyLabel = "بازه صدور/فعال‌سازی",
+        FromPlaceholder = "از تاریخ",
+        ToPlaceholder = "تا تاریخ"
+    })
+
+    @await Html.PartialAsync("_NumberRangeFilter", NumberRangeFilterViewModel.For(
+        "CountFrom", "CountTo", "تعداد کارت", "حداقل", "حداکثر"))
+
+    @await Html.PartialAsync("_NumberRangeFilter", NumberRangeFilterViewModel.For(
+        "PointsFrom", "PointsTo", "امتیاز اعطایی", "حداقل", "حداکثر"))
+
+    @await Html.PartialAsync("_FilterReset")
+</form>
+
+<div class="alert alert-light border small mt-2 mb-3">
+    «مصرف مشتریان» و «مانده مشتریان» مربوط به کیف امتیاز فعلی مشتریانی است که محصول را ثبت کرده‌اند؛
+    اگر یک مشتری چند محصول داشته باشد، مقدار او در گزارش هر محصول مرتبط دیده می‌شود.
+</div>

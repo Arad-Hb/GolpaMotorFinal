@@ -72,5 +72,8 @@ namespace DomainModel.Models
 
         public virtual ICollection<RewardRequest> RewardRequests { get; set; }
             = new HashSet<RewardRequest>();
+
+        public virtual ICollection<ReportActivityLog> ReportActivityLogs { get; set; }
+            = new HashSet<ReportActivityLog>();
     }
 }

@@ -218,8 +218,8 @@ namespace GolpaMotorFinal.Helpers
 
             foreach (var row in items)
             {
-                var gridRow = new GridRow { Key = row.Title };
-                gridRow.Columns.Add(Text(row.Title));
+                var gridRow = new GridRow { Key = row.RewardCatalogID.ToString() };
+                gridRow.Columns.Add(Link(row.Title, $"/Reports/RewardCatalogDetails/{row.RewardCatalogID}"));
                 gridRow.Columns.Add(Number(row.RequestCount));
                 gridRow.Columns.Add(Number(row.ApprovedCount));
                 gridRow.Columns.Add(Number(row.RejectedCount));
@@ -238,7 +238,7 @@ namespace GolpaMotorFinal.Helpers
             foreach (var item in users)
             {
                 var row = new GridRow { Key = item.UserID };
-                row.Columns.Add(Text(item.FullName));
+                row.Columns.Add(Link(item.FullName, $"/Reports/UserDetails/{Uri.EscapeDataString(item.UserID)}"));
                 row.Columns.Add(Text(item.PhoneNumber));
                 row.Columns.Add(Text(item.RoleName));
                 row.Columns.Add(Text(item.Province));
@@ -326,6 +326,132 @@ namespace GolpaMotorFinal.Helpers
             return grid;
         }
 
+        public static CrudGridViewModel BuildProductWarrantyReportGrid(
+            IEnumerable<ProductWarrantyReportRow> items)
+        {
+            var grid = new CrudGridViewModel
+            {
+                GridId = "ProductWarrantyReportGrid",
+                EmptyMessage = "داده‌ای یافت نشد",
+                ShowRowNumber = true
+            };
+            grid.Headers.AddRange(new[]
+            {
+                "محصول", "تاریخ ثبت", "کل", "فعال", "آزاد", "مشتری",
+                "امتیاز", "درخواست‌داده", "بدون درخواست", "درخواست",
+                "مصرف", "مانده"
+            });
+
+            foreach (var item in items)
+            {
+                var row = new GridRow { Key = item.ProductID.ToString() };
+                row.Columns.Add(Link(item.ProductName, $"/Reports/ProductDetails/{item.ProductID}"));
+                row.Columns.Add(Text(item.CreatedAtUtc.ToIranTime().ToPersianDate()));
+                row.Columns.Add(Number(item.TotalCards));
+                row.Columns.Add(Number(item.RegisteredCards));
+                row.Columns.Add(Number(item.UnregisteredCards));
+                row.Columns.Add(Number(item.UniqueCustomers));
+                row.Columns.Add(Number(item.AwardedPoints));
+                row.Columns.Add(Number(item.CustomersWithRewardRequest));
+                row.Columns.Add(Number(item.CustomersWithoutRewardRequest));
+                row.Columns.Add(Number(item.RewardRequestCount));
+                row.Columns.Add(Number(item.RegistrantSettledPoints));
+                row.Columns.Add(Number(item.RegistrantRemainedPoints, "fw-bold text-success"));
+                grid.Rows.Add(row);
+            }
+
+            return grid;
+        }
+
+        public static CrudGridViewModel BuildReportActivityGrid(
+            IEnumerable<ReportActivityItem> items)
+        {
+            var grid = new CrudGridViewModel
+            {
+                GridId = "ReportActivityGrid",
+                EmptyMessage = "رویدادی یافت نشد",
+                ShowRowNumber = true
+            };
+            grid.Headers.AddRange(new[]
+            {
+                "تاریخ", "نوع", "کاربر", "محصول", "کارت/رمز", "پاداش", "وضعیت",
+                "تغییر امتیاز", "کل امتیاز", "تسویه", "مانده", "قابل مصرف"
+            });
+
+            foreach (var item in items)
+            {
+                var row = new GridRow { Key = item.ReportActivityLogID.ToString() };
+                row.Columns.Add(Text(item.OccurredAtUtc.ToIranTime().ToPersianDateTime()));
+                row.Columns.Add(Text(ActivityTitle(item.ActivityType)));
+                row.Columns.Add(Link(item.UserName, $"/Reports/UserDetails/{Uri.EscapeDataString(item.UserID)}"));
+                row.Columns.Add(item.ProductID.HasValue
+                    ? Link(item.ProductName ?? "-", $"/Reports/ProductDetails/{item.ProductID}")
+                    : Text("-"));
+                row.Columns.Add(item.WarrantyCardID.HasValue
+                    ? Link(
+                        $"{item.SerialNumber} / {item.ScratchedCode}",
+                        $"/Reports/CardDetails/{item.WarrantyCardID}")
+                    : Text("-"));
+                row.Columns.Add(item.RewardRequestID.HasValue
+                    ? Link(item.RewardTitle ?? "درخواست پاداش", $"/Reports/RewardDetails/{item.RewardRequestID}")
+                    : Text("-"));
+                row.Columns.Add(Text(item.StatusTitle));
+                row.Columns.Add(Number(item.PointsDelta));
+                row.Columns.Add(Number(item.TotalEarnedPoints));
+                row.Columns.Add(Number(item.TotalSettledPoints));
+                row.Columns.Add(Number(item.RemainedPoints));
+                row.Columns.Add(Number(item.AvailablePoints, "fw-bold text-success"));
+                grid.Rows.Add(row);
+            }
+
+            return grid;
+        }
+
+        public static CrudGridViewModel BuildProductCardDetailsGrid(
+            IEnumerable<ProductCardDetailItem> items)
+        {
+            var grid = new CrudGridViewModel
+            {
+                GridId = "ProductCardDetailGrid",
+                EmptyMessage = "کارتی یافت نشد",
+                ShowRowNumber = true
+            };
+            grid.Headers.AddRange(new[]
+            {
+                "سریال", "رمز", "تاریخ صدور", "وضعیت",
+                "مشتری", "تاریخ رجیستر", "امتیاز"
+            });
+
+            foreach (var item in items)
+            {
+                var row = new GridRow { Key = item.WarrantyCardID.ToString() };
+                row.Columns.Add(Link(item.SerialNumber, $"/Reports/CardDetails/{item.WarrantyCardID}"));
+                row.Columns.Add(Text(item.ScratchedCode));
+                row.Columns.Add(Text(item.IssuedAtUtc.ToIranTime().ToPersianDateTime()));
+                row.Columns.Add(Text(item.IsRegistered ? "فعال‌شده" : "آزاد"));
+                row.Columns.Add(!string.IsNullOrWhiteSpace(item.UserID)
+                    ? Link(item.UserName ?? item.PhoneNumber ?? "نامشخص",
+                        $"/Reports/UserDetails/{Uri.EscapeDataString(item.UserID)}")
+                    : Text("-"));
+                row.Columns.Add(Text(item.RegisteredAtUtc.HasValue
+                    ? item.RegisteredAtUtc.Value.ToIranTime().ToPersianDateTime()
+                    : "-"));
+                row.Columns.Add(Number(item.AwardedPoints));
+                grid.Rows.Add(row);
+            }
+
+            return grid;
+        }
+
+        private static string ActivityTitle(string type) => type switch
+        {
+            ReportActivityTypes.CardRegistered => "فعال‌سازی کارت",
+            ReportActivityTypes.RewardRequested => "درخواست پاداش",
+            ReportActivityTypes.RewardApproved => "تأیید پاداش",
+            ReportActivityTypes.RewardRejected => "رد پاداش",
+            _ => type
+        };
+
         private static GridAction Modal(string text, string icon, string url, string id, string idName, string css)
         {
             return new GridAction
@@ -351,6 +477,13 @@ namespace GolpaMotorFinal.Helpers
             Type = GridColumnType.Number,
             Value = value ?? 0,
             CssClass = css
+        };
+
+        private static GridColumn Link(object? value, string url) => new()
+        {
+            Type = GridColumnType.Text,
+            Value = value ?? "-",
+            ButtonUrl = url
         };
     }
 }

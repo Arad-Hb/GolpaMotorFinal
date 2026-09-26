@@ -22,8 +22,12 @@ namespace DomainModel.Models
 
         public bool IsAvailable { get; set; }
 
-        //public DateTime CreatedDate { get; set; } = DateTime.Now; 
+        public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
+
         public virtual ICollection<WarrantyCard> WarrantyCards { get; set; }
             = new HashSet<WarrantyCard>();
+
+        public virtual ICollection<ReportActivityLog> ReportActivityLogs { get; set; }
+            = new HashSet<ReportActivityLog>();
     }
 }
