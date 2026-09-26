@@ -36,9 +36,6 @@ namespace ApplicationService.Services
             this.cache = cache;
         }
 
-        public Task<IEnumerable<CustomerType>> GetCustomerTypes()
-            => registrations.GetCustomerTypes();
-
         public async Task<(List<WarrantyCardListItem> Items, int PageIndex, int PageCount, int RecordCount)> SearchCards(WarrantyCardSearchModel sm)
         {
             sm ??= new WarrantyCardSearchModel();

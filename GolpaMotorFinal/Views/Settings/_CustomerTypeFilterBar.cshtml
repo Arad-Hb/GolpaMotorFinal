@@ -1,0 +1,4 @@
+<form class="table_filter_bar" data-filter-bar data-url="/Settings/List" data-target="#CustomerTypeGrid">
+    @await Html.PartialAsync("_FilterSearch", FilterSearchViewModel.For("title", "جستجوی عنوان"))
+    @await Html.PartialAsync("_FilterReset")
+</form>

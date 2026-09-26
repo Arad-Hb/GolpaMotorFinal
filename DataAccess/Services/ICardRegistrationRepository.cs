@@ -15,7 +15,6 @@ namespace DataAccess.Services
         Task AddTransaction(PointTransaction entity);
         Task<long> GetTotalPoints(string userId);
         Task AddUserCustomerType(UserCustomerType entity);
-        Task<IEnumerable<CustomerType>> GetCustomerTypes();
         Task<bool> IsCardAlreadyRegisteredByUserAsync(int CustomerTypeId, string userId);
         Task SaveChangesAsync();
         Task<List<CardRegistration>> GetByUserAsync(string userId);

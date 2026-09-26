@@ -1,0 +1,14 @@
+@using GolpaMotorFinal.Models.ViewModels.CRUD
+@{
+    Layout = "_AdminLayout";
+}
+
+@await Html.PartialAsync("_CrudPage", new CrudIndexViewModel
+{
+    GridId = "CustomerTypeGrid",
+    CreateUrl = Url.Action("Create", "Settings") ?? "/Settings/Create",
+    CreateTitle = "افزودن نوع مشتری",
+    CreateButtonText = "افزودن",
+    ListHeading = "انواع مشتری",
+    FilterPartial = "_CustomerTypeFilterBar"
+})

@@ -1,6 +1,5 @@
 using Application.Services;
 using DataAccess.Services;
-using DomainModel.Models;
 using DomainModel.ViewModels.User;
 using Framework.Common;
 
@@ -101,14 +100,5 @@ namespace ApplicationService.Services
             sm ??= new UserSearchModel();
             return repo.Search(sm);
         }
-
-        public Task<List<Province>> GetProvinces()
-            => repo.GetProvinces();
-
-        public Task<List<City>> GetCitiesByProvinceId(int provinceId)
-            => repo.GetCitiesByProvinceId(provinceId);
-
-        public Task<List<CustomerType>> GetCustomerTypes()
-            => repo.GetCustomerTypes();
     }
 }

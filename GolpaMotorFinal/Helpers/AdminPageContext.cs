@@ -31,6 +31,7 @@ namespace GolpaMotorFinal.Helpers
                 "usermanagement" => ("مدیریت کاربران", "کاربران"),
                 "rewardmanagement" => ("مدیریت پاداش", "پاداش"),
                 "reports" => ("گزارشات", "گزارشات"),
+                "settings" => ("تنظیمات", "تنظیمات"),
                 _ => ("داشبورد", "داشبورد")
             };
         }

@@ -6,6 +6,7 @@ using DataAccess.Services;
 using DomainModel.DataSeeder;
 using DomainModel.Models;
 using GolpaMotorFinal.FrameworkUI.Services;
+using GolpaMotorFinal.Helpers;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using OfficeOpenXml;
@@ -48,6 +49,7 @@ builder.Services.AddScoped<IWarrantyCardRepository, WarrantyCardRepository>();
 builder.Services.AddScoped<IRewardCatalogRepository, RewardCatalogRepository>();
 builder.Services.AddScoped<IRewardRequestRepository, RewardRequestRepository>();
 builder.Services.AddScoped<IReportRepository, ReportRepository>();
+builder.Services.AddScoped<ILookupRepository, LookupRepository>();
 
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IFileManager, FileManager>();
@@ -55,6 +57,8 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IRewardService, RewardService>();
 builder.Services.AddScoped<IWarrantyService, WarrantyService>();
 builder.Services.AddScoped<IWarrantyExcelService, WarrantyExcelService>();
+builder.Services.AddScoped<ILookupService, LookupService>();
+builder.Services.AddScoped<LookupLists>();
 
 builder.Services.AddAntiforgery(options =>
 {

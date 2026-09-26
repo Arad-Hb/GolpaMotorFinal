@@ -65,15 +65,6 @@ namespace DataAccess.Repositories
             await db.SaveChangesAsync();
         }
 
-        public async Task<IEnumerable<CustomerType>> GetCustomerTypes()
-        {
-            return await db.CustomerTypes.Select(c => new CustomerType
-            {
-                    CustomerTypeID = c.CustomerTypeID,
-                    Title = c.Title
-            }).ToListAsync();
-        }
-
         public async Task<bool> IsRegisteredAsync(long cardId)
         {
             return await db.CardRegistrations

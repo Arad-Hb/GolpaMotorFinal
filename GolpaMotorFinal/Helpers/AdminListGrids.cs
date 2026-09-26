@@ -94,6 +94,36 @@ namespace GolpaMotorFinal.Helpers
             return grid;
         }
 
+        public static CrudGridViewModel BuildCustomerTypeGrid(IEnumerable<CustomerType> items)
+        {
+            var grid = new CrudGridViewModel { GridId = "CustomerTypeGrid", EmptyMessage = "نوع مشتری یافت نشد" };
+            grid.Headers.AddRange(new[] { "عنوان" });
+
+            foreach (var item in items)
+            {
+                var id = item.CustomerTypeID.ToString();
+                var row = new GridRow { Key = id };
+                row.Columns.Add(Text(item.Title));
+                row.Actions.Add(Modal("ویرایش", "fa fa-pen", "/Settings/Edit", id, "id", "btn btn-sm btn-outline-warning"));
+                row.Actions.Add(new GridAction
+                {
+                    ActionText = "حذف",
+                    OpenModal = false,
+                    IsDelete = true,
+                    Icon = "fa fa-trash",
+                    Url = "/Settings/Delete",
+                    Id = id,
+                    IdName = "id",
+                    CssClass = "btn btn-sm btn-outline-danger",
+                    RefreshUrl = "/Settings/List",
+                    RefreshTargetId = "CustomerTypeGrid"
+                });
+                grid.Rows.Add(row);
+            }
+
+            return grid;
+        }
+
         public static CrudGridViewModel BuildRewardRequestGrid(IEnumerable<RewardRequestListItem> items)
         {
             var grid = new CrudGridViewModel { GridId = "RequestGrid", EmptyMessage = "درخواستی یافت نشد" };

@@ -811,7 +811,7 @@
         city.html('<option value="">همه شهرها</option>');
         updateFilterSelect(city.closest(".filter-select"));
         if (id) {
-            $.get("/UserManagement/GetCitiesByProvince", { provinceId: id }, function (res) {
+            $.get("/Lookup/Cities", { provinceId: id }, function (res) {
                 var list = res && res.data ? res.data : (Array.isArray(res) ? res : []);
                 list.forEach(function (c) {
                     city.append($("<option>").val(c.cityID || c.CityID).text(c.name || c.Name));

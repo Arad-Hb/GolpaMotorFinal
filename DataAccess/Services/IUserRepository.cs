@@ -20,9 +20,6 @@ namespace DataAccess.Services
         Task<bool> Exists(string userID);
         Task<UserListComplexModel> Search(UserSearchModel sm);
         Task RemoveImage(string userID);
-        Task<List<Province>> GetProvinces();
-        Task<List<City>> GetCitiesByProvinceId(int provinceId);
-        Task<List<CustomerType>> GetCustomerTypes();
         Task<ApplicationUser?> GetByPhone(string phone);
         Task<OperationResult> CreateCustomer(string phone, string? firstName, string? lastName);
         Task EnsureCustomerRole(string userId);

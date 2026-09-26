@@ -9,7 +9,6 @@ using GolpaMotorFinal.Models.ViewModels.ProductManagement;
 using GolpaMotorFinal.Models.ViewModels.WarrantyManagement;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Security.Claims;
 
 namespace GolpaMotorFinal.Controllers
@@ -19,32 +18,25 @@ namespace GolpaMotorFinal.Controllers
         private readonly IWarrantyExcelService excelService;
         private readonly IWarrantyService warrantyService;
         private readonly IProductService products;
+        private readonly LookupLists lookups;
 
         public WarrantyManagementController(
                IWarrantyExcelService excelService,
                IWarrantyService warrantyService,
-               IProductService products)
+               IProductService products,
+               LookupLists lookups)
         {
             this.excelService = excelService;
             this.warrantyService = warrantyService;
             this.products = products;
-        }
-
-        private async Task<IEnumerable<SelectListItem>> BindCustomerTypes()
-        {
-            var types = await warrantyService.GetCustomerTypes();
-            return types.Select(t => new SelectListItem
-            {
-                Value = t.CustomerTypeID.ToString(),
-                Text = t.Title
-            });
+            this.lookups = lookups;
         }
 
         private async Task<RegisterationCardViewModel> EmptyRegisterForm()
         {
             var vm = new RegisterationCardViewModel
             {
-                CustomerTypes = await BindCustomerTypes(),
+                CustomerTypes = await lookups.CustomerTypeItems(),
                 op = new OperationResult("WarrantyRegistration")
             };
             if (TempData["SuccessMessage"] is string ok)
@@ -67,11 +59,11 @@ namespace GolpaMotorFinal.Controllers
         {
             form ??= new RegisterationCardViewModel
             {
-                CustomerTypes = await BindCustomerTypes(),
+                CustomerTypes = await lookups.CustomerTypeItems(),
                 op = new OperationResult("WarrantyRegistration")
             };
             if (form.CustomerTypes == null || !form.CustomerTypes.Any())
-                form.CustomerTypes = await BindCustomerTypes();
+                form.CustomerTypes = await lookups.CustomerTypeItems();
             form.op ??= new OperationResult("WarrantyRegistration");
 
             var productList = await products.GetAll();
@@ -234,7 +226,7 @@ namespace GolpaMotorFinal.Controllers
         private async Task<IActionResult> ShowRegisterForm(RegisterationCardViewModel request, bool fromAdmin)
         {
             request.op ??= new OperationResult("WarrantyRegistration");
-            request.CustomerTypes = await BindCustomerTypes();
+            request.CustomerTypes = await lookups.CustomerTypeItems();
             return View(fromAdmin ? "Index" : nameof(Register), fromAdmin ? await BuildIndex("register", request) : request);
         }
 

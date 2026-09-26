@@ -65,6 +65,12 @@
                     <span>گزارشات</span>
                 </a>
             </li>
+            <li class="@(IsActive("Settings") ? "active" : null)">
+                <a asp-controller="Settings" asp-action="Index">
+                    <i class="fa fa-gear blue2_color"></i>
+                    <span>تنظیمات</span>
+                </a>
+            </li>
             <li class="@(IsActive("Admin", "Profile") ? "active" : null)">
                 <a asp-controller="Admin" asp-action="Profile">
                     <i class="fa fa-user text-light"></i>

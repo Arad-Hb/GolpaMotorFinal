@@ -15,45 +15,22 @@ namespace GolpaMotorFinal.Controllers
     {
         private readonly UserManager<ApplicationUser> userManager;
         private readonly SignInManager<ApplicationUser> signInManager;
-        private readonly IUserRepository userRepository;
         private readonly ICardRegistrationRepository cardRepository;
         private readonly IFileManager fileManager;
+        private readonly LookupLists lookups;
 
         public AccountController(
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
-            IUserRepository userRepository,
             ICardRegistrationRepository cardRepository,
-            IFileManager fileManager)
+            IFileManager fileManager,
+            LookupLists lookups)
         {
             this.userManager = userManager;
             this.signInManager = signInManager;
-            this.userRepository = userRepository;
             this.cardRepository = cardRepository;
             this.fileManager = fileManager;
-        }
-
-        [HttpGet]
-        [AllowAnonymous]
-        private async Task<SelectList> BindProvince()
-        {
-            var provinces = await userRepository.GetProvinces();
-            return new SelectList(provinces, "ProvinceID", "Name");
-        }
-
-        [HttpGet]
-        [AllowAnonymous]
-        public async Task<JsonResult> GetCitiesByProvince(int provinceId)
-        {
-            var cities = await userRepository.GetCitiesByProvinceId(provinceId);
-            if (cities == null || !cities.Any())
-                return Json(new { success = false, data = Array.Empty<object>(), message = "شهری یافت نشد" });
-
-            return Json(new
-            {
-                success = true,
-                data = cities.Select(c => new { cityID = c.CityID, name = c.Name })
-            });
+            this.lookups = lookups;
         }
 
         [HttpGet]
@@ -101,7 +78,7 @@ namespace GolpaMotorFinal.Controllers
         {
             return View(new RegisterViewModel
             {
-                Provinces = await BindProvince(),
+                Provinces = await lookups.ProvinceItems(),
                 Cities = new List<SelectListItem>(),
                 ReturnUrl = returnUrl
             });
@@ -118,7 +95,7 @@ namespace GolpaMotorFinal.Controllers
 
             if (!ModelState.IsValid)
             {
-                model.Provinces = await BindProvince();
+                model.Provinces = await lookups.ProvinceItems();
                 model.Cities = new List<SelectListItem>();
                 return View(model);
             }
@@ -171,7 +148,7 @@ namespace GolpaMotorFinal.Controllers
                 }
             }
 
-            model.Provinces = await BindProvince();
+            model.Provinces = await lookups.ProvinceItems();
             model.Cities = new List<SelectListItem>();
             return View(model);
         }

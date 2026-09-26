@@ -145,7 +145,7 @@ $(document).on("change", ".js-user-province", function () {
     if (window.refreshFilterSelect) window.refreshFilterSelect(city);
     if (!provinceId) return;
 
-    $.get("/UserManagement/GetCitiesByProvince", { provinceId: provinceId }, function (res) {
+    $.get("/Lookup/Cities", { provinceId: provinceId }, function (res) {
         if (!res || !res.success || !res.data) return;
         res.data.forEach(function (item) {
             const id = item.cityID ?? item.cityId ?? item.CityID;

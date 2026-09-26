@@ -361,21 +361,6 @@ namespace DataAccess.Repositories
             return roles.FirstOrDefault() ?? string.Empty;
         }
 
-        public async Task<List<Province>> GetProvinces()
-        {
-            return await db.Provinces.ToListAsync();
-        }
-
-        public async Task<List<City>> GetCitiesByProvinceId(int provinceId)
-        {
-            return await db.Cities.Where(c => c.ProvinceID == provinceId).ToListAsync();
-        }
-
-        public async Task<List<CustomerType>> GetCustomerTypes()
-        {
-            return await db.CustomerTypes.OrderBy(x => x.Title).ToListAsync();
-        }
-
         public async Task<UserListComplexModel> Search(UserSearchModel sm)
         {
             var q = db.Users.Where(u => !u.IsDeleted).AsQueryable();

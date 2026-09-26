@@ -21,21 +21,24 @@ namespace GolpaMotorFinal.Controllers
         private readonly IUserService service;
         private readonly IFileManager fileManager;
         private readonly IRewardService rewards;
+        private readonly LookupLists lookups;
 
         public UserManagementController(
             IUserService service,
             IFileManager fileManager,
-            IRewardService rewards)
+            IRewardService rewards,
+            LookupLists lookups)
         {
             this.service = service;
             this.fileManager = fileManager;
             this.rewards = rewards;
+            this.lookups = lookups;
         }
 
         public async Task<IActionResult> Index()
         {
-            ViewBag.CustomerTypes = await service.GetCustomerTypes();
-            ViewBag.Provinces = await service.GetProvinces();
+            ViewBag.CustomerTypes = await lookups.CustomerTypes();
+            ViewBag.Provinces = await lookups.Provinces();
             return View();
         }
 
@@ -150,8 +153,8 @@ namespace GolpaMotorFinal.Controllers
         [HttpGet]
         public async Task<IActionResult> Create()
         {
-            var provinces = await service.GetProvinces();
-            var customerTypes = await service.GetCustomerTypes();
+            var provinces = await lookups.Provinces();
+            var customerTypes = await lookups.CustomerTypes();
             var cities = new List<DomainModel.Models.City>();
 
             var form = new CrudFormViewModel
@@ -208,10 +211,10 @@ namespace GolpaMotorFinal.Controllers
             if (user == null)
                 return NotFound();
 
-            var provinces = await service.GetProvinces();
-            var customerTypes = await service.GetCustomerTypes();
+            var provinces = await lookups.Provinces();
+            var customerTypes = await lookups.CustomerTypes();
             var cities = user.ProvinceID.HasValue
-                ? await service.GetCitiesByProvinceId(user.ProvinceID.Value)
+                ? await lookups.Cities(user.ProvinceID.Value)
                 : new List<DomainModel.Models.City>();
 
             var form = new CrudFormViewModel
@@ -289,22 +292,6 @@ namespace GolpaMotorFinal.Controllers
             if (result.Success)
                 RemoveUserImage(user?.ProfileImageUrl);
             return Json(result);
-        }
-
-        [HttpGet]
-        public async Task<JsonResult> GetCitiesByProvince(int provinceId)
-        {
-            var cities = await service.GetCitiesByProvinceId(provinceId);
-            if (cities == null || !cities.Any())
-            {
-                return Json(new { success = false, data = Array.Empty<object>(), message = "شهری یافت نشد" });
-            }
-
-            return Json(new
-            {
-                success = true,
-                data = cities.Select(c => new { cityID = c.CityID, name = c.Name })
-            });
         }
 
         [HttpGet]

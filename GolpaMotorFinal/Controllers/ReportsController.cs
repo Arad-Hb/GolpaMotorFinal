@@ -17,21 +17,24 @@ namespace GolpaMotorFinal.Controllers
         private readonly IUserService users;
         private readonly IProductService products;
         private readonly IReportRepository reports;
+        private readonly LookupLists lookups;
 
         public ReportsController(
             IUserService users,
             IProductService products,
-            IReportRepository reports)
+            IReportRepository reports,
+            LookupLists lookups)
         {
             this.users = users;
             this.products = products;
             this.reports = reports;
+            this.lookups = lookups;
         }
 
         public async Task<IActionResult> Index()
         {
-            ViewBag.CustomerTypes = await users.GetCustomerTypes();
-            ViewBag.Provinces = await users.GetProvinces();
+            ViewBag.CustomerTypes = await lookups.CustomerTypes();
+            ViewBag.Provinces = await lookups.Provinces();
 
             return View(new ReportsIndexViewModel
             {

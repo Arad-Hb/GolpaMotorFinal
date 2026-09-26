@@ -21,7 +21,7 @@
         var city = $(this).closest("form").find(".js-user-city");
         city.empty().append($("<option>").val("").text("انتخاب شهر"));
         if (!provinceId) return;
-        $.get("/Account/GetCitiesByProvince", { provinceId: provinceId }, function (res) {
+        $.get("/Lookup/Cities", { provinceId: provinceId }, function (res) {
             if (!res || !res.success || !res.data) return;
             res.data.forEach(function (item) {
                 city.append($("<option>").val(item.cityID).text(item.name));

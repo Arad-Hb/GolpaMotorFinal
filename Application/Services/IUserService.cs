@@ -1,4 +1,3 @@
-using DomainModel.Models;
 using DomainModel.ViewModels.User;
 using Framework.Common;
 
@@ -14,8 +13,5 @@ namespace Application.Services
         Task<UserDetailsModel?> GetDetails(string userID);
         Task<UserDetailsModel> GetUserDetail(string search);
         Task<UserListComplexModel> Search(UserSearchModel sm);
-        Task<List<Province>> GetProvinces();
-        Task<List<City>> GetCitiesByProvinceId(int provinceId);
-        Task<List<CustomerType>> GetCustomerTypes();
     }
 }
