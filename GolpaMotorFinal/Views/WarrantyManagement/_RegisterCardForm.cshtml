@@ -24,8 +24,8 @@
         {
             <div class="card mb-3 warranty-row">
                 <div class="card-body">
-                    <div class="row g-3 align-items-end">
-                        <div class="col-12 col-md-10">
+                    <div class="row g-3 align-items-end warranty-code-row">
+                        <div class="col-12 col-md-10 warranty-code-field">
                             <label class="form-label">رمز</label>
                             <input type="text"
                                    name="ScratchedCode[@i]"
@@ -36,7 +36,7 @@
                         </div>
                         @if (i > 0)
                         {
-                            <div class="col-12 col-md-2">
+                            <div class="col-12 col-md-2 warranty-code-remove">
                                 <button type="button" class="btn text-danger remove-row"><i class="fa fa-trash"></i></button>
                             </div>
                         }
@@ -45,30 +45,49 @@
             </div>
         }
     </div>
-    <div class="mb-4 d-flex justify-content-between align-items-center px-2 text-success">
+    <div class="warranty-add-row mb-4 d-flex justify-content-between align-items-center px-2 text-success">
         <span>افزودن چند کارت گارانتی (حداکثر ۱۰ کارت)</span>
         <button type="button" id="btnAddWarranty" class="btn btn-add-extra-warranty">
             <i class="fa fa-plus-circle text-success"></i>
         </button>
     </div>
-    <div class="mb-4">
-        <label asp-for="CustomerPhoneNumber" class="form-label fw-semibold">
-            <span class="text-danger">*</span>
-            شماره موبایل
-        </label>
-        <div class="input-group">
-            <span class="input-group-text">
-                <i class="fa fa-mobile-phone text-secondary"></i>
-            </span>
-            <input asp-for="CustomerPhoneNumber"
-                   class="form-control text-start"
-                   placeholder="09120000000" />
+    <div class="warranty-contact-row mb-4">
+        <div class="warranty-phone">
+            <label asp-for="CustomerPhoneNumber" class="form-label fw-semibold">
+                <span class="text-danger">*</span>
+                شماره موبایل
+            </label>
+            <div class="input-group">
+                <span class="input-group-text">
+                    <i class="fa fa-mobile-phone text-secondary"></i>
+                </span>
+                <input asp-for="CustomerPhoneNumber"
+                       class="form-control text-start"
+                       placeholder="09120000000" />
+            </div>
+            <span asp-validation-for="CustomerPhoneNumber" class="text-danger small"></span>
         </div>
-        <span asp-validation-for="CustomerPhoneNumber" class="text-danger small"></span>
+        <div class="warranty-role-select">
+            <label class="form-label fw-semibold" for="customerTypeSelect">نقش</label>
+            <select id="customerTypeSelect" class="form-select" name="CustomerTypeId" disabled>
+                <option value="">انتخاب</option>
+                @foreach (var item in Model.CustomerTypes)
+                {
+                    if (Model.CustomerTypeId?.ToString() == item.Value)
+                    {
+                        <option value="@item.Value" selected>@item.Text</option>
+                    }
+                    else
+                    {
+                        <option value="@item.Value">@item.Text</option>
+                    }
+                }
+            </select>
+        </div>
     </div>
-    <div class="mb-4">
+    <div class="warranty-role-buttons mb-4">
         <label class="form-label fw-bold">نقش مشتری</label>
-        <div class="d-flex flex-wrap gap-2">
+        <div class="customer-type-list">
             @foreach (var item in Model.CustomerTypes)
             {
                 var id = $"customerType_{item.Value}";

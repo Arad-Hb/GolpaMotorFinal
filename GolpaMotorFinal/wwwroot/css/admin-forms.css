@@ -47,9 +47,134 @@
     }
 }
 
-.warranty-card-page {
-    max-width: 720px;
-    margin: 2rem auto;
+.pluto-public .warranty-card-page .warranty-code-row {
+    flex-wrap: nowrap;
+    align-items: flex-end;
+    gap: 8px;
+    margin-inline: 0;
+}
+
+.pluto-public .warranty-card-page .warranty-code-row > .warranty-code-field {
+    flex: 1 1 auto;
+    width: auto;
+    max-width: none;
+    padding: 0;
+}
+
+.pluto-public .warranty-card-page .warranty-code-row > .warranty-code-remove {
+    flex: 0 0 auto;
+    width: auto;
+    max-width: none;
+    padding: 0;
+}
+
+.customer-type-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.warranty-role-select {
+    display: none;
+}
+
+.pluto-public .warranty-card-page .customer-type-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 8px;
+}
+
+.pluto-public .warranty-card-page .customer-type-list .customer-type-btn {
+    width: 100%;
+    margin: 0;
+    white-space: normal;
+    line-height: 1.3;
+}
+
+.pluto-public .warranty-card-page .input-group {
+    flex-wrap: nowrap;
+    min-width: 0;
+}
+
+.pluto-public .warranty-card-page .input-group .form-control {
+    min-width: 0;
+}
+
+.pluto-public .warranty-card-page .form-actions--block .main_bt {
+    width: 100%;
+}
+
+@media (max-width: 575.98px) {
+    .pluto-public .warranty-card-page {
+        max-width: none;
+        padding: 12px;
+    }
+
+    .pluto-public .warranty-card-page > .card .card-body {
+        padding: 12px;
+    }
+
+    .pluto-public .warranty-card-page .admin-form .mb-3,
+    .pluto-public .warranty-card-page .admin-form .mb-4,
+    .pluto-public .warranty-card-page .warranty-row {
+        margin-bottom: 8px !important;
+    }
+
+    .pluto-public .warranty-card-page .warranty-add-row {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+        padding-inline: 0;
+    }
+
+    .pluto-public .warranty-card-page .warranty-add-row .btn-add-extra-warranty {
+        width: fit-content;
+        margin-inline-start: auto;
+    }
+
+    .pluto-public .warranty-card-page .warranty-contact-row {
+        display: grid;
+        grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+        gap: 8px;
+        align-items: start;
+    }
+
+    .pluto-public .warranty-card-page .warranty-role-select {
+        display: block;
+        min-width: 0;
+    }
+
+    .pluto-public .warranty-card-page .warranty-role-select .form-select {
+        min-height: 42px;
+        padding-top: 0.25rem;
+        padding-bottom: 0.25rem;
+    }
+
+    .pluto-public .warranty-card-page .warranty-role-buttons {
+        display: none;
+    }
+}
+
+@media (min-width: 576px) and (max-width: 991.98px) {
+    .pluto-public .warranty-card-page {
+        max-width: 640px;
+        padding: 24px 16px;
+    }
+
+    .pluto-public .warranty-card-page > .card .card-body {
+        padding: 24px;
+    }
+}
+
+@media (min-width: 992px) {
+    .pluto-public .warranty-card-page {
+        max-width: 720px;
+        padding: 32px 16px;
+    }
+
+    .pluto-public .warranty-card-page > .card .card-body {
+        padding: 32px;
+    }
 }
 
 .image-preview {

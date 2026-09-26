@@ -7,6 +7,40 @@
         if (!container || !addBtn || addBtn.dataset.bound === "1") return;
         addBtn.dataset.bound = "1";
 
+        var roleSelect = document.getElementById("customerTypeSelect");
+        var roleRadios = form ? form.querySelectorAll(".warranty-role-buttons input[type='radio']") : [];
+        var mobileQuery = window.matchMedia("(max-width: 575.98px)");
+
+        function syncRoleControl() {
+            if (!roleSelect || !form) return;
+            var mobile = mobileQuery.matches && document.body.classList.contains("pluto-public");
+            if (mobile) {
+                var checked = form.querySelector(".warranty-role-buttons input[type='radio']:checked");
+                if (checked) roleSelect.value = checked.value;
+                roleRadios.forEach(function (radio) { radio.disabled = true; });
+                roleSelect.disabled = false;
+            } else {
+                if (roleSelect.value) {
+                    roleRadios.forEach(function (radio) {
+                        radio.checked = radio.value === roleSelect.value;
+                    });
+                }
+                roleSelect.disabled = true;
+                roleRadios.forEach(function (radio) { radio.disabled = false; });
+            }
+        }
+
+        if (roleSelect) {
+            roleSelect.addEventListener("change", function () {
+                roleRadios.forEach(function (radio) {
+                    radio.checked = radio.value === roleSelect.value;
+                });
+            });
+            if (mobileQuery.addEventListener) mobileQuery.addEventListener("change", syncRoleControl);
+            else mobileQuery.addListener(syncRoleControl);
+            syncRoleControl();
+        }
+
         var maxCards = parseInt(container.getAttribute("data-max-cards") || "10", 10);
         var lockStorageKey = "warrantyRegisterLockUntil";
         var defaultLabel = "ثبت و فعال‌سازی گارانتی";
@@ -34,12 +68,12 @@
             container.insertAdjacentHTML("beforeend",
                 '<div class="card mb-3 warranty-row">' +
                     '<div class="card-body">' +
-                        '<div class="row g-3 align-items-end">' +
-                            '<div class="col-12 col-md-10">' +
+                        '<div class="row g-3 align-items-end warranty-code-row">' +
+                            '<div class="col-12 col-md-10 warranty-code-field">' +
                                 '<label class="form-label">رمز</label>' +
                                 '<input type="text" name="ScratchedCode[' + index + ']" class="form-control" maxlength="50" placeholder="رمز را وارد کنید" />' +
                             '</div>' +
-                            '<div class="col-12 col-md-2">' +
+                            '<div class="col-12 col-md-2 warranty-code-remove">' +
                                 '<button type="button" class="btn text-danger remove-row"><i class="fa fa-trash"></i></button>' +
                             '</div>' +
                         '</div>' +
