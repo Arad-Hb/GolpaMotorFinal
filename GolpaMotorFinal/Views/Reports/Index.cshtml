@@ -45,7 +45,7 @@
             FilterPartial = "_ProductReportFilterBar",
             FilterModel = new ProductReportFilterBarViewModel
             {
-                YearNow = Framework.Common.PersianDate.GetYear(DateTime.Today)
+                YearNow = DateTime.Today.GetPersianYear()
             }
         })
     </div>

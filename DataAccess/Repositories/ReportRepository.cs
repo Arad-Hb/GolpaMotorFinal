@@ -3,6 +3,7 @@ using DomainModel.Models;
 using DomainModel.ViewModels.Product;
 using DomainModel.ViewModels.Reports;
 using Framework.Common;
+using Framework.Common.Extensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace DataAccess.Repositories
@@ -75,8 +76,8 @@ namespace DataAccess.Repositories
                 .Select(x => new
                 {
                     x.ProductName,
-                    Year = PersianDate.GetYear(x.CreatedAt),
-                    Month = PersianDate.GetMonth(x.CreatedAt)
+                    Year = x.CreatedAt.GetPersianYear(),
+                    Month = x.CreatedAt.GetPersianMonth()
                 })
                 .Where(x => (!jalaliYear.HasValue || x.Year == jalaliYear.Value) &&
                              (!jalaliMonth.HasValue || x.Month == jalaliMonth.Value))

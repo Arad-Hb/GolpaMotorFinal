@@ -1,6 +1,7 @@
 ﻿using Application.Services;
 using DomainModel.ViewModels.User;
 using Framework.Common;
+using Framework.Common.Extensions;
 using GolpaMotorFinal.FrameworkUI.Services;
 using GolpaMotorFinal.Helpers;
 using GolpaMotorFinal.Mappers;
@@ -72,8 +73,8 @@ namespace GolpaMotorFinal.Controllers
         private static void BindUserFilter(UserSearchModel sm)
         {
             sm ??= new UserSearchModel();
-            sm.CardFrom = PersianDate.ParseOrNull(sm.CardFromJalali);
-            sm.CardTo = PersianDate.ParseOrNull(sm.CardToJalali);
+            sm.CardFrom = sm.CardFromJalali.ToGregorianDate();
+            sm.CardTo = sm.CardToJalali.ToGregorianDate();
         }
 
         [HttpGet]

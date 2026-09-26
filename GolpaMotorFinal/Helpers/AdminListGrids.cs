@@ -1,4 +1,5 @@
 using DomainModel.Models;
+using Framework.Common.Extensions;
 using DomainModel.ViewModels.Product;
 using DomainModel.ViewModels.Reports;
 using DomainModel.ViewModels.Reward;
@@ -111,7 +112,7 @@ namespace GolpaMotorFinal.Helpers
                 row.Columns.Add(Number(item.RequiredPoints));
                 row.Columns.Add(Number(item.RemainedPoints));
                 row.Columns.Add(Text(item.RequestDate.HasValue
-                    ? item.RequestDate.Value.ToLocalTime().ToString("yyyy/MM/dd"): "-"));
+                    ? item.RequestDate.Value.ToLocalTime().ToPersianDate() : "-"));
                 row.Columns.Add(Text(item.StatusTitle));
                 row.Actions.Add(Modal("جزئیات", "fa fa-eye", "/RewardManagement/RequestDetails", id, "rewardRequestID", "btn btn-sm btn-outline-secondary"));
                 row.Actions.Add(new GridAction

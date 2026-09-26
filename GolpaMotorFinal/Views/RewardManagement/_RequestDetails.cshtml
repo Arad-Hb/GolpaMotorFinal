@@ -35,11 +35,11 @@
         </div>
         <div class="modal-details-cell">
             <span class="modal-details-label">تاریخ درخواست</span>
-            <span class="modal-details-value">@(Model.RequestDate?.ToLocalTime().ToString("yyyy/MM/dd HH:mm") ?? "—")</span>
+            <span class="modal-details-value">@(Model.RequestDate?.ToLocalTime().ToPersianDateTime() ?? "—")</span>
         </div>
         <div class="modal-details-cell">
             <span class="modal-details-label">تاریخ بررسی</span>
-            <span class="modal-details-value">@(Model.ReviewedDate?.ToLocalTime().ToString("yyyy/MM/dd HH:mm") ?? "—")</span>
+            <span class="modal-details-value">@(Model.ReviewedDate?.ToLocalTime().ToPersianDateTime() ?? "—")</span>
         </div>
         <div class="modal-details-cell">
             <span class="modal-details-label">وضعیت</span>

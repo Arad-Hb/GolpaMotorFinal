@@ -1,17 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Globalization;
 
 namespace Framework.Common.Extensions
 {
     public static class DateTimeExtensions
     {
-        private static readonly PersianCalendar pc = new PersianCalendar();
+        private static readonly PersianCalendar Calendar = new();
 
-        private static readonly string[] WeekDays = new[]
+        private static readonly string[] WeekDays =
         {
             "یکشنبه",
             "دوشنبه",
@@ -22,9 +17,9 @@ namespace Framework.Common.Extensions
             "شنبه"
         };
 
-        private static readonly string[] Months = new[]
+        private static readonly string[] Months =
         {
-            "همه ماه‌ها", // index 0
+            "همه ماه‌ها",
             "فروردین",
             "اردیبهشت",
             "خرداد",
@@ -39,22 +34,62 @@ namespace Framework.Common.Extensions
             "اسفند"
         };
 
-        // 📅 فقط تاریخ (مثل: دوشنبه 25 خرداد 1405)
-        public static string ToPersianDate(this DateTime date)
-        {
-            int year = pc.GetYear(date);
-            int month = pc.GetMonth(date);
-            int day = pc.GetDayOfMonth(date);
-
-            string dayName = WeekDays[(int)date.DayOfWeek];
-
-            return $"{dayName} {day} {Months[month]} {year}";
-        }
-
         public static IReadOnlyList<string> PersianMonths => Months;
 
         public static string PersianMonthName(int month)
             => month >= 0 && month < Months.Length ? Months[month] : string.Empty;
 
+        public static string ToPersianDate(this DateTime date)
+        {
+            return $"{Calendar.GetYear(date):0000}/{Calendar.GetMonth(date):00}/{Calendar.GetDayOfMonth(date):00}";
+        }
+
+        public static string ToPersianDate(this DateTime? date)
+            => date.HasValue ? date.Value.ToPersianDate() : string.Empty;
+
+        public static string ToPersianDateTime(this DateTime date)
+        {
+            return $"{date.ToPersianDate()} {date:HH:mm}";
+        }
+
+        public static string ToPersianDateTime(this DateTime? date)
+            => date.HasValue ? date.Value.ToPersianDateTime() : string.Empty;
+
+        public static string ToPersianLongDate(this DateTime date)
+        {
+            var year = Calendar.GetYear(date);
+            var month = Calendar.GetMonth(date);
+            var day = Calendar.GetDayOfMonth(date);
+            var dayName = WeekDays[(int)date.DayOfWeek];
+
+            return $"{dayName} {day} {Months[month]} {year}";
+        }
+
+        public static DateTime? ToGregorianDate(this string? jalali)
+        {
+            if (string.IsNullOrWhiteSpace(jalali))
+                return null;
+
+            var parts = jalali.Trim().Replace('-', '/').Split('/');
+            if (parts.Length != 3)
+                return null;
+            if (!int.TryParse(parts[0], out var year) ||
+                !int.TryParse(parts[1], out var month) ||
+                !int.TryParse(parts[2], out var day))
+                return null;
+
+            try
+            {
+                return Calendar.ToDateTime(year, month, day, 0, 0, 0, 0);
+            }
+            catch (ArgumentOutOfRangeException)
+            {
+                return null;
+            }
+        }
+
+        public static int GetPersianYear(this DateTime date) => Calendar.GetYear(date);
+
+        public static int GetPersianMonth(this DateTime date) => Calendar.GetMonth(date);
     }
 }

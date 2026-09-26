@@ -26,7 +26,7 @@
                         <td>@card.SerialNumber</td>
                         <td>@card.ProductName</td>
                         <td>@card.Points</td>
-                        <td>@card.CreatedAt.ToLocalTime().ToString("yyyy/MM/dd")</td>
+                        <td>@card.CreatedAt.ToLocalTime().ToPersianDate()</td>
                     </tr>
                 }
             }

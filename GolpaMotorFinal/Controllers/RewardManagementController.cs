@@ -1,6 +1,6 @@
 ﻿using Application.Services;
 using DomainModel.ViewModels.Reward;
-using Framework.Common;
+using Framework.Common.Extensions;
 using GolpaMotorFinal.Helpers;
 using GolpaMotorFinal.Models.ViewModels;
 using Microsoft.AspNetCore.Authorization;
@@ -56,8 +56,8 @@ namespace GolpaMotorFinal.Controllers
         public async Task<IActionResult> RequestList(RewardRequestSearchModel sm)
         {
             sm ??= new RewardRequestSearchModel();
-            sm.RequestFrom = PersianDate.ParseOrNull(sm.RequestFromJalali);
-            sm.RequestTo = PersianDate.ParseOrNull(sm.RequestToJalali);
+            sm.RequestFrom = sm.RequestFromJalali.ToGregorianDate();
+            sm.RequestTo = sm.RequestToJalali.ToGregorianDate();
             sm.PageSize = PaginationViewModel.DefaultPageSize;
             var result = await rewards.SearchRequests(sm);
             var filter = result.sm ?? sm;

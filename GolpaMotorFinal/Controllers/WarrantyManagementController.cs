@@ -1,6 +1,7 @@
 ﻿using Application.Services;
 using DomainModel.ViewModels.Warranty;
 using Framework.Common;
+using Framework.Common.Extensions;
 using GolpaMotorFinal.FrameworkUI.Services;
 using GolpaMotorFinal.Helpers;
 using GolpaMotorFinal.Models.ViewModels;
@@ -114,8 +115,8 @@ namespace GolpaMotorFinal.Controllers
         {
             sm ??= new WarrantyCardSearchModel();
             sm.PageSize = PaginationViewModel.DefaultPageSize;
-            sm.RegisteredFrom = PersianDate.ParseOrNull(sm.RegisteredFromJalali);
-            sm.RegisteredTo = PersianDate.ParseOrNull(sm.RegisteredToJalali);
+            sm.RegisteredFrom = sm.RegisteredFromJalali.ToGregorianDate();
+            sm.RegisteredTo = sm.RegisteredToJalali.ToGregorianDate();
             var page = await warrantyService.SearchCards(sm);
             var grid = AdminListGrids.BuildWarrantyCardGrid(page.Items);
             CrudGridPager.Attach(

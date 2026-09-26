@@ -1,7 +1,7 @@
 using Application.Services;
 using DataAccess.Services;
 using DomainModel.ViewModels.User;
-using Framework.Common;
+using Framework.Common.Extensions;
 using GolpaMotorFinal.Helpers;
 using GolpaMotorFinal.Mappers;
 using GolpaMotorFinal.Models.ViewModels;
@@ -42,8 +42,8 @@ namespace GolpaMotorFinal.Controllers
         [HttpGet]
         public async Task<IActionResult> Users(UserSearchModel sm)
         {
-            sm.CardFrom = PersianDate.ParseOrNull(sm.CardFromJalali);
-            sm.CardTo = PersianDate.ParseOrNull(sm.CardToJalali);
+            sm.CardFrom = sm.CardFromJalali.ToGregorianDate();
+            sm.CardTo = sm.CardToJalali.ToGregorianDate();
             sm.PageSize = PaginationViewModel.DefaultPageSize;
             var result = await users.Search(sm);
             var page = result.sm ?? sm;
@@ -74,8 +74,8 @@ namespace GolpaMotorFinal.Controllers
         [HttpGet]
         public async Task<IActionResult> Warranty(long? productId, string? fromJalali, string? toJalali, int pageIndex = 0)
         {
-            var from = PersianDate.ParseOrNull(fromJalali);
-            var to = PersianDate.ParseOrNull(toJalali);
+            var from = fromJalali.ToGregorianDate();
+            var to = toJalali.ToGregorianDate();
             var page = CrudGridPager.Slice(await reports.GetWarrantyByProduct(productId, from, to), pageIndex);
             var grid = AdminListGrids.BuildWarrantyReportGrid(page.Items);
             CrudGridPager.Attach(
@@ -108,8 +108,8 @@ namespace GolpaMotorFinal.Controllers
         {
             var page = CrudGridPager.Slice(
                 await reports.GetRewardPopularity(
-                    PersianDate.ParseOrNull(fromJalali),
-                    PersianDate.ParseOrNull(toJalali)),
+                    fromJalali.ToGregorianDate(),
+                    toJalali.ToGregorianDate()),
                 pageIndex);
             var grid = AdminListGrids.BuildRewardReportGrid(page.Items);
             CrudGridPager.Attach(
