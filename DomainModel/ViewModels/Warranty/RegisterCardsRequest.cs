@@ -9,13 +9,4 @@ namespace DomainModel.ViewModels.Warranty
         public List<string> Codes { get; set; } = new();
         public string RateLimitKey { get; set; } = string.Empty;
     }
-
-    public class RegisterCardsResult
-    {
-        public bool Success { get; set; }
-        public string Message { get; set; } = string.Empty;
-        public int? RetryAfterSeconds { get; set; }
-        public List<string> FailedLines { get; set; } = new();
-        public int SavedCount { get; set; }
-    }
 }
