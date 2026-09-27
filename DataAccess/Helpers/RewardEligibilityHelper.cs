@@ -1,3 +1,4 @@
+using DataAccess.Queries;
 using DomainModel.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -7,8 +8,7 @@ namespace DataAccess.Helpers
     {
         public static async Task<int?> GetMinRequiredPointsAsync(GolpaMotorDbContext db)
         {
-            return await db.RewardCatalogs
-                .Where(x => x.IsActive)
+            return await RewardCatalogQueries.Active(db)
                 .Select(x => (int?)x.RequiredPoints)
                 .MinAsync();
         }

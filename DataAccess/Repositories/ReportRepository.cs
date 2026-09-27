@@ -23,7 +23,7 @@ namespace DataAccess.Repositories
         public async Task<List<WarrantyProductStatusRow>> GetWarrantyByProduct(long? productId, DateTime? from, DateTime? to)
         {
             var today = DateTime.Today;
-            var query = db.WarrantyCards.AsQueryable();
+            var query = WarrantyCardQueries.All(db);
             if (productId.HasValue && productId.Value > 0)
                 query = query.Where(x => x.ProductID == productId.Value);
 
@@ -113,7 +113,7 @@ namespace DataAccess.Repositories
 
         public async Task<List<RewardPopularityRow>> GetRewardPopularity(DateTime? from, DateTime? to)
         {
-            var query = db.RewardRequests.AsQueryable();
+            var query = RewardRequestQueries.All(db);
             if (from.HasValue)
                 query = query.Where(x => x.RequestDate != null && x.RequestDate >= from.Value);
             if (to.HasValue)
@@ -159,7 +159,7 @@ namespace DataAccess.Repositories
 
         public async Task<List<NamedCountItem>> GetTopRewards(int take = 5)
         {
-            return await db.RewardRequests
+            return await RewardRequestQueries.All(db)
                 .GroupBy(x => x.RewardCatalog.Title)
                 .Select(g => new NamedCountItem { Name = g.Key, Count = g.Count() })
                 .OrderByDescending(x => x.Count)
@@ -169,8 +169,8 @@ namespace DataAccess.Repositories
 
         public async Task<AdminDashboardSummary> GetAdminDashboardSummary()
         {
-            var users = db.Users.AsNoTracking().Where(x => !x.IsDeleted);
-            var rewardRequests = db.RewardRequests.AsNoTracking();
+            var users = UserQueries.Active(db);
+            var rewardRequests = RewardRequestQueries.All(db);
 
             return new AdminDashboardSummary
             {
@@ -194,8 +194,7 @@ namespace DataAccess.Repositories
                 take = 8;
 
             return await RewardRequestMapper.ToListItems(
-                    db.RewardRequests
-                        .AsNoTracking()
+                    RewardRequestQueries.All(db)
                         .Where(x =>
                             !x.IsComplete &&
                             x.RewardDeliveryStatus.Title == RewardStatusTitles.Pending))
@@ -246,8 +245,7 @@ namespace DataAccess.Repositories
             withinDays = Math.Max(0, withinDays);
             var today = DateTime.UtcNow.ToIranTime().Date;
 
-            var candidates = db.WarrantyCards
-                .AsNoTracking()
+            var candidates = WarrantyCardQueries.All(db)
                 .Where(x => x.IsRegistered && x.CardRegistrations.Any())
                 .Select(x => new
                 {
@@ -331,7 +329,7 @@ namespace DataAccess.Repositories
             var pageIndex = Math.Max(0, search.PageIndex);
             var pageSize = search.PageSize <= 0 ? 50 : search.PageSize;
 
-            var products = db.Products.AsNoTracking().Where(x => !x.IsDeleted);
+            var products = ProductQueries.Active(db);
             if (search.ProductID.HasValue && search.ProductID.Value > 0)
                 products = products.Where(x => x.ProductID == search.ProductID.Value);
             if (!string.IsNullOrWhiteSpace(search.SearchTerm))
@@ -340,7 +338,7 @@ namespace DataAccess.Repositories
                 products = products.Where(x => x.ProductName.Contains(term));
             }
 
-            var cards = db.WarrantyCards.AsNoTracking().AsQueryable();
+            var cards = WarrantyCardQueries.All(db);
             if (search.FromUtc.HasValue)
                 cards = cards.Where(x => x.IssuedAtUtc >= search.FromUtc.Value);
             if (search.ToUtcExclusive.HasValue)
@@ -520,7 +518,7 @@ namespace DataAccess.Repositories
             var pageIndex = Math.Max(0, search.PageIndex);
             var pageSize = search.PageSize <= 0 ? 50 : search.PageSize;
             var scopedUserId = string.IsNullOrWhiteSpace(search.UserID) ? null : search.UserID;
-            var query = db.WarrantyCards.AsNoTracking().AsQueryable();
+            var query = WarrantyCardQueries.All(db);
 
             if (search.ProductID.HasValue && search.ProductID.Value > 0)
                 query = query.Where(x => x.ProductID == search.ProductID.Value);

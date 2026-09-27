@@ -1,4 +1,5 @@
 ﻿using DataAccess.Mappers;
+using DataAccess.Queries;
 using DataAccess.Services;
 using DomainModel.Models;
 using DomainModel.ViewModels.Product;
@@ -87,7 +88,8 @@ namespace DataAccess.Repositories
         
         public async Task<ProductAddEditModel?> Get(long productID)
         {
-            var product = await db.Products.FirstOrDefaultAsync(x => x.ProductID == productID && !x.IsDeleted);
+            var product = await ProductQueries.Active(db)
+                .FirstOrDefaultAsync(x => x.ProductID == productID);
 
             if (product == null)
                 return null;
@@ -97,75 +99,29 @@ namespace DataAccess.Repositories
 
         public async Task<List<ProductListItem>> GetAll()
         {
-            return await db.Products.Where(x => !x.IsDeleted)
+            return await ProductQueries.Active(db)
                 .Select(ProductMapper.ToListItem)
                 .ToListAsync();
         }
 
         public async Task<ProductDetailsModel?> GetDetails(long productID)
         {
-            return await db.Products
-                .Where(x => x.ProductID == productID && !x.IsDeleted)
+            return await ProductQueries.Active(db)
+                .Where(x => x.ProductID == productID)
                 .Select(ProductMapper.ToDetails)
                 .FirstOrDefaultAsync();
         }
 
         public async Task<bool> Exists(long id)
         {
-            return await db.Products.AnyAsync(x => x.ProductID == id && !x.IsDeleted);
+            return await ProductQueries.Active(db).AnyAsync(x => x.ProductID == id);
         }
 
         public async Task<ProductListComplexModel> Search(ProductSearchModel searchModel)
         {
             var result = new ProductListComplexModel();
 
-            // 1. شروع Query
-            var query = db.Products.AsQueryable();
-
-            // 2. Soft Delete (خیلی مهم - همیشه اعمال شود)
-            query = query.Where(x => !x.IsDeleted);
-
-            // 3. فیلتر ProductID (اگر ارسال شده)
-            if (searchModel.ProductID > 0)
-            {
-                query = query.Where(p => p.ProductID == searchModel.ProductID);
-            }
-
-            // 4. فیلتر نام محصول
-            if (!string.IsNullOrWhiteSpace(searchModel.ProductName))
-            {
-                query = query.Where(p => p.ProductName.Contains(searchModel.ProductName));
-            }
-
-            // 5. اگر خواستی فیلتر وضعیت فعال/غیرفعال
-            if (searchModel.IsAvailable.HasValue)
-            {
-                query = query.Where(p => p.IsAvailable == searchModel.IsAvailable.Value);
-            }
-            if (searchModel.PointsFrom.HasValue)
-            {
-                query = query.Where(p => p.ProductPoint >= searchModel.PointsFrom.Value);
-            }
-            if (searchModel.PointsTo.HasValue)
-            {
-                query = query.Where(p => p.ProductPoint <= searchModel.PointsTo.Value);
-            }
-            if (searchModel.RegisteredFrom.HasValue)
-            {
-                query = query.Where(p => p.WarrantyCards.Count(w => w.IsRegistered) >= searchModel.RegisteredFrom.Value);
-            }
-            if (searchModel.RegisteredTo.HasValue)
-            {
-                query = query.Where(p => p.WarrantyCards.Count(w => w.IsRegistered) <= searchModel.RegisteredTo.Value);
-            }
-            if (searchModel.RemainingFrom.HasValue)
-            {
-                query = query.Where(p => p.WarrantyCards.Count(w => !w.IsRegistered) >= searchModel.RemainingFrom.Value);
-            }
-            if (searchModel.RemainingTo.HasValue)
-            {
-                query = query.Where(p => p.WarrantyCards.Count(w => !w.IsRegistered) <= searchModel.RemainingTo.Value);
-            }
+            var query = ProductQueries.ApplySearch(ProductQueries.Active(db), searchModel);
 
             // 6. Count کل رکوردها (قبل از paging)
             var totalCount = await query.CountAsync();
@@ -206,11 +162,11 @@ namespace DataAccess.Repositories
         {
             var stats = new ProductStatistics
             {
-                TotalProducts = await db.Products.CountAsync(x => !x.IsDeleted),
-                AvailableProducts = await db.Products.CountAsync(x => !x.IsDeleted && x.IsAvailable),
-                ProductsWithoutCards = await db.Products.CountAsync(x => !x.IsDeleted && !x.WarrantyCards.Any()),
-                RegisteredCards = await db.WarrantyCards.CountAsync(x => x.IsRegistered),
-                UnregisteredCards = await db.WarrantyCards.CountAsync(x => !x.IsRegistered),
+                TotalProducts = await ProductQueries.Active(db).CountAsync(),
+                AvailableProducts = await ProductQueries.Active(db).CountAsync(x => x.IsAvailable),
+                ProductsWithoutCards = await ProductQueries.Active(db).CountAsync(x => !x.WarrantyCards.Any()),
+                RegisteredCards = await WarrantyCardQueries.All(db).CountAsync(x => x.IsRegistered),
+                UnregisteredCards = await WarrantyCardQueries.All(db).CountAsync(x => !x.IsRegistered),
                 TotalRegisteredPoints = await db.CardRegistrations
                     .SumAsync(x => (int?)x.WarrantyCard.Product.ProductPoint) ?? 0
             };

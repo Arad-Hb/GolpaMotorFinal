@@ -1,5 +1,6 @@
 using DataAccess.Helpers;
 using DataAccess.Mappers;
+using DataAccess.Queries;
 using DataAccess.Services;
 using DomainModel.Models;
 using DomainModel.ViewModels.Reward;
@@ -35,8 +36,8 @@ namespace DataAccess.Repositories
             var pendingStatusId = await RewardEligibilityHelper.GetStatusIdAsync(db, RewardStatusTitles.Pending);
             var available = await ComputeAvailablePointsAsync(userId, user.RemainedPoints ?? 0, pendingStatusId);
 
-            return await db.RewardCatalogs
-                .Where(x => x.IsActive && x.RequiredPoints <= available)
+            return await RewardCatalogQueries.Active(db)
+                .Where(x => x.RequiredPoints <= available)
                 .OrderBy(x => x.RequiredPoints)
                 .Select(x => new UserEligibleRewardItem
                 {
@@ -57,49 +58,21 @@ namespace DataAccess.Repositories
 
         public async Task<List<RewardRequestListItem>> GetUserRequests(string userId)
         {
-            return await RewardRequestMapper.ToListItems(db.RewardRequests.Where(x => x.UserID == userId))
+            return await RewardRequestMapper.ToListItems(RewardRequestQueries.All(db).Where(x => x.UserID == userId))
                 .OrderByDescending(x => x.RequestDate)
                 .ToListAsync();
         }
 
         public async Task<RewardRequestListItem?> GetDetails(int rewardRequestId)
         {
-            return await RewardRequestMapper.ToListItems(db.RewardRequests.Where(x => x.RewardRequestID == rewardRequestId))
+            return await RewardRequestMapper.ToListItems(RewardRequestQueries.All(db).Where(x => x.RewardRequestID == rewardRequestId))
                 .FirstOrDefaultAsync();
         }
 
         public async Task<RewardRequestListComplexModel> Search(RewardRequestSearchModel searchModel)
         {
             var result = new RewardRequestListComplexModel();
-            var query = db.RewardRequests.AsQueryable();
-
-            if (searchModel.RewardDeliveryStatusID.HasValue && searchModel.RewardDeliveryStatusID.Value > 0)
-                query = query.Where(x => x.RewardDeliveryStatusID == searchModel.RewardDeliveryStatusID.Value);
-
-            if (searchModel.IsComplete.HasValue)
-                query = query.Where(x => x.IsComplete == searchModel.IsComplete.Value);
-
-            if (!string.IsNullOrWhiteSpace(searchModel.SearchTerm))
-            {
-                var term = searchModel.SearchTerm.Trim();
-                query = query.Where(x =>
-                    x.RewardCatalog.Title.Contains(term) ||
-                    (x.User.FirstName != null && x.User.FirstName.Contains(term)) ||
-                    (x.User.LastName != null && x.User.LastName.Contains(term)) ||
-                    (x.User.PhoneNumber != null && x.User.PhoneNumber.Contains(term)));
-            }
-
-            if (searchModel.RewardCatalogID.HasValue && searchModel.RewardCatalogID.Value > 0)
-                query = query.Where(x => x.RewardCatalogID == searchModel.RewardCatalogID.Value);
-
-            if (searchModel.RequestFrom.HasValue)
-                query = query.Where(x => x.RequestDate != null && x.RequestDate >= searchModel.RequestFrom.Value);
-
-            if (searchModel.RequestTo.HasValue)
-            {
-                var to = searchModel.RequestTo.Value.Date.AddDays(1);
-                query = query.Where(x => x.RequestDate != null && x.RequestDate < to);
-            }
+            var query = RewardRequestQueries.ApplySearch(RewardRequestQueries.All(db), searchModel);
 
             var totalCount = await query.CountAsync();
             var pageIndex = searchModel.PageIndex < 0 ? 0 : searchModel.PageIndex;

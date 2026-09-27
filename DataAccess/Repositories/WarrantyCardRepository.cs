@@ -1,4 +1,5 @@
-﻿using DataAccess.Services;
+﻿using DataAccess.Queries;
+using DataAccess.Services;
 using DomainModel.Models;
 using DomainModel.ViewModels.Warranty;
 using Framework.Common;
@@ -37,19 +38,19 @@ namespace DataAccess.Repositories
 
         public async Task<bool> SerialExistsAsync(string serialNumber)
         {
-            return await db.WarrantyCards.AnyAsync(x => x.SerialNumber == serialNumber);
+            return await WarrantyCardQueries.All(db).AnyAsync(x => x.SerialNumber == serialNumber);
         }
 
         public async Task<HashSet<string>> GetSerialsAsync()
         {
-            var list = await db.WarrantyCards.Select(x => x.SerialNumber).ToListAsync();
+            var list = await WarrantyCardQueries.All(db).Select(x => x.SerialNumber).ToListAsync();
             return new HashSet<string>(list, StringComparer.OrdinalIgnoreCase);
         }
 
         public async Task<(List<WarrantyCardListItem> Items, int Total)> SearchAsync(WarrantyCardSearchModel search)
         {
             search ??= new WarrantyCardSearchModel();
-            var query = db.WarrantyCards.AsQueryable();
+            var query = WarrantyCardQueries.All(db);
 
             if (search.ProductID.HasValue && search.ProductID.Value > 0)
                 query = query.Where(x => x.ProductID == search.ProductID.Value);

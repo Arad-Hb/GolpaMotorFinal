@@ -1,5 +1,6 @@
 using DataAccess.Helpers;
 using DataAccess.Mappers;
+using DataAccess.Queries;
 using DataAccess.Services;
 using DomainModel.Models;
 using DomainModel.ViewModels.Reward;
@@ -84,7 +85,7 @@ namespace DataAccess.Repositories
 
         public async Task<RewardCatalogAddEditModel?> Get(int rewardCatalogID)
         {
-            var entity = await db.RewardCatalogs
+            var entity = await RewardCatalogQueries.All(db)
                 .FirstOrDefaultAsync(x => x.RewardCatalogID == rewardCatalogID);
 
             return entity == null ? null : RewardCatalogMapper.ToAddEditModel(entity);
@@ -92,7 +93,7 @@ namespace DataAccess.Repositories
 
         public async Task<List<RewardCatalogListItem>> GetAll()
         {
-            return await db.RewardCatalogs
+            return await RewardCatalogQueries.All(db)
                 .OrderBy(x => x.RequiredPoints)
                 .Select(RewardCatalogMapper.ToListItem)
                 .ToListAsync();
@@ -100,8 +101,7 @@ namespace DataAccess.Repositories
 
         public async Task<List<RewardCatalogListItem>> GetActiveCatalogs()
         {
-            return await db.RewardCatalogs
-                .Where(x => x.IsActive)
+            return await RewardCatalogQueries.Active(db)
                 .OrderBy(x => x.RequiredPoints)
                 .Select(RewardCatalogMapper.ToListItem)
                 .ToListAsync();
@@ -109,7 +109,7 @@ namespace DataAccess.Repositories
 
         public async Task<RewardCatalogDetailsModel?> GetDetails(int rewardCatalogID)
         {
-            return await db.RewardCatalogs
+            return await RewardCatalogQueries.All(db)
                 .Where(x => x.RewardCatalogID == rewardCatalogID)
                 .Select(RewardCatalogMapper.ToDetails)
                 .FirstOrDefaultAsync();
@@ -117,28 +117,13 @@ namespace DataAccess.Repositories
 
         public async Task<bool> Exists(int rewardCatalogID)
         {
-            return await db.RewardCatalogs.AnyAsync(x => x.RewardCatalogID == rewardCatalogID);
+            return await RewardCatalogQueries.All(db).AnyAsync(x => x.RewardCatalogID == rewardCatalogID);
         }
 
         public async Task<RewardCatalogListComplexModel> Search(RewardCatalogSearchModel searchModel)
         {
             var result = new RewardCatalogListComplexModel();
-            var query = db.RewardCatalogs.AsQueryable();
-
-            if (!string.IsNullOrWhiteSpace(searchModel.Title))
-                query = query.Where(x => x.Title.Contains(searchModel.Title));
-
-            if (searchModel.IsActive.HasValue)
-                query = query.Where(x => x.IsActive == searchModel.IsActive.Value);
-
-            if (searchModel.IsCashReward.HasValue)
-                query = query.Where(x => x.IsCashReward == searchModel.IsCashReward.Value);
-
-            if (searchModel.RequiredFrom.HasValue)
-                query = query.Where(x => x.RequiredPoints >= searchModel.RequiredFrom.Value);
-
-            if (searchModel.RequiredTo.HasValue)
-                query = query.Where(x => x.RequiredPoints <= searchModel.RequiredTo.Value);
+            var query = RewardCatalogQueries.ApplySearch(RewardCatalogQueries.All(db), searchModel);
 
             var totalCount = await query.CountAsync();
             var pageIndex = searchModel.PageIndex < 0 ? 0 : searchModel.PageIndex;
