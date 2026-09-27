@@ -11,12 +11,12 @@
         <div class="modal-details-hero-main">
             @if (hasPhoto)
             {
-                <img src="@ImageHelper.Fix(Model.ImageUrl)" alt="" class="modal-details-photo" />
+                <img src="@ImageHelper.Fix(Model.ImageUrl)" alt="@Dash(Model.ProductName)" class="modal-details-photo modal-details-photo--product" />
             }
             else
             {
                 <div class="modal-details-photo is-empty">
-                    <i class="fa fa-image"></i>
+                    <i class="fa fa-image" aria-hidden="true"></i>
                     <span>فاقد تصویر</span>
                 </div>
             }
@@ -35,20 +35,26 @@
         }
     </div>
 
-    <div class="modal-details-grid">
-        <div class="modal-details-cell">
-            <span class="modal-details-label">امتیاز محصول</span>
-            <span class="modal-details-value">@Model.ProductPoint</span>
+    <section class="modal-details-section">
+        <h6 class="modal-section-title is-first">مشخصات محصول</h6>
+        <div class="modal-info-box-grid modal-info-box-grid--two">
+            <div class="modal-info-box">
+                <span>امتیاز محصول</span>
+                <strong>@Model.ProductPoint</strong>
+            </div>
+            <div class="modal-info-box">
+                <span>تعداد کارت گارانتی</span>
+                <strong>@Model.WarrantyCount</strong>
+            </div>
         </div>
-        <div class="modal-details-cell">
-            <span class="modal-details-label">تعداد گارانتی</span>
-            <span class="modal-details-value">@Model.WarrantyCount</span>
+    </section>
+
+    <section class="modal-details-section">
+        <h6 class="modal-section-title">توضیحات محصول</h6>
+        <div class="modal-description-box">
+            @Dash(Model.Description)
         </div>
-        <div class="modal-details-cell">
-            <span class="modal-details-label">توضیحات</span>
-            <span class="modal-details-value">@Dash(Model.Description)</span>
-        </div>
-    </div>
+    </section>
 
     <div class="form-actions">
         <button type="button" class="btn btn-secondary cancel-modal">بستن</button>

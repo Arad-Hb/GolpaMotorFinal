@@ -14,6 +14,8 @@ namespace DomainModel.ViewModels.Reward
         [Display(Name = "موبایل")]
         public string? PhoneNumber { get; set; }
 
+        public string? ProfileImageUrl { get; set; }
+
         public int RewardCatalogID { get; set; }
 
         [Display(Name = "پاداش")]

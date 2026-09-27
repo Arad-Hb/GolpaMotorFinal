@@ -7,7 +7,7 @@
     <div class="modal-details-hero">
         <div class="modal-details-hero-main">
             <div class="modal-details-photo is-empty">
-                <i class="fa fa-gift"></i>
+                <i class="fa fa-gift" aria-hidden="true"></i>
             </div>
             <div>
                 <div class="modal-details-name">@Dash(Model.Title)</div>
@@ -24,28 +24,44 @@
         }
     </div>
 
-    <div class="modal-details-grid">
-        <div class="modal-details-cell">
-            <span class="modal-details-label">حد نصاب امتیاز</span>
-            <span class="modal-details-value">@Model.RequiredPoints</span>
+    <section class="modal-details-section">
+        <h6 class="modal-section-title is-first">شرایط پاداش</h6>
+        <div class="modal-info-box-grid">
+            <div class="modal-info-box">
+                <span>حد نصاب امتیاز</span>
+                <strong>@Model.RequiredPoints</strong>
+            </div>
+            <div class="modal-info-box">
+                <span>نوع پاداش</span>
+                <strong>@(Model.IsCashReward ? "نقدی" : "غیرنقدی")</strong>
+            </div>
+            <div class="modal-info-box">
+                <span>مبلغ نقدی</span>
+                <strong>@(Model.IsCashReward ? (Model.CashValue?.ToString("N0") ?? "—") : "—")</strong>
+            </div>
         </div>
-        <div class="modal-details-cell">
-            <span class="modal-details-label">نوع</span>
-            <span class="modal-details-value">@(Model.IsCashReward ? "نقدی" : "غیرنقدی")</span>
+    </section>
+
+    <section class="modal-details-section">
+        <h6 class="modal-section-title">آمار پاداش</h6>
+        <div class="modal-info-box-grid modal-info-box-grid--two">
+            <div class="modal-info-box">
+                <span>تعداد درخواست‌ها</span>
+                <strong>@Model.RequestCount</strong>
+            </div>
+            <div class="modal-info-box">
+                <span>وضعیت</span>
+                <strong>@(Model.IsActive ? "فعال" : "غیرفعال")</strong>
+            </div>
         </div>
-        <div class="modal-details-cell">
-            <span class="modal-details-label">مبلغ نقدی</span>
-            <span class="modal-details-value">@(Model.IsCashReward ? (Model.CashValue?.ToString("N0") ?? "—") : "—")</span>
+    </section>
+
+    <section class="modal-details-section">
+        <h6 class="modal-section-title">توضیحات پاداش</h6>
+        <div class="modal-description-box">
+            @Dash(Model.Description)
         </div>
-        <div class="modal-details-cell">
-            <span class="modal-details-label">تعداد درخواست</span>
-            <span class="modal-details-value">@Model.RequestCount</span>
-        </div>
-        <div class="modal-details-cell">
-            <span class="modal-details-label">توضیحات</span>
-            <span class="modal-details-value">@Dash(Model.Description)</span>
-        </div>
-    </div>
+    </section>
 
     <div class="form-actions">
         <button type="button" class="btn btn-secondary cancel-modal">بستن</button>

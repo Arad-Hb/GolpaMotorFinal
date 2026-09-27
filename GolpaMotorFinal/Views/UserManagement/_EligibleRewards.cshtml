@@ -12,12 +12,12 @@
         <div class="modal-details-hero-main">
             @if (hasPhoto)
             {
-                <img src="@ImageHelper.ToThumbnail(Model.ProfileImageUrl)" alt="" class="modal-details-photo" />
+                <img src="@ImageHelper.ToThumbnail(Model.ProfileImageUrl)" alt="@Dash(Model.CustomerName)" class="modal-details-photo" />
             }
             else
             {
                 <div class="modal-details-photo is-empty">
-                    <i class="fa fa-image"></i>
+                    <i class="fa fa-image" aria-hidden="true"></i>
                     <span>فاقد تصویر</span>
                 </div>
             }
@@ -26,7 +26,10 @@
                    href="@Url.Action("UserCards", "Reports", new { id = Model.UserID })">
                     @Dash(string.IsNullOrWhiteSpace(Model.CustomerName) ? "مشتری" : Model.CustomerName)
                 </a>
-                <div class="modal-details-sub">@Dash(Model.PhoneNumber)</div>
+                <div class="modal-details-sub">
+                    <span><i class="fa fa-phone" aria-hidden="true"></i> @Dash(Model.PhoneNumber)</span>
+                    <span><i class="fa fa-briefcase" aria-hidden="true"></i> @Dash(Model.JobTitle)</span>
+                </div>
             </div>
         </div>
         @if (Model.IsEligibleForReward)
@@ -39,38 +42,72 @@
         }
     </div>
 
-    <div class="modal-details-grid">
-        <div class="modal-details-cell">
-            <span class="modal-details-label">واجد شرایط</span>
-            <span class="modal-details-value">@(Model.IsEligibleForReward ? "بله" : "خیر")</span>
+    <section class="modal-details-section">
+        <h6 class="modal-section-title is-first">وضعیت مشتری</h6>
+        <div class="modal-details-grid">
+            <div class="modal-details-cell">
+                <span class="modal-details-label">واجد شرایط</span>
+                <span class="modal-details-value">@(Model.IsEligibleForReward ? "بله" : "خیر")</span>
+            </div>
+            <div class="modal-details-cell">
+                <span class="modal-details-label">دریافت قبلی</span>
+                <span class="modal-details-value">@(Model.HasReceivedReward ? "بله" : "خیر")</span>
+            </div>
+            <div class="modal-details-cell">
+                <span class="modal-details-label">امتیاز قابل‌استفاده</span>
+                <span class="modal-details-value">@Model.AvailablePoints</span>
+            </div>
         </div>
-        <div class="modal-details-cell">
-            <span class="modal-details-label">دریافت قبلی</span>
-            <span class="modal-details-value">@(Model.HasReceivedReward ? "بله" : "خیر")</span>
-        </div>
-        <div class="modal-details-cell">
-            <span class="modal-details-label">استان</span>
-            <span class="modal-details-value">@Dash(Model.Province)</span>
-        </div>
-        <div class="modal-details-cell">
-            <span class="modal-details-label">شهر</span>
-            <span class="modal-details-value">@Dash(Model.City)</span>
-        </div>
-        <div class="modal-details-cell">
-            <span class="modal-details-label">شغل</span>
-            <span class="modal-details-value">@Dash(Model.JobTitle)</span>
-        </div>
-        <div class="modal-details-cell">
-            <span class="modal-details-label">امتیاز قابل‌استفاده</span>
-            <span class="modal-details-value">@Model.AvailablePoints</span>
-        </div>
-    </div>
+    </section>
 
-    @await Html.PartialAsync("_UserStatBoxes", UserStatBoxesViewModel.From(
-        Model.TotalEarnedPoints,
-        Model.TotalSettledPoints,
-        Model.RemainedPoints,
-        Model.TotalRegisteredCards))
+    <section class="modal-details-section">
+        <h6 class="modal-section-title">اطلاعات محل سکونت</h6>
+        <div class="modal-details-grid">
+            <div class="modal-details-cell">
+                <span class="modal-details-label">استان</span>
+                <span class="modal-details-value">@Dash(Model.Province)</span>
+            </div>
+            <div class="modal-details-cell">
+                <span class="modal-details-label">شهر</span>
+                <span class="modal-details-value">@Dash(Model.City)</span>
+            </div>
+            <div class="modal-details-cell">
+                <span class="modal-details-label">آدرس</span>
+                <span class="modal-details-value">@Dash(Model.Address)</span>
+            </div>
+            <div class="modal-details-cell">
+                <span class="modal-details-label">کد پستی</span>
+                <span class="modal-details-value">@Dash(Model.PostalCode)</span>
+            </div>
+        </div>
+    </section>
+
+    <section class="modal-details-section">
+        <h6 class="modal-section-title">وضعیت امتیازات</h6>
+        @await Html.PartialAsync("_UserStatBoxes", UserStatBoxesViewModel.From(
+            Model.TotalEarnedPoints,
+            Model.TotalSettledPoints,
+            Model.RemainedPoints,
+            Model.TotalRegisteredCards))
+    </section>
+
+    <section class="modal-details-section">
+        <h6 class="modal-section-title">اطلاعات مالی</h6>
+        <div class="modal-info-box-grid">
+            <div class="modal-info-box">
+                <span>شماره کارت</span>
+                <strong dir="ltr">@Dash(Model.CreditCartNumber)</strong>
+            </div>
+            <div class="modal-info-box">
+                <span>شماره شبا</span>
+                <strong dir="ltr">@Dash(Model.IBAN)</strong>
+            </div>
+            <div class="modal-info-box">
+                <span>شماره حساب</span>
+                <strong dir="ltr">@Dash(Model.AccountNumber)</strong>
+            </div>
+        </div>
+    </section>
 
     <h6 class="modal-section-title">پاداش‌های قابل درخواست</h6>
     @await Component.InvokeAsync("CrudGrid", new { model = Model.EligibleRewardsGrid })

@@ -9,10 +9,11 @@
     <input asp-for="Password" type="hidden" />
     <input asp-for="IsDeleted" type="hidden" />
 
+    <h6 class="modal-section-title is-first">تصویر و اطلاعات شخصی</h6>
     <div class="modal-photo-row" data-fallback="/images/imageUsers/noimage.jpg">
         <img src="@ImageHelper.ToThumbnail(Model.ProfileImageUrl)"
-             alt=""
-             class="modal-avatar image-preview" />
+             alt="تصویر کاربر"
+             class="modal-details-photo image-preview" />
         <div>
             <div class="modal-photo-actions">
                 <button type="button" class="btn js-pick-photo">بارگذاری عکس</button>
@@ -47,6 +48,16 @@
             </select>
             <span asp-validation-for="CustomerTypeID" class="text-danger"></span>
         </div>
+        <div class="col-12 col-md-6 d-flex align-items-end">
+            <div class="form-check mb-2">
+                <input asp-for="IsActive" class="form-check-input" />
+                <label asp-for="IsActive" class="form-check-label">فعال</label>
+            </div>
+        </div>
+    </div>
+
+    <h6 class="modal-section-title">اطلاعات محل سکونت</h6>
+    <div class="row">
         <div class="col-12 col-md-6">
             <label asp-for="ProvinceID"></label>
             <select asp-for="ProvinceID" asp-items="Model.Provinces" class="form-select js-user-province">
@@ -65,12 +76,6 @@
             <label asp-for="PostalCode"></label>
             <input asp-for="PostalCode" class="form-control" />
             <span asp-validation-for="PostalCode" class="text-danger"></span>
-        </div>
-        <div class="col-12 col-md-6 d-flex align-items-end">
-            <div class="form-check mb-2">
-                <input asp-for="IsActive" class="form-check-input" />
-                <label asp-for="IsActive" class="form-check-label">فعال</label>
-            </div>
         </div>
     </div>
 

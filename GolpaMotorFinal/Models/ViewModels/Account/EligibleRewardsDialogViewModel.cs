@@ -11,6 +11,11 @@ namespace GolpaMotorFinal.Models.ViewModels.Account
         public string? Province { get; set; }
         public string? City { get; set; }
         public string? JobTitle { get; set; }
+        public string? Address { get; set; }
+        public string? PostalCode { get; set; }
+        public string? CreditCartNumber { get; set; }
+        public string? IBAN { get; set; }
+        public string? AccountNumber { get; set; }
         public int TotalEarnedPoints { get; set; }
         public int TotalSettledPoints { get; set; }
         public int RemainedPoints { get; set; }

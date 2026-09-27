@@ -18,8 +18,9 @@
     <input asp-for="ProductID" type="hidden" />
     <input asp-for="ExistingImageUrl" type="hidden" />
     <div asp-validation-summary="ModelOnly" class="text-danger mb-2"></div>
+    <h6 class="modal-section-title is-first">تصویر محصول</h6>
     <div class="modal-photo-row" data-fallback="/images/imageProducts/noimage.jpg">
-        <img src="@ImageHelper.Fix(Model?.ExistingImageUrl)" class="modal-thumb image-preview" alt="" />
+        <img src="@ImageHelper.Fix(Model?.ExistingImageUrl)" class="modal-details-photo modal-details-photo--product image-preview" alt="تصویر محصول" />
         <div>
             <div class="modal-photo-actions">
                 <button type="button" class="btn js-pick-photo">بارگذاری عکس</button>
@@ -29,6 +30,7 @@
             <input asp-for="ImageFile" type="file" class="d-none image-preview-input" accept="image/*" />
         </div>
     </div>
+    <h6 class="modal-section-title">مشخصات محصول</h6>
     <div class="row">
         <div class="col-12 col-md-6">
             <label asp-for="ProductName" class="form-label"><i class="fa fa-box ms-1"></i> نام محصول</label>

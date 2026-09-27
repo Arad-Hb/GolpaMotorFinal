@@ -1,51 +1,74 @@
 @model DomainModel.ViewModels.Reward.RewardRequestListItem
 @using DomainModel.Models
+@using GolpaMotorFinal.Helpers
 @{
     string Dash(string? value) => string.IsNullOrWhiteSpace(value) ? "—" : value;
     var isPending = !Model.IsComplete && Model.StatusTitle == RewardStatusTitles.Pending;
     var statusClass = isPending ? "is-warn" : (Model.IsComplete ? "is-on" : "is-off");
+    var hasPhoto = !string.IsNullOrWhiteSpace(Model.ProfileImageUrl)
+        && Model.ProfileImageUrl.IndexOf("noimage", StringComparison.OrdinalIgnoreCase) < 0;
 }
 
 <div class="modal-compact">
     <div class="modal-details-hero">
         <div class="modal-details-hero-main">
-            <div class="modal-details-photo is-empty">
-                <i class="fa fa-user"></i>
-            </div>
+            @if (hasPhoto)
+            {
+                <img src="@ImageHelper.ToThumbnail(Model.ProfileImageUrl)" alt="@Dash(Model.UserFullName)" class="modal-details-photo" />
+            }
+            else
+            {
+                <div class="modal-details-photo is-empty">
+                    <i class="fa fa-user" aria-hidden="true"></i>
+                    <span>فاقد تصویر</span>
+                </div>
+            }
             <div>
                 <div class="modal-details-name">@Dash(string.IsNullOrWhiteSpace(Model.UserFullName) ? null : Model.UserFullName)</div>
-                <div class="modal-details-sub">@Dash(Model.CatalogTitle)</div>
+                <div class="modal-details-sub">
+                    <span><i class="fa fa-phone" aria-hidden="true"></i> @Dash(Model.PhoneNumber)</span>
+                    <span><i class="fa fa-gift" aria-hidden="true"></i> @Dash(Model.CatalogTitle)</span>
+                </div>
             </div>
         </div>
         <span class="modal-status-pill @statusClass">@Dash(Model.StatusTitle)</span>
     </div>
 
-    <div class="modal-details-grid">
-        <div class="modal-details-cell">
-            <span class="modal-details-label">موبایل</span>
-            <span class="modal-details-value">@Dash(Model.PhoneNumber)</span>
+    <section class="modal-details-section">
+        <h6 class="modal-section-title is-first">اطلاعات درخواست</h6>
+        <div class="modal-info-box-grid">
+            <div class="modal-info-box">
+                <span>پاداش</span>
+                <strong>@Dash(Model.CatalogTitle)</strong>
+            </div>
+            <div class="modal-info-box">
+                <span>حد نصاب</span>
+                <strong>@Model.RequiredPoints</strong>
+            </div>
+            <div class="modal-info-box">
+                <span>مانده امتیاز</span>
+                <strong>@Model.RemainedPoints</strong>
+            </div>
         </div>
-        <div class="modal-details-cell">
-            <span class="modal-details-label">حد نصاب</span>
-            <span class="modal-details-value">@Model.RequiredPoints</span>
+    </section>
+
+    <section class="modal-details-section">
+        <h6 class="modal-section-title">زمان‌بندی و وضعیت</h6>
+        <div class="modal-details-grid">
+            <div class="modal-details-cell">
+                <span class="modal-details-label">تاریخ درخواست</span>
+                <span class="modal-details-value">@(Model.RequestDate?.ToLocalTime().ToPersianDateTime() ?? "—")</span>
+            </div>
+            <div class="modal-details-cell">
+                <span class="modal-details-label">تاریخ بررسی</span>
+                <span class="modal-details-value">@(Model.ReviewedDate?.ToLocalTime().ToPersianDateTime() ?? "—")</span>
+            </div>
+            <div class="modal-details-cell">
+                <span class="modal-details-label">وضعیت</span>
+                <span class="modal-details-value">@Dash(Model.StatusTitle)</span>
+            </div>
         </div>
-        <div class="modal-details-cell">
-            <span class="modal-details-label">مانده امتیاز</span>
-            <span class="modal-details-value">@Model.RemainedPoints</span>
-        </div>
-        <div class="modal-details-cell">
-            <span class="modal-details-label">تاریخ درخواست</span>
-            <span class="modal-details-value">@(Model.RequestDate?.ToLocalTime().ToPersianDateTime() ?? "—")</span>
-        </div>
-        <div class="modal-details-cell">
-            <span class="modal-details-label">تاریخ بررسی</span>
-            <span class="modal-details-value">@(Model.ReviewedDate?.ToLocalTime().ToPersianDateTime() ?? "—")</span>
-        </div>
-        <div class="modal-details-cell">
-            <span class="modal-details-label">وضعیت</span>
-            <span class="modal-details-value">@Dash(Model.StatusTitle)</span>
-        </div>
-    </div>
+    </section>
 
     @if (isPending)
     {

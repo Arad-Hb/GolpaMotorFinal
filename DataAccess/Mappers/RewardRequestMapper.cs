@@ -13,6 +13,7 @@ namespace DataAccess.Mappers
                 UserID = x.UserID,
                 UserFullName = ((x.User.FirstName ?? "") + " " + (x.User.LastName ?? "")),
                 PhoneNumber = x.User.PhoneNumber,
+                ProfileImageUrl = x.User.ProfileImageUrl,
                 RewardCatalogID = x.RewardCatalogID,
                 CatalogTitle = x.RewardCatalog.Title,
                 RequiredPoints = x.RewardCatalog.RequiredPoints,

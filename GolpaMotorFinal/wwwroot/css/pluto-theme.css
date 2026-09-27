@@ -1669,6 +1669,12 @@ html[dir="rtl"] body.pluto-public {
     border-top: 1px solid #ececec;
 }
 
+.modal-section-title.is-first {
+    padding-top: 0;
+    margin-top: 0;
+    border-top: 0;
+}
+
 .modal-photo-row {
     display: flex;
     align-items: center;
@@ -1679,13 +1685,18 @@ html[dir="rtl"] body.pluto-public {
 .modal-photo-row .modal-avatar,
 .modal-photo-row .modal-thumb,
 .modal-photo-row .image-preview {
-    width: 64px;
-    height: 64px;
-    border-radius: 50%;
+    width: 72px;
+    height: 72px;
+    border-radius: 14px;
     object-fit: cover;
-    flex: 0 0 64px;
+    flex: 0 0 72px;
     background: #eee;
     border: 1px solid #ececec;
+}
+
+.modal-photo-row .modal-details-photo--product {
+    width: 88px;
+    flex-basis: 88px;
 }
 
 .modal-photo-actions {
@@ -1752,6 +1763,13 @@ html[dir="rtl"] body.pluto-public {
     padding: 14px 16px;
 }
 
+.modal-details-hero-main {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
 .modal-details-hero-main > div {
     min-width: 0;
 }
@@ -1763,6 +1781,11 @@ html[dir="rtl"] body.pluto-public {
     object-fit: cover;
     flex: 0 0 52px;
     background: #fff;
+}
+
+.modal-details-photo--product {
+    width: 68px;
+    flex-basis: 68px;
 }
 
 .modal-details-photo.is-empty {
@@ -1790,8 +1813,64 @@ html[dir="rtl"] body.pluto-public {
 }
 
 .modal-details-sub {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 12px;
+    margin-top: 4px;
     color: var(--pluto-muted);
     font-size: 13px;
+}
+
+.modal-details-sub span {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.modal-details-section {
+    min-width: 0;
+}
+
+.modal-info-box-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.modal-info-box-grid--two {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.modal-info-box {
+    min-width: 0;
+    padding: 13px 14px;
+    border: 1px solid #e5e9ed;
+    border-radius: 12px;
+    background: #fafbfc;
+}
+
+.modal-info-box span {
+    display: block;
+    margin-bottom: 6px;
+    color: var(--pluto-muted);
+    font-size: 12px;
+}
+
+.modal-info-box strong {
+    display: block;
+    color: var(--pluto-navy);
+    font-size: 13px;
+    overflow-wrap: anywhere;
+}
+
+.modal-description-box {
+    padding: 14px 16px;
+    border: 1px solid #e5e9ed;
+    border-radius: 12px;
+    background: #fafbfc;
+    color: var(--pluto-text);
+    line-height: 1.8;
+    white-space: pre-line;
 }
 
 .modal-status-pill {
@@ -1882,6 +1961,11 @@ html[dir="rtl"] body.pluto-public {
 
     .modal-details-hero {
         flex-wrap: wrap;
+    }
+
+    .modal-info-box-grid,
+    .modal-info-box-grid--two {
+        grid-template-columns: 1fr;
     }
 }
 
