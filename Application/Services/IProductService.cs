@@ -14,7 +14,5 @@ namespace Application.Services
         Task<ProductStatistics> GetStatistics();
         Task<ProductListComplexModel> Search(ProductSearchModel sm);
         Task<List<ProductListItem>> GetAll();
-        Task<List<NamedCountItem>> GetTopRegistrars(int take = 5);
-        Task<(List<NamedCountItem> Items, int Total)> GetTopRegistrarsPage(int pageIndex, int pageSize = 10);
     }
 }

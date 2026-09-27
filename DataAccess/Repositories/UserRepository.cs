@@ -1,5 +1,6 @@
 ﻿using DataAccess.Helpers;
 using DataAccess.Mappers;
+using DataAccess.Queries;
 using DataAccess.Services;
 using DomainModel.Models;
 using DomainModel.ViewModels.User;
@@ -363,65 +364,7 @@ namespace DataAccess.Repositories
 
         public async Task<UserListComplexModel> Search(UserSearchModel sm)
         {
-            var q = db.Users.Where(u => !u.IsDeleted).AsQueryable();
-
-            if (!string.IsNullOrEmpty(sm.FirstName))
-            {
-                q = q.Where(u => u.FirstName.Contains(sm.FirstName));
-            }
-            if (!string.IsNullOrEmpty(sm.LastName))
-            {
-                q = q.Where(u => u.LastName.Contains(sm.LastName));
-            }
-            if (!string.IsNullOrEmpty(sm.SearchTerm))
-            {
-                q = q.Where(u =>
-                    (u.PhoneNumber != null && u.PhoneNumber.Contains(sm.SearchTerm)) ||
-                    (u.FirstName != null && u.FirstName.Contains(sm.SearchTerm)) ||
-                    (u.LastName != null && u.LastName.Contains(sm.SearchTerm)));
-            }
-            if (!string.IsNullOrEmpty(sm.PhoneNumber) && string.IsNullOrEmpty(sm.SearchTerm))
-            {
-                q = q.Where(u => u.PhoneNumber.Contains(sm.PhoneNumber));
-            }
-            if (!string.IsNullOrEmpty(sm.Email))
-            {
-                q = q.Where(u => u.Email.Contains(sm.Email));
-            }
-            if (sm.CustomerTypeID.HasValue && sm.CustomerTypeID.Value > 0)
-            {
-                q = q.Where(u => u.UserCustomerTypes.Any(t => t.CustomerTypeID == sm.CustomerTypeID.Value));
-            }
-            if (sm.ProvinceID.HasValue && sm.ProvinceID.Value > 0)
-            {
-                q = q.Where(u => u.ProvinceID == sm.ProvinceID.Value);
-            }
-            if (sm.CityID.HasValue && sm.CityID.Value > 0)
-            {
-                q = q.Where(u => u.CityID == sm.CityID.Value);
-            }
-            if (sm.PointsFrom.HasValue)
-            {
-                q = q.Where(u => (u.RemainedPoints ?? 0) >= sm.PointsFrom.Value);
-            }
-            if (sm.PointsTo.HasValue)
-            {
-                q = q.Where(u => (u.RemainedPoints ?? 0) <= sm.PointsTo.Value);
-            }
-            if (sm.IsEligibleForReward.HasValue)
-            {
-                q = q.Where(u => u.IsEligibleForReward == sm.IsEligibleForReward.Value);
-            }
-            if (sm.HasReceivedReward.HasValue)
-            {
-                q = q.Where(u => u.HasReceivedReward == sm.HasReceivedReward.Value);
-            }
-            if (sm.CardFrom.HasValue || sm.CardTo.HasValue)
-            {
-                var from = sm.CardFrom ?? DateTime.MinValue;
-                var to = sm.CardTo?.Date.AddDays(1) ?? DateTime.MaxValue;
-                q = q.Where(u => u.CardRegistrations.Any(c => c.CreatedAt >= from && c.CreatedAt < to));
-            }
+            var q = UserQueries.ApplySearch(UserQueries.Active(db), sm);
 
             if (sm.PageSize <= 0)
                 sm.PageSize = 10;

@@ -1,4 +1,5 @@
 using DataAccess.Mappers;
+using DataAccess.Queries;
 using DataAccess.Services;
 using DomainModel.Models;
 using DomainModel.ViewModels.Product;
@@ -211,23 +212,7 @@ namespace DataAccess.Repositories
             pageIndex = Math.Max(0, pageIndex);
             pageSize = pageSize <= 0 ? 10 : pageSize;
 
-            var query = db.Users
-                .AsNoTracking()
-                .Where(x => !x.IsDeleted && x.CardRegistrations.Any())
-                .Select(x => new DashboardRegistrarItem
-                {
-                    UserID = x.Id,
-                    FullName = ((x.FirstName ?? "") + " " + (x.LastName ?? "")).Trim(),
-                    PhoneNumber = x.PhoneNumber,
-                    JobTitle = x.UserCustomerTypes
-                        .OrderBy(t => t.CustomerTypeID)
-                        .Select(t => t.CustomerType.Title)
-                        .FirstOrDefault(),
-                    Province = x.ProvinceID.HasValue ? x.Province.Name : null,
-                    City = x.CityID.HasValue ? x.City.Name : null,
-                    IsActive = x.IsActive,
-                    RegistrationCount = x.CardRegistrations.Count
-                });
+            var query = UserQueries.Registrars(db);
 
             var recordCount = await query.CountAsync();
             var pageCount = (int)Math.Ceiling(recordCount / (double)pageSize);

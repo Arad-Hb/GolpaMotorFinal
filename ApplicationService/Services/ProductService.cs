@@ -98,8 +98,5 @@ namespace ApplicationService.Services
         public Task<ProductStatistics> GetStatistics() => repo.GetStatistics();
         public Task<ProductListComplexModel> Search(ProductSearchModel sm) => repo.Search(sm ?? new ProductSearchModel());
         public Task<List<ProductListItem>> GetAll() => repo.GetAll();
-        public Task<List<NamedCountItem>> GetTopRegistrars(int take = 5) => repo.GetTopRegistrars(take);
-        public Task<(List<NamedCountItem> Items, int Total)> GetTopRegistrarsPage(int pageIndex, int pageSize = 10)
-            => repo.GetTopRegistrarsPage(pageIndex, pageSize);
     }
 }

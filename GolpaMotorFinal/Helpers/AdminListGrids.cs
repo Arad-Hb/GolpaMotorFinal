@@ -174,7 +174,7 @@ namespace GolpaMotorFinal.Helpers
         public static CrudGridViewModel BuildWarrantyReportGrid(IEnumerable<WarrantyProductStatusRow> items)
         {
             var grid = new CrudGridViewModel { GridId = "WarrantyReportGrid", EmptyMessage = "داده‌ای یافت نشد" , ShowRowNumber =true};
-            grid.Headers.AddRange(new[] { "محصول", "کل کارت", "ثبت‌شده", "آزاد", "منقضی", "تا ۱۰ روز" });
+            grid.Headers.AddRange(new[] { "محصول", "کل کارت", "ثبت‌شده", "ثبت‌نشده", "منقضی", "تا ۱۰ روز" });
 
             foreach (var row in items)
             {
