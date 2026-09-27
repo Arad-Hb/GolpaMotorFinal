@@ -218,7 +218,8 @@ $(document).on("click", ".btnDelete", async function () {
 $(document).on("click", ".btnSubmitRewardRequest", function () {
     const button = $(this);
     const catalogId = button.data("id");
-    const userId = button.data("user-id");
+    const page = $("#rewardDetailsContent");
+    const userId = button.data("user-id") || page.data("user-id");
     if (!catalogId || !userId) return;
 
     button.prop("disabled", true);
@@ -228,8 +229,8 @@ $(document).on("click", ".btnSubmitRewardRequest", function () {
         data: { userID: userId, rewardCatalogID: catalogId },
         headers: { RequestVerificationToken: token() },
         success: function (res) {
-            $.get("/UserManagement/EligibleRewards", { userID: userId }, function (html) {
-                const body = document.getElementById("generalModalBody");
+            $.get("/UserManagement/EligibleRewardsContent", { userID: userId }, function (html) {
+                const body = document.getElementById("rewardDetailsContent");
                 if (body) body.innerHTML = html;
                 const box = $("#rewardRequestAlert");
                 if (res && res.message && box.length) {
@@ -237,6 +238,9 @@ $(document).on("click", ".btnSubmitRewardRequest", function () {
                     box.addClass(res.success ? "alert-success" : "alert-danger");
                     box.text(res.message);
                 }
+            }).fail(function () {
+                button.prop("disabled", false);
+                toastError("خطا در به‌روزرسانی اطلاعات پاداش");
             });
         },
         error: function () {

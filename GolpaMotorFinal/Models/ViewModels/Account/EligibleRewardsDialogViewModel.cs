@@ -1,4 +1,4 @@
-using DomainModel.ViewModels.Reward;
+using GolpaMotorFinal.Models.ViewModels.CRUD;
 
 namespace GolpaMotorFinal.Models.ViewModels.Account
 {
@@ -8,19 +8,17 @@ namespace GolpaMotorFinal.Models.ViewModels.Account
         public string CustomerName { get; set; } = string.Empty;
         public string? PhoneNumber { get; set; }
         public string? ProfileImageUrl { get; set; }
+        public string? Province { get; set; }
+        public string? City { get; set; }
+        public string? JobTitle { get; set; }
         public int TotalEarnedPoints { get; set; }
         public int TotalSettledPoints { get; set; }
         public int RemainedPoints { get; set; }
+        public int AvailablePoints { get; set; }
         public int TotalRegisteredCards { get; set; }
         public bool IsEligibleForReward { get; set; }
         public bool HasReceivedReward { get; set; }
-        public List<UserEligibleRewardItem> Items { get; set; } = new();
-        public List<RewardRequestListItem> RecentRequests { get; set; } = new();
-        public int RewardPage { get; set; }
-        public int RewardPageCount { get; set; }
-        public int RewardRecordCount { get; set; }
-        public int HistoryPage { get; set; }
-        public int HistoryPageCount { get; set; }
-        public int HistoryRecordCount { get; set; }
+        public CrudGridViewModel EligibleRewardsGrid { get; set; } = new();
+        public CrudGridViewModel RewardHistoryGrid { get; set; } = new();
     }
 }

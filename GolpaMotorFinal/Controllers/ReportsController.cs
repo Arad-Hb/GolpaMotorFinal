@@ -217,6 +217,35 @@ namespace GolpaMotorFinal.Controllers
         }
 
         [HttpGet]
+        public async Task<IActionResult> UserCards(string id)
+        {
+            if (string.IsNullOrWhiteSpace(id))
+                return NotFound();
+
+            var user = await users.GetDetails(id);
+            if (user == null || string.IsNullOrWhiteSpace(user.UserID))
+                return NotFound();
+
+            var customerName = $"{user.FirstName} {user.LastName}".Trim();
+            if (string.IsNullOrWhiteSpace(customerName))
+                customerName = user.PhoneNumber;
+
+            return View("ReportDetails", new ReportDetailsPageViewModel
+            {
+                Title = $"کارت‌های گارانتی ثبت‌شده توسط «{customerName}»",
+                GridId = "ProductCardDetailGrid",
+                FilterPartial = "_UserCardDetailFilterBar",
+                Filter = new ReportActivityFilterBarViewModel
+                {
+                    Url = "/Reports/ProductCards",
+                    Target = "#ProductCardDetailGrid",
+                    UserID = user.UserID,
+                    SearchTerm = customerName
+                }
+            });
+        }
+
+        [HttpGet]
         public async Task<IActionResult> UserDetails(string id)
             => View("ReportDetails", await DetailPage(
                 $"گردش کامل کاربر", userId: id));

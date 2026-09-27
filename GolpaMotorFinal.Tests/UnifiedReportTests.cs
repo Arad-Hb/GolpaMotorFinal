@@ -144,6 +144,49 @@ public class UnifiedReportTests
     }
 
     [Fact]
+    public async Task Product_cards_are_scoped_to_user_and_include_points_and_validity()
+    {
+        await using var db = CreateDb();
+        var selectedUser = NewUser("cards-user");
+        var otherUser = NewUser("other-user");
+        var product = new Product
+        {
+            ProductName = "محصول کارت",
+            ProductPoint = 80,
+            IsAvailable = true
+        };
+        var first = NewCard(product, "USER-1", true);
+        var second = NewCard(product, "USER-2", true);
+        var other = NewCard(product, "OTHER-1", true);
+        db.AddRange(selectedUser, otherUser, product, first, second, other);
+        await db.SaveChangesAsync();
+
+        db.CardRegistrations.AddRange(
+            NewRegistration(selectedUser, first, 80),
+            NewRegistration(selectedUser, second, 60),
+            NewRegistration(otherUser, other, 80));
+        await db.SaveChangesAsync();
+
+        var page = await new ReportRepository(db).SearchProductCards(
+            new ReportActivitySearchModel
+            {
+                UserID = selectedUser.Id,
+                PageIndex = 0,
+                PageSize = 1
+            });
+
+        Assert.Equal(2, page.RecordCount);
+        Assert.Equal(2, page.PageCount);
+        var item = Assert.Single(page.Items);
+        Assert.Equal(selectedUser.Id, item.UserID);
+        Assert.True(item.AwardedPoints > 0);
+        Assert.NotNull(item.RegisteredAtUtc);
+        Assert.NotNull(item.PointsAwardedAtUtc);
+        Assert.Equal(12, item.ValidityMonths);
+        Assert.NotEqual("شروع‌نشده", item.RemainingValidityText);
+    }
+
+    [Fact]
     public void Jalali_range_is_half_open_and_displays_in_iran_time()
     {
         var from = "1405/07/04".JalaliStartOfDayUtc();

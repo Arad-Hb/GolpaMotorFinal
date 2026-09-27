@@ -5,13 +5,9 @@
     string Dash(string? value) => string.IsNullOrWhiteSpace(value) ? "—" : value;
     var hasPhoto = !string.IsNullOrWhiteSpace(Model.ProfileImageUrl)
         && Model.ProfileImageUrl.IndexOf("noimage", StringComparison.OrdinalIgnoreCase) < 0;
-    var rewardRow = Model.RewardPage * PaginationViewModel.DefaultPageSize;
-    var historyRow = Model.HistoryPage * PaginationViewModel.DefaultPageSize;
-    var rewardUrl = Url.Action("EligibleRewards", "UserManagement", new { userID = Model.UserID, historyPage = Model.HistoryPage }) ?? "/UserManagement/EligibleRewards";
-    var historyUrl = Url.Action("EligibleRewards", "UserManagement", new { userID = Model.UserID, rewardPage = Model.RewardPage }) ?? "/UserManagement/EligibleRewards";
 }
 
-<div class="modal-compact">
+<div class="reward-details-page">
     <div id="rewardRequestAlert" class="alert d-none"></div>
 
     <div class="modal-details-hero">
@@ -28,7 +24,10 @@
                 </div>
             }
             <div>
-                <div class="modal-details-name">@Dash(string.IsNullOrWhiteSpace(Model.CustomerName) ? "مشتری" : Model.CustomerName)</div>
+                <a class="modal-details-name text-decoration-none"
+                   href="@Url.Action("UserCards", "Reports", new { id = Model.UserID })">
+                    @Dash(string.IsNullOrWhiteSpace(Model.CustomerName) ? "مشتری" : Model.CustomerName)
+                </a>
                 <div class="modal-details-sub">@Dash(Model.PhoneNumber)</div>
             </div>
         </div>
@@ -51,6 +50,22 @@
             <span class="modal-details-label">دریافت قبلی</span>
             <span class="modal-details-value">@(Model.HasReceivedReward ? "بله" : "خیر")</span>
         </div>
+        <div class="modal-details-cell">
+            <span class="modal-details-label">استان</span>
+            <span class="modal-details-value">@Dash(Model.Province)</span>
+        </div>
+        <div class="modal-details-cell">
+            <span class="modal-details-label">شهر</span>
+            <span class="modal-details-value">@Dash(Model.City)</span>
+        </div>
+        <div class="modal-details-cell">
+            <span class="modal-details-label">شغل</span>
+            <span class="modal-details-value">@Dash(Model.JobTitle)</span>
+        </div>
+        <div class="modal-details-cell">
+            <span class="modal-details-label">امتیاز قابل‌استفاده</span>
+            <span class="modal-details-value">@Model.AvailablePoints</span>
+        </div>
     </div>
 
     @await Html.PartialAsync("_UserStatBoxes", UserStatBoxesViewModel.From(
@@ -60,107 +75,8 @@
         Model.TotalRegisteredCards))
 
     <h6 class="modal-section-title">پاداش‌های قابل درخواست</h6>
-    <div class="table-responsive">
-        <table class="table table-sm align-middle">
-            <thead>
-                <tr>
-                    <th class="table-num">#</th>
-                    <th>عنوان</th>
-                    <th>حد نصاب</th>
-                    <th>نوع</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                @if (Model.Items.Any())
-                {
-                    foreach (var item in Model.Items)
-                    {
-                        rewardRow++;
-                        <tr>
-                            <td class="table-num">@rewardRow</td>
-                            <td>
-                                <div>@item.Title</div>
-                                <div class="small text-muted">@item.Description</div>
-                            </td>
-                            <td>@item.RequiredPoints</td>
-                            <td>@(item.IsCashReward ? "نقدی" : "غیرنقدی")</td>
-                            <td>
-                                @if (item.HasPendingRequest)
-                                {
-                                    <span class="badge bg-warning text-dark">در انتظار بررسی</span>
-                                }
-                                else
-                                {
-                                    <button type="button"
-                                            class="btn btn-sm btn-primary btnSubmitRewardRequest"
-                                            data-id="@item.RewardCatalogID"
-                                            data-user-id="@Model.UserID">
-                                        ثبت درخواست
-                                    </button>
-                                }
-                            </td>
-                        </tr>
-                    }
-                }
-                else
-                {
-                    <tr>
-                        <td colspan="5" class="text-muted">در حال حاضر پاداش واجد شرایطی برای این مشتری وجود ندارد.</td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-    </div>
-    @await Component.InvokeAsync("Pagination", PaginationViewModel.For(
-        "generalModalBody",
-        Model.RewardPage,
-        Model.RewardPageCount,
-        Model.RewardRecordCount,
-        rewardUrl,
-        pageParameter: "rewardPage"))
+    @await Component.InvokeAsync("CrudGrid", new { model = Model.EligibleRewardsGrid })
 
     <h6 class="modal-section-title">درخواست‌های قبلی</h6>
-    <div class="table-responsive">
-        <table class="table table-sm align-middle">
-            <thead>
-                <tr>
-                    <th class="table-num">#</th>
-                    <th>عنوان</th>
-                    <th>وضعیت</th>
-                </tr>
-            </thead>
-            <tbody>
-                @if (Model.RecentRequests.Any())
-                {
-                    foreach (var req in Model.RecentRequests)
-                    {
-                        historyRow++;
-                        <tr>
-                            <td class="table-num">@historyRow</td>
-                            <td>@req.CatalogTitle</td>
-                            <td>@req.StatusTitle</td>
-                        </tr>
-                    }
-                }
-                else
-                {
-                    <tr>
-                        <td colspan="3" class="text-muted">درخواستی ثبت نشده است.</td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-    </div>
-    @await Component.InvokeAsync("Pagination", PaginationViewModel.For(
-        "generalModalBody",
-        Model.HistoryPage,
-        Model.HistoryPageCount,
-        Model.HistoryRecordCount,
-        historyUrl,
-        pageParameter: "historyPage"))
-
-    <div class="form-actions">
-        <button type="button" class="btn btn-secondary cancel-modal">بستن</button>
-    </div>
+    @await Component.InvokeAsync("CrudGrid", new { model = Model.RewardHistoryGrid })
 </div>

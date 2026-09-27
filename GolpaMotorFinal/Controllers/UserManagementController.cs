@@ -307,45 +307,18 @@ namespace GolpaMotorFinal.Controllers
         [HttpGet]
         public async Task<IActionResult> EligibleRewards(string userID, int rewardPage = 0, int historyPage = 0)
         {
-            if (string.IsNullOrWhiteSpace(userID))
-                return NotFound();
+            var vm = await BuildEligibleRewardsPage(userID, rewardPage, historyPage);
+            return vm == null ? NotFound() : View(vm);
+        }
 
-            await rewards.RefreshEligibility(userID);
-
-            var user = await service.GetDetails(userID);
-            if (user == null)
-                return NotFound();
-
-            var pageSize = PaginationViewModel.DefaultPageSize;
-            var allItems = await rewards.GetEligibleCatalogsForUser(user.UserID);
-            var allRequests = await rewards.GetUserRequests(user.UserID);
-            var rewardSlice = CrudGridPager.Slice(allItems, rewardPage, pageSize);
-            var history = CrudGridPager.Slice(allRequests, historyPage, pageSize);
-
-            var vm = new EligibleRewardsDialogViewModel
-            {
-                UserID = user.UserID,
-                CustomerName = $"{user.FirstName} {user.LastName}".Trim(),
-                PhoneNumber = user.PhoneNumber,
-                ProfileImageUrl = user.ProfileImageUrl,
-                TotalEarnedPoints = user.TotalEarnedPoints,
-                TotalSettledPoints = user.TotalSettledPoints,
-                RemainedPoints = await rewards.GetAvailablePoints(user.UserID),
-                TotalRegisteredCards = user.TotalRegisteredCards,
-                IsEligibleForReward = user.IsEligibleForReward,
-                HasReceivedReward = user.HasReceivedReward,
-                Items = rewardSlice.Items,
-                RecentRequests = history.Items,
-                RewardPage = rewardSlice.PageIndex,
-                RewardPageCount = rewardSlice.PageCount,
-                RewardRecordCount = rewardSlice.RecordCount,
-                HistoryPage = history.PageIndex,
-                HistoryPageCount = history.PageCount,
-                HistoryRecordCount = history.RecordCount
-            };
-
-            return PartialView("_EligibleRewards", vm);
-            //return view(vm);
+        [HttpGet]
+        public async Task<IActionResult> EligibleRewardsContent(
+            string userID,
+            int rewardPage = 0,
+            int historyPage = 0)
+        {
+            var vm = await BuildEligibleRewardsPage(userID, rewardPage, historyPage);
+            return vm == null ? NotFound() : PartialView("_EligibleRewards", vm);
         }
 
         [HttpPost]
@@ -357,6 +330,80 @@ namespace GolpaMotorFinal.Controllers
 
             var result = await rewards.CreateRequest(userID, rewardCatalogID);
             return Json(new { success = result.Success, message = result.Message });
+        }
+
+        private async Task<EligibleRewardsDialogViewModel?> BuildEligibleRewardsPage(
+            string userID,
+            int rewardPage,
+            int historyPage)
+        {
+            if (string.IsNullOrWhiteSpace(userID))
+                return null;
+
+            await rewards.RefreshEligibility(userID);
+            var user = await service.GetDetails(userID);
+            if (user == null || string.IsNullOrWhiteSpace(user.UserID))
+                return null;
+
+            var pageSize = PaginationViewModel.DefaultPageSize;
+            var rewardSlice = CrudGridPager.Slice(
+                await rewards.GetEligibleCatalogsForUser(user.UserID),
+                rewardPage,
+                pageSize);
+            var historySlice = CrudGridPager.Slice(
+                await rewards.GetUserRequests(user.UserID),
+                historyPage,
+                pageSize);
+
+            var eligibleGrid = AdminListGrids.BuildEligibleRewardGrid(rewardSlice.Items);
+            CrudGridPager.Attach(
+                eligibleGrid,
+                "rewardDetailsContent",
+                rewardSlice.PageIndex,
+                rewardSlice.PageCount,
+                rewardSlice.RecordCount,
+                FilterUrl.Combine("/UserManagement/EligibleRewardsContent", new
+                {
+                    userID = user.UserID,
+                    historyPage = historySlice.PageIndex
+                }),
+                pageSize);
+            eligibleGrid.GridId = "EligibleRewardGrid";
+
+            var historyGrid = AdminListGrids.BuildUserRewardHistoryGrid(historySlice.Items);
+            CrudGridPager.Attach(
+                historyGrid,
+                "rewardDetailsContent",
+                historySlice.PageIndex,
+                historySlice.PageCount,
+                historySlice.RecordCount,
+                FilterUrl.Combine("/UserManagement/EligibleRewardsContent", new
+                {
+                    userID = user.UserID,
+                    rewardPage = rewardSlice.PageIndex
+                }),
+                pageSize);
+            historyGrid.GridId = "UserRewardHistoryGrid";
+
+            return new EligibleRewardsDialogViewModel
+            {
+                UserID = user.UserID,
+                CustomerName = $"{user.FirstName} {user.LastName}".Trim(),
+                PhoneNumber = user.PhoneNumber,
+                ProfileImageUrl = user.ProfileImageUrl,
+                Province = user.Province,
+                City = user.City,
+                JobTitle = user.RoleName,
+                TotalEarnedPoints = user.TotalEarnedPoints,
+                TotalSettledPoints = user.TotalSettledPoints,
+                RemainedPoints = user.RemainedPoints,
+                AvailablePoints = await rewards.GetAvailablePoints(user.UserID),
+                TotalRegisteredCards = user.TotalRegisteredCards,
+                IsEligibleForReward = user.IsEligibleForReward,
+                HasReceivedReward = user.HasReceivedReward,
+                EligibleRewardsGrid = eligibleGrid,
+                RewardHistoryGrid = historyGrid
+            };
         }
 
         private async Task<FileUploadResult?> TryUpload(IFormFile? image)

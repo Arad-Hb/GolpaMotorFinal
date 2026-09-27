@@ -344,6 +344,7 @@ namespace DataAccess.Repositories
             search ??= new ReportActivitySearchModel();
             var pageIndex = Math.Max(0, search.PageIndex);
             var pageSize = search.PageSize <= 0 ? 50 : search.PageSize;
+            var scopedUserId = string.IsNullOrWhiteSpace(search.UserID) ? null : search.UserID;
             var query = db.WarrantyCards.AsNoTracking().AsQueryable();
 
             if (search.ProductID.HasValue && search.ProductID.Value > 0)
@@ -354,8 +355,8 @@ namespace DataAccess.Repositories
                 query = query.Where(x => x.IssuedAtUtc >= search.FromUtc.Value);
             if (search.ToUtcExclusive.HasValue)
                 query = query.Where(x => x.IssuedAtUtc < search.ToUtcExclusive.Value);
-            if (!string.IsNullOrWhiteSpace(search.UserID))
-                query = query.Where(x => x.CardRegistrations.Any(r => r.UserID == search.UserID));
+            if (scopedUserId != null)
+                query = query.Where(x => x.CardRegistrations.Any(r => r.UserID == scopedUserId));
             if (!string.IsNullOrWhiteSpace(search.SearchTerm))
             {
                 var term = search.SearchTerm.Trim();
@@ -366,7 +367,8 @@ namespace DataAccess.Repositories
                     x.CardRegistrations.Any(r =>
                         r.User.PhoneNumber!.Contains(term) ||
                         r.User.FirstName!.Contains(term) ||
-                        r.User.LastName!.Contains(term)));
+                        r.User.LastName!.Contains(term) ||
+                        ((r.User.FirstName ?? "") + " " + (r.User.LastName ?? "")).Contains(term)));
             }
 
             var recordCount = await query.CountAsync();
@@ -386,23 +388,32 @@ namespace DataAccess.Repositories
                     x.IssuedAtUtc,
                     x.ProductAssignedAtUtc,
                     x.IsRegistered,
+                    x.ValidityMonths,
                     UserID = x.CardRegistrations
+                        .Where(r => scopedUserId == null || r.UserID == scopedUserId)
                         .OrderBy(r => r.CreatedAt)
                         .Select(r => r.UserID)
                         .FirstOrDefault(),
                     UserName = x.CardRegistrations
+                        .Where(r => scopedUserId == null || r.UserID == scopedUserId)
                         .OrderBy(r => r.CreatedAt)
                         .Select(r => ((r.User.FirstName ?? "") + " " + (r.User.LastName ?? "")).Trim())
                         .FirstOrDefault(),
                     PhoneNumber = x.CardRegistrations
+                        .Where(r => scopedUserId == null || r.UserID == scopedUserId)
                         .OrderBy(r => r.CreatedAt)
                         .Select(r => r.User.PhoneNumber)
                         .FirstOrDefault(),
                     RegisteredAtUtc = x.CardRegistrations
+                        .Where(r => scopedUserId == null || r.UserID == scopedUserId)
                         .Select(r => (DateTime?)r.CreatedAt)
                         .Min(),
-                    StoredPoints = x.CardRegistrations.Sum(r => (int?)r.EarnedPionts) ?? 0,
-                    LegacyRegistrationCount = x.CardRegistrations.Count(r => r.EarnedPionts == 0)
+                    StoredPoints = x.CardRegistrations
+                        .Where(r => scopedUserId == null || r.UserID == scopedUserId)
+                        .Sum(r => (int?)r.EarnedPionts) ?? 0,
+                    LegacyRegistrationCount = x.CardRegistrations.Count(r =>
+                        (scopedUserId == null || r.UserID == scopedUserId) &&
+                        r.EarnedPionts == 0)
                 })
                 .ToListAsync();
 
@@ -420,11 +431,25 @@ namespace DataAccess.Repositories
                 UserName = x.UserName,
                 PhoneNumber = x.PhoneNumber,
                 RegisteredAtUtc = x.RegisteredAtUtc,
-                AwardedPoints = x.StoredPoints + x.LegacyRegistrationCount * x.ProductPoint
+                AwardedPoints = x.StoredPoints + x.LegacyRegistrationCount * x.ProductPoint,
+                PointsAwardedAtUtc = x.RegisteredAtUtc,
+                ValidityMonths = x.ValidityMonths
             }).ToList();
 
-            foreach (var item in items.Where(x => string.IsNullOrWhiteSpace(x.UserName)))
-                item.UserName = item.PhoneNumber;
+            var today = DateTime.UtcNow.ToIranTime().Date;
+            foreach (var item in items)
+            {
+                if (string.IsNullOrWhiteSpace(item.UserName))
+                    item.UserName = item.PhoneNumber;
+
+                item.RemainingDays = WarrantyValidity.RemainingDays(
+                    item.RegisteredAtUtc?.ToIranTime(),
+                    item.ValidityMonths,
+                    today);
+                item.RemainingValidityText = item.IsRegistered
+                    ? WarrantyValidity.Format(item.RemainingDays)
+                    : "شروع‌نشده";
+            }
 
             return new ReportPage<ProductCardDetailItem>
             {

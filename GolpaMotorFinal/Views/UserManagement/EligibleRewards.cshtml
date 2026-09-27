@@ -1,0 +1,15 @@
+@model GolpaMotorFinal.Models.ViewModels.Account.EligibleRewardsDialogViewModel
+@{
+    Layout = "_AdminLayout";
+}
+
+<div class="mb-3">
+    <a href="@Url.Action("Index", "UserManagement")" class="btn btn-sm btn-outline-secondary">
+        <i class="fa fa-arrow-right"></i>
+        بازگشت به مدیریت کاربران
+    </a>
+</div>
+
+<div id="rewardDetailsContent" data-user-id="@Model.UserID">
+    @await Html.PartialAsync("_EligibleRewards", Model)
+</div>

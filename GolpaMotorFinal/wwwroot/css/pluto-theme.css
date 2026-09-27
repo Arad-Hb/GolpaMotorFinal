@@ -1736,6 +1736,12 @@ html[dir="rtl"] body.pluto-public {
     gap: 12px;
 }
 
+.reward-details-page {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
 .modal-details-hero {
     display: flex;
     align-items: center;

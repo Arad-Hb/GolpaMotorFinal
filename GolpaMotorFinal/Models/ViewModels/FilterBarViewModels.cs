@@ -26,6 +26,7 @@ namespace GolpaMotorFinal.Models.ViewModels
         public string Url { get; set; } = "/Reports/Activities";
         public string Target { get; set; } = "#ReportActivityGrid";
         public IEnumerable<ProductListItem> Products { get; set; } = Enumerable.Empty<ProductListItem>();
+        public string? SearchTerm { get; set; }
         public long? ProductID { get; set; }
         public string? UserID { get; set; }
         public long? WarrantyCardID { get; set; }

@@ -248,7 +248,11 @@ namespace GolpaMotorFinal.Helpers
                 row.Columns.Add(Text(item.IsEligibleForReward ? "بله" : "خیر"));
                 row.Columns.Add(Text(item.HasReceivedReward ? "بله" : "خیر"));
 
-                row.Actions.Add(Modal("ثبت درخواست پاداش", "fa fa-gift", "/UserManagement/EligibleRewards", item.UserID, "userID", "btn btn-sm btn-outline-success"));
+                row.Actions.Add(Navigate(
+                    "ثبت درخواست پاداش",
+                    "fa fa-gift",
+                    $"/UserManagement/EligibleRewards?userID={Uri.EscapeDataString(item.UserID)}",
+                    "btn btn-sm btn-outline-success"));
                 row.Actions.Add(Modal("جزئیات", "fa fa-eye", "/UserManagement/Details", item.UserID, "userID", "btn btn-sm btn-outline-secondary"));
                 row.Actions.Add(Modal("ویرایش", "fa fa-pen", "/UserManagement/Edit", item.UserID, "userID", "btn btn-sm btn-outline-warning"));
                 row.Actions.Add(new GridAction
@@ -276,6 +280,66 @@ namespace GolpaMotorFinal.Helpers
                     RefreshUrl = "/UserManagement/List",
                     RefreshTargetId = "UserGrid"
                 });
+                grid.Rows.Add(row);
+            }
+
+            return grid;
+        }
+
+        public static CrudGridViewModel BuildEligibleRewardGrid(IEnumerable<UserEligibleRewardItem> items)
+        {
+            var grid = new CrudGridViewModel
+            {
+                GridId = "EligibleRewardGrid",
+                EmptyMessage = "در حال حاضر پاداش قابل درخواستی برای این مشتری وجود ندارد."
+            };
+            grid.Headers.AddRange(new[] { "عنوان", "توضیحات", "حد نصاب", "نوع", "وضعیت" });
+
+            foreach (var item in items)
+            {
+                var row = new GridRow { Key = item.RewardCatalogID.ToString() };
+                row.Columns.Add(Text(item.Title));
+                row.Columns.Add(Text(item.Description));
+                row.Columns.Add(Number(item.RequiredPoints));
+                row.Columns.Add(Text(item.IsCashReward ? "نقدی" : "غیرنقدی"));
+                row.Columns.Add(Text(item.HasPendingRequest ? "در انتظار بررسی" : "قابل درخواست"));
+                row.Actions.Add(new GridAction
+                {
+                    ActionText = "ثبت درخواست",
+                    OpenModal = false,
+                    Visible = !item.HasPendingRequest,
+                    Icon = "fa fa-gift",
+                    Id = item.RewardCatalogID.ToString(),
+                    IdName = "rewardCatalogID",
+                    CssClass = "btn btn-sm btn-primary btnSubmitRewardRequest"
+                });
+                grid.Rows.Add(row);
+            }
+
+            return grid;
+        }
+
+        public static CrudGridViewModel BuildUserRewardHistoryGrid(IEnumerable<RewardRequestListItem> items)
+        {
+            var grid = new CrudGridViewModel
+            {
+                GridId = "UserRewardHistoryGrid",
+                EmptyMessage = "درخواستی برای این مشتری ثبت نشده است."
+            };
+            grid.Headers.AddRange(new[] { "عنوان", "امتیاز لازم", "تاریخ درخواست", "تاریخ بررسی", "وضعیت" });
+
+            foreach (var item in items)
+            {
+                var row = new GridRow { Key = item.RewardRequestID.ToString() };
+                row.Columns.Add(Text(item.CatalogTitle));
+                row.Columns.Add(Number(item.RequiredPoints));
+                row.Columns.Add(Text(item.RequestDate.HasValue
+                    ? item.RequestDate.Value.ToIranTime().ToPersianDate()
+                    : "-"));
+                row.Columns.Add(Text(item.ReviewedDate.HasValue
+                    ? item.ReviewedDate.Value.ToIranTime().ToPersianDate()
+                    : "-"));
+                row.Columns.Add(Text(item.StatusTitle));
                 grid.Rows.Add(row);
             }
 
@@ -381,7 +445,7 @@ namespace GolpaMotorFinal.Helpers
             foreach (var item in items)
             {
                 var row = new GridRow { Key = item.ReportActivityLogID.ToString() };
-                row.Columns.Add(Text(item.OccurredAtUtc.ToIranTime().ToPersianDateTime()));
+                row.Columns.Add(Text(item.OccurredAtUtc.ToIranTime().ToPersianDate()));
                 row.Columns.Add(Text(ActivityTitle(item.ActivityType)));
                 row.Columns.Add(Link(item.UserName, $"/Reports/UserDetails/{Uri.EscapeDataString(item.UserID)}"));
                 row.Columns.Add(item.ProductID.HasValue
@@ -418,25 +482,32 @@ namespace GolpaMotorFinal.Helpers
             };
             grid.Headers.AddRange(new[]
             {
-                "سریال", "رمز", "تاریخ صدور", "وضعیت",
-                "مشتری", "تاریخ رجیستر", "امتیاز"
+                "محصول", "سریال", "رمز", "تاریخ صدور", "وضعیت",
+                "مشتری", "تاریخ ثبت", "امتیاز", "تاریخ امتیاز",
+                "اعتبار", "اعتبار باقی‌مانده"
             });
 
             foreach (var item in items)
             {
                 var row = new GridRow { Key = item.WarrantyCardID.ToString() };
+                row.Columns.Add(Text(item.ProductName));
                 row.Columns.Add(Link(item.SerialNumber, $"/Reports/CardDetails/{item.WarrantyCardID}"));
                 row.Columns.Add(Text(item.ScratchedCode));
-                row.Columns.Add(Text(item.IssuedAtUtc.ToIranTime().ToPersianDateTime()));
+                row.Columns.Add(Text(item.IssuedAtUtc.ToIranTime().ToPersianDate()));
                 row.Columns.Add(Text(item.IsRegistered ? "فعال‌شده" : "آزاد"));
                 row.Columns.Add(!string.IsNullOrWhiteSpace(item.UserID)
                     ? Link(item.UserName ?? item.PhoneNumber ?? "نامشخص",
                         $"/Reports/UserDetails/{Uri.EscapeDataString(item.UserID)}")
                     : Text("-"));
                 row.Columns.Add(Text(item.RegisteredAtUtc.HasValue
-                    ? item.RegisteredAtUtc.Value.ToIranTime().ToPersianDateTime()
+                    ? item.RegisteredAtUtc.Value.ToIranTime().ToPersianDate()
                     : "-"));
                 row.Columns.Add(Number(item.AwardedPoints));
+                row.Columns.Add(Text(item.PointsAwardedAtUtc.HasValue
+                    ? item.PointsAwardedAtUtc.Value.ToIranTime().ToPersianDate()
+                    : "-"));
+                row.Columns.Add(Number(item.ValidityMonths));
+                row.Columns.Add(Text(item.RemainingValidityText));
                 grid.Rows.Add(row);
             }
 
@@ -462,6 +533,19 @@ namespace GolpaMotorFinal.Helpers
                 Url = url,
                 Id = id,
                 IdName = idName,
+                CssClass = css
+            };
+        }
+
+        private static GridAction Navigate(string text, string icon, string url, string css)
+        {
+            return new GridAction
+            {
+                ActionText = text,
+                OpenModal = false,
+                Ajax = false,
+                Icon = icon,
+                Url = url,
                 CssClass = css
             };
         }

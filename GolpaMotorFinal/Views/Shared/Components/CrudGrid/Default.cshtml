@@ -84,20 +84,31 @@
                                         css += " open-modal";
                                     if (action.IsDelete && !css.Contains("btnDelete"))
                                         css += " btnDelete";
-                                    <button type="button"
-                                            class="@css"
-                                            title="@action.ActionText"
-                                            data-title="@action.ActionText"
-                                            data-url="@action.Url"
-                                            data-id="@action.Id"
-                                            data-id-name="@(action.IdName ?? "userID")"
-                                            data-size="@(action.Size ?? "modal-lg")"
-                                            data-grid-id="@action.GridId"
-                                            data-refresh-url="@action.RefreshUrl"
-                                            data-refresh-target-url="@action.RefreshUrl"
-                                            data-refresh-target-id="@action.RefreshTargetId">
-                                        <i class="@action.Icon"></i>
-                                    </button>
+                                    if (!action.Ajax && !action.OpenModal && !action.IsDelete)
+                                    {
+                                        <a href="@action.Url"
+                                           class="@css"
+                                           title="@action.ActionText">
+                                            <i class="@action.Icon"></i>
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <button type="button"
+                                                class="@css"
+                                                title="@action.ActionText"
+                                                data-title="@action.ActionText"
+                                                data-url="@action.Url"
+                                                data-id="@action.Id"
+                                                data-id-name="@(action.IdName ?? "userID")"
+                                                data-size="@(action.Size ?? "modal-lg")"
+                                                data-grid-id="@action.GridId"
+                                                data-refresh-url="@action.RefreshUrl"
+                                                data-refresh-target-url="@action.RefreshUrl"
+                                                data-refresh-target-id="@action.RefreshTargetId">
+                                            <i class="@action.Icon"></i>
+                                        </button>
+                                    }
                                 }
                                 </div>
                             </td>
