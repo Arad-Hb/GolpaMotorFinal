@@ -293,8 +293,7 @@ namespace DataAccess.Repositories
 
         public async Task<bool> Exists(string userID)
         {
-            return await db.Users
-                .AnyAsync(x => x.Id == userID && !x.IsDeleted);
+            return await db.Users.AnyAsync(x => x.Id == userID && !x.IsDeleted);
         }
 
         public async Task<UserAddEditModel?> Get(string userID)
@@ -388,9 +387,6 @@ namespace DataAccess.Repositories
 
         public Task<ApplicationUser?> GetByPhone(string phone)
         {
-            if (string.IsNullOrWhiteSpace(phone))
-                return Task.FromResult<ApplicationUser?>(null);
-
             return userManager.Users.FirstOrDefaultAsync(x => x.PhoneNumber == phone);
         }
 

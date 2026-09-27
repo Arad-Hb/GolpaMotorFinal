@@ -9,16 +9,16 @@ namespace DataAccess.Mappers
     {
         public static ApplicationUser ToEntity(UserAddEditModel model)
         {
+            var email = string.IsNullOrWhiteSpace(model.Email)
+                        ? $"u{Guid.NewGuid():N}"[..12] + "@x.local": model.Email.Trim();
+
             var user = new ApplicationUser
             {
-                UserName = string.IsNullOrWhiteSpace(model.Email)
-                            ? $"noemail_{Guid.NewGuid():N}@noemail.local"
-                            : model.Email.Trim(),
 
-                Email = string.IsNullOrWhiteSpace(model.Email)
-                            ? $"noemail_{Guid.NewGuid():N}@noemail.local"
-                            : model.Email.Trim(),
+                Email = email,
 
+                UserName = email,
+    
                 PhoneNumber = model.PhoneNumber,
 
                 FirstName = model.FirstName?.Trim(),

@@ -16,13 +16,19 @@ namespace ApplicationService.Services
         }
 
         public Task<List<Province>> GetProvinces()
-            => repo.GetProvinces();
+        {
+            return repo.GetProvinces();
+        }
 
         public Task<List<City>> GetCitiesByProvinceId(int provinceId)
-            => repo.GetCitiesByProvinceId(provinceId);
+        {
+            return repo.GetCitiesByProvinceId(provinceId);
+        }
 
         public Task<List<CustomerType>> GetCustomerTypes()
-            => repo.GetCustomerTypes();
+        {
+            return repo.GetCustomerTypes();
+        }
 
         public async Task<CustomerTypeAddEditModel?> GetCustomerType(int id)
         {
@@ -77,7 +83,11 @@ namespace ApplicationService.Services
             return await repo.DeleteCustomerType(id);
         }
 
-        private static string Normalize(string? title) => (title ?? string.Empty).Trim();
+        private static string Normalize(string? title)
+        {
+            title ??= string.Empty;
+            return title.Trim();
+        }
 
         private static string? Validate(string title)
         {

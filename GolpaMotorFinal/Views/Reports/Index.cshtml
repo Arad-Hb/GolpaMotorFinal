@@ -10,7 +10,7 @@
 <ul class="nav nav-tabs mb-3" role="tablist">
     <li class="nav-item"><button class="@NavClass("users")" data-bs-toggle="tab" data-bs-target="#reportUsers" type="button">گزارش کاربران</button></li>
     <li class="nav-item"><button class="@NavClass("productWarranty")" data-bs-toggle="tab" data-bs-target="#reportProductWarranty" type="button">گزارش کارت‌های گارانتی بر اساس محصول</button></li>
-    <li class="nav-item"><button class="@NavClass("products")" data-bs-toggle="tab" data-bs-target="#reportProducts" type="button">محصولات پرمصرف</button></li>
+    @* <li class="nav-item"><button class="@NavClass("products")" data-bs-toggle="tab" data-bs-target="#reportProducts" type="button">محصولات پرمصرف</button></li> *@
     <li class="nav-item"><button class="@NavClass("rewards")" data-bs-toggle="tab" data-bs-target="#reportRewards" type="button">گزارش پاداش</button></li>
 </ul>
 
@@ -42,7 +42,7 @@
             }
         })
     </div>
-    <div class="@PaneClass("products")" id="reportProducts">
+    @* <div class="@PaneClass("products")" id="reportProducts">
         @await Html.PartialAsync("_CrudPage", new CrudIndexViewModel
         {
             GridId = "ProductReportGrid",
@@ -53,7 +53,7 @@
                 YearNow = Model.CurrentJalaliYear
             }
         })
-    </div>
+    </div> *@
     <div class="@PaneClass("rewards")" id="reportRewards">
         @await Html.PartialAsync("_CrudPage", new CrudIndexViewModel
         {
