@@ -31,6 +31,10 @@ namespace ApplicationService.Services
                 return op.ToFailed("عنوان پاداش اجباری است");
             if (model.RequiredPoints <= 0)
                 return op.ToFailed("حد نصاب باید بزرگ‌تر از صفر باشد");
+            if (!model.IsCashReward)
+                model.CashValue = null;
+            else if (!model.CashValue.HasValue || model.CashValue.Value <= 0)
+                return op.ToFailed("مبلغ نقدی برای پاداش نقدی اجباری است و باید بزرگ‌تر از صفر باشد");
             return await catalogs.Add(model);
         }
 
@@ -41,6 +45,14 @@ namespace ApplicationService.Services
                 return op.ToFailed("شناسه نامعتبر است");
             if (!await catalogs.Exists(model.RewardCatalogID))
                 return op.ToFailed("پاداش پیدا نشد");
+            if (string.IsNullOrWhiteSpace(model.Title))
+                return op.ToFailed("عنوان پاداش اجباری است");
+            if (model.RequiredPoints <= 0)
+                return op.ToFailed("حد نصاب باید بزرگ‌تر از صفر باشد");
+            if (!model.IsCashReward)
+                model.CashValue = null;
+            else if (!model.CashValue.HasValue || model.CashValue.Value <= 0)
+                return op.ToFailed("مبلغ نقدی برای پاداش نقدی اجباری است و باید بزرگ‌تر از صفر باشد");
             return await catalogs.Update(model);
         }
 

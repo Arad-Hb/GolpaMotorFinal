@@ -8,6 +8,28 @@
         applyTableFilter($('[data-filter-bar][data-target="#RequestGrid"]'));
     }
 
+    window.syncRewardCatalogCashFields = function (root) {
+        const scope = $(root || document);
+        const selected = scope.find('input[name="IsCashReward"]:checked').val();
+        if (selected === undefined) return;
+
+        const isCash = String(selected).toLowerCase() === "true";
+        const group = scope.find(".js-reward-cash-value-group");
+        const input = group.find('input[name="CashValue"]');
+
+        group.toggleClass("d-none", !isCash);
+        input.prop("disabled", !isCash);
+        if (!isCash) {
+            input.val("");
+        } else if (window.initNumericInputs) {
+            window.initNumericInputs(group[0]);
+        }
+    };
+
+    $(document).on("change", ".js-reward-cash-type", function () {
+        window.syncRewardCatalogCashFields($(this).closest("form"));
+    });
+
     $(document).on("click", ".btnApproveRequest", async function () {
         const ok = await confirmDelete("این درخواست تأیید و امتیاز کاربر کسر شود؟");
         if (!ok) return;

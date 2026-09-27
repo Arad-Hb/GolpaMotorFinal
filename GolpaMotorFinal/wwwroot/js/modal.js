@@ -122,6 +122,8 @@ function openModal(url, title, id, idName, extra) {
     $.get(url, params, function (result) {
         document.getElementById("generalModalBody").innerHTML = result;
         if (window.initAdminSelects) window.initAdminSelects(document.getElementById("generalModalBody"));
+        if (window.initNumericInputs) window.initNumericInputs(document.getElementById("generalModalBody"));
+        if (window.syncRewardCatalogCashFields) window.syncRewardCatalogCashFields(document.getElementById("generalModalBody"));
     }).fail(function () {
         document.getElementById("generalModalBody").innerHTML =
             '<div class="alert alert-danger">خطا در بارگذاری فرم</div>';

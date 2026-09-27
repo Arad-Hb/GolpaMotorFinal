@@ -22,7 +22,7 @@
             }
             <div>
                 <div class="modal-details-name">@Dash(Model.ProductName)</div>
-                <div class="modal-details-sub">امتیاز @Model.ProductPoint</div>
+                <div class="modal-details-sub">امتیاز @Model.ProductPoint.ToGroupedNumber()</div>
             </div>
         </div>
         @if (Model.IsAvailable)
@@ -40,11 +40,11 @@
         <div class="modal-info-box-grid modal-info-box-grid--two">
             <div class="modal-info-box">
                 <span>امتیاز محصول</span>
-                <strong>@Model.ProductPoint</strong>
+                <strong>@Model.ProductPoint.ToGroupedNumber()</strong>
             </div>
             <div class="modal-info-box">
                 <span>تعداد کارت گارانتی</span>
-                <strong>@Model.WarrantyCount</strong>
+                <strong>@Model.WarrantyCount.ToGroupedNumber()</strong>
             </div>
         </div>
     </section>

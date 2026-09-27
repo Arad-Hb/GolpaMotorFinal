@@ -23,22 +23,35 @@
         </div>
         <div class="col-12 col-md-6">
             <label asp-for="RequiredPoints" class="form-label">بازه امتیاز</label>
-            <input asp-for="RequiredPoints" class="form-control" />
+            <input asp-for="RequiredPoints" type="text" inputmode="numeric" data-number-format class="form-control" />
             <span asp-validation-for="RequiredPoints" class="text-danger small"></span>
         </div>
         <div class="col-12">
             <label asp-for="Description" class="form-label">توضیحات</label>
             <textarea asp-for="Description" class="form-control"></textarea>
         </div>
-        <div class="col-12 col-md-6">
-            <div class="form-check mt-2">
-                <input asp-for="IsCashReward" class="form-check-input" />
-                <label asp-for="IsCashReward" class="form-check-label">پاداش نقدی</label>
+        <div class="col-12">
+            <label class="form-label d-block">نوع پاداش</label>
+            <div class="d-flex flex-wrap gap-3">
+                <div class="form-check">
+                    <input asp-for="IsCashReward" type="radio" value="true" id="createRewardCash" class="form-check-input js-reward-cash-type" />
+                    <label for="createRewardCash" class="form-check-label">پاداش نقدی</label>
+                </div>
+                <div class="form-check">
+                    <input asp-for="IsCashReward" type="radio" value="false" id="createRewardNonCash" class="form-check-input js-reward-cash-type" />
+                    <label for="createRewardNonCash" class="form-check-label">پاداش غیرنقدی</label>
+                </div>
             </div>
         </div>
-        <div class="col-12 col-md-6">
+        <div class="col-12 col-md-6 js-reward-cash-value-group @(Model.IsCashReward ? "" : "d-none")">
             <label asp-for="CashValue" class="form-label">مبلغ نقدی</label>
-            <input asp-for="CashValue" class="form-control" />
+            <input asp-for="CashValue"
+                   type="text"
+                   inputmode="numeric"
+                   data-number-format
+                   class="form-control"
+                   disabled="@(!Model.IsCashReward ? "disabled" : null)" />
+            <span asp-validation-for="CashValue" class="text-danger small"></span>
         </div>
         <div class="col-12">
             <div class="form-check">

@@ -600,6 +600,7 @@ html[dir="rtl"] body.pluto-public {
     max-width: 64px;
     text-align: center;
     white-space: nowrap;
+    font-variant-numeric: tabular-nums;
     padding-inline: 6px;
 }
 

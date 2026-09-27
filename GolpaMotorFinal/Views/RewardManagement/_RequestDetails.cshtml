@@ -43,11 +43,11 @@
             </div>
             <div class="modal-info-box">
                 <span>حد نصاب</span>
-                <strong>@Model.RequiredPoints</strong>
+                <strong>@Model.RequiredPoints.ToGroupedNumber()</strong>
             </div>
             <div class="modal-info-box">
                 <span>مانده امتیاز</span>
-                <strong>@Model.RemainedPoints</strong>
+                <strong>@Model.RemainedPoints.ToGroupedNumber()</strong>
             </div>
         </div>
     </section>

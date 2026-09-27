@@ -36,7 +36,7 @@
         <div class="full counter_section">
             <div class="couter_icon"><div><i class="fa fa-gift purple_color"></i></div></div>
             <div class="counter_no">
-                <p class="total_no">@(Model?.TotalRegisteredPoints ?? 0)</p>
+                <p class="total_no">@((Model?.TotalRegisteredPoints ?? 0).ToGroupedNumber())</p>
                 <p class="head_couter">امتیاز ثبت‌شده</p>
             </div>
         </div>

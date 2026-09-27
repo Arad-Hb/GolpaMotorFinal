@@ -25,7 +25,7 @@
                         <td class="table-num">@rowNumber</td>
                         <td>@card.SerialNumber</td>
                         <td>@card.ProductName</td>
-                        <td>@card.Points</td>
+                        <td>@card.Points.ToGroupedNumber()</td>
                         <td>@card.CreatedAt.ToLocalTime().ToPersianDate()</td>
                     </tr>
                 }

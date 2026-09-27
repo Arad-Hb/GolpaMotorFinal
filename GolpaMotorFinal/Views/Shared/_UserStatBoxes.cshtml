@@ -3,18 +3,18 @@
 <div class="modal-stat-row">
     <div class="modal-stat-box modal-stat-total">
         <span>کل</span>
-        <strong>@Model.TotalEarnedPoints</strong>
+        <strong>@Model.TotalEarnedPoints.ToGroupedNumber()</strong>
     </div>
     <div class="modal-stat-box modal-stat-used">
         <span>مصرف</span>
-        <strong>@Model.TotalSettledPoints</strong>
+        <strong>@Model.TotalSettledPoints.ToGroupedNumber()</strong>
     </div>
     <div class="modal-stat-box modal-stat-remain">
         <span>مانده</span>
-        <strong>@Model.RemainedPoints</strong>
+        <strong>@Model.RemainedPoints.ToGroupedNumber()</strong>
     </div>
     <div class="modal-stat-box modal-stat-card">
         <span>کارت</span>
-        <strong>@Model.TotalRegisteredCards</strong>
+        <strong>@Model.TotalRegisteredCards.ToGroupedNumber()</strong>
     </div>
 </div>

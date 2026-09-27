@@ -38,7 +38,7 @@ namespace DataAccess.Mappers
                 Description = catalog.Description,
                 RequiredPoints = catalog.RequiredPoints,
                 IsCashReward = catalog.IsCashReward,
-                CashValue = catalog.CashValue,
+                CashValue = catalog.IsCashReward ? catalog.CashValue : null,
                 IsActive = catalog.IsActive
             };
         }

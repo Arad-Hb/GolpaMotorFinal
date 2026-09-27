@@ -122,7 +122,13 @@ $(document).on("submit", ".merge-form", function (e) {
 $(document).on("submit", ".crud-form", function (e) {
     e.preventDefault();
     const form = $(this);
+    if (window.normalizeFormattedNumbers) {
+        window.normalizeFormattedNumbers(this);
+    }
     const formData = new FormData(this);
+    if (window.initNumericInputs) {
+        window.initNumericInputs(this);
+    }
     const modalShell = form.closest("#generalModal");
     const gridId = modalShell.attr("data-grid-id") || form.data("grid-id");
     const targetId = gridId ? ("#" + gridId) : null;

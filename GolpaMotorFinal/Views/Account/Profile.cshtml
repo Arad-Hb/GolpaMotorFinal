@@ -12,7 +12,7 @@
                     <img src="@ImageHelper.ToThumbnail(Model.ProfileImageUrl)" class="rounded-circle mb-3" style="width:96px;height:96px;object-fit:cover;" alt="" />
                     <h4>@(Model.FirstName) @(Model.LastName)</h4>
                     <p class="text-muted mb-1">@Model.PhoneNumber</p>
-                    <p class="mb-0">مانده امتیاز: <strong>@Model.RemainedPoints</strong></p>
+                    <p class="mb-0">مانده امتیاز: <strong>@Model.RemainedPoints.ToGroupedNumber()</strong></p>
                     <p>کارت ثبت‌شده: <strong>@Model.TotalRegisteredCards</strong></p>
                     <p class="mb-1">واجد شرایط پاداش: <strong>@(Model.IsEligibleForReward ? "بله" : "خیر")</strong></p>
                     <p>دریافت پاداش قبلی: <strong>@(Model.HasReceivedReward ? "بله" : "خیر")</strong></p>

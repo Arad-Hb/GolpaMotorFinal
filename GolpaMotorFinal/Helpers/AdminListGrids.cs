@@ -72,7 +72,7 @@ namespace GolpaMotorFinal.Helpers
                 row.Columns.Add(Text(item.Title));
                 row.Columns.Add(Number(item.RequiredPoints));
                 row.Columns.Add(Text(item.IsCashReward ? "نقدی" : "غیرنقدی"));
-                row.Columns.Add(Text(item.IsCashReward ? item.CashValue?.ToString("N0") ?? "-" : "-"));
+                row.Columns.Add(Text(item.IsCashReward ? item.CashValue.ToGroupedNumber("-") : "-"));
                 row.Columns.Add(Text(item.IsActive ? "فعال" : "غیرفعال"));
                 row.Columns.Add(Number(item.RequestCount));
                 row.Actions.Add(Modal("جزئیات", "fa fa-eye", "/RewardManagement/Details", id, "rewardCatalogID", "btn btn-sm btn-outline-secondary"));
@@ -559,7 +559,7 @@ namespace GolpaMotorFinal.Helpers
         private static GridColumn Number(object? value, string css = "") => new()
         {
             Type = GridColumnType.Number,
-            Value = value ?? 0,
+            Value = NumericExtensions.FormatGroupedNumber(value, "0"),
             CssClass = css
         };
 

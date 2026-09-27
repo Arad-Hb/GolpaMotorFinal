@@ -29,7 +29,7 @@
         <div class="modal-info-box-grid">
             <div class="modal-info-box">
                 <span>حد نصاب امتیاز</span>
-                <strong>@Model.RequiredPoints</strong>
+                <strong>@Model.RequiredPoints.ToGroupedNumber()</strong>
             </div>
             <div class="modal-info-box">
                 <span>نوع پاداش</span>
@@ -37,7 +37,7 @@
             </div>
             <div class="modal-info-box">
                 <span>مبلغ نقدی</span>
-                <strong>@(Model.IsCashReward ? (Model.CashValue?.ToString("N0") ?? "—") : "—")</strong>
+                <strong>@(Model.IsCashReward ? Model.CashValue.ToGroupedNumber() : "—")</strong>
             </div>
         </div>
     </section>
@@ -47,7 +47,7 @@
         <div class="modal-info-box-grid modal-info-box-grid--two">
             <div class="modal-info-box">
                 <span>تعداد درخواست‌ها</span>
-                <strong>@Model.RequestCount</strong>
+                <strong>@Model.RequestCount.ToGroupedNumber()</strong>
             </div>
             <div class="modal-info-box">
                 <span>وضعیت</span>

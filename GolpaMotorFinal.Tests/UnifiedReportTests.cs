@@ -1,8 +1,11 @@
+using DataAccess.Mappers;
 using DataAccess.Repositories;
 using DomainModel.Models;
 using DomainModel.ViewModels.Reports;
+using DomainModel.ViewModels.Reward;
 using Framework.Common.Extensions;
 using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 using Xunit;
 
 namespace GolpaMotorFinal.Tests;
@@ -218,6 +221,46 @@ public class UnifiedReportTests
         Assert.Equal("missing_financial_profile", cashResult.ErrorCode);
         Assert.False(nonCashResult.Success);
         Assert.Equal("missing_shipping_profile", nonCashResult.ErrorCode);
+    }
+
+    [Fact]
+    public void Reward_catalog_cash_rules_require_amount_and_clear_it_for_non_cash()
+    {
+        var cashModel = new RewardCatalogAddEditModel
+        {
+            Title = "نقدی",
+            RequiredPoints = 1_000,
+            IsCashReward = true
+        };
+        var validationResults = new List<ValidationResult>();
+
+        var isValid = Validator.TryValidateObject(
+            cashModel,
+            new ValidationContext(cashModel),
+            validationResults,
+            validateAllProperties: true);
+
+        Assert.False(isValid);
+        Assert.Contains(validationResults, x => x.MemberNames.Contains(nameof(cashModel.CashValue)));
+
+        var catalog = new RewardCatalog { CashValue = 4_000_000, IsCashReward = true };
+        RewardCatalogMapper.Apply(catalog, new RewardCatalogAddEditModel
+        {
+            Title = "غیرنقدی",
+            RequiredPoints = 50_000,
+            IsCashReward = false,
+            CashValue = 4_000_000
+        });
+
+        Assert.False(catalog.IsCashReward);
+        Assert.Null(catalog.CashValue);
+    }
+
+    [Fact]
+    public void Numeric_display_groups_money_and_points_by_three_digits()
+    {
+        Assert.Equal("4,000,000", 4_000_000.ToGroupedNumber());
+        Assert.Equal("50,000", 50_000.ToGroupedNumber());
     }
 
     [Fact]

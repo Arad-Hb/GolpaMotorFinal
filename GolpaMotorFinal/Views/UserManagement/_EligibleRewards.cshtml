@@ -55,7 +55,7 @@
             </div>
             <div class="modal-details-cell">
                 <span class="modal-details-label">امتیاز قابل‌استفاده</span>
-                <span class="modal-details-value">@Model.AvailablePoints</span>
+                <span class="modal-details-value">@Model.AvailablePoints.ToGroupedNumber()</span>
             </div>
         </div>
     </section>

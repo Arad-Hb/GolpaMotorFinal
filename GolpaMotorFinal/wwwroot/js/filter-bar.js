@@ -450,15 +450,25 @@
 
     function parseNum(val) {
         if (val === null || val === undefined || String(val).trim() === "") return null;
-        var n = Number(val);
+        var raw = window.getRawFormattedNumber
+            ? window.getRawFormattedNumber(val)
+            : String(val).replace(/,/g, "");
+        var n = Number(raw);
         return isNaN(n) ? null : n;
+    }
+
+    function displayNum(value) {
+        if (value === null) return "";
+        return window.formatGroupedNumber
+            ? window.formatGroupedNumber(value)
+            : String(value);
     }
 
     function numLabel(from, to, empty) {
         if (from === null && to === null) return empty;
-        if (from !== null && to !== null) return from + " – " + to;
-        if (from !== null) return "از " + from;
-        return "تا " + to;
+        if (from !== null && to !== null) return displayNum(from) + " – " + displayNum(to);
+        if (from !== null) return "از " + displayNum(from);
+        return "تا " + displayNum(to);
     }
 
     function updateNumTrigger(wrap) {
@@ -538,9 +548,9 @@
         var popup = $(
             '<div class="num-range-popup" dir="rtl">' +
             '<div class="num-range-popup__fields">' +
-            '<label class="num-range-popup__field"><span>حداقل</span><input type="number" class="num-range-popup__from" step="' + step + '" inputmode="numeric" /></label>' +
+            '<label class="num-range-popup__field"><span>حداقل</span><input type="text" data-number-format class="num-range-popup__from" inputmode="numeric" /></label>' +
             '<span class="num-range-popup__sep">تا</span>' +
-            '<label class="num-range-popup__field"><span>حداکثر</span><input type="number" class="num-range-popup__to" step="' + step + '" inputmode="numeric" /></label>' +
+            '<label class="num-range-popup__field"><span>حداکثر</span><input type="text" data-number-format class="num-range-popup__to" inputmode="numeric" /></label>' +
             "</div>" +
             '<div class="num-range-popup__actions">' +
             '<button type="button" class="num-range-popup__clear">پاک کردن</button>' +
@@ -550,6 +560,7 @@
         popup.find(".num-range-popup__from").val(from);
         popup.find(".num-range-popup__to").val(to);
         $("body").append(popup);
+        if (window.initNumericInputs) window.initNumericInputs(popup[0]);
         positionFixedPopup(wrap.find(".num-range__trigger"), popup);
         popup.find(".num-range-popup__from").trigger("focus").trigger("select");
 

@@ -88,7 +88,14 @@ namespace GolpaMotorFinal.Controllers
         public async Task<JsonResult> Create(RewardCatalogAddEditModel model)
         {
             if (!ModelState.IsValid)
-                return Json(new { success = false, message = "اطلاعات معتبر نیست" });
+                return Json(new
+                {
+                    success = false,
+                    message = ModelState.Values
+                        .SelectMany(x => x.Errors)
+                        .Select(x => x.ErrorMessage)
+                        .FirstOrDefault() ?? "اطلاعات معتبر نیست"
+                });
             var result = await rewards.AddCatalog(model);
             return Json(new { success = result.Success, message = result.Message });
         }
@@ -107,7 +114,14 @@ namespace GolpaMotorFinal.Controllers
         public async Task<IActionResult> Edit(RewardCatalogAddEditModel model)
         {
             if (!ModelState.IsValid)
-                return Json(new { success = false, message = "اطلاعات معتبر نیست" });
+                return Json(new
+                {
+                    success = false,
+                    message = ModelState.Values
+                        .SelectMany(x => x.Errors)
+                        .Select(x => x.ErrorMessage)
+                        .FirstOrDefault() ?? "اطلاعات معتبر نیست"
+                });
             var result = await rewards.UpdateCatalog(model);
             return Json(new { success = result.Success, message = result.Message });
         }

@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace DomainModel.ViewModels.Reward
 {
-    public class RewardCatalogAddEditModel
+    public class RewardCatalogAddEditModel : IValidatableObject
     {
         public int RewardCatalogID { get; set; }
 
@@ -28,5 +28,15 @@ namespace DomainModel.ViewModels.Reward
 
         [Display(Name = "فعال")]
         public bool IsActive { get; set; } = true;
+
+        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        {
+            if (IsCashReward && (!CashValue.HasValue || CashValue.Value <= 0))
+            {
+                yield return new ValidationResult(
+                    "مبلغ نقدی برای پاداش نقدی اجباری است و باید بزرگ‌تر از صفر باشد.",
+                    new[] { nameof(CashValue) });
+            }
+        }
     }
 }
