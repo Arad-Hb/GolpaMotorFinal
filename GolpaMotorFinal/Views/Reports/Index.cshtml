@@ -3,16 +3,19 @@
 @using GolpaMotorFinal.Models.ViewModels.CRUD
 @{
     Layout = "_AdminLayout";
+    string NavClass(string tab) => Model.OpenTab == tab ? "nav-link active" : "nav-link";
+    string PaneClass(string tab) => Model.OpenTab == tab ? "tab-pane fade show active" : "tab-pane fade";
 }
 
 <ul class="nav nav-tabs mb-3" role="tablist">
-    <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#reportUsers" type="button">گزارش کاربران</button></li>
-    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#reportProductWarranty" type="button">گزارش کارت‌های گارانتی بر اساس محصول</button></li>
-    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#reportRewards" type="button">گزارش پاداش</button></li>
+    <li class="nav-item"><button class="@NavClass("users")" data-bs-toggle="tab" data-bs-target="#reportUsers" type="button">گزارش کاربران</button></li>
+    <li class="nav-item"><button class="@NavClass("productWarranty")" data-bs-toggle="tab" data-bs-target="#reportProductWarranty" type="button">گزارش کارت‌های گارانتی بر اساس محصول</button></li>
+    <li class="nav-item"><button class="@NavClass("products")" data-bs-toggle="tab" data-bs-target="#reportProducts" type="button">محصولات پرمصرف</button></li>
+    <li class="nav-item"><button class="@NavClass("rewards")" data-bs-toggle="tab" data-bs-target="#reportRewards" type="button">گزارش پاداش</button></li>
 </ul>
 
 <div class="tab-content">
-    <div class="tab-pane fade show active" id="reportUsers">
+    <div class="@PaneClass("users")" id="reportUsers">
         @await Html.PartialAsync("_CrudPage", new CrudIndexViewModel
         {
             GridId = "UserReportGrid",
@@ -27,7 +30,7 @@
             }
         })
     </div>
-    <div class="tab-pane fade" id="reportProductWarranty">
+    <div class="@PaneClass("productWarranty")" id="reportProductWarranty">
         @await Html.PartialAsync("_CrudPage", new CrudIndexViewModel
         {
             GridId = "ProductWarrantyReportGrid",
@@ -39,7 +42,19 @@
             }
         })
     </div>
-    <div class="tab-pane fade" id="reportRewards">
+    <div class="@PaneClass("products")" id="reportProducts">
+        @await Html.PartialAsync("_CrudPage", new CrudIndexViewModel
+        {
+            GridId = "ProductReportGrid",
+            ListHeading = "محصولات از پرمصرف به کم‌مصرف",
+            FilterPartial = "_ProductReportFilterBar",
+            FilterModel = new ProductReportFilterBarViewModel
+            {
+                YearNow = Model.CurrentJalaliYear
+            }
+        })
+    </div>
+    <div class="@PaneClass("rewards")" id="reportRewards">
         @await Html.PartialAsync("_CrudPage", new CrudIndexViewModel
         {
             GridId = "RewardReportGrid",

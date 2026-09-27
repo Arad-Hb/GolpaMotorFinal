@@ -10,7 +10,12 @@
             <tr>
                 <th class="table-num">#</th>
                 <th>کاربر</th>
-                <th>تعداد</th>
+                <th>موبایل</th>
+                <th>شغل</th>
+                <th>استان</th>
+                <th>شهر</th>
+                <th>وضعیت</th>
+                <th>تعداد ثبت</th>
             </tr>
         </thead>
         <tbody>
@@ -21,15 +26,27 @@
                     rowNumber++;
                     <tr>
                         <td class="table-num">@rowNumber</td>
-                        <td>@item.Name</td>
-                        <td>@item.Count</td>
+                        <td>
+                            <a href="@Url.Action("UserCards", "Reports", new { id = item.UserID })"
+                               class="text-decoration-none fw-semibold">@item.FullName</a>
+                        </td>
+                        <td>@(item.PhoneNumber ?? "—")</td>
+                        <td>@(item.JobTitle ?? "—")</td>
+                        <td>@(item.Province ?? "—")</td>
+                        <td>@(item.City ?? "—")</td>
+                        <td>
+                            <span class="badge @(item.IsActive ? "bg-success" : "bg-danger")">
+                                @(item.IsActive ? "فعال" : "غیرفعال")
+                            </span>
+                        </td>
+                        <td class="table-num">@item.RegistrationCount.ToGroupedNumber()</td>
                     </tr>
                 }
             }
             else
             {
                 <tr>
-                    <td colspan="3" class="text-muted text-center">هنوز ثبتی وجود ندارد</td>
+                    <td colspan="8" class="text-muted text-center">هنوز ثبتی وجود ندارد</td>
                 </tr>
             }
         </tbody>

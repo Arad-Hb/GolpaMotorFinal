@@ -1,5 +1,6 @@
 using DomainModel.ViewModels.Product;
 using DomainModel.ViewModels.Reports;
+using DomainModel.ViewModels.Reward;
 using DomainModel.ViewModels.User;
 
 namespace DataAccess.Services
@@ -11,6 +12,10 @@ namespace DataAccess.Services
         Task<List<RewardPopularityRow>> GetRewardPopularity(DateTime? from, DateTime? to);
         Task<List<NamedCountItem>> GetTopProducts(int take = 5);
         Task<List<NamedCountItem>> GetTopRewards(int take = 5);
+        Task<AdminDashboardSummary> GetAdminDashboardSummary();
+        Task<List<RewardRequestListItem>> GetRecentPendingRewardRequests(int take = 8);
+        Task<ReportPage<DashboardRegistrarItem>> GetDashboardRegistrars(int pageIndex, int pageSize);
+        Task<List<DashboardWarrantyAlertItem>> GetWarrantyExpiryAlerts(int take = 10, int withinDays = 30);
         Task<ReportPage<ProductWarrantyReportRow>> SearchProductWarranty(ProductWarrantyReportSearchModel search);
         Task<ReportPage<ReportActivityItem>> SearchActivities(ReportActivitySearchModel search);
         Task<ReportPage<ProductCardDetailItem>> SearchProductCards(ReportActivitySearchModel search);

@@ -1,7 +1,9 @@
+using DataAccess.Mappers;
 using DataAccess.Services;
 using DomainModel.Models;
 using DomainModel.ViewModels.Product;
 using DomainModel.ViewModels.Reports;
+using DomainModel.ViewModels.Reward;
 using Framework.Common;
 using Framework.Common.Extensions;
 using Microsoft.EntityFrameworkCore;
@@ -64,6 +66,21 @@ namespace DataAccess.Repositories
 
         public async Task<List<ProductPopularityRow>> GetProductPopularity(int? jalaliYear, int? jalaliMonth)
         {
+            if (!jalaliYear.HasValue && !jalaliMonth.HasValue)
+            {
+                return await db.CardRegistrations
+                    .AsNoTracking()
+                    .GroupBy(x => x.WarrantyCard.Product.ProductName)
+                    .Select(g => new ProductPopularityRow
+                    {
+                        ProductName = g.Key,
+                        Count = g.Count()
+                    })
+                    .OrderByDescending(x => x.Count)
+                    .ThenBy(x => x.ProductName)
+                    .ToListAsync();
+            }
+
             var rows = await db.CardRegistrations
                 .Select(x => new
                 {
@@ -147,6 +164,179 @@ namespace DataAccess.Repositories
                 .OrderByDescending(x => x.Count)
                 .Take(take)
                 .ToListAsync();
+        }
+
+        public async Task<AdminDashboardSummary> GetAdminDashboardSummary()
+        {
+            var users = db.Users.AsNoTracking().Where(x => !x.IsDeleted);
+            var rewardRequests = db.RewardRequests.AsNoTracking();
+
+            return new AdminDashboardSummary
+            {
+                TotalEarnedPoints = await users.SumAsync(x => (int?)x.TotalEarnedPoints) ?? 0,
+                TotalSettledPoints = await users.SumAsync(x => (int?)x.TotalSettledPoints) ?? 0,
+                TotalRemainedPoints = await users.SumAsync(x => (int?)x.RemainedPoints) ?? 0,
+                TotalRewardRequests = await rewardRequests.CountAsync(),
+                SettledRewardRequests = await rewardRequests.CountAsync(x =>
+                    x.IsComplete ||
+                    x.RewardDeliveryStatus.Title == RewardStatusTitles.Approved ||
+                    x.RewardDeliveryStatus.Title == RewardStatusTitles.Paid),
+                PendingRewardRequests = await rewardRequests.CountAsync(x =>
+                    !x.IsComplete &&
+                    x.RewardDeliveryStatus.Title == RewardStatusTitles.Pending)
+            };
+        }
+
+        public async Task<List<RewardRequestListItem>> GetRecentPendingRewardRequests(int take = 8)
+        {
+            if (take <= 0)
+                take = 8;
+
+            return await RewardRequestMapper.ToListItems(
+                    db.RewardRequests
+                        .AsNoTracking()
+                        .Where(x =>
+                            !x.IsComplete &&
+                            x.RewardDeliveryStatus.Title == RewardStatusTitles.Pending))
+                .OrderByDescending(x => x.RequestDate)
+                .ThenByDescending(x => x.RewardRequestID)
+                .Take(take)
+                .ToListAsync();
+        }
+
+        public async Task<ReportPage<DashboardRegistrarItem>> GetDashboardRegistrars(
+            int pageIndex,
+            int pageSize)
+        {
+            pageIndex = Math.Max(0, pageIndex);
+            pageSize = pageSize <= 0 ? 10 : pageSize;
+
+            var query = db.Users
+                .AsNoTracking()
+                .Where(x => !x.IsDeleted && x.CardRegistrations.Any())
+                .Select(x => new DashboardRegistrarItem
+                {
+                    UserID = x.Id,
+                    FullName = ((x.FirstName ?? "") + " " + (x.LastName ?? "")).Trim(),
+                    PhoneNumber = x.PhoneNumber,
+                    JobTitle = x.UserCustomerTypes
+                        .OrderBy(t => t.CustomerTypeID)
+                        .Select(t => t.CustomerType.Title)
+                        .FirstOrDefault(),
+                    Province = x.ProvinceID.HasValue ? x.Province.Name : null,
+                    City = x.CityID.HasValue ? x.City.Name : null,
+                    IsActive = x.IsActive,
+                    RegistrationCount = x.CardRegistrations.Count
+                });
+
+            var recordCount = await query.CountAsync();
+            var pageCount = (int)Math.Ceiling(recordCount / (double)pageSize);
+            if (pageCount > 0 && pageIndex >= pageCount)
+                pageIndex = pageCount - 1;
+
+            var items = await query
+                .OrderByDescending(x => x.RegistrationCount)
+                .ThenBy(x => x.FullName)
+                .Skip(pageIndex * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            foreach (var item in items.Where(x => string.IsNullOrWhiteSpace(x.FullName)))
+                item.FullName = item.PhoneNumber ?? "نامشخص";
+
+            return new ReportPage<DashboardRegistrarItem>
+            {
+                Items = items,
+                PageIndex = pageIndex,
+                PageSize = pageSize,
+                RecordCount = recordCount
+            };
+        }
+
+        public async Task<List<DashboardWarrantyAlertItem>> GetWarrantyExpiryAlerts(
+            int take = 10,
+            int withinDays = 30)
+        {
+            take = take <= 0 ? 10 : take;
+            withinDays = Math.Max(0, withinDays);
+            var today = DateTime.UtcNow.ToIranTime().Date;
+
+            var candidates = db.WarrantyCards
+                .AsNoTracking()
+                .Where(x => x.IsRegistered && x.CardRegistrations.Any())
+                .Select(x => new
+                {
+                    x.WarrantyCardID,
+                    x.SerialNumber,
+                    x.ScratchedCode,
+                    x.ValidityMonths,
+                    ProductName = x.Product.ProductName,
+                    RegisteredAt = x.CardRegistrations.Select(r => (DateTime?)r.CreatedAt).Min(),
+                    UserID = x.CardRegistrations
+                        .OrderBy(r => r.CreatedAt)
+                        .Select(r => r.UserID)
+                        .FirstOrDefault(),
+                    UserName = x.CardRegistrations
+                        .OrderBy(r => r.CreatedAt)
+                        .Select(r => ((r.User.FirstName ?? "") + " " + (r.User.LastName ?? "")).Trim())
+                        .FirstOrDefault(),
+                    PhoneNumber = x.CardRegistrations
+                        .OrderBy(r => r.CreatedAt)
+                        .Select(r => r.User.PhoneNumber ?? r.CustomerPhoneNumber)
+                        .FirstOrDefault()
+                });
+
+            var rows = db.Database.IsSqlServer()
+                ? await candidates
+                    .Where(x => x.RegisteredAt.HasValue &&
+                        EF.Functions.DateDiffDay(
+                            today,
+                            x.RegisteredAt.Value.AddMonths(x.ValidityMonths)) <= withinDays)
+                    .OrderBy(x => EF.Functions.DateDiffDay(
+                        today,
+                        x.RegisteredAt!.Value.AddMonths(x.ValidityMonths)))
+                    .ThenBy(x => x.WarrantyCardID)
+                    .Take(take)
+                    .ToListAsync()
+                : (await candidates.ToListAsync())
+                    .Where(x => x.RegisteredAt.HasValue &&
+                        WarrantyValidity.RemainingDays(
+                            x.RegisteredAt.Value.ToIranTime(),
+                            x.ValidityMonths,
+                            today) <= withinDays)
+                    .OrderBy(x => WarrantyValidity.RemainingDays(
+                        x.RegisteredAt!.Value.ToIranTime(),
+                        x.ValidityMonths,
+                        today))
+                    .ThenBy(x => x.WarrantyCardID)
+                    .Take(take)
+                    .ToList();
+
+            return rows.Select(x =>
+            {
+                var registeredAt = x.RegisteredAt!.Value;
+                var localRegisteredAt = registeredAt.ToIranTime();
+                var remainingDays = WarrantyValidity.RemainingDays(
+                    localRegisteredAt,
+                    x.ValidityMonths,
+                    today) ?? 0;
+                return new DashboardWarrantyAlertItem
+                {
+                    WarrantyCardID = x.WarrantyCardID,
+                    UserID = x.UserID ?? string.Empty,
+                    UserName = string.IsNullOrWhiteSpace(x.UserName)
+                        ? x.PhoneNumber ?? "نامشخص"
+                        : x.UserName,
+                    PhoneNumber = x.PhoneNumber,
+                    ProductName = x.ProductName,
+                    SerialNumber = x.SerialNumber,
+                    ScratchedCode = x.ScratchedCode,
+                    RegisteredAtUtc = registeredAt,
+                    ExpiresAt = localRegisteredAt.Date.AddMonths(x.ValidityMonths),
+                    RemainingDays = remainingDays,
+                    RemainingText = WarrantyValidity.Format(remainingDays)
+                };
+            }).ToList();
         }
 
         public async Task<ReportPage<ProductWarrantyReportRow>> SearchProductWarranty(

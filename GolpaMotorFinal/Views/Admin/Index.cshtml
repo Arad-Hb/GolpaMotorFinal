@@ -2,100 +2,175 @@
 @{
     Layout = "_AdminLayout";
     var stats = Model.Stats;
+    var summary = Model.Summary;
+    var pendingGrid = AdminListGrids.BuildRewardRequestGrid(Model.PendingRewardRequests);
+    pendingGrid.GridId = "DashboardPendingRequestGrid";
 }
 
-<div class="row column1">
-    <div class="col-md-6 col-lg-3">
-        <div class="full counter_section">
-            <div class="couter_icon">
-                <div>
-                    <i class="fa fa-shield-halved green_color"></i>
-                </div>
-            </div>
-            <div class="counter_no">
-                <p class="total_no">@(stats?.RegisteredCards ?? 0)</p>
-                <p class="head_couter">گارانتی ثبت‌شده</p>
-            </div>
-        </div>
+<div class="dashboard-metrics-grid">
+    <div class="dashboard-metric-card metric-green">
+        <i class="fa fa-shield-halved"></i>
+        <div><strong>@((stats?.RegisteredCards ?? 0).ToGroupedNumber())</strong><span>گارانتی ثبت‌شده</span></div>
     </div>
-    <div class="col-md-6 col-lg-3">
-        <div class="full counter_section">
-            <div class="couter_icon">
-                <div>
-                    <i class="fa fa-clock yellow_color"></i>
-                </div>
-            </div>
-            <div class="counter_no">
-                <p class="total_no">@(stats?.UnregisteredCards ?? 0)</p>
-                <p class="head_couter">گارانتی باقی‌مانده</p>
-            </div>
-        </div>
+    <div class="dashboard-metric-card metric-amber">
+        <i class="fa fa-layer-group"></i>
+        <div><strong>@((stats?.UnregisteredCards ?? 0).ToGroupedNumber())</strong><span>گارانتی باقی‌مانده</span></div>
     </div>
-    <div class="col-md-6 col-lg-3">
-        <div class="full counter_section">
-            <div class="couter_icon">
-                <div>
-                    <i class="fa fa-triangle-exclamation red_color"></i>
-                </div>
-            </div>
-            <div class="counter_no">
-                <p class="total_no">@(stats?.ProductsWithoutCards ?? 0)</p>
-                <p class="head_couter">محصول بدون گارانتی</p>
-            </div>
-        </div>
+    <div class="dashboard-metric-card metric-blue">
+        <i class="fa fa-star"></i>
+        <div><strong>@((stats?.TotalRegisteredPoints ?? 0).ToGroupedNumber())</strong><span>امتیاز ثبت‌شده</span></div>
     </div>
-    <div class="col-md-6 col-lg-3">
-        <div class="full counter_section">
-            <div class="couter_icon">
-                <div>
-                    <i class="fa fa-gift purple_color"></i>
-                </div>
-            </div>
-            <div class="counter_no">
-                <p class="total_no">@((stats?.TotalRegisteredPoints ?? 0).ToGroupedNumber())</p>
-                <p class="head_couter">امتیاز ثبت‌شده</p>
-            </div>
-        </div>
+    <div class="dashboard-metric-card metric-purple">
+        <i class="fa fa-wallet"></i>
+        <div><strong>@summary.TotalRemainedPoints.ToGroupedNumber()</strong><span>امتیاز باقی‌مانده</span></div>
+    </div>
+    <div class="dashboard-metric-card metric-slate">
+        <i class="fa fa-circle-check"></i>
+        <div><strong>@summary.TotalSettledPoints.ToGroupedNumber()</strong><span>امتیاز تسویه‌شده</span></div>
+    </div>
+    <div class="dashboard-metric-card metric-red">
+        <i class="fa fa-box-open"></i>
+        <div><strong>@((stats?.ProductsWithoutCards ?? 0).ToGroupedNumber())</strong><span>محصول بدون گارانتی</span></div>
+    </div>
+    <div class="dashboard-metric-card metric-blue">
+        <i class="fa fa-gifts"></i>
+        <div><strong>@summary.TotalRewardRequests.ToGroupedNumber()</strong><span>کل درخواست پاداش</span></div>
+    </div>
+    <div class="dashboard-metric-card metric-green">
+        <i class="fa fa-handshake"></i>
+        <div><strong>@summary.SettledRewardRequests.ToGroupedNumber()</strong><span>پاداش تسویه‌شده</span></div>
+    </div>
+    <div class="dashboard-metric-card metric-amber">
+        <i class="fa fa-hourglass-half"></i>
+        <div><strong>@summary.PendingRewardRequests.ToGroupedNumber()</strong><span>پاداش در انتظار</span></div>
     </div>
 </div>
 
-<div class="row">
+<div class="row dashboard-ranking-row">
     <div class="col-md-6">
-        <div class="white_shd full margin_bottom_30">
-            <div class="full graph_head d-flex justify-content-between align-items-center">
+        <div class="white_shd full margin_bottom_30 dashboard-panel">
+            <div class="full graph_head dashboard-panel__head">
                 <div class="heading1 margin_0"><h2>محصولات پرمصرف</h2></div>
-                <a class="small" asp-controller="Reports" asp-action="Index">گزارش کامل</a>
+                <a class="dashboard-panel__link" asp-controller="Reports" asp-action="Index" asp-route-tab="products">
+                    گزارش کامل <i class="fa fa-arrow-left"></i>
+                </a>
             </div>
             <div class="padding_infor_info">
-                <ul class="list-unstyled mb-0">
-                    @foreach (var item in Model.TopProducts)
+                <ol class="dashboard-ranking-list mb-0">
+                    @if (Model.TopProducts.Any())
                     {
-                        <li class="d-flex justify-content-between py-1"><span>@item.Name</span><strong>@item.Count</strong></li>
+                        foreach (var item in Model.TopProducts)
+                        {
+                            <li><span>@item.Name</span><strong>@item.Count.ToGroupedNumber()</strong></li>
+                        }
                     }
-                </ul>
+                    else
+                    {
+                        <li class="dashboard-ranking-list__empty">هنوز محصولی ثبت نشده است.</li>
+                    }
+                </ol>
             </div>
         </div>
     </div>
     <div class="col-md-6">
-        <div class="white_shd full margin_bottom_30">
-            <div class="full graph_head d-flex justify-content-between align-items-center">
+        <div class="white_shd full margin_bottom_30 dashboard-panel">
+            <div class="full graph_head dashboard-panel__head">
                 <div class="heading1 margin_0"><h2>پاداش‌های پرتقاضا</h2></div>
-                <a class="small" asp-controller="Reports" asp-action="Index">گزارش کامل</a>
+                <a class="dashboard-panel__link" asp-controller="Reports" asp-action="Index" asp-route-tab="rewards">
+                    گزارش کامل <i class="fa fa-arrow-left"></i>
+                </a>
             </div>
             <div class="padding_infor_info">
-                <ul class="list-unstyled mb-0">
-                    @foreach (var item in Model.TopRewards)
+                <ol class="dashboard-ranking-list mb-0">
+                    @if (Model.TopRewards.Any())
                     {
-                        <li class="d-flex justify-content-between py-1"><span>@item.Name</span><strong>@item.Count</strong></li>
+                        foreach (var item in Model.TopRewards)
+                        {
+                            <li><span>@item.Name</span><strong>@item.Count.ToGroupedNumber()</strong></li>
+                        }
                     }
-                </ul>
+                    else
+                    {
+                        <li class="dashboard-ranking-list__empty">هنوز درخواست پاداشی ثبت نشده است.</li>
+                    }
+                </ol>
             </div>
         </div>
     </div>
 </div>
 
-<div class="white_shd full margin_bottom_30">
-    <div class="full graph_head">
+<div class="white_shd full margin_bottom_30 dashboard-panel">
+    <div class="full graph_head dashboard-panel__head">
+        <div class="heading1 margin_0">
+            <h2>جدیدترین درخواست‌های پاداش در انتظار</h2>
+        </div>
+        <a class="dashboard-panel__link" asp-controller="RewardManagement" asp-action="Index">
+            همه درخواست‌ها <i class="fa fa-arrow-left"></i>
+        </a>
+    </div>
+    <div class="table_section padding_infor_info">
+        <div id="dashboardPendingRequests">
+            @await Component.InvokeAsync("CrudGrid", new { model = pendingGrid })
+        </div>
+    </div>
+</div>
+
+<div class="white_shd full margin_bottom_30 dashboard-panel">
+    <div class="full graph_head dashboard-panel__head">
+        <div class="heading1 margin_0">
+            <h2>هشدار اعتبار کارت‌های گارانتی</h2>
+            <p class="dashboard-panel__subtitle">کارت‌های منقضی‌شده یا دارای حداکثر ۳۰ روز اعتبار</p>
+        </div>
+    </div>
+    <div class="table_section padding_infor_info">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle dashboard-table">
+                <thead>
+                    <tr>
+                        <th>کاربر</th>
+                        <th>موبایل</th>
+                        <th>محصول</th>
+                        <th>سریال</th>
+                        <th>رمز کارت</th>
+                        <th>تاریخ انقضا</th>
+                        <th>وضعیت اعتبار</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.WarrantyAlerts.Any())
+                    {
+                        foreach (var item in Model.WarrantyAlerts)
+                        {
+                            <tr>
+                                <td>
+                                    <a href="@Url.Action("UserCards", "Reports", new { id = item.UserID })"
+                                       class="text-decoration-none fw-semibold">@item.UserName</a>
+                                </td>
+                                <td>@(item.PhoneNumber ?? "—")</td>
+                                <td>@item.ProductName</td>
+                                <td>@item.SerialNumber</td>
+                                <td>@item.ScratchedCode</td>
+                                <td>@item.ExpiresAt.ToPersianDate()</td>
+                                <td>
+                                    <span class="badge @(item.RemainingDays < 0 ? "bg-danger" : "bg-warning text-dark")">
+                                        @item.RemainingText
+                                    </span>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr><td colspan="7" class="text-center text-muted">کارت نزدیک به انقضا یا منقضی‌شده‌ای وجود ندارد.</td></tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="white_shd full margin_bottom_30 dashboard-panel">
+    <div class="full graph_head dashboard-panel__head">
         <div class="heading1 margin_0">
             <h2>بیشترین ثبت‌کننده گارانتی</h2>
         </div>
@@ -106,3 +181,8 @@
         </div>
     </div>
 </div>
+
+@section Scripts
+{
+    <script src="~/js/rewardPages.js" asp-append-version="true"></script>
+}

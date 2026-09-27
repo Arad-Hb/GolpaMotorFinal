@@ -32,14 +32,20 @@ namespace GolpaMotorFinal.Controllers
             this.lookups = lookups;
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string? tab = null)
         {
             ViewBag.CustomerTypes = await lookups.CustomerTypes();
             ViewBag.Provinces = await lookups.Provinces();
+            var allowedTabs = new[] { "users", "productWarranty", "products", "rewards" };
+            var openTab = allowedTabs.Contains(tab, StringComparer.OrdinalIgnoreCase)
+                ? tab!
+                : "users";
 
             return View(new ReportsIndexViewModel
             {
-                Products = await products.GetAll()
+                Products = await products.GetAll(),
+                OpenTab = openTab,
+                CurrentJalaliYear = DateTime.UtcNow.ToIranTime().GetPersianYear()
             });
         }
 

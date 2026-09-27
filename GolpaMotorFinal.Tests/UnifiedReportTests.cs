@@ -257,6 +257,177 @@ public class UnifiedReportTests
     }
 
     [Fact]
+    public async Task Dashboard_summary_counts_points_and_reward_states()
+    {
+        await using var db = CreateDb();
+        var user = NewUser("dashboard-summary");
+        user.TotalEarnedPoints = 1_000;
+        user.TotalSettledPoints = 400;
+        user.RemainedPoints = 600;
+        var deletedUser = NewUser("dashboard-deleted");
+        deletedUser.IsDeleted = true;
+        deletedUser.TotalEarnedPoints = 9_000;
+        var pending = new RewardDeliveryStatus { Title = RewardStatusTitles.Pending };
+        var approved = new RewardDeliveryStatus { Title = RewardStatusTitles.Approved };
+        var rejected = new RewardDeliveryStatus { Title = RewardStatusTitles.Rejected };
+        var reward = new RewardCatalog { Title = "پاداش", RequiredPoints = 100, IsActive = true };
+        db.AddRange(user, deletedUser, pending, approved, rejected, reward);
+        await db.SaveChangesAsync();
+
+        db.RewardRequests.AddRange(
+            NewRewardRequest(user, reward, pending, DateTime.UtcNow, false),
+            NewRewardRequest(user, reward, approved, DateTime.UtcNow, false),
+            NewRewardRequest(user, reward, rejected, DateTime.UtcNow, true));
+        await db.SaveChangesAsync();
+
+        var summary = await new ReportRepository(db).GetAdminDashboardSummary();
+
+        Assert.Equal(1_000, summary.TotalEarnedPoints);
+        Assert.Equal(400, summary.TotalSettledPoints);
+        Assert.Equal(600, summary.TotalRemainedPoints);
+        Assert.Equal(3, summary.TotalRewardRequests);
+        Assert.Equal(2, summary.SettledRewardRequests);
+        Assert.Equal(1, summary.PendingRewardRequests);
+    }
+
+    [Fact]
+    public async Task Dashboard_pending_requests_are_filtered_and_newest_first()
+    {
+        await using var db = CreateDb();
+        var user = NewUser("dashboard-pending");
+        var pending = new RewardDeliveryStatus { Title = RewardStatusTitles.Pending };
+        var approved = new RewardDeliveryStatus { Title = RewardStatusTitles.Approved };
+        var reward = new RewardCatalog { Title = "پاداش", RequiredPoints = 100, IsActive = true };
+        db.AddRange(user, pending, approved, reward);
+        await db.SaveChangesAsync();
+
+        db.RewardRequests.AddRange(
+            NewRewardRequest(user, reward, pending, DateTime.UtcNow.AddDays(-2), false),
+            NewRewardRequest(user, reward, pending, DateTime.UtcNow.AddDays(-1), false),
+            NewRewardRequest(user, reward, pending, DateTime.UtcNow, true),
+            NewRewardRequest(user, reward, approved, DateTime.UtcNow.AddHours(1), false));
+        await db.SaveChangesAsync();
+
+        var requests = await new ReportRepository(db).GetRecentPendingRewardRequests();
+
+        Assert.Equal(2, requests.Count);
+        Assert.True(requests[0].RequestDate >= requests[1].RequestDate);
+        Assert.All(requests, x => Assert.Equal(RewardStatusTitles.Pending, x.StatusTitle));
+    }
+
+    [Fact]
+    public async Task Product_popularity_without_date_filter_is_grouped_and_descending()
+    {
+        await using var db = CreateDb();
+        var user = NewUser("dashboard-products");
+        var popular = new Product { ProductName = "محصول محبوب", ProductPoint = 10, IsAvailable = true };
+        var other = new Product { ProductName = "محصول دیگر", ProductPoint = 10, IsAvailable = true };
+        var cards = new[]
+        {
+            NewCard(popular, "POPULAR-1", true),
+            NewCard(popular, "POPULAR-2", true),
+            NewCard(popular, "POPULAR-3", true),
+            NewCard(other, "OTHER-1", true)
+        };
+        db.AddRange(user, popular, other);
+        db.AddRange(cards);
+        await db.SaveChangesAsync();
+        db.CardRegistrations.AddRange(cards.Select(x => NewRegistration(user, x, 10)));
+        await db.SaveChangesAsync();
+
+        var rows = await new ReportRepository(db).GetProductPopularity(null, null);
+
+        Assert.Equal(2, rows.Count);
+        Assert.Equal("محصول محبوب", rows[0].ProductName);
+        Assert.Equal(3, rows[0].Count);
+        Assert.Equal(0, rows[0].JalaliYear);
+        Assert.Equal(0, rows[0].JalaliMonth);
+    }
+
+    [Fact]
+    public async Task Warranty_alerts_include_expired_and_thirty_day_cards_only()
+    {
+        await using var db = CreateDb();
+        var user = NewUser("dashboard-expiry");
+        var product = new Product { ProductName = "محصول", ProductPoint = 10, IsAvailable = true };
+        var expired = NewCard(product, "EXPIRED", true);
+        expired.ValidityMonths = 1;
+        var soon = NewCard(product, "SOON", true);
+        soon.ValidityMonths = 1;
+        var far = NewCard(product, "FAR", true);
+        far.ValidityMonths = 12;
+        var unregistered = NewCard(product, "UNREGISTERED", false);
+        unregistered.ValidityMonths = 1;
+        db.AddRange(user, product, expired, soon, far, unregistered);
+        await db.SaveChangesAsync();
+
+        var expiredRegistration = NewRegistration(user, expired, 10);
+        expiredRegistration.CreatedAt = DateTime.UtcNow.AddMonths(-2);
+        var soonRegistration = NewRegistration(user, soon, 10);
+        soonRegistration.CreatedAt = DateTime.UtcNow.AddMonths(-1).AddDays(15);
+        var farRegistration = NewRegistration(user, far, 10);
+        var unregisteredRegistration = NewRegistration(user, unregistered, 10);
+        unregisteredRegistration.CreatedAt = DateTime.UtcNow.AddMonths(-2);
+        db.CardRegistrations.AddRange(
+            expiredRegistration,
+            soonRegistration,
+            farRegistration,
+            unregisteredRegistration);
+        await db.SaveChangesAsync();
+
+        var alerts = await new ReportRepository(db).GetWarrantyExpiryAlerts(10, 30);
+
+        Assert.Equal(new[] { "EXPIRED", "SOON" }, alerts.Select(x => x.SerialNumber));
+        Assert.True(alerts[0].RemainingDays < 0);
+        Assert.InRange(alerts[1].RemainingDays, 0, 30);
+    }
+
+    [Fact]
+    public async Task Dashboard_registrars_include_profile_fields_and_registration_order()
+    {
+        await using var db = CreateDb();
+        var province = new Province { Name = "تهران" };
+        var city = new City { Name = "تهران", Province = province };
+        var customerType = new CustomerType { Title = "تعمیرکار" };
+        var first = NewUser("dashboard-first");
+        first.FirstName = "علی";
+        first.LastName = "احمدی";
+        first.Province = province;
+        first.City = city;
+        first.UserCustomerTypes.Add(new UserCustomerType
+        {
+            User = first,
+            CustomerType = customerType
+        });
+        var second = NewUser("dashboard-second");
+        var product = new Product { ProductName = "محصول", ProductPoint = 10, IsAvailable = true };
+        var cards = new[]
+        {
+            NewCard(product, "REG-1", true),
+            NewCard(product, "REG-2", true),
+            NewCard(product, "REG-3", true)
+        };
+        db.AddRange(first, second, province, city, customerType, product);
+        db.AddRange(cards);
+        await db.SaveChangesAsync();
+        db.CardRegistrations.AddRange(
+            NewRegistration(first, cards[0], 10),
+            NewRegistration(first, cards[1], 10),
+            NewRegistration(second, cards[2], 10));
+        await db.SaveChangesAsync();
+
+        var page = await new ReportRepository(db).GetDashboardRegistrars(0, 10);
+
+        Assert.Equal(2, page.RecordCount);
+        Assert.Equal(first.Id, page.Items[0].UserID);
+        Assert.Equal(2, page.Items[0].RegistrationCount);
+        Assert.Equal("تعمیرکار", page.Items[0].JobTitle);
+        Assert.Equal("تهران", page.Items[0].Province);
+        Assert.Equal("تهران", page.Items[0].City);
+        Assert.True(page.Items[0].IsActive);
+    }
+
+    [Fact]
     public void Numeric_display_groups_money_and_points_by_three_digits()
     {
         Assert.Equal("4,000,000", 4_000_000.ToGroupedNumber());
@@ -350,5 +521,20 @@ public class UnifiedReportTests
         CreatedAt = DateTime.UtcNow,
         EarnedPionts = points,
         IsApproved = true
+    };
+
+    private static RewardRequest NewRewardRequest(
+        ApplicationUser user,
+        RewardCatalog reward,
+        RewardDeliveryStatus status,
+        DateTime requestedAt,
+        bool isComplete) => new()
+    {
+        User = user,
+        UserID = user.Id,
+        RewardCatalog = reward,
+        RewardDeliveryStatus = status,
+        RequestDate = requestedAt,
+        IsComplete = isComplete
     };
 }

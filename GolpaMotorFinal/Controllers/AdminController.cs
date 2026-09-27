@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using DomainModel.Models;
 using Application.Services;
 using GolpaMotorFinal.FrameworkUI.Services;
+using GolpaMotorFinal.Helpers;
 using GolpaMotorFinal.Models.ViewModels.Admin;
 using GolpaMotorFinal.Models.ViewModels;
 using DataAccess.Services;
@@ -39,18 +40,21 @@ namespace GolpaMotorFinal.Controllers
         {
             var stats = await products.GetStatistics();
             var pageSize = PaginationViewModel.DefaultPageSize;
-            var page = await products.GetTopRegistrarsPage(pageIndex, pageSize);
+            var page = await reports.GetDashboardRegistrars(pageIndex, pageSize);
             return View(new AdminDashboardViewModel
             {
                 Stats = stats,
+                Summary = await reports.GetAdminDashboardSummary(),
                 TopProducts = await reports.GetTopProducts(5),
                 TopRewards = await reports.GetTopRewards(5),
+                PendingRewardRequests = await reports.GetRecentPendingRewardRequests(8),
+                WarrantyAlerts = await reports.GetWarrantyExpiryAlerts(10, 30),
                 TopRegistrars = new TopRegistrarsPageViewModel
                 {
                     Items = page.Items,
-                    PageIndex = pageIndex,
-                    PageCount = pageSize <= 0 ? 1 : (int)Math.Ceiling(page.Total / (double)pageSize),
-                    RecordCount = page.Total
+                    PageIndex = page.PageIndex,
+                    PageCount = page.PageCount,
+                    RecordCount = page.RecordCount
                 }
             });
         }
@@ -59,15 +63,24 @@ namespace GolpaMotorFinal.Controllers
         public async Task<IActionResult> TopRegistrars(int pageIndex = 0)
         {
             var pageSize = PaginationViewModel.DefaultPageSize;
-            var page = await products.GetTopRegistrarsPage(pageIndex, pageSize);
+            var page = await reports.GetDashboardRegistrars(pageIndex, pageSize);
             var vm = new TopRegistrarsPageViewModel
             {
                 Items = page.Items,
-                PageIndex = pageIndex,
-                PageCount = pageSize <= 0 ? 1 : (int)Math.Ceiling(page.Total / (double)pageSize),
-                RecordCount = page.Total
+                PageIndex = page.PageIndex,
+                PageCount = page.PageCount,
+                RecordCount = page.RecordCount
             };
             return PartialView("_TopRegistrarsTable", vm);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> PendingRewardRequests()
+        {
+            var grid = AdminListGrids.BuildRewardRequestGrid(
+                await reports.GetRecentPendingRewardRequests(8));
+            grid.GridId = "DashboardPendingRequestGrid";
+            return ViewComponent("CrudGrid", new { model = grid });
         }
 
         [HttpGet]

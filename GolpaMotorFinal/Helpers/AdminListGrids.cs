@@ -142,7 +142,7 @@ namespace GolpaMotorFinal.Helpers
                 row.Columns.Add(Number(item.RequiredPoints));
                 row.Columns.Add(Number(item.RemainedPoints));
                 row.Columns.Add(Text(item.RequestDate.HasValue
-                    ? item.RequestDate.Value.ToLocalTime().ToPersianDate() : "-"));
+                    ? item.RequestDate.Value.ToIranTime().ToPersianDate() : "-"));
                 row.Columns.Add(Text(item.StatusTitle));
                 row.Actions.Add(Modal("جزئیات", "fa fa-eye", "/RewardManagement/RequestDetails", id, "rewardRequestID", "btn btn-sm btn-outline-secondary"));
                 row.Actions.Add(new GridAction
@@ -202,8 +202,8 @@ namespace GolpaMotorFinal.Helpers
                 var gridRow = new GridRow { Key = $"{row.ProductName}-{row.JalaliYear}-{row.JalaliMonth}" };
 
                 gridRow.Columns.Add(Text(row.ProductName));
-                gridRow.Columns.Add(Number(row.JalaliYear));
-                gridRow.Columns.Add(Number(row.JalaliMonth));
+                gridRow.Columns.Add(Text(row.JalaliYear > 0 ? row.JalaliYear.ToString() : "-"));
+                gridRow.Columns.Add(Text(row.JalaliMonth > 0 ? row.JalaliMonth.ToString() : "-"));
                 gridRow.Columns.Add(Number(row.Count));
                 grid.Rows.Add(gridRow);
             }

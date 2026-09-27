@@ -5,7 +5,16 @@
     }
 
     function loadRequests() {
-        applyTableFilter($('[data-filter-bar][data-target="#RequestGrid"]'));
+        const bar = $('[data-filter-bar][data-target="#RequestGrid"]');
+        if (bar.length) applyTableFilter(bar);
+    }
+
+    function refreshRewardRequestSurfaces() {
+        loadRequests();
+        const dashboard = $("#dashboardPendingRequests");
+        if (dashboard.length) {
+            dashboard.load("/Admin/PendingRewardRequests");
+        }
     }
 
     window.syncRewardCatalogCashFields = function (root) {
@@ -42,7 +51,7 @@
             success: function (res) {
                 if (res.success) {
                     closeModal();
-                    loadRequests();
+                    refreshRewardRequestSurfaces();
                     toastSuccess(res.message);
                 } else {
                     toastError(res.message);
@@ -63,7 +72,7 @@
             success: function (res) {
                 if (res.success) {
                     closeModal();
-                    loadRequests();
+                    refreshRewardRequestSurfaces();
                     toastSuccess(res.message);
                 } else {
                     toastError(res.message);

@@ -6,5 +6,7 @@ namespace GolpaMotorFinal.Models.ViewModels.Reports
     {
         public IEnumerable<ProductListItem> Products { get; set; } = Enumerable.Empty<ProductListItem>();
         public IEnumerable<string> Months { get; set; } = new List<string>();
+        public string OpenTab { get; set; } = "users";
+        public int CurrentJalaliYear { get; set; }
     }
 }
