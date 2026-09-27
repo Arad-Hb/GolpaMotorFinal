@@ -123,8 +123,10 @@ $(document).on("submit", ".crud-form", function (e) {
     e.preventDefault();
     const form = $(this);
     const formData = new FormData(this);
-    const targetId = form.data("grid-id") ? ("#" + form.data("grid-id")) : null;
-    const targetUrl = form.data("refresh-grid-url");
+    const modalShell = form.closest("#generalModal");
+    const gridId = modalShell.attr("data-grid-id") || form.data("grid-id");
+    const targetId = gridId ? ("#" + gridId) : null;
+    const targetUrl = modalShell.attr("data-refresh-url") || form.data("refresh-grid-url");
 
     $.ajax({
         url: form.attr("action"),
@@ -215,7 +217,7 @@ $(document).on("click", ".btnDelete", async function () {
     });
 });
 
-$(document).on("click", ".btnSubmitRewardRequest", function () {
+$(document).on("click", ".btnSubmitRewardRequest", async function () {
     const button = $(this);
     const catalogId = button.data("id");
     const page = $("#rewardDetailsContent");
@@ -228,17 +230,37 @@ $(document).on("click", ".btnSubmitRewardRequest", function () {
         type: "POST",
         data: { userID: userId, rewardCatalogID: catalogId },
         headers: { RequestVerificationToken: token() },
-        success: function (res) {
-            $.get("/UserManagement/EligibleRewardsContent", { userID: userId }, function (html) {
-                const body = document.getElementById("rewardDetailsContent");
-                if (body) body.innerHTML = html;
-                const box = $("#rewardRequestAlert");
-                if (res && res.message && box.length) {
-                    box.removeClass("d-none alert-success alert-danger");
-                    box.addClass(res.success ? "alert-success" : "alert-danger");
-                    box.text(res.message);
+        success: async function (res) {
+            if (!res || !res.success) {
+                button.prop("disabled", false);
+                if (res && res.requiresProfileEdit) {
+                    const editUser = await confirmProfileEdit(res.message);
+                    if (editUser && typeof openModal === "function") {
+                        openModal(
+                            "/UserManagement/Edit",
+                            "ویرایش اطلاعات کاربر",
+                            userId,
+                            "userID",
+                            {
+                                size: "modal-lg",
+                                gridId: "rewardDetailsContent",
+                                refreshUrl: "/UserManagement/EligibleRewardsContent?userID=" + encodeURIComponent(userId)
+                            }
+                        );
+                    }
+                } else {
+                    toastError(res && res.message ? res.message : "ثبت درخواست پاداش انجام نشد.");
                 }
-            }).fail(function () {
+                return;
+            }
+
+            $.get("/UserManagement/EligibleRewardsContent", { userID: userId })
+                .done(function (html) {
+                    const body = document.getElementById("rewardDetailsContent");
+                    if (body) body.innerHTML = html;
+                    toastSuccess(res.message);
+                })
+                .fail(function () {
                 button.prop("disabled", false);
                 toastError("خطا در به‌روزرسانی اطلاعات پاداش");
             });

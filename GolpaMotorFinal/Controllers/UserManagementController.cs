@@ -329,7 +329,16 @@ namespace GolpaMotorFinal.Controllers
                 return Json(new { success = false, message = "کاربر نامعتبر است." });
 
             var result = await rewards.CreateRequest(userID, rewardCatalogID);
-            return Json(new { success = result.Success, message = result.Message });
+            var requiresProfileEdit =
+                result.ErrorCode == "missing_financial_profile" ||
+                result.ErrorCode == "missing_shipping_profile";
+            return Json(new
+            {
+                success = result.Success,
+                message = result.Message,
+                errorCode = result.ErrorCode,
+                requiresProfileEdit
+            });
         }
 
         private async Task<EligibleRewardsDialogViewModel?> BuildEligibleRewardsPage(

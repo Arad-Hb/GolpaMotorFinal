@@ -154,7 +154,9 @@ namespace DataAccess.Repositories
                         !string.IsNullOrWhiteSpace(user.AccountNumber);
 
                     if (!hasFinancial)
-                        return op.ToFailed("برای این درخواست ابتدا باید یکی از شماره کارت، شبا یا شماره حساب را در ویرایش کاربر تکمیل کنید. پس از تکمیل اطلاعات، اجازه درخواست پاداش نقدی را خواهید داشت.");
+                        return op.ToFailed(
+                            "برای این درخواست ابتدا باید یکی از شماره کارت، شبا یا شماره حساب را در ویرایش کاربر تکمیل کنید. پس از تکمیل اطلاعات، اجازه درخواست پاداش نقدی را خواهید داشت.",
+                            "missing_financial_profile");
                 }
                 else
                 {
@@ -165,7 +167,9 @@ namespace DataAccess.Repositories
                         !string.IsNullOrWhiteSpace(user.PostalCode);
 
                     if (!hasShipping)
-                        return op.ToFailed("برای درخواست پاداش غیرنقدی ابتدا باید استان، شهر، آدرس و کد پستی را در ویرایش کاربر تکمیل کنید. پس از تکمیل اطلاعات، اجازه درخواست را خواهید داشت.");
+                        return op.ToFailed(
+                            "برای درخواست پاداش غیرنقدی ابتدا باید استان، شهر، آدرس و کد پستی را در ویرایش کاربر تکمیل کنید. پس از تکمیل اطلاعات، اجازه درخواست را خواهید داشت.",
+                            "missing_shipping_profile");
                 }
 
                 var pendingStatusId = await RewardEligibilityHelper.GetStatusIdAsync(db, RewardStatusTitles.Pending);

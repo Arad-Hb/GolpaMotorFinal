@@ -16,6 +16,7 @@ namespace Framework.Common
         public DateTime OperationDate { get; private set; } = DateTime.Now;
         public bool Success { get; private set; } = false;
         public string Message { get; private set; }
+        public string? ErrorCode { get; private set; }
 
         public OperationResult ToSuccess(string message)
         {
@@ -34,6 +35,13 @@ namespace Framework.Common
         {
             this.Success = false;
             this.Message = Message;
+            return this;
+        }
+        public OperationResult ToFailed(string message, string errorCode)
+        {
+            Success = false;
+            Message = message;
+            ErrorCode = errorCode;
             return this;
         }
         public OperationResult ToFailed(string Message, long recordId)

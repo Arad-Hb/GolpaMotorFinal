@@ -38,6 +38,22 @@ async function confirmDelete(text) {
     return confirm(text || "آیا از حذف مطمئن هستید؟");
 }
 
+async function confirmProfileEdit(message) {
+    if (window.Swal) {
+        const result = await Swal.fire({
+            title: "تکمیل اطلاعات کاربر",
+            text: message || "برای ثبت این درخواست، اطلاعات کاربر باید تکمیل شود.",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "ویرایش اطلاعات کاربر",
+            cancelButtonText: "انصراف",
+            reverseButtons: true
+        });
+        return result.isConfirmed;
+    }
+    return confirm(message || "برای ادامه، اطلاعات کاربر را ویرایش می‌کنید؟");
+}
+
 function getModalDialog() {
     return modalElement ? modalElement.querySelector(".modal-dialog") : null;
 }

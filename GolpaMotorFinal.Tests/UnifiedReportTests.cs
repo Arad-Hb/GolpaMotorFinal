@@ -187,6 +187,40 @@ public class UnifiedReportTests
     }
 
     [Fact]
+    public async Task Reward_request_returns_profile_error_codes_for_missing_required_information()
+    {
+        await using var db = CreateDb();
+        var user = NewUser("reward-profile-user");
+        user.RemainedPoints = 1000;
+        var cash = new RewardCatalog
+        {
+            Title = "پاداش نقدی",
+            RequiredPoints = 100,
+            IsActive = true,
+            IsCashReward = true
+        };
+        var nonCash = new RewardCatalog
+        {
+            Title = "پاداش غیرنقدی",
+            RequiredPoints = 100,
+            IsActive = true,
+            IsCashReward = false
+        };
+        db.AddRange(user, cash, nonCash);
+        await db.SaveChangesAsync();
+
+        var repository = new RewardRequestRepository(db, new ReportActivityWriter(db));
+
+        var cashResult = await repository.CreateRequest(user.Id, cash.RewardCatalogID);
+        var nonCashResult = await repository.CreateRequest(user.Id, nonCash.RewardCatalogID);
+
+        Assert.False(cashResult.Success);
+        Assert.Equal("missing_financial_profile", cashResult.ErrorCode);
+        Assert.False(nonCashResult.Success);
+        Assert.Equal("missing_shipping_profile", nonCashResult.ErrorCode);
+    }
+
+    [Fact]
     public void Jalali_range_is_half_open_and_displays_in_iran_time()
     {
         var from = "1405/07/04".JalaliStartOfDayUtc();
