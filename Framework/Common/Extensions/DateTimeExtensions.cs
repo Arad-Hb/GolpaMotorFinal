@@ -56,6 +56,15 @@ namespace Framework.Common.Extensions
         public static string ToPersianDateTime(this DateTime? date)
             => date.HasValue ? date.Value.ToPersianDateTime() : string.Empty;
 
+        public static string ToIranTimeIso(this DateTime utc)
+        {
+            var iranTime = utc.ToIranTime();
+
+            return iranTime.ToString(
+                "yyyy-MM-ddTHH:mm:ss",
+                CultureInfo.InvariantCulture);
+        }
+
         public static string ToPersianLongDate(this DateTime date)
         {
             var year = Calendar.GetYear(date);

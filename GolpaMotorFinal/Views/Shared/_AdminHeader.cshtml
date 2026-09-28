@@ -6,6 +6,8 @@
     var displayName = string.Join(" ", new[] { adminUser?.FirstName, adminUser?.LastName }.Where(x => !string.IsNullOrWhiteSpace(x)));
     if (string.IsNullOrWhiteSpace(displayName))
         displayName = User.Identity?.Name ?? "مدیر";
+
+    var iranNow = DateTime.UtcNow.ToIranTimeIso();
 }
 <div class="topbar">
     <div class="full">
@@ -21,7 +23,9 @@
             <div class="icon_info">
                 <ul>
                     <li>
+                        <span class="text-light" id="live-clock"></span>
                         <span class="text-light">@DateTime.Now.ToPersianLongDate()</span>
+                        
                     </li>
                 </ul>
                 <ul class="user_profile_dd">
@@ -47,3 +51,22 @@
         </div>
     </div>
 </div>
+
+<script>
+    const iranTime = new Date("@iranNow");
+
+    function updateClock() {
+        iranTime.setSeconds(iranTime.getSeconds() + 1);
+
+        document.getElementById("live-clock").innerText =
+            iranTime.toLocaleString("fa-IR", {
+                timeZone: "Asia/Tehran",
+                hour: "2-digit",
+                minute: "2-digit",
+                second: "2-digit"
+            });
+    }
+
+    updateClock();
+    setInterval(updateClock, 1000);
+</script>
