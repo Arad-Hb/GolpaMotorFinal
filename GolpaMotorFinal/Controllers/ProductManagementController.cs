@@ -15,9 +15,6 @@ namespace GolpaMotorFinal.Controllers
     [Authorize(Roles = "Admin")]
     public class ProductManagementController : Controller
     {
-        private static readonly string[] ImageExtensions = { "jpg", "jpeg", "png" };
-        private const string ProductUploadFolder = "images/imageProducts/uploads";
-        private const string ProductThumbFolder = "images/imageProducts/thumbnails";
 
         private readonly IProductService service;
         private readonly IFileManager fileManager;
@@ -74,21 +71,20 @@ namespace GolpaMotorFinal.Controllers
             if (!ModelState.IsValid)
                 return Json(new { success = false, message = "اطلاعات معتبر نیست" });
 
-            if (vm.ImageFile == null)
-                return Json(new { success = false, message = "تصویر محصول الزامی است" });
-
-            var upload = await fileManager.UploadAsync(
-                vm.ImageFile, 5, ImageExtensions, ProductUploadFolder, ProductThumbFolder);
-            if (!upload.Success)
-                return Json(new { success = false, message = upload.Message });
-
             var model = ProductViewMapper.ToAddEditModel(vm);
-            model.ImageUrl = upload.FileUrl;
-            var result = await service.AddProduct(model);
-            if (!result.Success)
-                fileManager.Remove(upload.FileUrl);
+            model.ImageUrl = "/images/pics/noimage.jpg";
 
-            return Json(new { success = result.Success, message = result.Message });
+            var uploaded = await TryUpload(vm.ImageFile);
+            if (uploaded is { Success: false })
+                return Json(new OperationResult("AddProduct").ToFailed(uploaded.Message));
+            if (uploaded is { Success: true })
+                model.ImageUrl = uploaded.FileUrl;
+
+            var result = await service.AddProduct(model);
+            if (!result.Success && uploaded is { Success: true })
+                RemoveImage(uploaded.FileUrl);
+
+            return Json(result);
         }
 
         [HttpGet]
@@ -113,21 +109,18 @@ namespace GolpaMotorFinal.Controllers
                 return Json(new { success = false, message = "محصول یافت نشد" });
 
             var model = ProductViewMapper.ToAddEditModel(vm);
-            model.ImageUrl = current.ImageUrl;
+            model.ImageUrl =string.IsNullOrWhiteSpace(current.ImageUrl)
+                ? "/images/pics/noimage.jpg"
+                : current.ImageUrl;
 
-            if (vm.ImageFile != null)
+            var uploaded = await TryUpload(vm.ImageFile);
+            if (uploaded is { Success: false })
+                return Json(new OperationResult("UpdateProduct").ToFailed(uploaded.Message));
+            if (uploaded is { Success: true })
             {
-                var upload = await fileManager.UploadAsync(
-                    vm.ImageFile, 5, ImageExtensions, ProductUploadFolder, ProductThumbFolder);
-                if (!upload.Success)
-                    return Json(new OperationResult("UpdateProduct").ToFailed(upload.Message));
-
-                if (!string.IsNullOrWhiteSpace(current.ImageUrl))
-                    fileManager.Remove(current.ImageUrl);
-
-                model.ImageUrl = upload.FileUrl;
+                RemoveImage(current.ImageUrl);
+                model.ImageUrl = uploaded.FileUrl;
             }
-
             return Json(await service.UpdateProduct(model));
         }
 
@@ -149,6 +142,22 @@ namespace GolpaMotorFinal.Controllers
             if (prod == null)
                 return NotFound();
             return PartialView("_Details", prod);
+        }
+
+        private async Task<FileUploadResult?> TryUpload(IFormFile? image)
+        {
+            if (image == null)
+                return null;
+            return await fileManager.UploadAsync(
+                image, 5, new[] { "jpg", "jpeg", "png" },
+                "images/imageProducts/uploads", "images/imageProducts/thumbnails");
+        }
+        private void RemoveImage(string? url)
+        {
+            if (string.IsNullOrWhiteSpace(url) || url == "/images/pics/noimage.jpg")
+                return;
+            fileManager.Remove(url);
+            fileManager.Remove(url.Replace("/images/imageProducts/uploads/", "/images/imageProducts/thumbnails/"));
         }
     }
 }

@@ -390,8 +390,7 @@ namespace GolpaMotorFinal.Helpers
             return grid;
         }
 
-        public static CrudGridViewModel BuildProductWarrantyReportGrid(
-            IEnumerable<ProductWarrantyReportRow> items)
+        public static CrudGridViewModel BuildProductWarrantyReportGrid(IEnumerable<ProductWarrantyReportRow> items)
         {
             var grid = new CrudGridViewModel
             {
@@ -427,8 +426,7 @@ namespace GolpaMotorFinal.Helpers
             return grid;
         }
 
-        public static CrudGridViewModel BuildReportActivityGrid(
-            IEnumerable<ReportActivityItem> items)
+        public static CrudGridViewModel BuildReportActivityGrid(IEnumerable<ReportActivityItem> items)
         {
             var grid = new CrudGridViewModel
             {

@@ -189,7 +189,7 @@ namespace GolpaMotorFinal.Controllers
             }
 
             var model = UserViewMapper.ToAddEditModel(vm);
-            model.ProfileImageUrl = "/images/imageUsers/noimage.jpg";
+            model.ProfileImageUrl = "/images/pics/noimage.jpg";
 
             var uploaded = await TryUpload(vm.ProfileImage);
             if (uploaded is { Success: false })
@@ -263,7 +263,7 @@ namespace GolpaMotorFinal.Controllers
 
             var model = UserViewMapper.ToAddEditModel(vm);
             model.ProfileImageUrl = string.IsNullOrWhiteSpace(currentUser.ProfileImageUrl)
-                ? "/images/imageUsers/noimage.jpg"
+                ? "/images/pics/noimage.jpg"
                 : currentUser.ProfileImageUrl;
 
             var uploaded = await TryUpload(vm.ProfileImage);
@@ -277,7 +277,7 @@ namespace GolpaMotorFinal.Controllers
             else if (vm.RemoveProfileImage)
             {
                 RemoveUserImage(currentUser.ProfileImageUrl);
-                model.ProfileImageUrl = "/images/imageUsers/noimage.jpg";
+                model.ProfileImageUrl = "/images/pics/noimage.jpg";
             }
 
             return Json(await service.UpdateUser(model));

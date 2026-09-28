@@ -1,8 +1,5 @@
-﻿using Framework.Common;
-using GolpaMotorFinal.FrameworkUI.Services;
-using GolpaMotorFinal.Models;
+﻿using GolpaMotorFinal.Models;
 using SixLabors.ImageSharp.Formats.Jpeg;
-using System.Net.NetworkInformation;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Processing;
 
