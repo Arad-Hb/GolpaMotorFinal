@@ -568,7 +568,7 @@ html[dir="rtl"] body.pluto-public {
 }
 
 .pluto-admin .report-grid--compact {
-    overflow-x: clip;
+    overflow-x: auto;
 }
 
 .pluto-admin .report-grid--compact table.table {
@@ -578,8 +578,23 @@ html[dir="rtl"] body.pluto-public {
     font-size: 12.5px;
 }
 
-.pluto-admin .report-grid--compact table.table th,
-.pluto-admin .report-grid--compact table.table td {
+.pluto-admin .report-grid--compact table.table thead th {
+    min-width: 5.5rem;
+    width: auto;
+    padding: 7px 3px;
+    text-align: center;
+    white-space: nowrap;
+    overflow-wrap: normal;
+    word-break: keep-all;
+    line-height: 1.45;
+}
+
+.pluto-admin .report-grid--compact table.table thead th.table-num {
+    min-width: 2.5rem;
+    width: 2.5rem;
+}
+
+.pluto-admin .report-grid--compact table.table tbody td {
     min-width: 0;
     padding: 7px 3px;
     text-align: center;
