@@ -44,15 +44,6 @@ namespace GolpaMotorFinal.Helpers
                     IdName = "productID",
                     CssClass = "btn btn-sm btn-outline-danger"
                 });
-                //row.Actions.Add(new GridAction
-                //{
-                //    ActionText = "حذف عکس",
-                //    OpenModal = false,
-                //    Icon = "fa fa-image",
-                //    Id = id,
-                //    IdName = "productID",
-                //    CssClass = "btn btn-sm btn-outline-danger btnRemovePicture"
-                //});
                 grid.Rows.Add(row);
             }
 
@@ -135,7 +126,7 @@ namespace GolpaMotorFinal.Helpers
                 var pending = !item.IsComplete && item.StatusTitle == RewardStatusTitles.Pending;
                 var row = new GridRow { Key = item.RewardRequestID.ToString() };
                 var name = string.IsNullOrWhiteSpace(item.UserFullName) ? "نامشخص" : item.UserFullName;
-                
+
                 row.Columns.Add(Text(name));
                 row.Columns.Add(Text(item.PhoneNumber ?? "-"));
                 row.Columns.Add(Text(item.CatalogTitle));
@@ -173,7 +164,7 @@ namespace GolpaMotorFinal.Helpers
 
         public static CrudGridViewModel BuildWarrantyReportGrid(IEnumerable<WarrantyProductStatusRow> items)
         {
-            var grid = new CrudGridViewModel { GridId = "WarrantyReportGrid", EmptyMessage = "داده‌ای یافت نشد" , ShowRowNumber =true};
+            var grid = new CrudGridViewModel { GridId = "WarrantyReportGrid", EmptyMessage = "داده‌ای یافت نشد", ShowRowNumber = true };
             grid.Headers.AddRange(new[] { "محصول", "کل کارت", "ثبت‌شده", "ثبت‌نشده", "منقضی", "تا ۱۰ روز" });
 
             foreach (var row in items)
@@ -404,7 +395,6 @@ namespace GolpaMotorFinal.Helpers
                 "امتیاز", "درخواست‌داده", "بدون درخواست", "درخواست",
                 "مصرف", "مانده"
             });
-
             foreach (var item in items)
             {
                 var row = new GridRow { Key = item.ProductID.ToString() };
@@ -469,8 +459,7 @@ namespace GolpaMotorFinal.Helpers
             return grid;
         }
 
-        public static CrudGridViewModel BuildProductCardDetailsGrid(
-            IEnumerable<ProductCardDetailItem> items)
+        public static CrudGridViewModel BuildProductCardDetailsGrid(IEnumerable<ProductCardDetailItem> items)
         {
             var grid = new CrudGridViewModel
             {
