@@ -1,4 +1,5 @@
 ﻿using GolpaMotorFinal.Models.ViewModels.CRUD;
+using GolpaMotorFinal.Validation;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.ComponentModel.DataAnnotations;
 
@@ -47,14 +48,17 @@ namespace GolpaMotorFinal.Models.ViewModels.UserManagement
 
         [Display(Name = "شماره کارت")]
         [StringLength(20)]
+        [IranianCardNumber]
         public string? CreditCartNumber { get; set; }
 
         [Display(Name = "شماره شبا")]
         [StringLength(50)]
+        [IranianSheba]
         public string? IBAN { get; set; }
 
         [Display(Name = "شماره حساب")]
         [StringLength(50)]
+        [IranianAccountNumber]
         public string? AccountNumber { get; set; }
 
         [Display(Name = "فعال")]

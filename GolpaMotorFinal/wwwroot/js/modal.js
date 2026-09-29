@@ -120,10 +120,17 @@ function openModal(url, title, id, idName, extra) {
     }
 
     $.get(url, params, function (result) {
-        document.getElementById("generalModalBody").innerHTML = result;
-        if (window.initAdminSelects) window.initAdminSelects(document.getElementById("generalModalBody"));
-        if (window.initNumericInputs) window.initNumericInputs(document.getElementById("generalModalBody"));
-        if (window.syncRewardCatalogCashFields) window.syncRewardCatalogCashFields(document.getElementById("generalModalBody"));
+        const body = document.getElementById("generalModalBody");
+        body.innerHTML = result;
+        if (window.initAdminSelects) window.initAdminSelects(body);
+        if (window.initNumericInputs) window.initNumericInputs(body);
+        if (window.syncRewardCatalogCashFields) window.syncRewardCatalogCashFields(body);
+        if (window.jQuery && $.validator && $.validator.unobtrusive) {
+            $(body).find("form").each(function () {
+                $(this).removeData("validator").removeData("unobtrusiveValidation");
+            });
+            $.validator.unobtrusive.parse(body);
+        }
     }).fail(function () {
         document.getElementById("generalModalBody").innerHTML =
             '<div class="alert alert-danger">خطا در بارگذاری فرم</div>';

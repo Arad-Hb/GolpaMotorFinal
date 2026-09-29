@@ -1,5 +1,6 @@
 using Application.Services;
 using DataAccess.Services;
+using DomainModel.Validation;
 using DomainModel.ViewModels.User;
 using Framework.Common;
 
@@ -26,6 +27,10 @@ namespace ApplicationService.Services
                 if (string.IsNullOrWhiteSpace(user.PhoneNumber))
                     return op.ToFailed("شماره موبایل اجباری است");
 
+                var bankingError = ValidateBankingFields(user, op);
+                if (bankingError != null)
+                    return bankingError;
+
                 user.IsDeleted = false;
                 if (string.IsNullOrWhiteSpace(user.ProfileImageUrl))
                     user.ProfileImageUrl = DefaultProfileImageUrl;
@@ -48,6 +53,10 @@ namespace ApplicationService.Services
 
                 if (!await repo.Exists(user.UserID))
                     return op.ToFailed("کاربر یافت نشد.");
+
+                var bankingError = ValidateBankingFields(user, op);
+                if (bankingError != null)
+                    return bankingError;
 
                 if (string.IsNullOrWhiteSpace(user.ProfileImageUrl))
                     user.ProfileImageUrl = DefaultProfileImageUrl;
@@ -99,6 +108,29 @@ namespace ApplicationService.Services
         {
             sm ??= new UserSearchModel();
             return repo.Search(sm);
+        }
+
+        private static OperationResult? ValidateBankingFields(UserAddEditModel user, OperationResult op)
+        {
+            if (!string.IsNullOrWhiteSpace(user.CreditCartNumber) &&
+                !IranianBankingRules.IsValid(BankingFieldKind.Card, user.CreditCartNumber))
+            {
+                return op.ToFailed("شماره کارت معتبر نیست.");
+            }
+
+            if (!string.IsNullOrWhiteSpace(user.IBAN) &&
+                !IranianBankingRules.IsValid(BankingFieldKind.Sheba, user.IBAN))
+            {
+                return op.ToFailed("شماره شبا معتبر نیست.");
+            }
+
+            if (!string.IsNullOrWhiteSpace(user.AccountNumber) &&
+                !IranianBankingRules.IsValid(BankingFieldKind.Account, user.AccountNumber))
+            {
+                return op.ToFailed("شماره حساب معتبر نیست.");
+            }
+
+            return null;
         }
     }
 }

@@ -122,6 +122,9 @@ $(document).on("submit", ".merge-form", function (e) {
 $(document).on("submit", ".crud-form", function (e) {
     e.preventDefault();
     const form = $(this);
+    if (form.data("validator") && !form.valid()) {
+        return;
+    }
     if (window.normalizeFormattedNumbers) {
         window.normalizeFormattedNumbers(this);
     }

@@ -4,6 +4,31 @@ namespace Framework.Common.Extensions
 {
     public static class NumericExtensions
     {
+        public static string ToEnglishDigits(this string value)
+        {
+            ArgumentNullException.ThrowIfNull(value);
+
+            var result = new System.Text.StringBuilder(value.Length);
+
+            foreach (char character in value)
+            {
+                if (character is >= '۰' and <= '۹')
+                {
+                    result.Append((char)('0' + character - '۰'));
+                }
+                else if (character is >= '٠' and <= '٩')
+                {
+                    result.Append((char)('0' + character - '٠'));
+                }
+                else
+                {
+                    result.Append(character);
+                }
+            }
+
+            return result.ToString();
+        }
+
         public static string ToGroupedNumber(this int value)
             => value.ToString("N0", CultureInfo.InvariantCulture);
 
