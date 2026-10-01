@@ -2,23 +2,53 @@
 
 <form class="table_filter_bar" data-filter-bar data-url="@Model.Url" data-target="@Model.Target">
 
+    @if (!string.IsNullOrWhiteSpace(Model.UserID))
+    {
+        <input type="hidden" name="UserID" value="@Model.UserID" data-fixed-filter />
+    }
+
+    @if (Model.RewardRequestID.HasValue)
+    {
+        <input type="hidden" name="RewardRequestID" value="@Model.RewardRequestID" data-fixed-filter />
+    }
+
+    @if (Model.RewardCatalogID.HasValue)
+    {
+        <input type="hidden" name="RewardCatalogID" value="@Model.RewardCatalogID" data-fixed-filter />
+    }
+
+    @if (Model.WarrantyCardID.HasValue && Model.CardDetails)
+    {
+        <input type="hidden" name="WarrantyCardID" value="@Model.WarrantyCardID" data-fixed-filter />
+    }
+
     @await Html.PartialAsync("_FilterSearch",
         FilterSearchViewModel.For("SearchTerm",Model.CardDetails? "محصول، سریال، رمز یا مشتری": "نام، موبایل، محصول یا کارت"))
 
     @if (!Model.RewardsOnly)
     {
-        <select name="ProductID" class="form-select">
-            <option value="">همه محصولات</option>
+        @if (Model.ProductID.HasValue)
+        {
+            <input type="hidden" name="ProductID" value="@Model.ProductID" data-fixed-filter />
+        }
+        else
+        {
+            <select name="ProductID" class="form-select">
+                <option value="">همه محصولات</option>
 
-            @foreach (var product in Model.Products)
-            {
-                <option value="@product.ProductID">
-                    @product.ProductName
-                </option>
-            }
-        </select>
+                @foreach (var product in Model.Products)
+                {
+                    <option value="@product.ProductID">
+                        @product.ProductName
+                    </option>
+                }
+            </select>
+        }
 
-        <input type="number" name="WarrantyCardID" min="1" class="form-control" placeholder="شماره کارت گارانتی" />
+        @if (!Model.WarrantyCardID.HasValue)
+        {
+            <input type="number" name="WarrantyCardID" min="1" class="form-control" placeholder="شماره کارت گارانتی" />
+        }
     }
 
     @if (Model.CardDetails)

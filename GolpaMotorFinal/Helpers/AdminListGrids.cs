@@ -210,7 +210,7 @@ namespace GolpaMotorFinal.Helpers
             foreach (var row in items)
             {
                 var gridRow = new GridRow { Key = row.RewardCatalogID.ToString() };
-                gridRow.Columns.Add(Link(row.Title, $"/Reports/RewardCatalogDetails/{row.RewardCatalogID}"));
+                gridRow.Columns.Add(Link(row.Title, ReportRoutes.RewardCatalog(row.RewardCatalogID)));
                 gridRow.Columns.Add(Number(row.RequestCount));
                 gridRow.Columns.Add(Number(row.ApprovedCount));
                 gridRow.Columns.Add(Number(row.RejectedCount));
@@ -229,7 +229,7 @@ namespace GolpaMotorFinal.Helpers
             foreach (var item in users)
             {
                 var row = new GridRow { Key = item.UserID };
-                row.Columns.Add(Link(item.FullName, $"/Reports/UserDetails/{Uri.EscapeDataString(item.UserID)}"));
+                row.Columns.Add(Link(item.FullName, ReportRoutes.UserTransactions(item.UserID)));
                 row.Columns.Add(Text(item.PhoneNumber));
                 row.Columns.Add(Text(item.RoleName));
                 row.Columns.Add(Text(item.Province));
@@ -345,7 +345,7 @@ namespace GolpaMotorFinal.Helpers
             foreach (var item in users)
             {
                 var row = new GridRow { Key = item.UserID };
-                row.Columns.Add(Text(item.FullName));
+                row.Columns.Add(Link(item.FullName, ReportRoutes.UserTransactions(item.UserID)));
                 row.Columns.Add(Text(item.PhoneNumber));
                 row.Columns.Add(Text(item.RoleName));
                 row.Columns.Add(Number(item.TotalRegisteredCards));
@@ -398,7 +398,7 @@ namespace GolpaMotorFinal.Helpers
             foreach (var item in items)
             {
                 var row = new GridRow { Key = item.ProductID.ToString() };
-                row.Columns.Add(Link(item.ProductName, $"/Reports/ProductDetails/{item.ProductID}"));
+                row.Columns.Add(Link(item.ProductName, ReportRoutes.ProductCardDetails(item.ProductID)));
                 row.Columns.Add(Text(item.CreatedAtUtc.ToIranTime().ToPersianDate()));
                 row.Columns.Add(Number(item.TotalCards));
                 row.Columns.Add(Number(item.RegisteredCards));
@@ -435,17 +435,17 @@ namespace GolpaMotorFinal.Helpers
                 var row = new GridRow { Key = item.ReportActivityLogID.ToString() };
                 row.Columns.Add(Text(item.OccurredAtUtc.ToIranTime().ToPersianDate()));
                 row.Columns.Add(Text(ActivityTitle(item.ActivityType)));
-                row.Columns.Add(Link(item.UserName, $"/Reports/UserDetails/{Uri.EscapeDataString(item.UserID)}"));
+                row.Columns.Add(Link(item.UserName, ReportRoutes.UserTransactions(item.UserID)));
                 row.Columns.Add(item.ProductID.HasValue
-                    ? Link(item.ProductName ?? "-", $"/Reports/ProductDetails/{item.ProductID}")
+                    ? Link(item.ProductName ?? "-", ReportRoutes.ProductFromActivity(item.ProductID.Value))
                     : Text("-"));
                 row.Columns.Add(item.WarrantyCardID.HasValue
                     ? Link(
                         $"{item.SerialNumber} / {item.ScratchedCode}",
-                        $"/Reports/CardDetails/{item.WarrantyCardID}")
+                        ReportRoutes.ProductCardDetails(warrantyCardId: item.WarrantyCardID))
                     : Text("-"));
                 row.Columns.Add(item.RewardRequestID.HasValue
-                    ? Link(item.RewardTitle ?? "درخواست پاداش", $"/Reports/RewardDetails/{item.RewardRequestID}")
+                    ? Link(item.RewardTitle ?? "درخواست پاداش", ReportRoutes.RewardRequest(item.RewardRequestID.Value))
                     : Text("-"));
                 row.Columns.Add(Text(item.StatusTitle));
                 row.Columns.Add(Number(item.PointsDelta));
@@ -480,13 +480,13 @@ namespace GolpaMotorFinal.Helpers
             {
                 var row = new GridRow { Key = item.WarrantyCardID.ToString() };
                 row.Columns.Add(Text(item.ProductName));
-                row.Columns.Add(Link(item.SerialNumber, $"/Reports/CardDetails/{item.WarrantyCardID}"));
+                row.Columns.Add(Link(item.SerialNumber, ReportRoutes.ProductCardDetails(warrantyCardId: item.WarrantyCardID)));
                 row.Columns.Add(Text(item.ScratchedCode));
                 row.Columns.Add(Text(item.IssuedAtUtc.ToIranTime().ToPersianDate()));
                 row.Columns.Add(Text(item.IsRegistered ? "فعال‌شده" : "آزاد"));
                 row.Columns.Add(!string.IsNullOrWhiteSpace(item.UserID)
                     ? Link(item.UserName ?? item.PhoneNumber ?? "نامشخص",
-                        $"/Reports/UserDetails/{Uri.EscapeDataString(item.UserID)}")
+                        ReportRoutes.UserTransactions(item.UserID))
                     : Text("-"));
                 row.Columns.Add(Text(item.RegisteredAtUtc.HasValue
                     ? item.RegisteredAtUtc.Value.ToIranTime().ToPersianDate()

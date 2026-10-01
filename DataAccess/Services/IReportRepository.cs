@@ -10,6 +10,22 @@ namespace DataAccess.Services
         Task<List<WarrantyProductStatusRow>> GetWarrantyByProduct(long? productId, DateTime? from, DateTime? to);
         Task<List<ProductPopularityRow>> GetProductPopularity(int? jalaliYear, int? jalaliMonth);
         Task<List<RewardPopularityRow>> GetRewardPopularity(DateTime? from, DateTime? to);
+        Task<ReportPage<WarrantyProductStatusRow>> SearchWarrantyByProduct(
+            long? productId,
+            DateTime? from,
+            DateTime? to,
+            int pageIndex,
+            int pageSize);
+        Task<ReportPage<ProductPopularityRow>> SearchProductPopularity(
+            int? jalaliYear,
+            int? jalaliMonth,
+            int pageIndex,
+            int pageSize);
+        Task<ReportPage<RewardPopularityRow>> SearchRewardPopularity(
+            DateTime? from,
+            DateTime? to,
+            int pageIndex,
+            int pageSize);
         Task<List<NamedCountItem>> GetTopProducts(int take = 5);
         Task<List<NamedCountItem>> GetTopRewards(int take = 5);
         Task<AdminDashboardSummary> GetAdminDashboardSummary();

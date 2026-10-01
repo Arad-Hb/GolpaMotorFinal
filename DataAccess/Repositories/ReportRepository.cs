@@ -111,40 +111,38 @@ namespace DataAccess.Repositories
                 .ToList();
         }
 
-        public async Task<List<RewardPopularityRow>> GetRewardPopularity(DateTime? from, DateTime? to)
+        public Task<List<RewardPopularityRow>> GetRewardPopularity(DateTime? from, DateTime? to) =>
+            RewardReportQueries.LoadPopularityRows(db, from, to);
+
+        public async Task<ReportPage<WarrantyProductStatusRow>> SearchWarrantyByProduct(
+            long? productId,
+            DateTime? from,
+            DateTime? to,
+            int pageIndex,
+            int pageSize)
         {
-            var query = RewardRequestQueries.All(db);
-            if (from.HasValue)
-                query = query.Where(x => x.RequestDate != null && x.RequestDate >= from.Value);
-            if (to.HasValue)
-            {
-                var end = to.Value.Date.AddDays(1);
-                query = query.Where(x => x.RequestDate != null && x.RequestDate < end);
-            }
+            var rows = await GetWarrantyByProduct(productId, from, to);
+            return ToPage(rows, pageIndex, pageSize);
+        }
 
-            var items = await query
-                .Select(x => new
-                {
-                    x.RewardCatalogID,
-                    Title = x.RewardCatalog.Title,
-                    Status = x.RewardDeliveryStatus.Title,
-                    x.IsComplete
-                })
-                .ToListAsync();
+        public async Task<ReportPage<ProductPopularityRow>> SearchProductPopularity(
+            int? jalaliYear,
+            int? jalaliMonth,
+            int pageIndex,
+            int pageSize)
+        {
+            var rows = await GetProductPopularity(jalaliYear, jalaliMonth);
+            return ToPage(rows, pageIndex, pageSize);
+        }
 
-            return items
-                .GroupBy(x => new { x.RewardCatalogID, x.Title })
-                .Select(g => new RewardPopularityRow
-                {
-                    RewardCatalogID = g.Key.RewardCatalogID,
-                    Title = g.Key.Title,
-                    RequestCount = g.Count(),
-                    ApprovedCount = g.Count(x => x.Status == RewardStatusTitles.Approved || x.IsComplete),
-                    RejectedCount = g.Count(x => x.Status == RewardStatusTitles.Rejected),
-                    PendingCount = g.Count(x => x.Status == RewardStatusTitles.Pending)
-                })
-                .OrderByDescending(x => x.RequestCount)
-                .ToList();
+        public async Task<ReportPage<RewardPopularityRow>> SearchRewardPopularity(
+            DateTime? from,
+            DateTime? to,
+            int pageIndex,
+            int pageSize)
+        {
+            var rows = await GetRewardPopularity(from, to);
+            return ToPage(rows, pageIndex, pageSize);
         }
 
         public async Task<List<NamedCountItem>> GetTopProducts(int take = 5)
@@ -324,78 +322,15 @@ namespace DataAccess.Repositories
             var pageIndex = Math.Max(0, search.PageIndex);
             var pageSize = search.PageSize <= 0 ? 50 : search.PageSize;
 
-            var products = ProductQueries.Active(db);
-            if (search.ProductID.HasValue && search.ProductID.Value > 0)
-                products = products.Where(x => x.ProductID == search.ProductID.Value);
-            if (!string.IsNullOrWhiteSpace(search.SearchTerm))
-            {
-                var term = search.SearchTerm.Trim();
-                products = products.Where(x => x.ProductName.Contains(term));
-            }
+            var products = ProductWarrantyReportQueries.ApplyProductFilters(ProductQueries.Active(db), search);
+            var cards = ProductWarrantyReportQueries.ApplyCardFilters(WarrantyCardQueries.All(db), search);
+            var registrations = ProductWarrantyReportQueries.ApplyRegistrationDateFilters(
+                db.CardRegistrations.AsNoTracking().AsQueryable(),
+                search);
 
-            var cards = WarrantyCardQueries.All(db);
-            if (search.FromUtc.HasValue)
-                cards = cards.Where(x => x.IssuedAtUtc >= search.FromUtc.Value);
-            if (search.ToUtcExclusive.HasValue)
-                cards = cards.Where(x => x.IssuedAtUtc < search.ToUtcExclusive.Value);
-            if (search.IsRegistered.HasValue)
-                cards = cards.Where(x => x.IsRegistered == search.IsRegistered.Value);
-
-            var registrations = db.CardRegistrations.AsNoTracking().AsQueryable();
-            if (search.FromUtc.HasValue)
-                registrations = registrations.Where(x => x.CreatedAt >= search.FromUtc.Value);
-            if (search.ToUtcExclusive.HasValue)
-                registrations = registrations.Where(x => x.CreatedAt < search.ToUtcExclusive.Value);
-
-            var query = products.Select(p => new ProductWarrantyReportRow
-            {
-                ProductID = p.ProductID,
-                ProductName = p.ProductName,
-                CreatedAtUtc = p.CreatedAtUtc,
-                TotalCards = cards.Count(w => w.ProductID == p.ProductID),
-                RegisteredCards = cards.Count(w => w.ProductID == p.ProductID && w.IsRegistered),
-                UnregisteredCards = cards.Count(w => w.ProductID == p.ProductID && !w.IsRegistered),
-                UniqueCustomers = registrations
-                    .Where(r => r.WarrantyCard.ProductID == p.ProductID)
-                    .Select(r => r.UserID)
-                    .Distinct()
-                    .Count(),
-                AwardedPoints = registrations
-                    .Where(r => r.WarrantyCard.ProductID == p.ProductID)
-                    .Sum(r => (int?)(r.EarnedPionts != 0
-                        ? r.EarnedPionts
-                        : r.WarrantyCard.Product.ProductPoint)) ?? 0,
-                CustomersWithRewardRequest = db.RewardRequests
-                    .Where(rr => registrations.Any(r =>
-                        r.WarrantyCard.ProductID == p.ProductID &&
-                        r.UserID == rr.UserID))
-                    .Select(rr => rr.UserID)
-                    .Distinct()
-                    .Count(),
-                RewardRequestCount = db.RewardRequests.Count(rr =>
-                    registrations.Any(r =>
-                        r.WarrantyCard.ProductID == p.ProductID &&
-                        r.UserID == rr.UserID)),
-                RegistrantSettledPoints = db.Users
-                    .Where(u => registrations.Any(r =>
-                        r.WarrantyCard.ProductID == p.ProductID &&
-                        r.UserID == u.Id))
-                    .Sum(u => (int?)u.TotalSettledPoints) ?? 0,
-                RegistrantRemainedPoints = db.Users
-                    .Where(u => registrations.Any(r =>
-                        r.WarrantyCard.ProductID == p.ProductID &&
-                        r.UserID == u.Id))
-                    .Sum(u => (int?)u.RemainedPoints) ?? 0
-            });
-
-            if (search.CountFrom.HasValue)
-                query = query.Where(x => x.TotalCards >= search.CountFrom.Value);
-            if (search.CountTo.HasValue)
-                query = query.Where(x => x.TotalCards <= search.CountTo.Value);
-            if (search.PointsFrom.HasValue)
-                query = query.Where(x => x.AwardedPoints >= search.PointsFrom.Value);
-            if (search.PointsTo.HasValue)
-                query = query.Where(x => x.AwardedPoints <= search.PointsTo.Value);
+            var query = ProductWarrantyReportQueries.ApplyAggregateFilters(
+                ProductWarrantyReportQueries.BuildSummaryQuery(db, products, cards, registrations),
+                search);
 
             var recordCount = await query.CountAsync();
             var items = await query
@@ -423,62 +358,7 @@ namespace DataAccess.Repositories
             search ??= new ReportActivitySearchModel();
             var pageIndex = Math.Max(0, search.PageIndex);
             var pageSize = search.PageSize <= 0 ? 50 : search.PageSize;
-            var query = db.ReportActivityLogs.AsNoTracking().AsQueryable();
-
-            if (search.RewardsOnly)
-            {
-                query = query.Where(activity =>
-                    activity.ActivityType == ReportActivityTypes.RewardRequested ||
-                    activity.ActivityType == ReportActivityTypes.RewardApproved ||
-                    activity.ActivityType == ReportActivityTypes.RewardRejected);
-            }
-            if (search.ProductID.HasValue && search.ProductID.Value > 0)
-                query = query.Where(x => x.ProductID == search.ProductID.Value);
-
-            if (!string.IsNullOrWhiteSpace(search.UserID))
-                query = query.Where(x => x.UserID == search.UserID);
-
-            if (search.WarrantyCardID.HasValue && search.WarrantyCardID.Value > 0)
-                query = query.Where(x => x.WarrantyCardID == search.WarrantyCardID.Value);
-
-            if (search.RewardRequestID.HasValue && search.RewardRequestID.Value > 0)
-                query = query.Where(x => x.RewardRequestID == search.RewardRequestID.Value);
-
-            if (search.RewardCatalogID.HasValue && search.RewardCatalogID.Value > 0)
-                query = query.Where(x =>
-                    x.RewardRequest != null &&
-                    x.RewardRequest.RewardCatalogID == search.RewardCatalogID.Value);
-
-            if (!string.IsNullOrWhiteSpace(search.ActivityType))
-                query = query.Where(x => x.ActivityType == search.ActivityType);
-
-            if (!string.IsNullOrWhiteSpace(search.RewardStatus))
-                query = query.Where(x => x.StatusTitle == search.RewardStatus);
-
-            if (search.PointsFrom.HasValue)
-                query = query.Where(x => x.PointsDelta >= search.PointsFrom.Value);
-
-            if (search.PointsTo.HasValue)
-                query = query.Where(x => x.PointsDelta <= search.PointsTo.Value);
-
-            if (search.FromUtc.HasValue)
-                query = query.Where(x => x.OccurredAtUtc >= search.FromUtc.Value);
-
-            if (search.ToUtcExclusive.HasValue)
-                query = query.Where(x => x.OccurredAtUtc < search.ToUtcExclusive.Value);
-
-            if (!string.IsNullOrWhiteSpace(search.SearchTerm))
-            {
-                var term = search.SearchTerm.Trim();
-                query = query.Where(x =>
-                    x.User.FirstName!.Contains(term) ||
-                    x.User.LastName!.Contains(term) ||
-                    x.User.PhoneNumber!.Contains(term) ||
-                    (x.Product != null && x.Product.ProductName.Contains(term)) ||
-                    (x.WarrantyCard != null &&
-                        (x.WarrantyCard.SerialNumber.Contains(term) ||
-                         x.WarrantyCard.ScratchedCode.Contains(term))));
-            }
+            var query = ReportActivityQueries.ApplySearch(ReportActivityQueries.Base(db), search);
 
             var recordCount = await query.CountAsync();
             var items = await query
@@ -486,29 +366,7 @@ namespace DataAccess.Repositories
                 .ThenByDescending(x => x.ReportActivityLogID)
                 .Skip(pageIndex * pageSize)
                 .Take(pageSize)
-                .Select(x => new ReportActivityItem
-                {
-                    ReportActivityLogID = x.ReportActivityLogID,
-                    ActivityType = x.ActivityType,
-                    OccurredAtUtc = x.OccurredAtUtc,
-                    UserID = x.UserID,
-                    UserName = ((x.User.FirstName ?? "") + " " + (x.User.LastName ?? "")).Trim(),
-                    PhoneNumber = x.User.PhoneNumber,
-                    ProductID = x.ProductID,
-                    ProductName = x.Product != null ? x.Product.ProductName : null,
-                    WarrantyCardID = x.WarrantyCardID,
-                    SerialNumber = x.WarrantyCard != null ? x.WarrantyCard.SerialNumber : null,
-                    ScratchedCode = x.WarrantyCard != null ? x.WarrantyCard.ScratchedCode : null,
-                    RewardRequestID = x.RewardRequestID,
-                    RewardTitle = x.RewardRequest != null ? x.RewardRequest.RewardCatalog.Title : null,
-                    StatusTitle = x.StatusTitle,
-                    PointsDelta = x.PointsDelta,
-                    TotalEarnedPoints = x.TotalEarnedPoints,
-                    TotalSettledPoints = x.TotalSettledPoints,
-                    RemainedPoints = x.RemainedPoints,
-                    AvailablePoints = x.AvailablePoints,
-                    Description = x.Description
-                })
+                .Select(ReportMapper.ToActivityItem)
                 .ToListAsync();
 
             foreach (var item in items.Where(x => string.IsNullOrWhiteSpace(x.UserName)))
@@ -529,41 +387,10 @@ namespace DataAccess.Repositories
             var pageIndex = Math.Max(0, search.PageIndex);
             var pageSize = search.PageSize <= 0 ? 50 : search.PageSize;
             var scopedUserId = string.IsNullOrWhiteSpace(search.UserID) ? null : search.UserID;
-            var query = WarrantyCardQueries.All(db);
-
-            if (search.IsRegistered.HasValue)
-            {
-                query = query.Where(card =>
-                    card.IsRegistered == search.IsRegistered.Value);
-            }
-            if (search.ProductID.HasValue && search.ProductID.Value > 0)
-                query = query.Where(x => x.ProductID == search.ProductID.Value);
-
-            if (search.WarrantyCardID.HasValue && search.WarrantyCardID.Value > 0)
-                query = query.Where(x => x.WarrantyCardID == search.WarrantyCardID.Value);
-
-            if (search.FromUtc.HasValue)
-                query = query.Where(x => x.IssuedAtUtc >= search.FromUtc.Value);
-
-            if (search.ToUtcExclusive.HasValue)
-                query = query.Where(x => x.IssuedAtUtc < search.ToUtcExclusive.Value);
-
-            if (scopedUserId != null)
-                query = query.Where(x => x.CardRegistrations.Any(r => r.UserID == scopedUserId));
-
-            if (!string.IsNullOrWhiteSpace(search.SearchTerm))
-            {
-                var term = search.SearchTerm.Trim();
-                query = query.Where(x =>
-                    x.SerialNumber.Contains(term) ||
-                    x.ScratchedCode.Contains(term) ||
-                    x.Product.ProductName.Contains(term) ||
-                    x.CardRegistrations.Any(r =>
-                        r.User.PhoneNumber!.Contains(term) ||
-                        r.User.FirstName!.Contains(term) ||
-                        r.User.LastName!.Contains(term) ||
-                        ((r.User.FirstName ?? "") + " " + (r.User.LastName ?? "")).Contains(term)));
-            }
+            var query = WarrantyCardReportQueries.ApplyCardDetailSearch(
+                WarrantyCardQueries.All(db),
+                search,
+                scopedUserId);
 
             var recordCount = await query.CountAsync();
             var rawItems = await query
@@ -651,6 +478,24 @@ namespace DataAccess.Repositories
                 PageIndex = pageIndex,
                 PageSize = pageSize,
                 RecordCount = recordCount
+            };
+        }
+
+        private static ReportPage<T> ToPage<T>(List<T> rows, int pageIndex, int pageSize)
+        {
+            pageSize = pageSize <= 0 ? 50 : pageSize;
+            pageIndex = Math.Max(0, pageIndex);
+
+            var pageCount = (int)Math.Ceiling(rows.Count / (double)pageSize);
+            var lastPageIndex = Math.Max(0, pageCount - 1);
+            pageIndex = Math.Min(pageIndex, lastPageIndex);
+
+            return new ReportPage<T>
+            {
+                Items = rows.Skip(pageIndex * pageSize).Take(pageSize).ToList(),
+                PageIndex = pageIndex,
+                PageSize = pageSize,
+                RecordCount = rows.Count
             };
         }
     }

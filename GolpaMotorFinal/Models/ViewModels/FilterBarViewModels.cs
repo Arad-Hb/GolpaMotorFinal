@@ -19,11 +19,12 @@ namespace GolpaMotorFinal.Models.ViewModels
     public class ProductWarrantyReportFilterBarViewModel
     {
         public IEnumerable<ProductListItem> Products { get; set; } = Enumerable.Empty<ProductListItem>();
+        public long? ProductID { get; set; }
     }
 
     public class ReportActivityFilterBarViewModel
     {
-        public string Url { get; set; } = "/Reports/Activities";
+        public string Url { get; set; } = "/reports/grid/userstransactiondetails";
         public string Target { get; set; } = "#ReportActivityGrid";
         public IEnumerable<ProductListItem> Products { get; set; } = Enumerable.Empty<ProductListItem>();
         public string? SearchTerm { get; set; }
