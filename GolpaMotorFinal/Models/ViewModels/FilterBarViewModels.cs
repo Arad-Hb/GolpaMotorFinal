@@ -32,5 +32,8 @@ namespace GolpaMotorFinal.Models.ViewModels
         public long? WarrantyCardID { get; set; }
         public int? RewardRequestID { get; set; }
         public int? RewardCatalogID { get; set; }
+        public bool CardDetails { get; set; }
+
+        public bool RewardsOnly { get; set; }
     }
 }

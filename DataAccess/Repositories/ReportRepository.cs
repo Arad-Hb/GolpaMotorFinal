@@ -204,9 +204,7 @@ namespace DataAccess.Repositories
                 .ToListAsync();
         }
 
-        public async Task<ReportPage<DashboardRegistrarItem>> GetDashboardRegistrars(
-            int pageIndex,
-            int pageSize)
+        public async Task<ReportPage<DashboardRegistrarItem>> GetDashboardRegistrars(int pageIndex,int pageSize)
         {
             pageIndex = Math.Max(0, pageIndex);
             pageSize = pageSize <= 0 ? 10 : pageSize;
@@ -237,9 +235,7 @@ namespace DataAccess.Repositories
             };
         }
 
-        public async Task<List<DashboardWarrantyAlertItem>> GetWarrantyExpiryAlerts(
-            int take = 10,
-            int withinDays = 30)
+        public async Task<List<DashboardWarrantyAlertItem>> GetWarrantyExpiryAlerts(int take = 10,int withinDays = 30)
         {
             take = take <= 0 ? 10 : take;
             withinDays = Math.Max(0, withinDays);
@@ -322,8 +318,7 @@ namespace DataAccess.Repositories
             }).ToList();
         }
 
-        public async Task<ReportPage<ProductWarrantyReportRow>> SearchProductWarranty(
-            ProductWarrantyReportSearchModel search)
+        public async Task<ReportPage<ProductWarrantyReportRow>> SearchProductWarranty(ProductWarrantyReportSearchModel search)
         {
             search ??= new ProductWarrantyReportSearchModel();
             var pageIndex = Math.Max(0, search.PageIndex);
@@ -423,38 +418,55 @@ namespace DataAccess.Repositories
             };
         }
 
-        public async Task<ReportPage<ReportActivityItem>> SearchActivities(
-            ReportActivitySearchModel search)
+        public async Task<ReportPage<ReportActivityItem>> SearchActivities(ReportActivitySearchModel search)
         {
             search ??= new ReportActivitySearchModel();
             var pageIndex = Math.Max(0, search.PageIndex);
             var pageSize = search.PageSize <= 0 ? 50 : search.PageSize;
             var query = db.ReportActivityLogs.AsNoTracking().AsQueryable();
 
+            if (search.RewardsOnly)
+            {
+                query = query.Where(activity =>
+                    activity.ActivityType == ReportActivityTypes.RewardRequested ||
+                    activity.ActivityType == ReportActivityTypes.RewardApproved ||
+                    activity.ActivityType == ReportActivityTypes.RewardRejected);
+            }
             if (search.ProductID.HasValue && search.ProductID.Value > 0)
                 query = query.Where(x => x.ProductID == search.ProductID.Value);
+
             if (!string.IsNullOrWhiteSpace(search.UserID))
                 query = query.Where(x => x.UserID == search.UserID);
+
             if (search.WarrantyCardID.HasValue && search.WarrantyCardID.Value > 0)
                 query = query.Where(x => x.WarrantyCardID == search.WarrantyCardID.Value);
+
             if (search.RewardRequestID.HasValue && search.RewardRequestID.Value > 0)
                 query = query.Where(x => x.RewardRequestID == search.RewardRequestID.Value);
+
             if (search.RewardCatalogID.HasValue && search.RewardCatalogID.Value > 0)
                 query = query.Where(x =>
                     x.RewardRequest != null &&
                     x.RewardRequest.RewardCatalogID == search.RewardCatalogID.Value);
+
             if (!string.IsNullOrWhiteSpace(search.ActivityType))
                 query = query.Where(x => x.ActivityType == search.ActivityType);
+
             if (!string.IsNullOrWhiteSpace(search.RewardStatus))
                 query = query.Where(x => x.StatusTitle == search.RewardStatus);
+
             if (search.PointsFrom.HasValue)
                 query = query.Where(x => x.PointsDelta >= search.PointsFrom.Value);
+
             if (search.PointsTo.HasValue)
                 query = query.Where(x => x.PointsDelta <= search.PointsTo.Value);
+
             if (search.FromUtc.HasValue)
                 query = query.Where(x => x.OccurredAtUtc >= search.FromUtc.Value);
+
             if (search.ToUtcExclusive.HasValue)
                 query = query.Where(x => x.OccurredAtUtc < search.ToUtcExclusive.Value);
+
             if (!string.IsNullOrWhiteSpace(search.SearchTerm))
             {
                 var term = search.SearchTerm.Trim();
@@ -511,8 +523,7 @@ namespace DataAccess.Repositories
             };
         }
 
-        public async Task<ReportPage<ProductCardDetailItem>> SearchProductCards(
-            ReportActivitySearchModel search)
+        public async Task<ReportPage<ProductCardDetailItem>> SearchProductCards(ReportActivitySearchModel search)
         {
             search ??= new ReportActivitySearchModel();
             var pageIndex = Math.Max(0, search.PageIndex);
@@ -520,16 +531,26 @@ namespace DataAccess.Repositories
             var scopedUserId = string.IsNullOrWhiteSpace(search.UserID) ? null : search.UserID;
             var query = WarrantyCardQueries.All(db);
 
+            if (search.IsRegistered.HasValue)
+            {
+                query = query.Where(card =>
+                    card.IsRegistered == search.IsRegistered.Value);
+            }
             if (search.ProductID.HasValue && search.ProductID.Value > 0)
                 query = query.Where(x => x.ProductID == search.ProductID.Value);
+
             if (search.WarrantyCardID.HasValue && search.WarrantyCardID.Value > 0)
                 query = query.Where(x => x.WarrantyCardID == search.WarrantyCardID.Value);
+
             if (search.FromUtc.HasValue)
                 query = query.Where(x => x.IssuedAtUtc >= search.FromUtc.Value);
+
             if (search.ToUtcExclusive.HasValue)
                 query = query.Where(x => x.IssuedAtUtc < search.ToUtcExclusive.Value);
+
             if (scopedUserId != null)
                 query = query.Where(x => x.CardRegistrations.Any(r => r.UserID == scopedUserId));
+
             if (!string.IsNullOrWhiteSpace(search.SearchTerm))
             {
                 var term = search.SearchTerm.Trim();

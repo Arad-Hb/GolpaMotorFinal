@@ -60,6 +60,7 @@ builder.Services.AddScoped<IWarrantyService, WarrantyService>();
 builder.Services.AddScoped<IWarrantyExcelService, WarrantyExcelService>();
 builder.Services.AddScoped<ILookupService, LookupService>();
 builder.Services.AddScoped<LookupLists>();
+builder.Services.AddScoped<IReportService, ReportService>();
 
 builder.Services.AddAntiforgery(options =>
 {

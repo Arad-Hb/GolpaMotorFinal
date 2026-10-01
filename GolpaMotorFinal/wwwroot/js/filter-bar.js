@@ -758,6 +758,11 @@
     }
 
     function applyFilter(bar, page) {
+        if (window.ReportSearch && window.ReportSearch.owns(bar)) {
+                window.ReportSearch.load(bar, page);
+                return;
+        }
+
         var url = bar.attr("data-url");
         var target = bar.attr("data-target");
         if (!url || !target) return;
@@ -837,8 +842,7 @@
         }
     });
 
-    $(function () {
-        $("[data-filter-bar]").each(function () {
+    $(function () {$("[data-filter-bar]").each(function () {
             if ($(this).attr("data-autoload") === "false") return;
             var target = $(this).attr("data-target");
             if (!target) return;
@@ -846,4 +850,20 @@
             if (t.length && $.trim(t.html()) === "") applyFilter($(this), 0);
         });
     });
+
+    window.refreshReportFilterLabels = function (bar) {
+    wrapFilterSelects(bar);
+
+    bar.find(".date-range").each(function () {
+        updateTrigger($(this));
+    });
+
+    bar.find(".num-range").each(function () {
+        updateNumTrigger($(this));
+    });
+
+    bar.find(".filter-select").each(function () {
+        updateFilterSelect($(this));
+    });
+};
 })();

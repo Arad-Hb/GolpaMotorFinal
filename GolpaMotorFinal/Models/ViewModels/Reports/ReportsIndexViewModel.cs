@@ -1,12 +1,16 @@
 using DomainModel.ViewModels.Product;
+using GolpaMotorFinal.Models.ViewModels.CRUD;
 
 namespace GolpaMotorFinal.Models.ViewModels.Reports
 {
-    public class ReportsIndexViewModel
+    public sealed class ReportsIndexViewModel
     {
-        public IEnumerable<ProductListItem> Products { get; set; } = Enumerable.Empty<ProductListItem>();
-        public IEnumerable<string> Months { get; set; } = new List<string>();
-        public string OpenTab { get; set; } = "users";
+        public string OpenTab { get; set; } = "";
+
         public int CurrentJalaliYear { get; set; }
+
+        public IReadOnlyList<ReportTabViewModel> Tabs { get; set; }= Array.Empty<ReportTabViewModel>();
+
+        public CrudIndexViewModel Page { get; set; } = new();
     }
 }

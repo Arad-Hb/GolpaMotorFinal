@@ -12,6 +12,17 @@
         var target = document.getElementById(gridId);
         if (!target || typeof window.$ !== "function") return;
 
+        var reportRoot = target.closest("[data-report-page]");
+
+        if (reportRoot && window.ReportSearch) {
+            var filterBar = $(reportRoot).find("[data-filter-bar]").first();
+
+            if (filterBar.length) {
+                window.ReportSearch.load(filterBar, page);
+                return;
+             }
+        }
+
         var parsed = new URL(url, window.location.origin);
         parsed.searchParams.set(param, String(page));
         parsed.searchParams.set("_", Date.now().toString());

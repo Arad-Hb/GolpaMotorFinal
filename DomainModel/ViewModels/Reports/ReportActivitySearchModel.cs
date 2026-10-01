@@ -10,6 +10,8 @@ namespace DomainModel.ViewModels.Reports
         public long? WarrantyCardID { get; set; }
         public int? RewardRequestID { get; set; }
         public int? RewardCatalogID { get; set; }
+        public bool RewardsOnly { get; set; }
+        public bool? IsRegistered { get; set; }
         public string? ActivityType { get; set; }
         public string? RewardStatus { get; set; }
         public int? PointsFrom { get; set; }

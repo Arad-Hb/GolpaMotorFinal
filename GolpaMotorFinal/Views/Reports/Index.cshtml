@@ -1,65 +1,29 @@
 @model GolpaMotorFinal.Models.ViewModels.Reports.ReportsIndexViewModel
-@using DomainModel.Models
-@using GolpaMotorFinal.Models.ViewModels.CRUD
+
 @{
     Layout = "_AdminLayout";
-    string NavClass(string tab) => Model.OpenTab == tab ? "nav-link active" : "nav-link";
-    string PaneClass(string tab) => Model.OpenTab == tab ? "tab-pane fade show active" : "tab-pane fade";
 }
 
-<ul class="nav nav-tabs mb-3" role="tablist">
-    <li class="nav-item"><button class="@NavClass("users")" data-bs-toggle="tab" data-bs-target="#reportUsers" type="button">گزارش کاربران</button></li>
-    <li class="nav-item"><button class="@NavClass("productWarranty")" data-bs-toggle="tab" data-bs-target="#reportProductWarranty" type="button">گزارش کارت‌های گارانتی بر اساس محصول</button></li>
-    @* <li class="nav-item"><button class="@NavClass("products")" data-bs-toggle="tab" data-bs-target="#reportProducts" type="button">محصولات پرمصرف</button></li> *@
-    <li class="nav-item"><button class="@NavClass("rewards")" data-bs-toggle="tab" data-bs-target="#reportRewards" type="button">گزارش پاداش</button></li>
+<ul class="nav nav-tabs mb-3">
+    @foreach (var tab in Model.Tabs)
+    {
+        var selected = Model.OpenTab == tab.Key;
+
+        <li class="nav-item">
+            <a class="nav-link @(selected ? "active" : "")"
+               href="/reports/@tab.Key"
+               aria-current="@(selected ? "page" : null)">
+                @tab.Title
+            </a>
+        </li>
+    }
 </ul>
 
-<div class="tab-content">
-    <div class="@PaneClass("users")" id="reportUsers">
-        @await Html.PartialAsync("_CrudPage", new CrudIndexViewModel
-        {
-            GridId = "UserReportGrid",
-            ListHeading = "گزارش کاربران",
-            FilterPartial = "~/Views/UserManagement/_UserFilterBar.cshtml",
-            FilterModel = new UserFilterBarViewModel
-            {
-                Url = "/Reports/Users",
-                Target = "#UserReportGrid",
-                CustomerTypes = ViewBag.CustomerTypes as IEnumerable<CustomerType> ?? Enumerable.Empty<CustomerType>(),
-                Provinces = ViewBag.Provinces as IEnumerable<Province> ?? Enumerable.Empty<Province>()
-            }
-        })
-    </div>
-    <div class="@PaneClass("productWarranty")" id="reportProductWarranty">
-        @await Html.PartialAsync("_CrudPage", new CrudIndexViewModel
-        {
-            GridId = "ProductWarrantyReportGrid",
-            ListHeading = "گزارش یکپارچه محصول و کارت گارانتی",
-            FilterPartial = "_ProductWarrantyReportFilterBar",
-            FilterModel = new ProductWarrantyReportFilterBarViewModel
-            {
-                Products = Model.Products
-            }
-        })
-    </div>
-    @* <div class="@PaneClass("products")" id="reportProducts">
-        @await Html.PartialAsync("_CrudPage", new CrudIndexViewModel
-        {
-            GridId = "ProductReportGrid",
-            ListHeading = "محصولات از پرمصرف به کم‌مصرف",
-            FilterPartial = "_ProductReportFilterBar",
-            FilterModel = new ProductReportFilterBarViewModel
-            {
-                YearNow = Model.CurrentJalaliYear
-            }
-        })
-    </div> *@
-    <div class="@PaneClass("rewards")" id="reportRewards">
-        @await Html.PartialAsync("_CrudPage", new CrudIndexViewModel
-        {
-            GridId = "RewardReportGrid",
-            ListHeading = "گزارش پاداش",
-            FilterPartial = "_RewardReportFilterBar"
-        })
-    </div>
+<div data-report-page="/reports/@Model.OpenTab">
+    @await Html.PartialAsync("_CrudPage", Model.Page)
 </div>
+
+@section Scripts
+{
+    <script src="~/js/reports.js"asp-append-version="true"></script>
+}

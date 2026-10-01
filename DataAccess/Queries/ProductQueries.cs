@@ -9,9 +9,7 @@ namespace DataAccess.Queries
         public static IQueryable<Product> Active(GolpaMotorDbContext db)
             => db.Products.AsNoTracking().Where(x => !x.IsDeleted);
 
-        public static IQueryable<Product> ApplySearch(
-            IQueryable<Product> query,
-            ProductSearchModel searchModel)
+        public static IQueryable<Product> ApplySearch(IQueryable<Product> query,ProductSearchModel searchModel)
         {
             if (searchModel.ProductID > 0)
                 query = query.Where(p => p.ProductID == searchModel.ProductID);

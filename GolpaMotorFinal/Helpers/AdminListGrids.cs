@@ -427,7 +427,7 @@ namespace GolpaMotorFinal.Helpers
             grid.Headers.AddRange(new[]
             {
                 "تاریخ", "نوع", "کاربر", "محصول", "کارت/رمز", "پاداش", "وضعیت",
-                "تغییر امتیاز", "کل امتیاز", "تسویه", "مانده", "قابل مصرف"
+                "تغییر امتیاز", "کل امتیاز", "تسویه", "مانده", "قابل مصرف","موبایل","توضیحات"
             });
 
             foreach (var item in items)
@@ -453,6 +453,8 @@ namespace GolpaMotorFinal.Helpers
                 row.Columns.Add(Number(item.TotalSettledPoints));
                 row.Columns.Add(Number(item.RemainedPoints));
                 row.Columns.Add(Number(item.AvailablePoints, "fw-bold text-success"));
+                row.Columns.Add(Text(item.PhoneNumber));
+                row.Columns.Add(Text(item.Description));
                 grid.Rows.Add(row);
             }
 
