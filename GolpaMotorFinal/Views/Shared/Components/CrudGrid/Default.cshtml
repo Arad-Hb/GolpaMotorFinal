@@ -76,42 +76,99 @@
                         }
                         @if (hasActions)
                         {
-                            <td class="table-actions">
-                                <div class="table-actions__btns">
-                                @foreach (var action in row.Actions.Where(a => a.Visible))
+                            <td class="crud-grid-actions-cell">
+                                @if (row.Actions.Count > 3)
                                 {
-                                    var css = action.CssClass ?? "";
-                                    if (action.OpenModal && !action.IsDelete && !css.Contains("open-modal"))
-                                        css += " open-modal";
-                                    if (action.IsDelete && !css.Contains("btnDelete"))
-                                        css += " btnDelete";
-                                    if (!action.Ajax && !action.OpenModal && !action.IsDelete)
-                                    {
-                                        <a href="@action.Url"
-                                           class="@css"
-                                           title="@action.ActionText">
-                                            <i class="@action.Icon"></i>
-                                        </a>
-                                    }
-                                    else
-                                    {
-                                        <button type="button"
-                                                class="@css"
-                                                title="@action.ActionText"
-                                                data-title="@action.ActionText"
-                                                data-url="@action.Url"
-                                                data-id="@action.Id"
-                                                data-id-name="@(action.IdName ?? "userID")"
-                                                data-size="@(action.Size ?? "modal-lg")"
-                                                data-grid-id="@action.GridId"
-                                                data-refresh-url="@action.RefreshUrl"
-                                                data-refresh-target-url="@action.RefreshUrl"
-                                                data-refresh-target-id="@action.RefreshTargetId">
-                                            <i class="@action.Icon"></i>
+                                    var dropdownId = $"crud-actions-{Guid.NewGuid():N}";
+
+                                    <div class="crud-action-dropdown" dir="rtl">
+                                        <button type="button" class="crud-action-toggle" aria-expanded="false" aria-controls="@dropdownId">
+                                            <span>عملیات</span>
+
+                                            <svg class="crud-action-chevron" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                                <path d="m6 9 6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                            </svg>
                                         </button>
-                                    }
+
+                                        <ul id="@dropdownId" class="crud-action-options" hidden>
+                                            @foreach (var action in row.Actions)
+                                            {
+                                                var css = action.CssClass ?? "";
+                                                if (action.OpenModal && !action.IsDelete && !css.Contains("open-modal"))
+                                                    css += " open-modal";
+                                                if (action.IsDelete && !css.Contains("btnDelete"))
+                                                    css += " btnDelete";
+                                                if (!action.Ajax && !action.OpenModal && !action.IsDelete)
+                                                {
+                                                    <li class="crud-action-option">
+                                                        <a href="@action.Url"
+                                                           class="@css"
+                                                           title="@action.ActionText">
+                                                            <i class="@action.Icon"></i>
+                                                        </a>
+                                                    </li> 
+                                                }
+                                                else
+                                                {
+                                                    <li class="crud-action-option">
+                                                        <button type="button"
+                                                                class="@css"
+                                                                title="@action.ActionText"
+                                                                data-title="@action.ActionText"
+                                                                data-url="@action.Url"
+                                                                data-id="@action.Id"
+                                                                data-id-name="@(action.IdName ?? "userID")"
+                                                                data-size="@(action.Size ?? "modal-lg")"
+                                                                data-grid-id="@action.GridId"
+                                                                data-refresh-url="@action.RefreshUrl"
+                                                                data-refresh-target-url="@action.RefreshUrl"
+                                                                data-refresh-target-id="@action.RefreshTargetId">
+                                                            <i class="@action.Icon"></i>
+                                                        </button>
+                                                    </li>
+                                                }
+                                            }
+                                        </ul>
+                                    </div>
                                 }
-                                </div>
+                                else
+                                {
+                                    <div class="table-actions__btns">
+                                        @foreach (var action in row.Actions.Where(a => a.Visible))
+                                        {
+                                            var css = action.CssClass ?? "";
+                                            if (action.OpenModal && !action.IsDelete && !css.Contains("open-modal"))
+                                                css += " open-modal";
+                                            if (action.IsDelete && !css.Contains("btnDelete"))
+                                                css += " btnDelete";
+                                            if (!action.Ajax && !action.OpenModal && !action.IsDelete)
+                                            {
+                                                <a href="@action.Url"
+                                                   class="@css"
+                                                   title="@action.ActionText">
+                                                    <i class="@action.Icon"></i>
+                                                </a>
+                                            }
+                                            else
+                                            {
+                                                <button type="button"
+                                                        class="@css"
+                                                        title="@action.ActionText"
+                                                        data-title="@action.ActionText"
+                                                        data-url="@action.Url"
+                                                        data-id="@action.Id"
+                                                        data-id-name="@(action.IdName ?? "userID")"
+                                                        data-size="@(action.Size ?? "modal-lg")"
+                                                        data-grid-id="@action.GridId"
+                                                        data-refresh-url="@action.RefreshUrl"
+                                                        data-refresh-target-url="@action.RefreshUrl"
+                                                        data-refresh-target-id="@action.RefreshTargetId">
+                                                    <i class="@action.Icon"></i>
+                                                </button>
+                                            }
+                                        }
+                                    </div>
+                                }
                             </td>
                         }
                     </tr>

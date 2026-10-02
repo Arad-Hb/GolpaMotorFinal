@@ -239,8 +239,7 @@ namespace GolpaMotorFinal.Helpers
                 row.Columns.Add(Text(item.IsEligibleForReward ? "بله" : "خیر"));
                 row.Columns.Add(Text(item.HasReceivedReward ? "بله" : "خیر"));
 
-                row.Actions.Add(Navigate(
-                    "ثبت درخواست پاداش",
+                row.Actions.Add(Navigate("ثبت درخواست پاداش",
                     "fa fa-gift",
                     $"/UserManagement/EligibleRewards?userID={Uri.EscapeDataString(item.UserID)}",
                     "btn btn-sm btn-outline-success"));

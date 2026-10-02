@@ -9,9 +9,7 @@ namespace DataAccess.Queries
         public static IQueryable<ReportActivityLog> Base(GolpaMotorDbContext db) =>
             db.ReportActivityLogs.AsNoTracking();
 
-        public static IQueryable<ReportActivityLog> ApplySearch(
-            IQueryable<ReportActivityLog> query,
-            ReportActivitySearchModel search)
+        public static IQueryable<ReportActivityLog> ApplySearch(IQueryable<ReportActivityLog> query,ReportActivitySearchModel search)
         {
             if (search.RewardsOnly)
             {
