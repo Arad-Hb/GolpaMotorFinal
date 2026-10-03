@@ -508,6 +508,7 @@ namespace GolpaMotorFinal.Helpers
             ReportActivityTypes.RewardRequested => "درخواست پاداش",
             ReportActivityTypes.RewardApproved => "تأیید پاداش",
             ReportActivityTypes.RewardRejected => "رد پاداش",
+            ReportActivityTypes.BalanceAdjustment => "اصلاح امتیاز",
             _ => type
         };
 

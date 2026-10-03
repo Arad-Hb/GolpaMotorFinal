@@ -6,5 +6,6 @@ namespace DomainModel.Models
         public const string RewardRequested = "RewardRequested";
         public const string RewardApproved = "RewardApproved";
         public const string RewardRejected = "RewardRejected";
+        public const string BalanceAdjustment = "BalanceAdjustment";
     }
 }

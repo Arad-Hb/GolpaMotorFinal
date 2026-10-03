@@ -264,6 +264,7 @@ namespace ApplicationService.Services
             }
 
             await registrations.SaveChangesAsync();
+            await reportActivities.FinalizeSourceKeysAsync();
             await rewards.RefreshEligibility(user.Id);
 
             var savedCount = validCards.Count;

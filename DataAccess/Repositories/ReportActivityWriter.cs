@@ -7,6 +7,7 @@ namespace DataAccess.Repositories
     public class ReportActivityWriter : IReportActivityWriter
     {
         private readonly GolpaMotorDbContext db;
+        private readonly List<ReportActivityLog> pendingKeys = new();
 
         public ReportActivityWriter(GolpaMotorDbContext db)
         {
@@ -22,9 +23,11 @@ namespace DataAccess.Repositories
             var balances = await GetBalancesAsync(userId);
             transaction.PointsBeforeTransaction = balances.Remained - transaction.PointsAmount;
             transaction.PointsAfterTransaction = balances.Remained;
-            db.ReportActivityLogs.Add(new ReportActivityLog
+            var cardLog = new ReportActivityLog
             {
-                SourceKey = $"live:{Guid.NewGuid():N}",
+                SourceKey = registration.CardRegisterationID > 0
+                    ? $"registration:{registration.CardRegisterationID}"
+                    : $"registration:card:{card.WarrantyCardID}",
                 ActivityType = ReportActivityTypes.CardRegistered,
                 OccurredAtUtc = registration.CreatedAt,
                 UserID = userId,
@@ -39,7 +42,9 @@ namespace DataAccess.Repositories
                 AvailablePoints = balances.Available,
                 StatusTitle = "فعال شده",
                 Description = $"ثبت کارت گارانتی {card.SerialNumber}"
-            });
+            };
+            pendingKeys.Add(cardLog);
+            db.ReportActivityLogs.Add(cardLog);
         }
 
         public async Task AddRewardActivityAsync(
@@ -47,16 +52,11 @@ namespace DataAccess.Repositories
             string activityType,
             PointTransaction? transaction = null)
         {
-            var balances = await GetBalancesAsync(
-                request.UserID,
-                request.RewardRequestID > 0 ? request.RewardRequestID : null,
-                activityType == ReportActivityTypes.RewardRequested
-                    ? request.RewardCatalog?.RequiredPoints ?? 0
-                    : 0);
+            var balances = await GetBalancesAsync(request.UserID);
 
-            db.ReportActivityLogs.Add(new ReportActivityLog
+            var rewardLog = new ReportActivityLog
             {
-                SourceKey = $"live:{Guid.NewGuid():N}",
+                SourceKey = StableRewardKey(request, activityType),
                 ActivityType = activityType,
                 OccurredAtUtc = activityType == ReportActivityTypes.RewardRequested
                     ? ToUtc(request.RequestDate)
@@ -79,13 +79,52 @@ namespace DataAccess.Repositories
                 Description = request.RewardCatalog == null
                     ? "درخواست پاداش"
                     : $"درخواست پاداش: {request.RewardCatalog.Title}"
-            });
+            };
+            pendingKeys.Add(rewardLog);
+            db.ReportActivityLogs.Add(rewardLog);
         }
 
-        private async Task<(int Earned, int Settled, int Remained, int Available)> GetBalancesAsync(
-            string userId,
-            int? excludePendingRequestId = null,
-            int additionalLockedPoints = 0)
+        public async Task FinalizeSourceKeysAsync()
+        {
+            foreach (var log in pendingKeys)
+            {
+                var key = StableKey(log);
+                if (key != null && log.SourceKey != key)
+                    log.SourceKey = key;
+            }
+
+            pendingKeys.Clear();
+            if (db.ChangeTracker.HasChanges())
+                await db.SaveChangesAsync();
+        }
+
+        private static string StableRewardKey(RewardRequest request, string activityType)
+        {
+            if (request.RewardRequestID <= 0)
+                return $"reward-request:new:{Guid.NewGuid():N}";
+
+            return activityType == ReportActivityTypes.RewardRequested
+                ? $"reward-request:{request.RewardRequestID}"
+                : $"reward-status:{request.RewardRequestID}";
+        }
+
+        private static string? StableKey(ReportActivityLog log)
+        {
+            if (log.ActivityType == ReportActivityTypes.CardRegistered && log.CardRegistrationID is > 0)
+                return $"registration:{log.CardRegistrationID.Value}";
+
+            if (log.ActivityType == ReportActivityTypes.RewardRequested && log.RewardRequestID is > 0)
+                return $"reward-request:{log.RewardRequestID.Value}";
+
+            if ((log.ActivityType == ReportActivityTypes.RewardApproved ||
+                 log.ActivityType == ReportActivityTypes.RewardRejected) &&
+                log.RewardRequestID is > 0)
+                return $"reward-status:{log.RewardRequestID.Value}";
+
+            return null;
+        }
+
+        private async Task<(int Earned, int Settled, int Remained, int Available)> GetBalancesAsync(string userId)
         {
             var persisted = await db.PointTransactions
                 .Where(x => x.UserID == userId)
@@ -105,17 +144,7 @@ namespace DataAccess.Repositories
             var earned = (persisted?.Earned ?? 0) + added.Where(x => x > 0).Sum();
             var settled = (persisted?.Settled ?? 0) + added.Where(x => x < 0).Sum(x => -x);
             var remained = earned - settled;
-
-            var pendingTitle = RewardStatusTitles.Pending;
-            var locked = await db.RewardRequests
-                .Where(x =>
-                    x.UserID == userId &&
-                    !x.IsComplete &&
-                    x.RewardDeliveryStatus.Title == pendingTitle &&
-                    (!excludePendingRequestId.HasValue || x.RewardRequestID != excludePendingRequestId.Value))
-                .SumAsync(x => (int?)x.RewardCatalog.RequiredPoints) ?? 0;
-
-            return (earned, settled, remained, Math.Max(0, remained - locked - additionalLockedPoints));
+            return (earned, settled, remained, remained);
         }
 
         private static DateTime ToUtc(DateTime? value)

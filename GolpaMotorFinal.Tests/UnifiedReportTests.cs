@@ -17,6 +17,9 @@ public class UnifiedReportTests
     {
         await using var db = CreateDb();
         var user = NewUser("u1");
+        user.TotalEarnedPoints = 9000;
+        user.TotalSettledPoints = 9000;
+        user.RemainedPoints = 5000;
         var product = new Product
         {
             ProductName = "محصول",
@@ -42,12 +45,23 @@ public class UnifiedReportTests
         };
         db.AddRange(pending, catalog);
         await db.SaveChangesAsync();
-        db.RewardRequests.Add(new RewardRequest
+        var request = new RewardRequest
         {
             UserID = user.Id,
             RewardCatalogID = catalog.RewardCatalogID,
             RewardDeliveryStatusID = pending.RewardDeliveryStatusID,
             RequestDate = DateTime.UtcNow
+        };
+        db.RewardRequests.Add(request);
+        await db.SaveChangesAsync();
+        db.ReportActivityLogs.Add(new ReportActivityLog
+        {
+            SourceKey = $"reward-status:{request.RewardRequestID}",
+            ActivityType = ReportActivityTypes.RewardApproved,
+            OccurredAtUtc = DateTime.UtcNow,
+            UserID = user.Id,
+            RewardRequestID = request.RewardRequestID,
+            PointsDelta = -100
         });
         await db.SaveChangesAsync();
 
@@ -62,6 +76,8 @@ public class UnifiedReportTests
         Assert.Equal(200, row.AwardedPoints);
         Assert.Equal(1, row.CustomersWithRewardRequest);
         Assert.Equal(1, row.RewardRequestCount);
+        Assert.Equal(100, row.RegistrantSettledPoints);
+        Assert.Equal(100, row.RegistrantRemainedPoints);
     }
 
     [Fact]
@@ -95,9 +111,10 @@ public class UnifiedReportTests
         db.Add(registration);
         db.Add(transaction);
 
-        await new ReportActivityWriter(db).AddCardRegisteredAsync(
-            user.Id, card, registration, transaction);
+        var writer = new ReportActivityWriter(db);
+        await writer.AddCardRegisteredAsync(user.Id, card, registration, transaction);
         await db.SaveChangesAsync();
+        await writer.FinalizeSourceKeysAsync();
 
         var log = Assert.Single(db.ReportActivityLogs);
         Assert.Equal(ReportActivityTypes.CardRegistered, log.ActivityType);
@@ -107,6 +124,7 @@ public class UnifiedReportTests
         Assert.Equal(25, transaction.PointsBeforeTransaction);
         Assert.Equal(100, transaction.PointsAfterTransaction);
         Assert.Equal(card.WarrantyCardID, log.WarrantyCardID);
+        Assert.Equal($"registration:{registration.CardRegisterationID}", log.SourceKey);
         Assert.NotNull(log.CardRegistrationID);
         Assert.NotNull(log.PointTransactionID);
     }

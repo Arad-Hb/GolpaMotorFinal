@@ -14,5 +14,7 @@ namespace DataAccess.Services
             RewardRequest request,
             string activityType,
             PointTransaction? transaction = null);
+
+        Task FinalizeSourceKeysAsync();
     }
 }

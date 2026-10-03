@@ -92,16 +92,32 @@ namespace DataAccess.Queries
                     registrations.Any(r =>
                         r.WarrantyCard.ProductID == p.ProductID &&
                         r.UserID == rr.UserID)),
-                RegistrantSettledPoints = db.Users
-                    .Where(u => registrations.Any(r =>
-                        r.WarrantyCard.ProductID == p.ProductID &&
-                        r.UserID == u.Id))
-                    .Sum(u => (int?)u.TotalSettledPoints) ?? 0,
-                RegistrantRemainedPoints = db.Users
-                    .Where(u => registrations.Any(r =>
-                        r.WarrantyCard.ProductID == p.ProductID &&
-                        r.UserID == u.Id))
-                    .Sum(u => (int?)u.RemainedPoints) ?? 0
+                RegistrantSettledPoints = db.ReportActivityLogs
+                    .Where(l =>
+                        l.ActivityType == ReportActivityTypes.RewardApproved &&
+                        l.RewardRequestID != null &&
+                        registrations.Any(r =>
+                            r.WarrantyCard.ProductID == p.ProductID &&
+                            r.UserID == l.UserID))
+                    .GroupBy(l => l.RewardRequestID)
+                    .Select(g => g.Max(l => l.PointsDelta < 0 ? -l.PointsDelta : 0))
+                    .Sum(),
+                RegistrantRemainedPoints =
+                    (registrations
+                        .Where(r => r.WarrantyCard.ProductID == p.ProductID)
+                        .Sum(r => (int?)(r.EarnedPionts != 0
+                            ? r.EarnedPionts
+                            : r.WarrantyCard.Product.ProductPoint)) ?? 0)
+                    - db.ReportActivityLogs
+                        .Where(l =>
+                            l.ActivityType == ReportActivityTypes.RewardApproved &&
+                            l.RewardRequestID != null &&
+                            registrations.Any(r =>
+                                r.WarrantyCard.ProductID == p.ProductID &&
+                                r.UserID == l.UserID))
+                        .GroupBy(l => l.RewardRequestID)
+                        .Select(g => g.Max(l => l.PointsDelta < 0 ? -l.PointsDelta : 0))
+                        .Sum()
             });
         }
 

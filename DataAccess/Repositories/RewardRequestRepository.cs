@@ -34,7 +34,7 @@ namespace DataAccess.Repositories
                 return new List<UserEligibleRewardItem>();
 
             var pendingStatusId = await RewardEligibilityHelper.GetStatusIdAsync(db, RewardStatusTitles.Pending);
-            var available = await ComputeAvailablePointsAsync(userId, user.RemainedPoints ?? 0, pendingStatusId);
+            var available = user.RemainedPoints ?? 0;
 
             return await RewardCatalogQueries.Active(db)
                 .Where(x => x.RequiredPoints <= available)
@@ -96,8 +96,7 @@ namespace DataAccess.Repositories
             if (user == null)
                 return 0;
 
-            var pendingStatusId = await RewardEligibilityHelper.GetStatusIdAsync(db, RewardStatusTitles.Pending);
-            return await ComputeAvailablePointsAsync(userId, user.RemainedPoints ?? 0, pendingStatusId);
+            return user.RemainedPoints ?? 0;
         }
 
         public async Task<List<RewardDeliveryStatus>> GetStatuses()
@@ -149,7 +148,7 @@ namespace DataAccess.Repositories
                 if (pendingStatusId == 0)
                     return op.ToFailed("وضعیت درخواست پاداش در سیستم تعریف نشده است");
 
-                var available = await ComputeAvailablePointsAsync(userId, user.RemainedPoints ?? 0, pendingStatusId);
+                var available = user.RemainedPoints ?? 0;
                 if (available < catalog.RequiredPoints)
                     return op.ToFailed("امتیاز مشتری به حد نصاب این پاداش نرسیده است");
 
@@ -177,6 +176,7 @@ namespace DataAccess.Repositories
                 await reportActivities.AddRewardActivityAsync(
                     request, ReportActivityTypes.RewardRequested);
                 await db.SaveChangesAsync();
+                await reportActivities.FinalizeSourceKeysAsync();
                 return op.ToSuccess("درخواست پاداش ثبت شد", request.RewardRequestID);
             }
             catch (Exception ex)
@@ -240,6 +240,7 @@ namespace DataAccess.Repositories
                 await reportActivities.AddRewardActivityAsync(
                     request, ReportActivityTypes.RewardApproved, pointTransaction);
                 await db.SaveChangesAsync();
+                await reportActivities.FinalizeSourceKeysAsync();
                 return op.ToSuccess("درخواست تأیید شد و پاداش برای کاربر ثبت شد");
             }
             catch (Exception ex)
@@ -273,6 +274,7 @@ namespace DataAccess.Repositories
                 await reportActivities.AddRewardActivityAsync(
                     request, ReportActivityTypes.RewardRejected);
                 await db.SaveChangesAsync();
+                await reportActivities.FinalizeSourceKeysAsync();
                 return op.ToSuccess("درخواست رد شد");
             }
             catch (Exception ex)
@@ -281,19 +283,5 @@ namespace DataAccess.Repositories
             }
         }
 
-        private async Task<int> ComputeAvailablePointsAsync(string userId, int remained, int pendingStatusId)
-        {
-            if (pendingStatusId == 0)
-                return remained;
-
-            var locked = await db.RewardRequests
-                .Where(x =>
-                    x.UserID == userId &&
-                    !x.IsComplete &&
-                    x.RewardDeliveryStatusID == pendingStatusId)
-                .SumAsync(x => (int?)x.RewardCatalog.RequiredPoints) ?? 0;
-
-            return Math.Max(0, remained - locked);
-        }
     }
 }
