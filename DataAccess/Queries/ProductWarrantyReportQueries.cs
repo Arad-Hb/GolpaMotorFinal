@@ -6,9 +6,7 @@ namespace DataAccess.Queries
 {
     public static class ProductWarrantyReportQueries
     {
-        public static IQueryable<Product> ApplyProductFilters(
-            IQueryable<Product> products,
-            ProductWarrantyReportSearchModel search)
+        public static IQueryable<Product> ApplyProductFilters(IQueryable<Product> products,ProductWarrantyReportSearchModel search)
         {
             if (search.ProductID.HasValue && search.ProductID.Value > 0)
             {
@@ -24,9 +22,7 @@ namespace DataAccess.Queries
             return products;
         }
 
-        public static IQueryable<WarrantyCard> ApplyCardFilters(
-            IQueryable<WarrantyCard> cards,
-            ProductWarrantyReportSearchModel search)
+        public static IQueryable<WarrantyCard> ApplyCardFilters(IQueryable<WarrantyCard> cards,ProductWarrantyReportSearchModel search)
         {
             if (search.FromUtc.HasValue)
             {
@@ -46,9 +42,7 @@ namespace DataAccess.Queries
             return cards;
         }
 
-        public static IQueryable<CardRegistration> ApplyRegistrationDateFilters(
-            IQueryable<CardRegistration> registrations,
-            ProductWarrantyReportSearchModel search)
+        public static IQueryable<CardRegistration> ApplyRegistrationDateFilters(IQueryable<CardRegistration> registrations,ProductWarrantyReportSearchModel search)
         {
             if (search.FromUtc.HasValue)
             {
@@ -111,9 +105,7 @@ namespace DataAccess.Queries
             });
         }
 
-        public static IQueryable<ProductWarrantyReportRow> ApplyAggregateFilters(
-            IQueryable<ProductWarrantyReportRow> query,
-            ProductWarrantyReportSearchModel search)
+        public static IQueryable<ProductWarrantyReportRow> ApplyAggregateFilters(IQueryable<ProductWarrantyReportRow> query,ProductWarrantyReportSearchModel search)
         {
             if (search.CountFrom.HasValue)
             {

@@ -143,8 +143,7 @@ namespace ApplicationService.Services
             }
         }
 
-        public async Task<ReportSearchResult<ReportPage<ReportActivityItem>>> SearchUserTransactions(
-            ReportActivitySearchModel search)
+        public async Task<ReportSearchResult<ReportPage<ReportActivityItem>>> SearchUserTransactions(ReportActivitySearchModel search)
         {
             var result = new ReportSearchResult<ReportPage<ReportActivityItem>>("SearchUserTransactions");
 
@@ -177,8 +176,7 @@ namespace ApplicationService.Services
             }
         }
 
-        public async Task<ReportSearchResult<ReportPage<ProductCardDetailItem>>> SearchProductWarrantyTransactions(
-            ReportActivitySearchModel search)
+        public async Task<ReportSearchResult<ReportPage<ProductCardDetailItem>>> SearchProductWarrantyTransactions(ReportActivitySearchModel search)
         {
             var result = new ReportSearchResult<ReportPage<ProductCardDetailItem>>("SearchProductWarrantyTransactions");
 
@@ -211,8 +209,7 @@ namespace ApplicationService.Services
             }
         }
 
-        public async Task<ReportSearchResult<ReportPage<ReportActivityItem>>> SearchRewardTransactions(
-            ReportActivitySearchModel search)
+        public async Task<ReportSearchResult<ReportPage<ReportActivityItem>>> SearchRewardTransactions(ReportActivitySearchModel search)
         {
             var result = new ReportSearchResult<ReportPage<ReportActivityItem>>("SearchRewardTransactions");
 

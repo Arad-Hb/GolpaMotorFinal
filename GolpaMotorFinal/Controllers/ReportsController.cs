@@ -22,6 +22,7 @@ namespace GolpaMotorFinal.Controllers
             this.pageBuilder = pageBuilder;
         }
 
+
         [HttpGet("/reports")]
         public IActionResult Index(string? tab = null)
         {
@@ -33,8 +34,10 @@ namespace GolpaMotorFinal.Controllers
             return Redirect(ReportRoutes.TabPath(selectedTab.Key));
         }
 
+
         [HttpGet("/Reports/Index")]
         public IActionResult LegacyIndex() => Redirect(ReportRoutes.TabPath(ReportRoutes.Users));
+
 
         [HttpGet("/reports/users")]
         [HttpGet("/reports/productwarranty")]
@@ -66,34 +69,42 @@ namespace GolpaMotorFinal.Controllers
             return View("Index", model);
         }
 
+
         [HttpGet("/Reports/UserDetails/{userId}")]
         public IActionResult UserDetails(string userId) =>
             Redirect(ReportRoutes.UserTransactions(userId));
+
 
         [HttpGet("/Reports/ProductDetails/{productId:long}")]
         public IActionResult ProductDetails(long productId) =>
             Redirect(ReportRoutes.ProductCardDetails(productId));
 
+
         [HttpGet("/Reports/CardDetails/{warrantyCardId:long}")]
         public IActionResult CardDetails(long warrantyCardId) =>
             Redirect(ReportRoutes.ProductCardDetails(warrantyCardId: warrantyCardId));
+
 
         [HttpGet("/Reports/RewardDetails/{rewardRequestId:int}")]
         public IActionResult RewardDetails(int rewardRequestId) =>
             Redirect(ReportRoutes.RewardRequest(rewardRequestId));
 
+
         [HttpGet("/Reports/RewardCatalogDetails/{rewardCatalogId:int}")]
         public IActionResult RewardCatalogDetails(int rewardCatalogId) =>
             Redirect(ReportRoutes.RewardCatalog(rewardCatalogId));
+
 
         [HttpGet("/Reports/Activities")]
         public IActionResult ActivitiesRedirect(ReportActivitySearchModel search) =>
             Redirect(ReportRoutes.TabUrl(ReportRoutes.UserTransactionDetails, ActivityQuery(search)));
 
+
         [HttpGet("/Reports/ProductCards")]
         public IActionResult ProductCardsRedirect(ReportActivitySearchModel search) =>
             Redirect(ReportRoutes.TabUrl(ReportRoutes.ProductWarrantyTransactionDetails, ActivityQuery(search)));
 
+        
         [HttpGet("/Reports/Warranty")]
         public IActionResult WarrantyRedirect(long? productId, string? fromJalali, string? toJalali) =>
             Redirect(ReportRoutes.TabUrl(ReportRoutes.ProductWarranty, new
@@ -103,10 +114,12 @@ namespace GolpaMotorFinal.Controllers
                 ToJalali = toJalali
             }));
 
+        
         [HttpGet("/Reports/Products")]
         public IActionResult ProductsRedirect() =>
             Redirect(ReportRoutes.TabPath(ReportRoutes.ProductWarranty));
 
+        
         [HttpGet("/reports/grid/users")]
         public async Task<IActionResult> UsersGrid(UserSearchModel search)
         {
@@ -138,6 +151,7 @@ namespace GolpaMotorFinal.Controllers
             return ReportGridResult.FromSearch(this, result, grid, "UserReportGrid", pagerUrl);
         }
 
+        
         [HttpGet("/reports/grid/productwarranty")]
         public async Task<IActionResult> ProductWarrantyGrid(ProductWarrantyReportSearchModel search)
         {
@@ -164,6 +178,7 @@ namespace GolpaMotorFinal.Controllers
             return ReportGridResult.FromSearch(this, result, grid, "ProductWarrantyReportGrid", pagerUrl);
         }
 
+        
         [HttpGet("/reports/grid/rewards")]
         public async Task<IActionResult> RewardsGrid(string? fromJalali, string? toJalali, int pageIndex = 0)
         {
@@ -173,6 +188,7 @@ namespace GolpaMotorFinal.Controllers
             return ReportGridResult.FromSearch(this, result, grid, "RewardReportGrid", pagerUrl);
         }
 
+        
         [HttpGet("/reports/grid/userstransactiondetails")]
         public async Task<IActionResult> UsersTransactionDetailsGrid(ReportActivitySearchModel search)
         {
@@ -187,6 +203,7 @@ namespace GolpaMotorFinal.Controllers
             return ReportGridResult.FromSearch(this, result, grid, "ReportActivityGrid", pagerUrl);
         }
 
+        
         [HttpGet("/reports/grid/productwarrantytransactiondetails")]
         public async Task<IActionResult> ProductWarrantyTransactionDetailsGrid(ReportActivitySearchModel search)
         {
@@ -201,6 +218,7 @@ namespace GolpaMotorFinal.Controllers
             return ReportGridResult.FromSearch(this, result, grid, "ProductCardDetailGrid", pagerUrl);
         }
 
+        
         [HttpGet("/reports/grid/rewardstransactiondetails")]
         public async Task<IActionResult> RewardsTransactionDetailsGrid(ReportActivitySearchModel search)
         {
@@ -215,6 +233,7 @@ namespace GolpaMotorFinal.Controllers
             return ReportGridResult.FromSearch(this, result, grid, "ReportActivityGrid", pagerUrl);
         }
 
+        
         private static object ActivityQuery(ReportActivitySearchModel search) => new
         {
             search.SearchTerm,
