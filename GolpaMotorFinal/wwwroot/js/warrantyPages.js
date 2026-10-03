@@ -1,4 +1,63 @@
 (function () {
+    function statusSpan(input) {
+        var wrap = input.closest(".warranty-code-input-wrap");
+        return wrap ? wrap.querySelector(".warranty-code-status") : null;
+    }
+
+    function setStatus(input, ok, message) {
+        var span = statusSpan(input);
+        if (!span) return;
+        span.textContent = message || "";
+        span.classList.remove("is-ok", "is-bad");
+        if (!message) return;
+        span.classList.add(ok ? "is-ok" : "is-bad");
+    }
+
+    function checkScratchCode(input) {
+        var code = (input.value || "").trim();
+        var span = statusSpan(input);
+        if (!span) return;
+        span.classList.remove("is-ok", "is-bad");
+        if (!code) {
+            setStatus(input, false, "لطفاً رمز را وارد کنید.");
+            return;
+        }
+        span.textContent = "در حال بررسی...";
+        fetch("/WarrantyManagement/CheckScratchCode?code=" + encodeURIComponent(code), {
+            method: "GET",
+            headers: { "Accept": "application/json" }
+        })
+            .then(function (res) {
+                if (!res.ok) throw new Error("bad");
+                return res.json();
+            })
+            .then(function (data) {
+                setStatus(input, !!data.ok, data.message || (data.ok ? "رمز معتبر است." : "این رمز در سامانه وجود ندارد."));
+            })
+            .catch(function () {
+                setStatus(input, false, "بررسی رمز انجام نشد.");
+            });
+    }
+
+    document.addEventListener("keydown", function (e) {
+        var input = e.target;
+        if (!input || !input.classList || !input.classList.contains("warranty-scratch-input")) return;
+        if (e.key !== "Enter" && e.keyCode !== 13) return;
+        e.preventDefault();
+        e.stopPropagation();
+        checkScratchCode(input);
+    }, true);
+
+    document.addEventListener("blur", function (e) {
+        var input = e.target;
+        if (!input || !input.classList || !input.classList.contains("warranty-scratch-input")) return;
+        if (!(input.value || "").trim()) {
+            setStatus(input, false, "");
+            return;
+        }
+        checkScratchCode(input);
+    }, true);
+
     function initWarrantyRegisterForm() {
         var container = document.getElementById("warrantyContainer");
         var addBtn = document.getElementById("btnAddWarranty");
@@ -53,7 +112,7 @@
         function reindexRows() {
             var rows = container.querySelectorAll(".warranty-row");
             rows.forEach(function (row, i) {
-                var input = row.querySelector("input[type='text']");
+                var input = row.querySelector(".warranty-scratch-input");
                 if (input) input.name = "ScratchedCode[" + i + "]";
             });
         }
@@ -71,7 +130,10 @@
                         '<div class="row g-3 align-items-end warranty-code-row">' +
                             '<div class="col-12 col-md-10 warranty-code-field">' +
                                 '<label class="form-label">رمز</label>' +
-                                '<input type="text" name="ScratchedCode[' + index + ']" class="form-control" maxlength="50" placeholder="رمز را وارد کنید" />' +
+                                '<div class="warranty-code-input-wrap">' +
+                                    '<input type="text" name="ScratchedCode[' + index + ']" class="form-control warranty-scratch-input" maxlength="50" placeholder="رمز را وارد کنید" />' +
+                                    '<span class="warranty-code-status" aria-live="polite"></span>' +
+                                '</div>' +
                             '</div>' +
                             '<div class="col-12 col-md-2 warranty-code-remove">' +
                                 '<button type="button" class="btn text-danger remove-row"><i class="fa fa-trash"></i></button>' +

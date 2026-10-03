@@ -89,6 +89,14 @@ namespace GolpaMotorFinal.Controllers
             return View(await EmptyRegisterForm());
         }
 
+        [HttpGet]
+        [AllowAnonymous]
+        public async Task<IActionResult> CheckScratchCode(string? code)
+        {
+            var result = await warrantyService.CheckScratchCode(code);
+            return Json(new { ok = result.Ok, message = result.Message });
+        }
+
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]

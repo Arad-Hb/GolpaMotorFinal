@@ -136,6 +136,25 @@ namespace ApplicationService.Services
             return result;
         }
 
+        public async Task<(bool Ok, string Message)> CheckScratchCode(string? code)
+        {
+            var scratchedCode = code?.Trim();
+            if (string.IsNullOrWhiteSpace(scratchedCode))
+                return (false, "لطفاً رمز را وارد کنید.");
+
+            var (card, isAmbiguous) = await registrations.GetByScratchedCodeAsync(scratchedCode);
+            if (isAmbiguous || card == null)
+                return (false, "این رمز در سامانه وجود ندارد.");
+
+            if (card.Product == null)
+                return (false, "محصول مرتبط با این کارت یافت نشد.");
+
+            if (await registrations.IsRegisteredAsync(card.WarrantyCardID))
+                return (false, "این کارت قبلاً ثبت شده است.");
+
+            return (true, "رمز معتبر است.");
+        }
+
         public async Task<RegisterCardsResult> RegisterCards(RegisterCardsRequest request)
         {
             request ??= new RegisterCardsRequest();

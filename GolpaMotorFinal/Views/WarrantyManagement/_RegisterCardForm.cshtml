@@ -27,12 +27,15 @@
                     <div class="row g-3 align-items-end warranty-code-row">
                         <div class="col-12 col-md-10 warranty-code-field">
                             <label class="form-label">رمز</label>
-                            <input type="text"
-                                   name="ScratchedCode[@i]"
-                                   value="@codes[i]"
-                                   class="form-control"
-                                   maxlength="50"
-                                   placeholder="رمز را وارد کنید" />
+                            <div class="warranty-code-input-wrap">
+                                <input type="text"
+                                       name="ScratchedCode[@i]"
+                                       value="@codes[i]"
+                                       class="form-control warranty-scratch-input"
+                                       maxlength="50"
+                                       placeholder="رمز را وارد کنید" />
+                                <span class="warranty-code-status" aria-live="polite"></span>
+                            </div>
                         </div>
                         @if (i > 0)
                         {
@@ -45,10 +48,10 @@
             </div>
         }
     </div>
-    <div class="warranty-add-row mb-4 d-flex justify-content-between align-items-center px-2 text-success">
+    <div class="warranty-add-row mb-4 d-flex justify-content-between align-items-center px-2 warranty-brand-text">
         <span>افزودن چند کارت گارانتی (حداکثر ۱۰ کارت)</span>
         <button type="button" id="btnAddWarranty" class="btn btn-add-extra-warranty">
-            <i class="fa fa-plus-circle text-success"></i>
+            <i class="fa fa-plus-circle"></i>
         </button>
     </div>
     <div class="warranty-contact-row mb-4">

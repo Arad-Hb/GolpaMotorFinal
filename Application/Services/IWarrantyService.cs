@@ -9,5 +9,6 @@ namespace Application.Services
         Task<OperationResult> GenerateCodes(long productId, int count, int validityMonths = 12);
         Task<WarrantyImportResult> ImportCards(long productId, IReadOnlyList<WarrantyCardImportItem> items);
         Task<RegisterCardsResult> RegisterCards(RegisterCardsRequest request);
+        Task<(bool Ok, string Message)> CheckScratchCode(string? code);
     }
 }

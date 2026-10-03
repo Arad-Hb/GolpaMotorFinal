@@ -183,3 +183,39 @@
     object-fit: cover;
     border-radius: 8px;
 }
+
+.warranty-brand-text,
+.warranty-brand-text i,
+.btn-add-extra-warranty {
+    color: #002363;
+}
+
+.warranty-code-input-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+}
+
+.warranty-code-input-wrap .warranty-scratch-input {
+    flex: 1 1 auto;
+    width: 0;
+    min-width: 0;
+}
+
+.warranty-code-status {
+    flex: 0 0 auto;
+    max-width: 45%;
+    min-height: 1.2em;
+    font-size: 12px;
+    line-height: 1.35;
+    white-space: normal;
+}
+
+.warranty-code-status.is-ok {
+    color: #002363;
+}
+
+.warranty-code-status.is-bad {
+    color: #c0392b;
+}

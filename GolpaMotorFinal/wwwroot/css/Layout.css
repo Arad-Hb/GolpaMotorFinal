@@ -445,12 +445,41 @@ body {
         width: 100%;
         border: 0;
         border-radius: 28px;
-        overflow: hidden;
+        overflow: visible;
         box-shadow: 0 5px 30px rgba(0,0,0,.06);
     }
 .btn-add-extra-warranty{
     font-size:24px;
-
+    color: #002363;
+}
+.warranty-brand-text,
+.warranty-brand-text i {
+    color: #002363;
+}
+.warranty-code-input-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+}
+.warranty-code-input-wrap .warranty-scratch-input {
+    flex: 1 1 auto;
+    width: 0;
+    min-width: 0;
+}
+.warranty-code-status {
+    flex: 0 0 auto;
+    max-width: 45%;
+    min-height: 1.2em;
+    font-size: 12px;
+    line-height: 1.35;
+    white-space: normal;
+}
+.warranty-code-status.is-ok {
+    color: #002363;
+}
+.warranty-code-status.is-bad {
+    color: #c0392b;
 }
 .remove-row {
     font-size: 20px;
