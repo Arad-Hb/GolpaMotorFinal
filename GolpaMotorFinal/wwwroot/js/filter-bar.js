@@ -789,11 +789,19 @@
         applyFilter($(this).closest("[data-filter-bar]"), 0);
     });
 
+    $(document).on("input", "[data-filter-bar] .filter-search__input", function () {
+        var input = this;
+        clearTimeout(input._filterSearchTimer);
+        input._filterSearchTimer = setTimeout(function () {
+            applyFilter($(input).closest("[data-filter-bar]"), 0);
+        }, 300);
+    });
+
     $(document).on("keydown", "[data-filter-bar] .filter-search__input", function (e) {
-        if (e.key === "Enter") {
-            e.preventDefault();
-            applyFilter($(this).closest("[data-filter-bar]"), 0);
-        }
+        if (e.key !== "Enter") return;
+        e.preventDefault();
+        clearTimeout(this._filterSearchTimer);
+        applyFilter($(this).closest("[data-filter-bar]"), 0);
     });
 
     $(document).on("change", "[data-filter-bar] select, [data-filter-bar] input[type=number], [data-filter-bar] .js-jalali", function () {
