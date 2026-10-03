@@ -31,6 +31,7 @@
             if (window.Pager && typeof window.Pager.scan === "function") {
                 window.Pager.scan(target);
             }
+            if (window.initGridTooltips) window.initGridTooltips(target);
         });
     }
 

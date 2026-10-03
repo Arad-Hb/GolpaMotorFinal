@@ -6,6 +6,83 @@
 
     window.crudGridActionsInitialized = true;
 
+    function initGridTooltips(root) {
+        if (!window.bootstrap || typeof bootstrap.Tooltip !== "function") {
+            return;
+        }
+
+        const scope = root instanceof Element ? root : document;
+        const tables = scope.matches && scope.matches("table")
+            ? [scope]
+            : Array.from(scope.querySelectorAll("table"));
+
+        tables.forEach(table => {
+            table.querySelectorAll("thead th").forEach(th => {
+                const text = (th.getAttribute("data-bs-title") || th.textContent || "")
+                    .replace(/\s+/g, " ")
+                    .trim();
+                if (!text) {
+                    return;
+                }
+                th.setAttribute("data-bs-toggle", "tooltip");
+                th.setAttribute("data-bs-title", text);
+                th.setAttribute("data-bs-placement", "top");
+            });
+
+            table.querySelectorAll(
+                ".table-actions a, .table-actions button, .table-actions__btns a, .table-actions__btns button, .crud-action-option a, .crud-action-option button, .crud-action-toggle"
+            ).forEach(btn => {
+                const text = (
+                    btn.getAttribute("data-bs-title") ||
+                    btn.getAttribute("data-title") ||
+                    btn.getAttribute("title") ||
+                    btn.getAttribute("aria-label") ||
+                    ""
+                ).replace(/\s+/g, " ").trim();
+                if (!text) {
+                    return;
+                }
+                btn.setAttribute("data-bs-toggle", "tooltip");
+                btn.setAttribute("data-bs-title", text);
+                btn.setAttribute("data-bs-placement", "top");
+            });
+        });
+
+        scope.querySelectorAll("table [data-bs-toggle='tooltip']").forEach(el => {
+            const existing = bootstrap.Tooltip.getInstance(el);
+            if (existing) {
+                existing.dispose();
+            }
+            new bootstrap.Tooltip(el, {
+                container: "body",
+                trigger: "hover focus",
+                placement: "top"
+            });
+        });
+    }
+
+    window.initGridTooltips = initGridTooltips;
+
+    function scheduleGridTooltips(root) {
+        window.setTimeout(function () {
+            initGridTooltips(root || document);
+        }, 0);
+    }
+
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", function () {
+            initGridTooltips(document);
+        });
+    } else {
+        initGridTooltips(document);
+    }
+
+    if (window.$) {
+        $(document).ajaxComplete(function () {
+            scheduleGridTooltips(document);
+        });
+    }
+
     const dropdownSelector = ".crud-action-dropdown";
 
     function setOpen(dropdown, open) {

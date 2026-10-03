@@ -146,6 +146,9 @@
             if (window.Pager) {
                 window.Pager.scan(target[0]);
             }
+            if (window.initGridTooltips) {
+                window.initGridTooltips(target[0]);
+            }
         });
 
         pendingRequest.fail(function (xhr, status) {

@@ -12,15 +12,15 @@
             <tr>
                 @if (Model.ShowRowNumber)
                 {
-                    <th class="table-num">#</th>
+                    <th class="table-num" data-bs-toggle="tooltip" data-bs-title="#" data-bs-placement="top">#</th>
                 }
                 @foreach (var header in Model.Headers)
                 {
-                    <th scope="col" class="text-nowrap">@header</th>
+                    <th scope="col" class="text-nowrap" data-bs-toggle="tooltip" data-bs-title="@header" data-bs-placement="top">@header</th>
                 }
                 @if (hasActions)
                 {
-                    <th class="table-actions">عملیات</th>
+                    <th class="table-actions" data-bs-toggle="tooltip" data-bs-title="عملیات" data-bs-placement="top">عملیات</th>
                 }
             </tr>
         </thead>
@@ -82,7 +82,7 @@
                                     var dropdownId = $"crud-actions-{Guid.NewGuid():N}";
 
                                     <div class="crud-action-dropdown" dir="rtl">
-                                        <button type="button" class="crud-action-toggle" aria-expanded="false" aria-controls="@dropdownId">
+                                        <button type="button" class="crud-action-toggle" aria-expanded="false" aria-controls="@dropdownId" data-bs-toggle="tooltip" data-bs-title="عملیات" data-bs-placement="top">
                                             <span>عملیات</span>
 
                                             <svg class="crud-action-chevron" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
@@ -103,7 +103,10 @@
                                                     <li class="crud-action-option">
                                                         <a href="@action.Url"
                                                            class="@css"
-                                                           title="@action.ActionText">
+                                                           title="@action.ActionText"
+                                                           data-bs-toggle="tooltip"
+                                                           data-bs-title="@action.ActionText"
+                                                           data-bs-placement="top">
                                                             <i class="@action.Icon"></i>
                                                         </a>
                                                     </li> 
@@ -114,6 +117,9 @@
                                                         <button type="button"
                                                                 class="@css"
                                                                 title="@action.ActionText"
+                                                                data-bs-toggle="tooltip"
+                                                                data-bs-title="@action.ActionText"
+                                                                data-bs-placement="top"
                                                                 data-title="@action.ActionText"
                                                                 data-url="@action.Url"
                                                                 data-id="@action.Id"
@@ -145,7 +151,10 @@
                                             {
                                                 <a href="@action.Url"
                                                    class="@css"
-                                                   title="@action.ActionText">
+                                                   title="@action.ActionText"
+                                                   data-bs-toggle="tooltip"
+                                                   data-bs-title="@action.ActionText"
+                                                   data-bs-placement="top">
                                                     <i class="@action.Icon"></i>
                                                 </a>
                                             }
@@ -154,6 +163,9 @@
                                                 <button type="button"
                                                         class="@css"
                                                         title="@action.ActionText"
+                                                        data-bs-toggle="tooltip"
+                                                        data-bs-title="@action.ActionText"
+                                                        data-bs-placement="top"
                                                         data-title="@action.ActionText"
                                                         data-url="@action.Url"
                                                         data-id="@action.Id"

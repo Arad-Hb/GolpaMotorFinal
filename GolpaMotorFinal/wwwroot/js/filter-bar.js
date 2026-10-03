@@ -774,6 +774,7 @@
             if (window.Pager && typeof window.Pager.scan === "function") {
                 window.Pager.scan(this);
             }
+            if (window.initGridTooltips) window.initGridTooltips(this);
         });
     }
 
