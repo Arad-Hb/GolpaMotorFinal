@@ -63,8 +63,8 @@
         var addBtn = document.getElementById("btnAddWarranty");
         var form = document.getElementById("warrantyRegisterForm");
         var submitBtn = document.getElementById("btnRegisterWarranty");
-        if (!container || !addBtn || addBtn.dataset.bound === "1") return;
-        addBtn.dataset.bound = "1";
+        if (!form || form.dataset.warrantyBound === "1") return;
+        form.dataset.warrantyBound = "1";
 
         var roleSelect = document.getElementById("customerTypeSelect");
         var roleRadios = form ? form.querySelectorAll(".warranty-role-buttons input[type='radio']") : [];
@@ -72,20 +72,13 @@
 
         function syncRoleControl() {
             if (!roleSelect || !form) return;
-            var mobile = mobileQuery.matches && document.body.classList.contains("pluto-public");
-            if (mobile) {
-                var checked = form.querySelector(".warranty-role-buttons input[type='radio']:checked");
-                if (checked) roleSelect.value = checked.value;
-                roleRadios.forEach(function (radio) { radio.disabled = true; });
-                roleSelect.disabled = false;
-            } else {
-                if (roleSelect.value) {
-                    roleRadios.forEach(function (radio) {
-                        radio.checked = radio.value === roleSelect.value;
-                    });
-                }
-                roleSelect.disabled = true;
-                roleRadios.forEach(function (radio) { radio.disabled = false; });
+            var checked = form.querySelector(".warranty-role-buttons input[type='radio']:checked");
+            if (checked && !roleSelect.value)
+                roleSelect.value = checked.value;
+            else if (roleSelect.value) {
+                roleRadios.forEach(function (radio) {
+                    radio.checked = radio.value === roleSelect.value;
+                });
             }
         }
 
@@ -93,6 +86,12 @@
             roleSelect.addEventListener("change", function () {
                 roleRadios.forEach(function (radio) {
                     radio.checked = radio.value === roleSelect.value;
+                    radio.disabled = false;
+                });
+            });
+            roleRadios.forEach(function (radio) {
+                radio.addEventListener("change", function () {
+                    if (radio.checked) roleSelect.value = radio.value;
                 });
             });
             if (mobileQuery.addEventListener) mobileQuery.addEventListener("change", syncRoleControl);
@@ -100,16 +99,17 @@
             syncRoleControl();
         }
 
-        var maxCards = parseInt(container.getAttribute("data-max-cards") || "10", 10);
+        var maxCards = parseInt((container && container.getAttribute("data-max-cards")) || "10", 10);
         var lockStorageKey = "warrantyRegisterLockUntil";
         var defaultLabel = "ثبت و فعال‌سازی گارانتی";
         var lockTimer = null;
 
         function rowCount() {
-            return container.querySelectorAll(".warranty-row").length;
+            return container ? container.querySelectorAll(".warranty-row").length : 0;
         }
 
         function reindexRows() {
+            if (!container) return;
             var rows = container.querySelectorAll(".warranty-row");
             rows.forEach(function (row, i) {
                 var input = row.querySelector(".warranty-scratch-input");
@@ -118,25 +118,27 @@
         }
 
         function syncAddButton() {
-            addBtn.disabled = rowCount() >= maxCards;
+            if (addBtn) addBtn.disabled = rowCount() >= maxCards;
         }
 
-        if (window.bootstrap && typeof bootstrap.Tooltip === "function") {
+        if (addBtn && window.bootstrap && typeof bootstrap.Tooltip === "function") {
             var existingTip = bootstrap.Tooltip.getInstance(addBtn);
             if (existingTip) existingTip.dispose();
             new bootstrap.Tooltip(addBtn, { container: "body", placement: "top", trigger: "hover focus" });
         }
 
-        addBtn.addEventListener("click", function () {
+        if (addBtn && container) addBtn.addEventListener("click", function () {
             if (rowCount() >= maxCards) return;
             var index = rowCount();
             container.insertAdjacentHTML("beforeend",
                 '<div class="warranty-row">' +
                     '<div class="warranty-code-input-wrap">' +
                         '<input type="text" name="ScratchedCode[' + index + ']" class="form-control warranty-scratch-input" maxlength="50" placeholder="رمز را وارد کنید" />' +
-                        '<button type="button" class="btn text-danger remove-row" data-bs-toggle="tooltip" data-bs-title="حذف این کارت" aria-label="حذف این کارت"><i class="fa fa-trash"></i></button>' +
                     '</div>' +
                     '<span class="warranty-code-status" aria-live="polite"></span>' +
+                    '<div>'+
+                        '<button type="button" class="btn text-danger remove-row" data-bs-toggle="tooltip" data-bs-title="حذف این کارت" aria-label="حذف این کارت"><i class="fa fa-trash"></i></button>' +
+                    '</div>'+
                 '</div>');
             var newRemove = container.querySelector(".warranty-row:last-child .remove-row");
             if (newRemove && window.bootstrap && typeof bootstrap.Tooltip === "function") {
@@ -146,6 +148,7 @@
         });
 
         document.addEventListener("click", function (e) {
+            if (!container) return;
             var btn = e.target.closest(".remove-row");
             if (!btn || !container.contains(btn)) return;
             var row = btn.closest(".warranty-row");
@@ -195,14 +198,20 @@
 
         if (form && submitBtn) {
             form.addEventListener("submit", function () {
-                if (submitBtn.disabled) return;
-                setLockUntil(60);
-                applyLockUi();
+                roleRadios.forEach(function (radio) { radio.disabled = false; });
+                if (roleSelect && roleSelect.value) {
+                    roleRadios.forEach(function (radio) {
+                        radio.checked = radio.value === roleSelect.value;
+                    });
+                }
             });
         }
 
         var serverRetry = submitBtn ? parseInt(submitBtn.getAttribute("data-retry-after") || "", 10) : 0;
         if (serverRetry > 0) setLockUntil(serverRetry);
+        else {
+            try { sessionStorage.removeItem(lockStorageKey); } catch (e) { }
+        }
 
         applyLockUi();
         syncAddButton();

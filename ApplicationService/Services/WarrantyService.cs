@@ -4,6 +4,7 @@ using DataAccess.Services;
 using DomainModel.Models;
 using DomainModel.ViewModels.Warranty;
 using Framework.Common;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 
 namespace ApplicationService.Services
@@ -159,16 +160,18 @@ namespace ApplicationService.Services
         {
             request ??= new RegisterCardsRequest();
 
-            if (!TryConsumeAttempt(request.RateLimitKey, out var retryAfterSeconds))
-            {
-                return Fail(
-                    $"لطفاً {retryAfterSeconds} ثانیه صبر کنید و سپس دوباره تلاش کنید.",
-                    retryAfterSeconds);
-            }
+            var phone = IranianMobileNumber.Normalize(request.CustomerPhoneNumber);
+            if (phone == null)
+                return Fail("شماره موبایل معتبر نیست.");
+            request.CustomerPhoneNumber = phone;
 
-            var codes = request.Codes ?? new List<string>();
+            var codes = (request.Codes ?? new List<string>())
+                .Select((code, index) => (Code: code?.Trim(), Row: index + 1))
+                .Where(x => !string.IsNullOrWhiteSpace(x.Code))
+                .ToList();
+
             if (codes.Count == 0)
-                return Fail("اطلاعات کارت‌ها نامعتبر است.");
+                return Fail("رمز اجباری است.");
 
             if (codes.Count > MaxCardsPerRequest)
                 return Fail("حداکثر ۱۰ کارت گارانتی در هر درخواست قابل ثبت است.");
@@ -177,19 +180,13 @@ namespace ApplicationService.Services
             var invalidCards = new List<string>();
             var seenCodes = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-            for (int i = 0; i < codes.Count; i++)
+            foreach (var item in codes)
             {
-                var scratchedCode = codes[i]?.Trim();
-
-                if (string.IsNullOrWhiteSpace(scratchedCode))
-                {
-                    invalidCards.Add($"ردیف {i + 1}: رمز وارد نشده است.");
-                    continue;
-                }
+                var scratchedCode = item.Code!;
 
                 if (!seenCodes.Add(scratchedCode))
                 {
-                    invalidCards.Add($"ردیف {i + 1}: این رمز تکراری است.");
+                    invalidCards.Add($"ردیف {item.Row}: این رمز تکراری است.");
                     continue;
                 }
 
@@ -197,40 +194,50 @@ namespace ApplicationService.Services
 
                 if (isAmbiguous || card == null)
                 {
-                    invalidCards.Add($"ردیف {i + 1}: رمز وارد شده معتبر نیست.");
+                    invalidCards.Add($"ردیف {item.Row}: رمز وارد شده معتبر نیست.");
                     continue;
                 }
 
                 if (card.Product == null)
                 {
-                    invalidCards.Add($"ردیف {i + 1}: محصول مرتبط با این کارت یافت نشد.");
+                    invalidCards.Add($"ردیف {item.Row}: محصول مرتبط با این کارت یافت نشد.");
                     continue;
                 }
 
                 var alreadyRegistered = await registrations.IsRegisteredAsync(card.WarrantyCardID);
                 if (alreadyRegistered)
                 {
-                    invalidCards.Add($"ردیف {i + 1}: این کارت قبلاً ثبت شده است.");
+                    invalidCards.Add($"ردیف {item.Row}: این کارت قبلاً ثبت شده است.");
                     continue;
                 }
 
                 validCards.Add(card);
             }
 
-            if (validCards.Count == 0)
+            if (invalidCards.Count > 0)
             {
-                return Fail("اطلاعات وارد شده همه کارت‌ها نامعتبر است.", failedLines: invalidCards);
+                return Fail(
+                    validCards.Count == 0
+                        ? "اطلاعات وارد شده همه کارت‌ها نامعتبر است."
+                        : "هیچ کارتی ثبت نشد. لطفاً رمزهای نامعتبر را اصلاح کنید.",
+                    failedLines: invalidCards);
             }
 
-            var user = await users.GetByPhone(request.CustomerPhoneNumber);
+            if (IsRateLimited(request.RateLimitKey, out var retryAfterSeconds))
+            {
+                return Fail(
+                    $"لطفاً {retryAfterSeconds} ثانیه صبر کنید و سپس دوباره تلاش کنید.",
+                    retryAfterSeconds);
+            }
+
+            var user = await users.GetByPhone(phone);
             if (user == null)
             {
-                var created = await users.CreateCustomer(
-                    request.CustomerPhoneNumber, request.FirstName, request.LastName);
+                var created = await users.CreateCustomer(phone, request.FirstName, request.LastName);
                 if (!created.Success)
                     return Fail(string.IsNullOrWhiteSpace(created.Message) ? "ایجاد کاربر ناموفق بود." : created.Message);
 
-                user = await users.GetByPhone(request.CustomerPhoneNumber);
+                user = await users.GetByPhone(phone);
                 if (user == null)
                     return Fail("ایجاد کاربر ناموفق بود.");
             }
@@ -261,7 +268,7 @@ namespace ApplicationService.Services
                     UserID = user.Id,
                     SerialNumber = card.SerialNumber,
                     ScratchedCode = card.ScratchedCode,
-                    CustomerPhoneNumber = request.CustomerPhoneNumber,
+                    CustomerPhoneNumber = phone,
                     CreatedAt = occurredAtUtc,
                     EarnedPionts = card.Product.ProductPoint,
                     IsApproved = true
@@ -282,45 +289,51 @@ namespace ApplicationService.Services
                     user.Id, card, registration, pointTransaction);
             }
 
-            await registrations.SaveChangesAsync();
-            await reportActivities.FinalizeSourceKeysAsync();
-            await rewards.RefreshEligibility(user.Id);
+            try
+            {
+                await registrations.SaveChangesAsync();
+                await reportActivities.FinalizeSourceKeysAsync();
+            }
+            catch (DbUpdateException)
+            {
+                return Fail("ثبت کارت انجام نشد. ممکن است یکی از کارت‌ها قبلاً ثبت شده باشد.");
+            }
 
-            var savedCount = validCards.Count;
-            var failCount = invalidCards.Count;
-            var message = failCount > 0
-                ? $"{savedCount} کارت ثبت شد و {failCount} کارت نامعتبر بود."
-                : $"{savedCount} کارت با موفقیت ثبت شد.";
+            RememberAttempt(request.RateLimitKey);
+            await rewards.RefreshEligibility(user.Id);
 
             return new RegisterCardsResult
             {
                 Success = true,
-                Message = message,
-                SavedCount = savedCount,
-                FailedLines = invalidCards
+                Message = $"{validCards.Count} کارت با موفقیت ثبت شد.",
+                SavedCount = validCards.Count
             };
         }
 
-        private bool TryConsumeAttempt(string key, out int retryAfterSeconds)
+        private bool IsRateLimited(string key, out int retryAfterSeconds)
         {
             retryAfterSeconds = 0;
             if (string.IsNullOrWhiteSpace(key))
                 key = "warranty-reg:unknown";
 
             var now = DateTime.UtcNow;
-            if (cache.TryGetValue(key, out DateTime lastAttemptUtc))
-            {
-                var elapsed = (int)(now - lastAttemptUtc).TotalSeconds;
-                var remaining = RegisterAttemptWindowSeconds - elapsed;
-                if (remaining > 0)
-                {
-                    retryAfterSeconds = remaining;
-                    return false;
-                }
-            }
+            if (!cache.TryGetValue(key, out DateTime lastAttemptUtc))
+                return false;
 
-            cache.Set(key, now, TimeSpan.FromSeconds(RegisterAttemptWindowSeconds));
+            var remaining = RegisterAttemptWindowSeconds - (int)(now - lastAttemptUtc).TotalSeconds;
+            if (remaining <= 0)
+                return false;
+
+            retryAfterSeconds = remaining;
             return true;
+        }
+
+        private void RememberAttempt(string key)
+        {
+            if (string.IsNullOrWhiteSpace(key))
+                key = "warranty-reg:unknown";
+
+            cache.Set(key, DateTime.UtcNow, TimeSpan.FromSeconds(RegisterAttemptWindowSeconds));
         }
 
         private static RegisterCardsResult Fail(string message, int? retryAfterSeconds = null, List<string>? failedLines = null)

@@ -387,7 +387,13 @@ namespace DataAccess.Repositories
 
         public Task<ApplicationUser?> GetByPhone(string phone)
         {
-            return userManager.Users.FirstOrDefaultAsync(x => x.PhoneNumber == phone);
+            var candidates = IranianMobileNumber.LookupCandidates(phone);
+            if (candidates.Count == 0)
+                return Task.FromResult<ApplicationUser?>(null);
+
+            return userManager.Users.FirstOrDefaultAsync(x =>
+                (x.PhoneNumber != null && candidates.Contains(x.PhoneNumber))
+                || candidates.Contains(x.UserName));
         }
 
         public async Task<OperationResult> CreateCustomer(string phone, string? firstName, string? lastName)

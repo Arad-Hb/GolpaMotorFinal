@@ -39,6 +39,9 @@ namespace DomainModel.Models.Configurations
             builder.HasOne(x => x.WarrantyCard)
                 .WithMany(x => x.CardRegistrations)
                 .HasForeignKey(x => x.WarrantyCardID);
+
+            builder.HasIndex(x => x.WarrantyCardID)
+                .IsUnique();
         }
     }
 }

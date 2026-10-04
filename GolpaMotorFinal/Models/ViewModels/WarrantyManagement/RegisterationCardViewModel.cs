@@ -6,8 +6,6 @@ namespace GolpaMotorFinal.Models.ViewModels.WarrantyManagement
 {
     public class RegisterationCardViewModel
     {
-        [Required(ErrorMessage = "رمز اجباری است.")]
-        [Display(Name = "رمز")]
         public List<string> ScratchedCode { get; set; } = new List<string>();
 
         [StringLength(50, MinimumLength = 3, ErrorMessage = "شماره موبایل باید بین ۳ تا 50 کاراکتر باشد.")]

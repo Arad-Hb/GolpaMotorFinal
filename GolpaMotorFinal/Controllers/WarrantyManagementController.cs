@@ -39,9 +39,7 @@ namespace GolpaMotorFinal.Controllers
                 CustomerTypes = await lookups.CustomerTypeItems(),
                 op = new OperationResult("WarrantyRegistration")
             };
-            if (TempData["SuccessMessage"] is string ok)
-                vm.op.ToSuccess(ok);
-            else if (TempData["ErrorMessage"] is string err)
+            if (TempData["ErrorMessage"] is string err)
                 vm.op.ToFailed(err);
             return vm;
         }
@@ -195,10 +193,21 @@ namespace GolpaMotorFinal.Controllers
         {
             request.op ??= new OperationResult("WarrantyRegistration");
 
+            if (!string.IsNullOrWhiteSpace(request.CustomerPhoneNumber))
+            {
+                var normalizedPhone = IranianMobileNumber.Normalize(request.CustomerPhoneNumber);
+                if (normalizedPhone == null)
+                    ModelState.AddModelError(nameof(request.CustomerPhoneNumber), "شماره موبایل معتبر نیست.");
+                else
+                    request.CustomerPhoneNumber = normalizedPhone;
+            }
+
+            if (request.ScratchedCode == null || request.ScratchedCode.All(string.IsNullOrWhiteSpace))
+                ModelState.AddModelError("", "رمز اجباری است.");
+
             if (!ModelState.IsValid)
             {
                 request.op.ToFailed("اطلاعات وارد شده در فرم معتبر نیست.");
-                ModelState.AddModelError("", "اطلاعات وارد شده در فرم معتبر نیست.");
                 return await ShowRegisterForm(request, fromAdmin);
             }
 
@@ -223,8 +232,6 @@ namespace GolpaMotorFinal.Controllers
             }
 
             TempData["SuccessMessage"] = result.Message;
-            if (result.FailedLines.Count > 0)
-                TempData["FailedCards"] = string.Join(" | ", result.FailedLines);
 
             return fromAdmin
                 ? RedirectToAction(nameof(Index), new { tab = "cards" })

@@ -23,10 +23,11 @@
         @for (var i = 0; i < cardCount; i++)
         {
             <div class="warranty-row">
-                @if (i == 0)
+                
+                @* @if (i == 0)
                 {
                     <label class="form-label">رمز</label>
-                }
+                } *@
                 <div class="warranty-code-input-wrap">
                     <input type="text"
                            name="ScratchedCode[@i]"
@@ -34,6 +35,10 @@
                            class="form-control warranty-scratch-input"
                            maxlength="50"
                            placeholder="رمز را وارد کنید" />
+                           
+                   </div>
+                    <span class="warranty-code-status" aria-live="polite"></span>
+                   <div>
                     @if (i == 0)
                     {
                         <button type="button"
@@ -53,8 +58,9 @@
                         </button>
                     }
                 </div>
-                <span class="warranty-code-status" aria-live="polite"></span>
+               
             </div>
+
         }
     </div>
     <div class="warranty-contact-row">
@@ -75,7 +81,7 @@
         </div>
         <div class="warranty-role-select">
             <label class="form-label" for="customerTypeSelect">نقش</label>
-            <select id="customerTypeSelect" class="form-select" name="CustomerTypeId" disabled>
+            <select id="customerTypeSelect" class="form-select">
                 <option value="">انتخاب</option>
                 @foreach (var item in Model.CustomerTypes)
                 {
