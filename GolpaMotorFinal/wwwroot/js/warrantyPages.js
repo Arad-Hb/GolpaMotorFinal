@@ -1,7 +1,7 @@
 (function () {
-    function statusSpan(input) {
-        var wrap = input.closest(".warranty-code-input-wrap");
-        return wrap ? wrap.querySelector(".warranty-code-status") : null;
+        function statusSpan(input) {
+        var row = input.closest(".warranty-row");
+        return row ? row.querySelector(".warranty-code-status") : null;
     }
 
     function setStatus(input, ok, message) {
@@ -121,26 +121,27 @@
             addBtn.disabled = rowCount() >= maxCards;
         }
 
+        if (window.bootstrap && typeof bootstrap.Tooltip === "function") {
+            var existingTip = bootstrap.Tooltip.getInstance(addBtn);
+            if (existingTip) existingTip.dispose();
+            new bootstrap.Tooltip(addBtn, { container: "body", placement: "top", trigger: "hover focus" });
+        }
+
         addBtn.addEventListener("click", function () {
             if (rowCount() >= maxCards) return;
             var index = rowCount();
             container.insertAdjacentHTML("beforeend",
-                '<div class="card mb-3 warranty-row">' +
-                    '<div class="card-body">' +
-                        '<div class="row g-3 align-items-end warranty-code-row">' +
-                            '<div class="col-12 col-md-10 warranty-code-field">' +
-                                '<label class="form-label">رمز</label>' +
-                                '<div class="warranty-code-input-wrap">' +
-                                    '<input type="text" name="ScratchedCode[' + index + ']" class="form-control warranty-scratch-input" maxlength="50" placeholder="رمز را وارد کنید" />' +
-                                    '<span class="warranty-code-status" aria-live="polite"></span>' +
-                                '</div>' +
-                            '</div>' +
-                            '<div class="col-12 col-md-2 warranty-code-remove">' +
-                                '<button type="button" class="btn text-danger remove-row"><i class="fa fa-trash"></i></button>' +
-                            '</div>' +
-                        '</div>' +
+                '<div class="warranty-row">' +
+                    '<div class="warranty-code-input-wrap">' +
+                        '<input type="text" name="ScratchedCode[' + index + ']" class="form-control warranty-scratch-input" maxlength="50" placeholder="رمز را وارد کنید" />' +
+                        '<button type="button" class="btn text-danger remove-row" data-bs-toggle="tooltip" data-bs-title="حذف این کارت" aria-label="حذف این کارت"><i class="fa fa-trash"></i></button>' +
                     '</div>' +
+                    '<span class="warranty-code-status" aria-live="polite"></span>' +
                 '</div>');
+            var newRemove = container.querySelector(".warranty-row:last-child .remove-row");
+            if (newRemove && window.bootstrap && typeof bootstrap.Tooltip === "function") {
+                new bootstrap.Tooltip(newRemove, { container: "body", placement: "top", trigger: "hover focus" });
+            }
             syncAddButton();
         });
 
@@ -148,6 +149,10 @@
             var btn = e.target.closest(".remove-row");
             if (!btn || !container.contains(btn)) return;
             var row = btn.closest(".warranty-row");
+            if (window.bootstrap && typeof bootstrap.Tooltip === "function") {
+                var tip = bootstrap.Tooltip.getInstance(btn);
+                if (tip) tip.dispose();
+            }
             if (row) row.remove();
             reindexRows();
             syncAddButton();

@@ -8,55 +8,58 @@
 
 @if (Model.op != null && !string.IsNullOrWhiteSpace(Model.op.Message))
 {
-    <div class="alert @(Model.op.Success ? "alert-success" : "alert-danger")">
+    <div class="alert @(Model.op.Success ? "alert-success" : "alert-danger") py-2 mb-2">
         @Model.op.Message
     </div>
 }
 @if (TempData["FailedCards"] is string failedCards && !string.IsNullOrWhiteSpace(failedCards))
 {
-    <div class="alert alert-warning">@failedCards</div>
+    <div class="alert alert-warning py-2 mb-2">@failedCards</div>
 }
 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-<form asp-action="@actionName" asp-controller="WarrantyManagement" method="post" class="admin-form" id="warrantyRegisterForm">
+<form asp-action="@actionName" asp-controller="WarrantyManagement" method="post" class="admin-form warranty-register-form" id="warrantyRegisterForm">
     @Html.AntiForgeryToken()
     <div id="warrantyContainer" data-next-index="@cardCount" data-max-cards="10">
         @for (var i = 0; i < cardCount; i++)
         {
-            <div class="card mb-3 warranty-row">
-                <div class="card-body">
-                    <div class="row g-3 align-items-end warranty-code-row">
-                        <div class="col-12 col-md-10 warranty-code-field">
-                            <label class="form-label">رمز</label>
-                            <div class="warranty-code-input-wrap">
-                                <input type="text"
-                                       name="ScratchedCode[@i]"
-                                       value="@codes[i]"
-                                       class="form-control warranty-scratch-input"
-                                       maxlength="50"
-                                       placeholder="رمز را وارد کنید" />
-                                <span class="warranty-code-status" aria-live="polite"></span>
-                            </div>
-                        </div>
-                        @if (i > 0)
-                        {
-                            <div class="col-12 col-md-2 warranty-code-remove">
-                                <button type="button" class="btn text-danger remove-row"><i class="fa fa-trash"></i></button>
-                            </div>
-                        }
-                    </div>
+            <div class="warranty-row">
+                @if (i == 0)
+                {
+                    <label class="form-label">رمز</label>
+                }
+                <div class="warranty-code-input-wrap">
+                    <input type="text"
+                           name="ScratchedCode[@i]"
+                           value="@codes[i]"
+                           class="form-control warranty-scratch-input"
+                           maxlength="50"
+                           placeholder="رمز را وارد کنید" />
+                    @if (i == 0)
+                    {
+                        <button type="button"
+                                id="btnAddWarranty"
+                                class="btn btn-add-extra-warranty"
+                                data-bs-toggle="tooltip"
+                                data-bs-placement="top"
+                                data-bs-title="افزودن چند کارت گارانتی (حداکثر ۱۰ کارت)"
+                                aria-label="افزودن چند کارت گارانتی (حداکثر ۱۰ کارت)">
+                            <i class="fa fa-plus-circle"></i>
+                        </button>
+                    }
+                    else
+                    {
+                        <button type="button" class="btn text-danger remove-row" data-bs-toggle="tooltip" data-bs-title="حذف این کارت" aria-label="حذف این کارت">
+                            <i class="fa fa-trash"></i>
+                        </button>
+                    }
                 </div>
+                <span class="warranty-code-status" aria-live="polite"></span>
             </div>
         }
     </div>
-    <div class="warranty-add-row mb-4 d-flex justify-content-between align-items-center px-2 warranty-brand-text">
-        <span>افزودن چند کارت گارانتی (حداکثر ۱۰ کارت)</span>
-        <button type="button" id="btnAddWarranty" class="btn btn-add-extra-warranty">
-            <i class="fa fa-plus-circle"></i>
-        </button>
-    </div>
-    <div class="warranty-contact-row mb-4">
+    <div class="warranty-contact-row">
         <div class="warranty-phone">
-            <label asp-for="CustomerPhoneNumber" class="form-label fw-semibold">
+            <label asp-for="CustomerPhoneNumber" class="form-label">
                 <span class="text-danger">*</span>
                 شماره موبایل
             </label>
@@ -71,7 +74,7 @@
             <span asp-validation-for="CustomerPhoneNumber" class="text-danger small"></span>
         </div>
         <div class="warranty-role-select">
-            <label class="form-label fw-semibold" for="customerTypeSelect">نقش</label>
+            <label class="form-label" for="customerTypeSelect">نقش</label>
             <select id="customerTypeSelect" class="form-select" name="CustomerTypeId" disabled>
                 <option value="">انتخاب</option>
                 @foreach (var item in Model.CustomerTypes)
@@ -88,8 +91,8 @@
             </select>
         </div>
     </div>
-    <div class="warranty-role-buttons mb-4">
-        <label class="form-label fw-bold">نقش مشتری</label>
+    <div class="warranty-role-buttons">
+        <label class="form-label">نقش مشتری</label>
         <div class="customer-type-list">
             @foreach (var item in Model.CustomerTypes)
             {
@@ -107,8 +110,8 @@
         </div>
         <span asp-validation-for="CustomerTypeId" class="text-danger"></span>
     </div>
-    <div class="row">
-        <div class="col-12 col-md-6 mb-3">
+    <div class="warranty-name-row">
+        <div>
             <label asp-for="FirstName" class="form-label">نام</label>
             <div class="input-group">
                 <span class="input-group-text">
@@ -118,7 +121,7 @@
             </div>
             <span asp-validation-for="FirstName" class="text-danger small"></span>
         </div>
-        <div class="col-12 col-md-6 mb-3">
+        <div>
             <label asp-for="LastName" class="form-label">نام خانوادگی</label>
             <div class="input-group">
                 <span class="input-group-text">
