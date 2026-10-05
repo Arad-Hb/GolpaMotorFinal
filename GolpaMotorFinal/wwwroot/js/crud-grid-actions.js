@@ -1,5 +1,4 @@
 ﻿(() => {
-    // Prevent duplicate event handlers if the script is loaded again.
     if (window.crudGridActionsInitialized) {
         return;
     }
@@ -104,7 +103,6 @@
         });
     }
 
-    // Delegation also handles rows inserted by an AJAX grid refresh.
     document.addEventListener("click", event => {
         if (!(event.target instanceof Element)) {
             return;

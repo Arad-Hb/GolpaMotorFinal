@@ -32,11 +32,9 @@
         ToPlaceholder = "تا تاریخ"
     })
 
-    @await Html.PartialAsync("_NumberRangeFilter", NumberRangeFilterViewModel.For(
-        "CountFrom", "CountTo", "تعداد کارت", "حداقل", "حداکثر"))
+    @await Html.PartialAsync("_NumberRangeFilter", NumberRangeFilterViewModel.For("CountFrom", "CountTo", "تعداد کارت", "حداقل", "حداکثر"))
 
-    @await Html.PartialAsync("_NumberRangeFilter", NumberRangeFilterViewModel.For(
-        "PointsFrom", "PointsTo", "امتیاز اعطایی", "حداقل", "حداکثر"))
+    @await Html.PartialAsync("_NumberRangeFilter", NumberRangeFilterViewModel.For("PointsFrom", "PointsTo", "امتیاز اعطایی", "حداقل", "حداکثر"))
 
     @await Html.PartialAsync("_FilterReset")
 </form>

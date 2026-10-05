@@ -347,8 +347,8 @@ html[dir="rtl"] body.pluto-public {
 }
 
 .golpa-brand-mark {
-    height: 36px;
-    width: 36px;
+    height: auto;
+    width: 200px;
     object-fit: contain;
     background: transparent;
 }

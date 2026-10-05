@@ -38,7 +38,7 @@ namespace GolpaMotorFinal.Controllers
         [HttpGet("/Reports/Index")]
         public IActionResult LegacyIndex() => Redirect(ReportRoutes.TabPath(ReportRoutes.Users));
 
-
+        //[HttpGet("/reports/*")]
         [HttpGet("/reports/users")]
         [HttpGet("/reports/productwarranty")]
         [HttpGet("/reports/rewards")]

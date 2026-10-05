@@ -9,7 +9,6 @@
 
     var bar = root.find("[data-filter-bar]").first();
 
-    // Prevent the shared filter script from starting a second request.
     bar.attr("data-autoload", "false");
 
     var pendingRequest = null;
@@ -183,7 +182,6 @@
     function restoreFromAddress(skipHistory) {
         restoring = true;
 
-        // Invalidate any earlier request before restoring controls.
         requestVersion++;
 
         if (pendingRequest) {

@@ -17,9 +17,7 @@ namespace GolpaMotorFinal.Helpers
             this.products = products;
         }
 
-        public async Task<CrudIndexViewModel> BuildAsync(
-            ReportTabViewModel selectedTab,
-            IQueryCollection query)
+        public async Task<CrudIndexViewModel> BuildAsync(ReportTabViewModel selectedTab,IQueryCollection query)
         {
             switch (selectedTab.Key)
             {
