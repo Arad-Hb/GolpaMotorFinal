@@ -30,7 +30,7 @@
             });
 
             table.querySelectorAll(
-                ".table-actions a, .table-actions button, .table-actions__btns a, .table-actions__btns button, .crud-action-option a, .crud-action-option button, .crud-action-toggle"
+                ".crud-grid__action-btns a, .crud-grid__action-btns button, .crud-action-option a, .crud-action-option button, .crud-action-toggle"
             ).forEach(btn => {
                 const text = (
                     btn.getAttribute("data-bs-title") ||

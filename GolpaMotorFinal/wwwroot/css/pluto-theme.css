@@ -574,7 +574,6 @@ html[dir="rtl"] body.pluto-public {
 .pluto-admin .report-grid--compact table.table {
     width: 100%;
     min-width: 0;
-    table-layout: fixed;
     font-size: 12.5px;
 }
 
@@ -603,12 +602,6 @@ html[dir="rtl"] body.pluto-public {
     line-height: 1.45;
 }
 
-.pluto-admin .report-grid--compact table.table th:nth-child(2),
-.pluto-admin .report-grid--compact table.table td:nth-child(2) {
-    width: 13%;
-    text-align: right;
-}
-
 .pluto-admin table.table th.table-num,
 .pluto-admin table.table td.table-num {
     width: 52px;
@@ -617,22 +610,6 @@ html[dir="rtl"] body.pluto-public {
     white-space: nowrap;
     font-variant-numeric: tabular-nums;
     padding-inline: 6px;
-}
-
-.pluto-admin table.table th.table-actions,
-.pluto-admin table.table td.table-actions {
-    width: 168px;
-    min-width: 176px;
-    white-space: nowrap;
-    vertical-align: middle;
-}
-
-.pluto-admin table.table .table-actions__btns {
-    display: flex;
-    flex-wrap: nowrap;
-    align-items: center;
-    justify-content: flex-start;
-    gap: 4px;
 }
 
 .table_filter_bar {

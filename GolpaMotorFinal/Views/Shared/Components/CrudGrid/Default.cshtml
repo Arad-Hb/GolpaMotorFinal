@@ -2,25 +2,25 @@
 @model CrudGridViewModel
 @{
     var hasActions = Model.Rows.Any(r => r.Actions.Any(a => a.Visible));
-    var compactReport = Model.GridId == "ProductWarrantyReportGrid" ||
-                        Model.GridId == "ProductCardDetailGrid";
+    var colCount = Model.Headers.Count
+        + (Model.ShowRowNumber ? 1 : 0)
+        + (hasActions ? 1 : 0);
 }
-@* <div class="table-responsive @(compactReport ? "report-grid--compact" : null)" data-grid="@Model.GridId"> *@
-<div class="table-responsive report-grid--compact"  data-grid="@Model.GridId">
-    <table class="table table-hover table-striped  align-middle w-100" style="min-width:1100px!important;">
-        <thead class="table-dark">
+<div class="crud-grid" data-grid="@Model.GridId">
+    <table>
+        <thead>
             <tr>
                 @if (Model.ShowRowNumber)
                 {
-                    <th class="table-num" data-bs-toggle="tooltip" data-bs-title="#" data-bs-placement="top">#</th>
+                    <th class="crud-grid__num" data-bs-toggle="tooltip" data-bs-title="#" data-bs-placement="top">#</th>
                 }
                 @foreach (var header in Model.Headers)
                 {
-                    <th scope="col" class="text-nowrap" data-bs-toggle="tooltip" data-bs-title="@header" data-bs-placement="top">@header</th>
+                    <th scope="col" data-bs-toggle="tooltip" data-bs-title="@header" data-bs-placement="top">@header</th>
                 }
                 @if (hasActions)
                 {
-                    <th class="table-actions" data-bs-toggle="tooltip" data-bs-title="عملیات" data-bs-placement="top">عملیات</th>
+                    <th class="crud-grid__actions" data-bs-toggle="tooltip" data-bs-title="عملیات" data-bs-placement="top">عملیات</th>
                 }
             </tr>
         </thead>
@@ -33,11 +33,11 @@
                     <tr>
                         @if (Model.ShowRowNumber)
                         {
-                            <td class="table-num">@rowNumber</td>
+                            <td class="crud-grid__num">@rowNumber</td>
                         }
                         @foreach (var column in row.Columns)
                         {
-                            <td class="@column.CssClass @(column.Type == GridColumnType.Number ? "table-num" : null)">
+                            <td class="@column.CssClass @(column.Type == GridColumnType.Number ? "crud-grid__num" : null)">
                                 @switch (column.Type)
                                 {
                                     case GridColumnType.Image:
@@ -45,7 +45,7 @@
                                             ? column.ImageUrl
                                             : column.Value?.ToString();
                                         <img src="@(string.IsNullOrWhiteSpace(imageSrc) ? "/images/pics/noimage.jpg" : imageSrc)"
-                                             style="width:50px;height:50px;object-fit:cover;border-radius:6px;"
+                                             class="crud-grid__img"
                                              alt="" />
                                         break;
                                     case GridColumnType.Boolean:
@@ -62,7 +62,7 @@
                                     default:
                                         if (!string.IsNullOrWhiteSpace(column.ButtonUrl))
                                         {
-                                            <a href="@column.ButtonUrl" class="text-decoration-none fw-semibold">
+                                            <a href="@column.ButtonUrl" class="crud-grid__link">
                                                 @(column.Value ?? column.EmptyText)
                                             </a>
                                         }
@@ -76,12 +76,12 @@
                         }
                         @if (hasActions)
                         {
-                            <td class="crud-grid-actions-cell">
+                            <td class="crud-grid__actions-cell">
                                 @if (row.Actions.Count > 3)
                                 {
                                     var dropdownId = $"crud-actions-{Guid.NewGuid():N}";
 
-                                    <div class="crud-action-dropdown" dir="rtl">
+                                    <div class="crud-action-dropdown">
                                         <button type="button" class="crud-action-toggle" aria-expanded="false" aria-controls="@dropdownId" data-bs-toggle="tooltip" data-bs-title="عملیات" data-bs-placement="top">
                                             <span>عملیات</span>
 
@@ -109,7 +109,7 @@
                                                            data-bs-placement="top">
                                                             <i class="@action.Icon"></i>
                                                         </a>
-                                                    </li> 
+                                                    </li>
                                                 }
                                                 else
                                                 {
@@ -139,7 +139,7 @@
                                 }
                                 else
                                 {
-                                    <div class="table-actions__btns">
+                                    <div class="crud-grid__action-btns">
                                         @foreach (var action in row.Actions.Where(a => a.Visible))
                                         {
                                             var css = action.CssClass ?? "";
@@ -189,8 +189,8 @@
             }
             else
             {
-                <tr>
-                    <td colspan="100" class="text-center text-muted">
+                <tr class="crud-grid__empty">
+                    <td colspan="@colCount">
                         @Model.EmptyMessage
                     </td>
                 </tr>
